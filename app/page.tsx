@@ -60,7 +60,7 @@ export default function Home() {
           {t('home.welcome')}
         </div>
 
-        <h1 className="text-6xl md:text-8xl font-black leading-[1.05] tracking-tight max-w-4xl">
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black leading-[1.1] tracking-tight max-w-4xl break-keep">
           {t('home.heroTitle').split('\n')[0]}
           <br />
           <span style={BRAND_TEXT}>{t('home.heroTitle').split('\n')[1]}</span>
