@@ -66,7 +66,7 @@ export default function Home() {
           <span style={BRAND_TEXT}>{t('home.heroTitle').split('\n')[1]}</span>
         </h1>
 
-        <p className="text-[15px] text-white/35 max-w-md leading-[1.8] font-normal">
+        <p className="text-[15px] text-white/35 max-w-md leading-[1.8] font-normal break-keep">
           {t('home.heroDesc').split('\n')[0]}<br />
           {t('home.heroDesc').split('\n')[1]}
         </p>
