@@ -33,18 +33,20 @@ export default function Home() {
     <div className="min-h-screen bg-[#080808] text-white overflow-hidden">
 
       {/* 네비게이션 */}
-      <nav className="relative flex items-center justify-between px-8 py-5 border-b border-white/5">
+      <nav className="grid grid-cols-3 items-center px-4 md:px-8 py-5 border-b border-white/5">
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
         </div>
-        <span className="absolute left-1/2 -translate-x-1/2"><KverseLogo size="lg" /></span>
-        <div className="flex items-center gap-3">
+        <div className="flex justify-center">
+          <KverseLogo size="lg" />
+        </div>
+        <div className="flex items-center justify-end gap-2">
           <Link href="/login"
-            className="px-5 py-2 rounded-full border border-white/10 text-sm font-medium text-white/50 hover:text-white hover:border-white/25 transition">
+            className="hidden sm:block px-5 py-2 rounded-full border border-white/10 text-sm font-medium text-white/50 hover:text-white hover:border-white/25 transition">
             {t('auth.login')}
           </Link>
           <Link href="/signup"
-            className="px-5 py-2 rounded-full text-sm font-medium hover:opacity-90 transition"
+            className="px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
             style={{ background: BRAND_GRADIENT }}>
             {t('home.enterUniverse')}
           </Link>
