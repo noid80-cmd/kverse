@@ -157,9 +157,9 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="flex flex-col items-center justify-center text-center px-6 py-32 gap-6 border-t border-white/5">
-        <p className="text-white/25 text-xs font-medium tracking-[0.2em] uppercase">{t('home.ctaDesc')}</p>
-        <h2 className="text-5xl font-bold text-white">{t('home.ctaTitle')}</h2>
+      <section className="flex flex-col items-center justify-center text-center px-6 py-24 gap-6 border-t border-white/5">
+        <p className="text-white/45 text-xs font-medium tracking-[0.2em] uppercase">{t('home.ctaDesc')}</p>
+        <h2 className="text-4xl sm:text-5xl font-bold text-white break-keep">{t('home.ctaTitle')}</h2>
         <Link href="/signup"
           className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
           style={{ background: BRAND_GRADIENT }}>
@@ -168,14 +168,14 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-white/5 px-8 py-10 text-center">
-        <p className="text-white/20 text-sm font-normal mb-4">© 2026 Kverse — K-pop Universe. All rights reserved.</p>
-        <p className="text-white/10 text-xs max-w-2xl mx-auto leading-relaxed font-normal">
+        <p className="text-white/35 text-sm font-normal mb-4">© 2026 Kverse — K-pop Universe. All rights reserved.</p>
+        <p className="text-white/25 text-xs max-w-2xl mx-auto leading-relaxed font-normal">
           Kverse is an independent fan community platform and is not affiliated with, endorsed by, or officially connected to
           any K-pop artist, entertainment company, or their management. All artist names, group names, logos, and related
           intellectual property belong to their respective owners. Cover videos uploaded by users are fan-created content
           for non-commercial purposes only.
         </p>
-        <p className="text-white/10 text-xs mt-2 font-normal">
+        <p className="text-white/25 text-xs mt-2 font-normal">
           Kverse는 K팝 아티스트 및 소속사와 무관한 독립 팬 커뮤니티 플랫폼입니다.
         </p>
       </footer>
