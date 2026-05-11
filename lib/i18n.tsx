@@ -33,7 +33,7 @@ const translations: Record<Locale, Dict> = {
     // home
     'home.welcome': 'K-pop Universe에 오신 것을 환영합니다',
     'home.heroTitle': '당신의 케이팝\n유니버스를 펼쳐요',
-    'home.heroDesc': 'BTS의 Purple Planet부터 BLACKPINK의 Pink Kingdom까지.\n좋아하는 아이돌의 세계로 여행을 떠나 나만의 커버로 빛나세요.',
+    'home.heroDesc': 'BTS의 Purple Planet부터\nBLACKPINK의 Pink Kingdom까지.\n좋아하는 아이돌의 세계로 여행을 떠나 나만의 커버로 빛나세요.',
     'home.startUniverse': '나의 유니버스 시작',
     'home.enterUniverse': '유니버스 입장',
     'home.whichUniverse': '어떤 유니버스로 떠날까요?',

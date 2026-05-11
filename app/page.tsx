@@ -67,8 +67,9 @@ export default function Home() {
         </h1>
 
         <p className="text-[15px] text-white/35 max-w-md leading-[1.8] font-normal break-keep">
-          {t('home.heroDesc').split('\n')[0]}<br />
-          {t('home.heroDesc').split('\n')[1]}
+          {t('home.heroDesc').split('\n').map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+          ))}
         </p>
 
         <div className="flex gap-3">
