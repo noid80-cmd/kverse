@@ -13,49 +13,71 @@ export default function Icon() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: '24%',
+        position: 'relative',
       }}
     >
-      {/* gradient planet circle */}
-      <div
+      {/* Back arc – top half, faded (behind K) */}
+      <svg
+        width={512}
+        height={512}
+        viewBox="0 0 512 512"
+        style={{ position: 'absolute', top: 0, left: 0 }}
+      >
+        <defs>
+          <linearGradient id="rb" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#E91E8C" />
+            <stop offset="100%" stopColor="#7B2FBE" />
+          </linearGradient>
+          <clipPath id="top512">
+            <rect x="0" y="0" width="512" height="256" />
+          </clipPath>
+        </defs>
+        <ellipse
+          cx="256" cy="256" rx="230" ry="56"
+          transform="rotate(-18 256 256)"
+          stroke="url(#rb)" strokeWidth="18" fill="none"
+          clipPath="url(#top512)" opacity="0.38"
+        />
+      </svg>
+
+      {/* K letter */}
+      <span
         style={{
+          fontSize: 300,
+          fontWeight: 900,
+          color: 'white',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          lineHeight: 1,
           position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 260,
-          height: 260,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #E91E8C 0%, #7B2FBE 100%)',
+          zIndex: 1,
         }}
       >
-        <span
-          style={{
-            color: 'white',
-            fontSize: 160,
-            fontWeight: 900,
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-            lineHeight: 1,
-            letterSpacing: '-6px',
-          }}
-        >
-          K
-        </span>
-      </div>
-      {/* ring arc — wide ellipse in front */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 110,
-          left: 60,
-          right: 60,
-          height: 36,
-          borderRadius: '50%',
-          border: '14px solid transparent',
-          borderBottom: '14px solid #E91E8C',
-          transform: 'rotate(-20deg)',
-        }}
-      />
+        K
+      </span>
+
+      {/* Front arc – bottom half, full opacity (in front of K) */}
+      <svg
+        width={512}
+        height={512}
+        viewBox="0 0 512 512"
+        style={{ position: 'absolute', top: 0, left: 0, zIndex: 2 }}
+      >
+        <defs>
+          <linearGradient id="rf" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#E91E8C" />
+            <stop offset="100%" stopColor="#7B2FBE" />
+          </linearGradient>
+          <clipPath id="bot512">
+            <rect x="0" y="256" width="512" height="256" />
+          </clipPath>
+        </defs>
+        <ellipse
+          cx="256" cy="256" rx="230" ry="56"
+          transform="rotate(-18 256 256)"
+          stroke="url(#rf)" strokeWidth="18" fill="none"
+          clipPath="url(#bot512)"
+        />
+      </svg>
     </div>,
     { ...size }
   )
