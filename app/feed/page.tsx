@@ -363,9 +363,6 @@ export default function FeedPage() {
 
         {/* 필터 */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-white">
-            {account?.groups.name ? groupDisplayName(account.groups.name, locale) : ''} {t('feed.ranking')}
-          </h2>
           <div className="flex gap-1">
             <button onClick={() => setSort('newest')} className="px-3 py-1 rounded-full text-xs font-medium transition border"
               style={sort === 'newest' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
