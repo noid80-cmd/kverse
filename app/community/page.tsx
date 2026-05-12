@@ -67,6 +67,11 @@ export default function CommunityPage() {
     setPosts(data || [])
   }
 
+  async function handleDelete(postId: string) {
+    await supabase.from('posts').delete().eq('id', postId)
+    setPosts(prev => prev.filter(p => p.id !== postId))
+  }
+
   async function handlePost() {
     if (!account || !content.trim()) return
     setPosting(true)
@@ -200,6 +205,14 @@ export default function CommunityPage() {
                   </div>
                   <span className="text-white text-sm font-semibold">@{post.accounts.username}</span>
                   <span className="text-white/20 text-xs ml-auto">{timeAgo(post.created_at)}</span>
+                  {post.accounts.username === account?.username && (
+                    <button
+                      onClick={() => handleDelete(post.id)}
+                      className="w-6 h-6 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-400/10 transition text-xs"
+                    >
+                      🗑
+                    </button>
+                  )}
                 </div>
                 <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
               </div>
