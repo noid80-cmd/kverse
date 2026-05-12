@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import { useParams } from 'next/navigation'
@@ -43,7 +43,7 @@ export default function UniversePage() {
   useEffect(() => {
     async function load() {
       // 로그인 상태 확인
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = await getAuthUser()
       if (user) {
         setIsLoggedIn(true)
         const activeId = getActiveAccountId()

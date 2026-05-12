@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GROUP_THEMES } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import Link from 'next/link'
@@ -38,7 +38,7 @@ export default function BrowsePage() {
   useEffect(() => {
     async function init() {
       // 로그인 상태 확인 + 계정 가져오기
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = await getAuthUser()
       if (user) {
         setIsLoggedIn(true)
         const activeId = getActiveAccountId()

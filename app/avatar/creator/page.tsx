@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getAuthUser } from '@/lib/supabase'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 
@@ -16,7 +16,7 @@ export default function AvatarCreatorPage() {
 
   useEffect(() => {
     async function getAccount() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
       const activeId = getActiveAccountId()
       let q = supabase.from('accounts').select('id').eq('user_id', user.id)

@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getAuthUser } from '@/lib/supabase'
 import { GROUP_THEMES, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { COUNTRIES, getFlagImageUrl } from '@/lib/countries'
 import Avatar from '@/app/components/Avatar'
@@ -37,7 +37,7 @@ export default function SelectGroupPage() {
     setError('')
     setLoading(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthUser()
     if (!user) { router.push('/login'); return }
 
     const { data: existing } = await supabase
@@ -71,7 +71,7 @@ export default function SelectGroupPage() {
     setError('')
     setLoading(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthUser()
     if (!user) { router.push('/login'); return }
 
     const { error } = await supabase.from('accounts').insert({

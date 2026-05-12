@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getAuthUser } from '@/lib/supabase'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -27,7 +27,7 @@ export default function CoinsPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
 
