@@ -248,7 +248,7 @@ export default function FeedPage() {
       )}
 
       {/* 네비게이션 */}
-      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/"><KverseLogo /></Link>
 
