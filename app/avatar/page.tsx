@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
-import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
+import { getTheme, groupDisplayName, worldName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import Avatar, { EquippedItems } from '@/app/components/Avatar'
 import { useRouter } from 'next/navigation'
@@ -18,36 +18,16 @@ type Account = {
   groups: { name: string } | null
 }
 
-type ShopItem = {
-  id: string
-  name: string
-  description: string
-  price: number
-  emoji: string
-  slot: string
-  visual: Record<string, string>
-  artist: string | null
-}
-
 export default function AvatarPage() {
   const router = useRouter()
   const t = useT()
   const { locale } = useLanguage()
-  const SLOT_LABELS: Record<string, string> = {
-    outfit: t('av.outfit'),
-    hat: t('av.hat'),
-    glowstick: t('av.stick'),
-    accessory: t('av.accessory'),
-    skin: t('av.skin'),
-    photocard: t('av.photocard'),
-  }
   const [account, setAccount] = useState<Account | null>(null)
-  const [ownedItems, setOwnedItems] = useState<ShopItem[]>([])
-  const [equippedIds, setEquippedIds] = useState<Record<string, string>>({})
-  const [activeSlot, setActiveSlot] = useState<string>('outfit')
+  const [equippedVisuals, setEquippedVisuals] = useState<EquippedItems>({})
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     async function load() {
@@ -61,71 +41,65 @@ export default function AvatarPage() {
       if (!acc) { router.push('/select-account'); return }
 
       setAccount(acc)
-      setEquippedIds(acc.equipped || {})
 
-      const { data: owned } = await supabase
-        .from('user_items')
-        .select('item_id, shop_items(id, name, description, price, emoji, slot, visual, artist)')
-        .eq('account_id', acc.id)
+      // 장착 아이템 시각화
+      const ids = Object.values(acc.equipped || {}).filter(Boolean) as string[]
+      if (ids.length > 0) {
+        const { data: items } = await supabase.from('shop_items').select('id, slot, visual, emoji').in('id', ids)
+        const result: EquippedItems = {}
+        for (const item of items || []) {
+          const v = item.visual || {}
+          if (item.slot === 'outfit') result.outfit = { outfitColor: v.outfitColor, type: v.type }
+          if (item.slot === 'hat') result.hat = { hatColor: v.hatColor, style: v.style, hatEmoji: item.emoji }
+          if (item.slot === 'accessory') result.accessory = { type: v.type, color: v.color, emoji: item.emoji }
+          if (item.slot === 'glowstick') result.glowstick = { glowColor: v.glowColor, shape: v.shape }
+          if (item.slot === 'skin') result.skin = { auraColor: v.auraColor, gradient: v.gradient }
+        }
+        setEquippedVisuals(result)
+      }
 
-      const items = (owned || []).map((r: any) => r.shop_items).filter(Boolean)
-      setOwnedItems(items)
       setLoading(false)
     }
     load()
   }, [])
 
-  async function handleEquip(item: ShopItem) {
+  async function handlePhotoUpload(file: File) {
     if (!account) return
-    const isEquipped = equippedIds[item.slot] === item.id
-
-    const newEquipped = { ...equippedIds }
-    if (isEquipped) {
-      delete newEquipped[item.slot]
-    } else {
-      newEquipped[item.slot] = item.id
+    setUploading(true)
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${account.id}/profile.${ext}`
+    const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, { upsert: true })
+    if (upErr) {
+      showToast('업로드 실패했어요')
+      setUploading(false)
+      return
     }
-
-    setEquippedIds(newEquipped)
-    setSaving(true)
-
-    await supabase
-      .from('accounts')
-      .update({ equipped: newEquipped })
-      .eq('id', account.id)
-
-    showToast(isEquipped ? '장착 해제됐어요' : `${item.emoji} ${item.name} 장착!`)
-    setSaving(false)
+    const { data: { publicUrl } } = supabase.storage.from('아바타').getPublicUrl(path)
+    await supabase.from('accounts').update({ rpm_avatar_url: publicUrl }).eq('id', account.id)
+    setAccount(prev => prev ? { ...prev, rpm_avatar_url: publicUrl } : prev)
+    showToast('사진이 업데이트됐어요 ✓')
+    setUploading(false)
   }
 
-  function buildEquippedProps(): EquippedItems {
-    const result: EquippedItems = {}
-    for (const [slot, itemId] of Object.entries(equippedIds)) {
-      const item = ownedItems.find(i => i.id === itemId)
-      if (!item) continue
-      const v = item.visual || {}
-      if (slot === 'outfit') result.outfit = { outfitColor: v.outfitColor, type: v.type }
-      if (slot === 'hat') result.hat = { hatColor: v.hatColor, style: v.style, hatEmoji: item.emoji }
-      if (slot === 'accessory') result.accessory = { type: v.type, color: v.color, emoji: item.emoji }
-      if (slot === 'glowstick') result.glowstick = { glowColor: v.glowColor, shape: v.shape, emoji: item.emoji }
-      if (slot === 'skin') result.skin = { auraColor: v.auraColor, gradient: v.gradient }
-    }
-    return result
+  async function handleRemovePhoto() {
+    if (!account) return
+    await supabase.from('accounts').update({ rpm_avatar_url: null }).eq('id', account.id)
+    setAccount(prev => prev ? { ...prev, rpm_avatar_url: null } : prev)
+    showToast('사진이 제거됐어요')
   }
 
   function showToast(msg: string) {
     setToast(msg)
-    setTimeout(() => setToast(null), 2000)
+    setTimeout(() => setToast(null), 2500)
   }
 
   const theme = account?.groups ? getTheme(account.groups.name) : getTheme('')
   const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
-  const slotItems = ownedItems.filter(i => i.slot === activeSlot)
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-pink-400 animate-pulse font-medium">Loading Universe...</div>
+        <div className="text-pink-400 animate-pulse font-medium">Loading...</div>
       </div>
     )
   }
@@ -139,128 +113,68 @@ export default function AvatarPage() {
       )}
 
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠 {t('nav.home')}</Link>
-          <Link href="/profile" className="text-white/40 hover:text-white transition text-sm">← {t('nav.profile')}</Link>
-        </div>
+        <Link href="/profile" className="text-white/40 hover:text-white transition text-sm">← {t('nav.profile')}</Link>
         <span className="font-black text-white">{t('nav.avatar')}</span>
-        <div className="flex items-center gap-2">
-          <Link href="/shop" className="text-sm px-3 py-1.5 rounded-full border border-white/20 text-white/60 hover:text-white transition">
-            🛍 {t('nav.shop')}
-          </Link>
-        </div>
+        <div />
       </nav>
 
-      <div className="max-w-lg mx-auto px-6 py-8">
-        {/* 아바타 카드 */}
-        <div className="flex flex-col items-center mb-8">
-          <div
-            className="rounded-3xl p-6 border mb-3 relative overflow-hidden"
-            style={{ background: `${accentColor}10`, borderColor: `${accentColor}30` }}
-          >
-            {saving && (
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-3xl z-10">
-                <div className="text-white/60 text-sm animate-pulse">{t('common.saving')}</div>
-              </div>
-            )}
-            <Avatar
-              gender={(account?.gender as 'male' | 'female') || 'female'}
-              equipped={buildEquippedProps()}
-              groupColor={accentColor}
-              size={180}
-              rpmAvatarUrl={account?.rpm_avatar_url}
-              username={account?.username}
-            />
-          </div>
+      <div className="max-w-sm mx-auto px-6 py-12 flex flex-col items-center gap-8">
 
-          <p className="text-white font-semibold mt-1">@{account?.username}</p>
-          {account?.groups && (
-            <p className="text-sm mt-0.5" style={{ color: `${accentColor}90` }}>
-              {groupDisplayName(account.groups.name, locale)} · {worldName(theme, locale)}
-            </p>
+        {/* 아바타 미리보기 */}
+        <div
+          className="rounded-3xl p-8 border flex flex-col items-center gap-4"
+          style={{ background: `${accentColor}10`, borderColor: `${accentColor}30` }}
+        >
+          <Avatar
+            gender={(account?.gender as 'male' | 'female') || 'female'}
+            equipped={equippedVisuals}
+            groupColor={accentColor}
+            size={180}
+            rpmAvatarUrl={account?.rpm_avatar_url}
+            username={account?.username}
+          />
+          <div className="text-center">
+            <p className="text-white font-semibold">@{account?.username}</p>
+            {account?.groups && (
+              <p className="text-sm mt-0.5" style={{ color: `${accentColor}90` }}>
+                {groupDisplayName(account.groups.name, locale)} · {worldName(theme, locale)}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* 사진 업로드 */}
+        <div className="w-full flex flex-col gap-3">
+          <button
+            onClick={() => photoInputRef.current?.click()}
+            disabled={uploading}
+            className="w-full py-4 rounded-2xl font-medium text-white transition disabled:opacity-50"
+            style={{ background: theme.gradient }}
+          >
+            {uploading ? '업로드 중...' : '📷 내 사진으로 변경'}
+          </button>
+
+          {account?.rpm_avatar_url && (
+            <button
+              onClick={handleRemovePhoto}
+              className="w-full py-3 rounded-2xl font-medium text-sm border border-white/10 text-white/40 hover:text-white/70 transition"
+            >
+              사진 제거 (기본 아바타로)
+            </button>
           )}
 
-          {/* 장착된 아이템 요약 */}
-          <div className="flex flex-wrap gap-2 mt-3 justify-center">
-            {Object.entries(equippedIds).map(([slot, itemId]) => {
-              const item = ownedItems.find(i => i.id === itemId)
-              if (!item) return null
-              return (
-                <span key={slot} className="text-xs px-2 py-1 rounded-full border flex items-center gap-1"
-                  style={{ borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
-                  {item.emoji} {item.name}
-                </span>
-              )
-            })}
-          </div>
+          <p className="text-white/25 text-xs text-center leading-relaxed">
+            사진을 업로드하면 프로필과 커버 영상 목록에<br />내 사진이 표시됩니다
+          </p>
         </div>
 
-        {/* 슬롯 탭 */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
-          {Object.entries(SLOT_LABELS).map(([slot, label]) => (
-            <button
-              key={slot}
-              onClick={() => setActiveSlot(slot)}
-              className="flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium transition border"
-              style={activeSlot === slot
-                ? { background: theme.gradient, borderColor: 'transparent', color: 'white' }
-                : { borderColor: `${accentColor}25`, color: `${accentColor}60` }
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* 보유 아이템 목록 */}
-        {slotItems.length === 0 ? (
-          <div className="text-center py-12 border border-white/8 rounded-2xl">
-            <p className="text-white/25 text-sm">{t('av.noItems', { slot: SLOT_LABELS[activeSlot] })}</p>
-            <Link
-              href="/shop"
-              className="inline-block mt-3 px-5 py-2 rounded-full text-white text-sm font-medium"
-              style={{ background: theme.gradient }}
-            >
-              {t('av.buyInShop')}
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {slotItems.map(item => {
-              const isEquipped = equippedIds[item.slot] === item.id
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleEquip(item)}
-                  className="rounded-2xl p-4 border text-left transition hover:scale-[1.02]"
-                  style={{
-                    borderColor: isEquipped ? `${accentColor}70` : `${accentColor}20`,
-                    background: isEquipped ? `${accentColor}15` : `${accentColor}05`,
-                  }}
-                >
-                  <div className="text-3xl mb-2">{item.emoji}</div>
-                  <p className="text-white text-sm font-semibold leading-tight">{item.name}</p>
-                  {item.artist && (
-                    <p className="text-xs mt-0.5" style={{ color: `${accentColor}70` }}>{item.artist}</p>
-                  )}
-                  <div className="mt-3">
-                    {isEquipped ? (
-                      <span className="text-xs px-3 py-1 rounded-full font-medium"
-                        style={{ background: theme.gradient, color: 'white' }}>
-                        {t('av.equipped')}
-                      </span>
-                    ) : (
-                      <span className="text-xs px-3 py-1 rounded-full border font-medium"
-                        style={{ borderColor: `${accentColor}40`, color: `${accentColor}80` }}>
-                        {t('av.equip')}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        )}
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f) }}
+        />
       </div>
     </div>
   )

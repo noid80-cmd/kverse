@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GroupTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import Avatar from '@/app/components/Avatar'
@@ -47,8 +47,6 @@ export default function ProfilePage() {
   const [nationality, setNationality] = useState('KR')
   const [editingNationality, setEditingNationality] = useState(false)
   const [nationalitySearch, setNationalitySearch] = useState('')
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
-  const photoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     async function load() {
@@ -100,19 +98,6 @@ export default function ProfilePage() {
     if (!error) {
       setVideos(prev => prev.map(v => v.id === video.id ? { ...v, is_private: !v.is_private } : v))
     }
-  }
-
-  async function handlePhotoUpload(file: File) {
-    if (!account) return
-    setUploadingPhoto(true)
-    const ext = file.name.split('.').pop() || 'jpg'
-    const path = `${account.id}/profile.${ext}`
-    const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, { upsert: true })
-    if (upErr) { setUploadingPhoto(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('아바타').getPublicUrl(path)
-    await supabase.from('accounts').update({ rpm_avatar_url: publicUrl }).eq('id', account.id)
-    setAccount(prev => prev ? { ...prev, rpm_avatar_url: publicUrl } : prev)
-    setUploadingPhoto(false)
   }
 
   async function updateNationality(code: string) {
@@ -244,20 +229,6 @@ export default function ProfilePage() {
                 src={getFlagImageUrl(nationality, 20)}
                 alt={nationality}
                 className="absolute -top-1 -right-1 w-5 h-3.5 rounded-sm object-cover shadow-lg border border-black/80 z-10"
-              />
-              <button
-                onClick={() => photoInputRef.current?.click()}
-                disabled={uploadingPhoto}
-                className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full text-xs bg-black/80 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition whitespace-nowrap z-10"
-              >
-                {uploadingPhoto ? '...' : '📷'}
-              </button>
-              <input
-                ref={photoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f) }}
               />
             </div>
 
