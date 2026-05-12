@@ -177,7 +177,9 @@ export default function FeedPage() {
               src={selectedVideo.video_url}
               controls
               autoPlay
-              className="w-full aspect-video bg-black"
+              playsInline
+              className="w-full bg-black"
+              style={{ maxHeight: '65vh', display: 'block' }}
             />
             <div className="bg-black p-4">
               <p className="text-white font-semibold text-lg">{selectedVideo.title}</p>
@@ -399,14 +401,19 @@ export default function FeedPage() {
                 <div className="text-2xl font-bold text-white/20 w-8 text-center">
                   {index + 1}
                 </div>
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 relative"
-                  style={{ background: `${accentColor}20`, color: accentColor }}
-                >
-                  {video.category === 'vocal' ? 'VOCAL' : 'DANCE'}
-                  <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/0 hover:bg-black/20 transition">
-                    <span className="text-white/0 group-hover:text-white/80 text-xs">▶</span>
-                  </div>
+                <div className="w-14 h-14 rounded-xl flex-shrink-0 relative overflow-hidden"
+                  style={{ background: `${accentColor}15` }}>
+                  <video
+                    src={`${video.video_url}#t=0.5`}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                    muted
+                    playsInline
+                  />
+                  <span className="absolute bottom-0.5 left-0 right-0 text-center text-[9px] font-bold"
+                    style={{ color: accentColor, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                    {video.category === 'vocal' ? '🎤' : '💃'}
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-semibold truncate">{video.title}</p>
