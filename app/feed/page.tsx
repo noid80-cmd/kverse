@@ -30,6 +30,7 @@ type Video = {
   video_url: string
   created_at: string
   is_live: boolean
+  is_private: boolean
   accounts: { username: string }
   groups: { name: string }
 }
@@ -97,6 +98,7 @@ export default function FeedPage() {
       .from('videos')
       .select('*, accounts(username), groups(name)')
       .eq('group_id', groupId)
+      .or(`is_private.eq.false,account_id.eq.${account?.id}`)
       .order('like_count', { ascending: false })
       .limit(20)
 
@@ -436,6 +438,11 @@ export default function FeedPage() {
                     {video.is_live && (
                       <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
                         🔴 LIVE
+                      </span>
+                    )}
+                    {video.is_private && (
+                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/10 text-white/40 border border-white/15">
+                        🔒
                       </span>
                     )}
                   </div>

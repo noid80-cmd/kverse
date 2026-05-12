@@ -38,6 +38,7 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
+  const [isPrivate, setIsPrivate] = useState(false)
   const [isMobile, setIsMobile] = useState(true)
 
   useEffect(() => {
@@ -131,6 +132,7 @@ export default function UploadPage() {
       title: title.trim(),
       video_url: publicUrl,
       is_live: uploadMode === 'live',
+      is_private: isPrivate,
     })
 
     setProgress(100)
@@ -296,6 +298,21 @@ export default function UploadPage() {
               className="hidden"
             />
           </div>
+
+          {/* 공개/비공개 토글 */}
+          <button
+            onClick={() => setIsPrivate(p => !p)}
+            className={`w-full py-3 px-4 rounded-xl border-2 font-medium transition text-sm flex items-center justify-between ${
+              isPrivate
+                ? 'border-white/20 bg-white/5 text-white/60'
+                : 'border-pink-500/40 bg-pink-500/10 text-pink-300'
+            }`}
+          >
+            <span>{isPrivate ? '🔒 비공개' : '🌐 공개'}</span>
+            <span className="text-xs opacity-60">
+              {isPrivate ? '나만 볼 수 있어요' : '유니버스에 공개돼요'}
+            </span>
+          </button>
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
