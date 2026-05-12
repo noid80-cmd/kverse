@@ -116,7 +116,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-pink-400 text-xl font-medium animate-pulse">Loading Universe...</div>
+        <div className="text-pink-400 text-xl font-medium animate-pulse">{t('common.loadingUniverse')}</div>
       </div>
     )
   }
@@ -131,12 +131,18 @@ export default function ProfilePage() {
       {/* ── NAV ── */}
       <nav className="sticky top-0 z-20 bg-black/80 backdrop-blur border-b border-white/10 px-5 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-white/40 hover:text-white transition text-sm">Home</Link>
+          <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠</Link>
           <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">← {t('nav.back')}</Link>
         </div>
         <KverseLogo />
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+            className="px-3 py-1.5 text-white/40 hover:text-white text-xs rounded-full border border-white/10 transition"
+          >
+            {t('nav.logout')}
+          </button>
           <Link href="/upload" className="px-3 py-1.5 text-white text-xs font-medium rounded-full" style={{ background: theme?.gradient }}>
             {t('prof.upload')}
           </Link>

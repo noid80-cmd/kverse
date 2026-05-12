@@ -53,10 +53,11 @@ export default function BrowsePage() {
         }
       }
 
-      // 전체 영상 로드
+      // 전체 영상 로드 (비공개 제외)
       const { data } = await supabase
         .from('videos')
         .select('*, accounts(username), groups(name)')
+        .eq('is_private', false)
         .order('like_count', { ascending: false })
         .limit(100)
       setVideos(data || [])

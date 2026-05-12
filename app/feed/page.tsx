@@ -461,7 +461,7 @@ export default function FeedPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-white/40 text-sm">@{video.accounts.username}</p>
+                  <Link href={`/profile/${video.accounts.username}`} onClick={e => e.stopPropagation()} className="text-white/40 text-sm hover:text-white/70 transition">@{video.accounts.username}</Link>
                   <div className="flex items-center gap-3 mt-1">
                     <span className="text-xs" style={{ color: accentColor }}>
                       <span style={likedIds.has(video.id) ? { color: accentColor } : { color: 'rgba(255,255,255,0.25)' }}>♥</span> {video.like_count}
