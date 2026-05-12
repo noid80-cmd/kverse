@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kverse</string>
+    <string name="title_activity_main">Kverse</string>
+    <string name="package_name">app.kverse.cover</string>
+    <string name="custom_url_scheme">app.kverse.cover</string>
+</resources>

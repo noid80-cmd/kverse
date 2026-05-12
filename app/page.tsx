@@ -195,6 +195,9 @@ export default function Home() {
         <p className="text-white/25 text-xs mt-2 font-normal">
           Kverse는 K팝 아티스트 및 소속사와 무관한 독립 팬 커뮤니티 플랫폼입니다.
         </p>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <Link href="/privacy" className="text-white/25 hover:text-white/50 text-xs transition">개인정보처리방침 · Privacy Policy</Link>
+        </div>
       </footer>
     </div>
   )

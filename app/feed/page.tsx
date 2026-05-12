@@ -54,6 +54,9 @@ export default function FeedPage() {
   const [showAccountMenu, setShowAccountMenu] = useState(false)
   const [isPlus, setIsPlus] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Video | null>(null)
+  const [reportTarget, setReportTarget] = useState<Video | null>(null)
+  const [reportReason, setReportReason] = useState('')
+  const [reportDone, setReportDone] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -126,6 +129,19 @@ export default function FeedPage() {
       .select('video_id')
       .eq('account_id', accountId)
     if (data) setLikedIds(new Set(data.map((r: { video_id: string }) => r.video_id)))
+  }
+
+  async function submitReport() {
+    if (!reportTarget || !reportReason || !account) return
+    await supabase.from('reports').insert({
+      video_id: reportTarget.id,
+      reporter_account_id: account.id,
+      reason: reportReason,
+    })
+    setReportTarget(null)
+    setReportReason('')
+    setReportDone(true)
+    setTimeout(() => setReportDone(false), 3000)
   }
 
   async function deleteVideo(video: Video) {
@@ -472,14 +488,23 @@ export default function FeedPage() {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {video.accounts.username !== account?.username && (
-                    <Link
-                      href={`/dm?to=${video.accounts.username}`}
-                      onClick={e => e.stopPropagation()}
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}
-                    >
-                      💬
-                    </Link>
+                    <>
+                      <Link
+                        href={`/dm?to=${video.accounts.username}`}
+                        onClick={e => e.stopPropagation()}
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}
+                      >
+                        💬
+                      </Link>
+                      <button
+                        onClick={e => { e.stopPropagation(); setReportTarget(video); setReportReason('') }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.2)' }}
+                      >
+                        🚩
+                      </button>
+                    </>
                   )}
                   {video.accounts.username === account?.username && (
                     <button
@@ -508,6 +533,69 @@ export default function FeedPage() {
           </div>
         )}
       </div>
+
+      {/* 신고 완료 토스트 */}
+      {reportDone && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          ✅ {t('feed.reportDone')}
+        </div>
+      )}
+
+      {/* 신고 모달 */}
+      {reportTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setReportTarget(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4"
+            style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="text-3xl mb-2">🚩</div>
+              <p className="text-white font-semibold">{t('feed.reportTitle')}</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {[
+                { key: 'inappropriate', label: t('feed.reportInappropriate') },
+                { key: 'copyright', label: t('feed.reportCopyright') },
+                { key: 'spam', label: t('feed.reportSpam') },
+                { key: 'other', label: t('feed.reportOther') },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setReportReason(key)}
+                  className="w-full py-3 px-4 rounded-xl text-sm text-left transition border"
+                  style={reportReason === key
+                    ? { background: `${accentColor}20`, borderColor: accentColor, color: 'white' }
+                    : { borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setReportTarget(null)}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-white/50 text-sm font-medium"
+              >
+                {t('feed.cancelBtn')}
+              </button>
+              <button
+                onClick={submitReport}
+                disabled={!reportReason}
+                className="flex-1 py-3 rounded-xl text-white text-sm font-medium disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}
+              >
+                {t('feed.reportSubmit')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 삭제 확인 모달 */}
       {deleteTarget && (
