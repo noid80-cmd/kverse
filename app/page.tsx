@@ -90,15 +90,31 @@ export default function Home() {
         </p>
 
         <div className="flex gap-3">
-          <Link href={loggedIn ? '/feed' : '/signup'}
-            className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
-            style={{ background: BRAND_GRADIENT }}>
-            {loggedIn ? t('home.enterUniverse') : t('home.startUniverse')}
-          </Link>
-          <Link href="/browse"
-            className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">
-            {t('home.viewCovers')}
-          </Link>
+          {loggedIn ? (
+            <>
+              <Link href="/feed"
+                className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
+                style={{ background: BRAND_GRADIENT }}>
+                {t('home.enterUniverse')}
+              </Link>
+              <Link href="/select-group"
+                className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">
+                + {t('sa.addFanNick')}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/signup"
+                className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
+                style={{ background: BRAND_GRADIENT }}>
+                {t('home.startUniverse')}
+              </Link>
+              <Link href="/browse"
+                className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">
+                {t('home.viewCovers')}
+              </Link>
+            </>
+          )}
         </div>
       </section>
 
@@ -177,11 +193,25 @@ export default function Home() {
       <section className="flex flex-col items-center justify-center text-center px-6 py-24 gap-6 border-t border-white/5">
         <p className="text-white/45 text-xs font-medium tracking-[0.2em] uppercase">{t('home.ctaDesc')}</p>
         <h2 className="text-4xl sm:text-5xl font-bold text-white break-keep">{t('home.ctaTitle')}</h2>
-        <Link href={loggedIn ? '/feed' : '/signup'}
-          className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
-          style={{ background: BRAND_GRADIENT }}>
-          {loggedIn ? t('home.enterUniverse') : t('home.ctaBtn')}
-        </Link>
+        {loggedIn ? (
+          <div className="flex gap-3">
+            <Link href="/feed"
+              className="px-10 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
+              style={{ background: BRAND_GRADIENT }}>
+              {t('home.enterUniverse')}
+            </Link>
+            <Link href="/select-group"
+              className="px-10 py-4 rounded-full border border-white/10 font-medium text-base text-white/50 hover:text-white hover:border-white/25 transition">
+              + {t('sa.addFanNick')}
+            </Link>
+          </div>
+        ) : (
+          <Link href="/signup"
+            className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
+            style={{ background: BRAND_GRADIENT }}>
+            {t('home.ctaBtn')}
+          </Link>
+        )}
       </section>
 
       <footer className="border-t border-white/5 px-8 py-10 text-center">
