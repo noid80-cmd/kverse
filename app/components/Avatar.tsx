@@ -19,9 +19,10 @@ type AvatarProps = {
 
 export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl, username }: AvatarProps) {
   if (rpmAvatarUrl) {
-    const base = rpmAvatarUrl.replace(/\.glb$/, '')
-    const pngUrl = `${base}.png?scene=fullbody-portrait-v1-transparent&arm=5`
-    return <img src={pngUrl} alt="avatar" width={size} height={size} style={{ objectFit: 'cover', borderRadius: 16 }} />
+    const displayUrl = rpmAvatarUrl.endsWith('.glb')
+      ? `${rpmAvatarUrl.replace(/\.glb$/, '')}.png?scene=fullbody-portrait-v1-transparent&arm=5`
+      : rpmAvatarUrl
+    return <img src={displayUrl} alt="avatar" width={size} height={size} style={{ objectFit: 'cover', borderRadius: 16 }} />
   }
 
   const color     = groupColor || '#7C3AED'
