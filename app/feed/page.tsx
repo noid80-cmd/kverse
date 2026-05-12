@@ -84,7 +84,7 @@ export default function FeedPage() {
       }
 
       await Promise.all([
-        fetchVideos(data.group_id, 'all', 'newest'),
+        fetchVideos(data.group_id, 'all', 'newest', data.id),
         fetchLikedIds(data.id),
       ])
       setLoading(false)
@@ -129,13 +129,14 @@ export default function FeedPage() {
     return () => observer.disconnect()
   }, [videos])
 
-  async function fetchVideos(groupId: string, p: Period, s: SortOrder) {
+  async function fetchVideos(groupId: string, p: Period, s: SortOrder, accId?: string) {
     setVideosLoading(true)
+    const id = accId ?? account?.id
     let query = supabase
       .from('videos')
       .select('*, accounts(username), groups(name)')
       .eq('group_id', groupId)
-      .or(`is_private.eq.false,account_id.eq.${account?.id}`)
+      .or(id ? `is_private.eq.false,account_id.eq.${id}` : 'is_private.eq.false')
       .order(s === 'newest' ? 'created_at' : 'like_count', { ascending: false })
       .limit(20)
 
@@ -283,7 +284,7 @@ export default function FeedPage() {
                     setActiveAccountId(acc.id)
                     setAccount(acc)
                     setShowAccountMenu(false)
-                    fetchVideos(acc.group_id, period, sort)
+                    fetchVideos(acc.group_id, period, sort, acc.id)
                     fetchLikedIds(acc.id)
                   }}
                   className="w-full px-4 py-3.5 flex items-center gap-3 hover:bg-white/5 transition text-left"
