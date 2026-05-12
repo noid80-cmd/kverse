@@ -3,7 +3,11 @@ import { ImageResponse } from 'next/og'
 export const size = { width: 512, height: 512 }
 export const contentType = 'image/png'
 
-export default function Icon() {
+export default async function Icon() {
+  const fontData = await fetch(
+    'https://cdn.jsdelivr.net/npm/@fontsource/inter/files/inter-latin-900-normal.woff'
+  ).then(r => r.arrayBuffer())
+
   return new ImageResponse(
     <div
       style={{
@@ -16,7 +20,6 @@ export default function Icon() {
         position: 'relative',
       }}
     >
-      {/* Back arc – top half, faded (behind K) */}
       <svg
         width={512} height={512} viewBox="0 0 512 512"
         style={{ position: 'absolute', top: 0, left: 0 }}
@@ -35,23 +38,21 @@ export default function Icon() {
         />
       </svg>
 
-      {/* K letter */}
       <span
         style={{
-          fontSize: 340,
+          fontSize: 360,
           fontWeight: 900,
           color: '#E91E8C',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: 'Inter',
           lineHeight: 1,
           position: 'relative',
           zIndex: 1,
-          textShadow: '0 0 40px rgba(233,30,140,0.6), 0 0 80px rgba(233,30,140,0.3)',
+          textShadow: '0 0 40px rgba(233,30,140,0.5)',
         }}
       >
         K
       </span>
 
-      {/* Front arc – bottom half, full opacity (in front of K) */}
       <svg
         width={512} height={512} viewBox="0 0 512 512"
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 2 }}
@@ -70,6 +71,9 @@ export default function Icon() {
         />
       </svg>
     </div>,
-    { ...size }
+    {
+      ...size,
+      fonts: [{ name: 'Inter', data: fontData, weight: 900, style: 'normal' }],
+    }
   )
 }

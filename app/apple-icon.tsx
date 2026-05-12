@@ -3,7 +3,11 @@ import { ImageResponse } from 'next/og'
 export const size = { width: 180, height: 180 }
 export const contentType = 'image/png'
 
-export default function AppleIcon() {
+export default async function AppleIcon() {
+  const fontData = await fetch(
+    'https://cdn.jsdelivr.net/npm/@fontsource/inter/files/inter-latin-900-normal.woff'
+  ).then(r => r.arrayBuffer())
+
   return new ImageResponse(
     <div
       style={{
@@ -36,14 +40,14 @@ export default function AppleIcon() {
 
       <span
         style={{
-          fontSize: 120,
+          fontSize: 126,
           fontWeight: 900,
           color: '#E91E8C',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: 'Inter',
           lineHeight: 1,
           position: 'relative',
           zIndex: 1,
-          textShadow: '0 0 16px rgba(233,30,140,0.6), 0 0 32px rgba(233,30,140,0.3)',
+          textShadow: '0 0 16px rgba(233,30,140,0.5)',
         }}
       >
         K
@@ -67,6 +71,9 @@ export default function AppleIcon() {
         />
       </svg>
     </div>,
-    { ...size }
+    {
+      ...size,
+      fonts: [{ name: 'Inter', data: fontData, weight: 900, style: 'normal' }],
+    }
   )
 }
