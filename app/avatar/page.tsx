@@ -69,9 +69,8 @@ export default function AvatarPage() {
     setUploading(true)
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
     const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg'
-    const path = `${account.id}/profile.${safeExt}`
+    const path = `${account.id}/profile_${Date.now()}.${safeExt}`
     const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, {
-      upsert: true,
       contentType: file.type || `image/${safeExt}`,
     })
     if (upErr) {
