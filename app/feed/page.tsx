@@ -123,6 +123,20 @@ export default function FeedPage() {
     if (data) setLikedIds(new Set(data.map((r: { video_id: string }) => r.video_id)))
   }
 
+  async function deleteVideo(video: Video, e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!confirm('이 영상을 삭제할까요?')) return
+
+    // storage 경로 추출: .../videos/[path] → [path]
+    const match = video.video_url.match(/\/videos\/(.+)$/)
+    if (match) {
+      await supabase.storage.from('videos').remove([decodeURIComponent(match[1])])
+    }
+    await supabase.from('videos').delete().eq('id', video.id)
+    setVideos(prev => prev.filter(v => v.id !== video.id))
+    if (selectedVideo?.id === video.id) setSelectedVideo(null)
+  }
+
   async function toggleLike(video: Video) {
     if (!account) return
     const liked = likedIds.has(video.id)
@@ -434,18 +448,29 @@ export default function FeedPage() {
                     <span className="text-white/20 text-xs">{video.category === 'vocal' ? t('common.vocal') : t('common.dance')}</span>
                   </div>
                 </div>
-                <button
-                  onClick={e => { e.stopPropagation(); toggleLike(video) }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition flex-shrink-0 text-lg"
-                  style={likedIds.has(video.id) ? {
-                    background: theme?.gradient,
-                  } : {
-                    background: `${accentColor}15`,
-                    border: `1px solid ${accentColor}30`,
-                  }}
-                >
-                  <span style={likedIds.has(video.id) ? { color: 'white' } : { color: accentColor }}>♥</span>
-                </button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {video.accounts.username === account?.username && (
+                    <button
+                      onClick={e => deleteVideo(video, e)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
+                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}
+                    >
+                      🗑
+                    </button>
+                  )}
+                  <button
+                    onClick={e => { e.stopPropagation(); toggleLike(video) }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
+                    style={likedIds.has(video.id) ? {
+                      background: theme?.gradient,
+                    } : {
+                      background: `${accentColor}15`,
+                      border: `1px solid ${accentColor}30`,
+                    }}
+                  >
+                    <span style={likedIds.has(video.id) ? { color: 'white' } : { color: accentColor }}>♥</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
