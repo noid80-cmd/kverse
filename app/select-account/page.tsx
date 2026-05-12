@@ -27,6 +27,8 @@ export default function SelectAccountPage() {
   const [equippedMap, setEquippedMap] = useState<Record<string, EquippedItems>>({})
   const [loading, setLoading] = useState(true)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Account | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -93,6 +95,22 @@ export default function SelectAccountPage() {
     router.push('/feed')
   }
 
+  async function deleteAccount(account: Account) {
+    setDeleting(true)
+    await supabase.from('videos').delete().eq('account_id', account.id)
+    await supabase.from('accounts').delete().eq('id', account.id)
+    const remaining = accounts.filter(a => a.id !== account.id)
+    setAccounts(remaining)
+    setDeleteTarget(null)
+    setDeleting(false)
+    if (remaining.length === 0) {
+      router.push('/select-group')
+    } else if (remaining.length === 1) {
+      setActiveAccountId(remaining[0].id)
+      router.push('/feed')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -117,39 +135,43 @@ export default function SelectAccountPage() {
             const theme = getTheme(account.groups.name)
             const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
             return (
-              <button
-                key={account.id}
-                onClick={() => handleSelect(account)}
-                className="w-full rounded-2xl p-5 flex items-center gap-4 border transition hover:scale-[1.02] text-left"
-                style={{
-                  borderColor: `${accentColor}40`,
-                  background: `${accentColor}08`,
-                }}
-              >
-                {/* 아바타 */}
-                <div
-                  className="flex-shrink-0 w-14 h-14 rounded-full overflow-hidden flex items-start justify-center"
-                  style={{ background: `${accentColor}18` }}
+              <div key={account.id} className="relative">
+                <button
+                  onClick={() => handleSelect(account)}
+                  className="w-full rounded-2xl p-5 flex items-center gap-4 border transition hover:scale-[1.02] text-left"
+                  style={{ borderColor: `${accentColor}40`, background: `${accentColor}08` }}
                 >
-                  <Avatar
-                    gender={(account.gender as 'male' | 'female') || 'female'}
-                    equipped={equippedMap[account.id] || {}}
-                    groupColor={accentColor}
-                    size={56}
-                    username={account.username}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-base">@{account.username}</p>
-                  <p className="text-sm font-medium mt-0.5" style={{ color: accentColor }}>
-                    {groupDisplayName(account.groups.name, locale)} · {worldName(theme, locale)}
-                  </p>
-                  <p className="text-white/20 text-xs mt-1">
-                    {new Date(account.created_at).toLocaleDateString()} {t('common.joined')}
-                  </p>
-                </div>
-                <div className="text-white/30 text-lg">→</div>
-              </button>
+                  <div
+                    className="flex-shrink-0 w-14 h-14 rounded-full overflow-hidden flex items-start justify-center"
+                    style={{ background: `${accentColor}18` }}
+                  >
+                    <Avatar
+                      gender={(account.gender as 'male' | 'female') || 'female'}
+                      equipped={equippedMap[account.id] || {}}
+                      groupColor={accentColor}
+                      size={56}
+                      username={account.username}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-base">@{account.username}</p>
+                    <p className="text-sm font-medium mt-0.5" style={{ color: accentColor }}>
+                      {groupDisplayName(account.groups.name, locale)} · {worldName(theme, locale)}
+                    </p>
+                    <p className="text-white/20 text-xs mt-1">
+                      {new Date(account.created_at).toLocaleDateString()} {t('common.joined')}
+                    </p>
+                  </div>
+                  <div className="text-white/30 text-lg">→</div>
+                </button>
+                {/* 삭제 버튼 */}
+                <button
+                  onClick={e => { e.stopPropagation(); setDeleteTarget(account) }}
+                  className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-400/10 transition text-sm"
+                >
+                  🗑
+                </button>
+              </div>
             )
           })}
         </div>
@@ -243,6 +265,44 @@ export default function SelectAccountPage() {
             >
               {t('common.later')}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 팬닉 삭제 확인 모달 */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 flex items-end justify-center pb-8 px-4"
+          style={{ zIndex: 9999, background: 'rgba(0,0,0,0.8)' }}
+          onClick={() => !deleting && setDeleteTarget(null)}
+        >
+          <div
+            className="w-full max-w-sm bg-zinc-900 border border-red-500/20 rounded-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="text-4xl mb-3">🗑</div>
+              <h2 className="text-white font-bold text-lg mb-2">{t('sa.deleteAccountTitle')}</h2>
+              <p className="text-white/50 text-sm leading-relaxed">
+                {t('sa.deleteAccountDesc').replace('{username}', deleteTarget.username)}
+              </p>
+            </div>
+            <div className="border-t border-white/5 flex">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 py-4 text-white/50 hover:text-white text-sm font-medium border-r border-white/5 transition disabled:opacity-40"
+              >
+                {t('feed.cancelBtn')}
+              </button>
+              <button
+                onClick={() => deleteAccount(deleteTarget)}
+                disabled={deleting}
+                className="flex-1 py-4 text-red-400 hover:text-red-300 text-sm font-bold transition disabled:opacity-40"
+              >
+                {deleting ? t('sa.deleting') : t('sa.deleteAccountBtn')}
+              </button>
+            </div>
           </div>
         </div>
       )}
