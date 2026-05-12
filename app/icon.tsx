@@ -3,6 +3,10 @@ import { ImageResponse } from 'next/og'
 export const size = { width: 512, height: 512 }
 export const contentType = 'image/png'
 
+// K as a single filled polygon — clean joints, no bleed
+// Vertical bar: 90px wide. Arms: 90px thick at tip.
+const K = 'M 80,65 L 170,65 L 170,205 L 395,65 L 432,65 L 432,155 L 232,256 L 432,357 L 432,447 L 395,447 L 170,307 L 170,447 L 80,447 Z'
+
 export default function Icon() {
   return new ImageResponse(
     <div
@@ -23,8 +27,8 @@ export default function Icon() {
           </linearGradient>
           <clipPath id="top"><rect x="0" y="0" width="512" height="256" /></clipPath>
           <clipPath id="bot"><rect x="0" y="256" width="512" height="256" /></clipPath>
-          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="10" result="blur" />
+          <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="9" result="blur" />
             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
@@ -36,19 +40,8 @@ export default function Icon() {
           clipPath="url(#top)" opacity="0.4"
         />
 
-        {/* K — vertical bar */}
-        <rect x="74" y="62" width="110" height="388" rx="20"
-          fill="#E91E8C" filter="url(#glow)" />
-
-        {/* K — upper arm */}
-        <line x1="152" y1="242" x2="448" y2="64"
-          stroke="#E91E8C" strokeWidth="95"
-          strokeLinecap="round" filter="url(#glow)" />
-
-        {/* K — lower arm */}
-        <line x1="152" y1="270" x2="448" y2="448"
-          stroke="#E91E8C" strokeWidth="95"
-          strokeLinecap="round" filter="url(#glow)" />
+        {/* K */}
+        <path d={K} fill="#E91E8C" filter="url(#glow)" />
 
         {/* Front arc */}
         <ellipse cx="256" cy="256" rx="232" ry="58"

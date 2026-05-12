@@ -3,6 +3,9 @@ import { ImageResponse } from 'next/og'
 export const size = { width: 180, height: 180 }
 export const contentType = 'image/png'
 
+// Same K polygon scaled to 180x180 (factor 0.352)
+const K = 'M 28,23 L 60,23 L 60,72 L 139,23 L 152,23 L 152,55 L 82,90 L 152,126 L 152,157 L 139,157 L 60,108 L 60,157 L 28,157 Z'
+
 export default function AppleIcon() {
   return new ImageResponse(
     <div
@@ -23,8 +26,8 @@ export default function AppleIcon() {
           </linearGradient>
           <clipPath id="top"><rect x="0" y="0" width="180" height="90" /></clipPath>
           <clipPath id="bot"><rect x="0" y="90" width="180" height="90" /></clipPath>
-          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
@@ -36,19 +39,8 @@ export default function AppleIcon() {
           clipPath="url(#top)" opacity="0.4"
         />
 
-        {/* K — vertical bar */}
-        <rect x="26" y="22" width="38" height="136" rx="7"
-          fill="#E91E8C" filter="url(#glow)" />
-
-        {/* K — upper arm */}
-        <line x1="53" y1="85" x2="157" y2="22"
-          stroke="#E91E8C" strokeWidth="33"
-          strokeLinecap="round" filter="url(#glow)" />
-
-        {/* K — lower arm */}
-        <line x1="53" y1="95" x2="157" y2="158"
-          stroke="#E91E8C" strokeWidth="33"
-          strokeLinecap="round" filter="url(#glow)" />
+        {/* K */}
+        <path d={K} fill="#E91E8C" filter="url(#glow)" />
 
         {/* Front arc */}
         <ellipse cx="90" cy="90" rx="82" ry="20"
