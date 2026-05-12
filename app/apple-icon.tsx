@@ -35,7 +35,7 @@ export default function AppleIcon() {
         <ellipse
           cx="90" cy="90" rx="81" ry="20"
           transform="rotate(-18 90 90)"
-          stroke="url(#rb)" strokeWidth="6.5" fill="none"
+          stroke="url(#rb)" strokeWidth="8" fill="none"
           clipPath="url(#top180)" opacity="0.38"
         />
       </svg>
@@ -43,13 +43,14 @@ export default function AppleIcon() {
       {/* K letter */}
       <span
         style={{
-          fontSize: 106,
+          fontSize: 120,
           fontWeight: 900,
-          color: 'white',
+          color: '#E91E8C',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           lineHeight: 1,
           position: 'relative',
           zIndex: 1,
+          textShadow: '0 0 16px rgba(233,30,140,0.6), 0 0 32px rgba(233,30,140,0.3)',
         }}
       >
         K
@@ -74,7 +75,7 @@ export default function AppleIcon() {
         <ellipse
           cx="90" cy="90" rx="81" ry="20"
           transform="rotate(-18 90 90)"
-          stroke="url(#rf)" strokeWidth="6.5" fill="none"
+          stroke="url(#rf)" strokeWidth="8" fill="none"
           clipPath="url(#bot180)"
         />
       </svg>

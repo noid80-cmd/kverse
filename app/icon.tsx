@@ -35,7 +35,7 @@ export default function Icon() {
         <ellipse
           cx="256" cy="256" rx="230" ry="56"
           transform="rotate(-18 256 256)"
-          stroke="url(#rb)" strokeWidth="18" fill="none"
+          stroke="url(#rb)" strokeWidth="22" fill="none"
           clipPath="url(#top512)" opacity="0.38"
         />
       </svg>
@@ -43,13 +43,14 @@ export default function Icon() {
       {/* K letter */}
       <span
         style={{
-          fontSize: 300,
+          fontSize: 340,
           fontWeight: 900,
-          color: 'white',
+          color: '#E91E8C',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           lineHeight: 1,
           position: 'relative',
           zIndex: 1,
+          textShadow: '0 0 40px rgba(233,30,140,0.6), 0 0 80px rgba(233,30,140,0.3)',
         }}
       >
         K
@@ -74,7 +75,7 @@ export default function Icon() {
         <ellipse
           cx="256" cy="256" rx="230" ry="56"
           transform="rotate(-18 256 256)"
-          stroke="url(#rf)" strokeWidth="18" fill="none"
+          stroke="url(#rf)" strokeWidth="22" fill="none"
           clipPath="url(#bot512)"
         />
       </svg>
