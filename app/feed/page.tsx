@@ -290,6 +290,9 @@ export default function FeedPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/dm" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
+            💬
+          </Link>
           <Link href="/community" className="hidden sm:block px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             {t('nav.community')}
           </Link>
