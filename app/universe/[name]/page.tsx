@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -34,6 +34,7 @@ export default function UniversePage() {
   const t = useT()
   const { locale } = useLanguage()
   const { name } = useParams<{ name: string }>()
+  const searchParams = useSearchParams()
   const groupName = decodeURIComponent(name)
   const theme = getTheme(groupName)
   const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
@@ -49,7 +50,10 @@ export default function UniversePage() {
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
+  const [shareToast, setShareToast] = useState(false)
+  const [highlightId, setHighlightId] = useState<string | null>(null)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
     async function load() {
@@ -88,6 +92,17 @@ export default function UniversePage() {
     }
     load()
   }, [groupName])
+
+  // 공유 링크로 들어왔을 때 해당 영상으로 스크롤
+  useEffect(() => {
+    const videoId = searchParams.get('video')
+    if (!videoId || videos.length === 0) return
+    setHighlightId(videoId)
+    setTimeout(() => {
+      cardRefs.current[videoId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 300)
+    setTimeout(() => setHighlightId(null), 3000)
+  }, [videos, searchParams])
 
   // 화면에 들어온 영상 자동 재생
   useEffect(() => {
@@ -138,6 +153,18 @@ export default function UniversePage() {
     setComments(prev => prev.filter(c => c.id !== commentId))
   }
 
+  async function shareVideo(video: Video) {
+    const url = `https://kverse-nine.vercel.app/universe/${encodeURIComponent(groupName)}?video=${video.id}`
+    const text = `@${video.accounts.username}의 ${groupDisplayName(groupName, locale)} 커버 영상을 Kverse에서 보세요!`
+    if (navigator.share) {
+      await navigator.share({ title: video.title, text, url }).catch(() => {})
+    } else {
+      await navigator.clipboard.writeText(url).catch(() => {})
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    }
+  }
+
   async function toggleLike(video: Video) {
     if (!accountId) return
     const liked = likedIds.has(video.id)
@@ -176,6 +203,14 @@ export default function UniversePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+
+      {/* 링크 복사 토스트 */}
+      {shareToast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          🔗 링크가 복사됐어요
+        </div>
+      )}
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
@@ -284,8 +319,12 @@ export default function UniversePage() {
             {filtered.map((video, index) => (
               <div
                 key={video.id}
-                className="rounded-2xl overflow-hidden border"
-                style={{ borderColor: index === 0 ? `${accentColor}50` : `${accentColor}18` }}
+                ref={el => { cardRefs.current[video.id] = el }}
+                className="rounded-2xl overflow-hidden border transition-all duration-500"
+                style={{
+                  borderColor: highlightId === video.id ? accentColor : index === 0 ? `${accentColor}50` : `${accentColor}18`,
+                  boxShadow: highlightId === video.id ? `0 0 0 2px ${accentColor}, 0 0 32px ${accentColor}40` : 'none',
+                }}
               >
                 {/* 헤더 */}
                 <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${accentColor}08` }}>
@@ -330,6 +369,13 @@ export default function UniversePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <button
+                      onClick={() => shareVideo(video)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"
+                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}
+                    >
+                      📤
+                    </button>
                     <button
                       onClick={() => { setCommentVideoId(video.id); fetchComments(video.id) }}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"

@@ -73,6 +73,7 @@ export default function FeedPage() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [newVideoNotif, setNewVideoNotif] = useState(false)
+  const [shareToast, setShareToast] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
@@ -270,6 +271,19 @@ export default function FeedPage() {
   async function deleteComment(commentId: string) {
     await supabase.from('video_comments').delete().eq('id', commentId)
     setComments(prev => prev.filter(c => c.id !== commentId))
+  }
+
+  async function shareVideo(video: Video) {
+    const groupName = video.groups?.name || account?.groups.name || ''
+    const url = `https://kverse-nine.vercel.app/universe/${encodeURIComponent(groupName)}?video=${video.id}`
+    const text = `@${video.accounts.username}의 ${groupName} 커버 영상을 Kverse에서 보세요!`
+    if (navigator.share) {
+      await navigator.share({ title: video.title, text, url }).catch(() => {})
+    } else {
+      await navigator.clipboard.writeText(url).catch(() => {})
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    }
   }
 
   async function toggleLike(video: Video) {
@@ -745,6 +759,11 @@ export default function FeedPage() {
                         🗑
                       </button>
                     )}
+                    <button onClick={() => shareVideo(video)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"
+                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
+                      📤
+                    </button>
                     <button onClick={() => { setCommentVideoId(video.id); fetchComments(video.id) }}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"
                       style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
@@ -769,6 +788,14 @@ export default function FeedPage() {
           </div>
         )}
       </div>
+
+      {/* 링크 복사 토스트 */}
+      {shareToast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          🔗 링크가 복사됐어요
+        </div>
+      )}
 
       {/* 신고 완료 토스트 */}
       {reportDone && (
