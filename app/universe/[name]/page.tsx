@@ -17,7 +17,7 @@ type Video = {
   view_count: number
   video_url: string
   created_at: string
-  accounts: { username: string }
+  accounts: { username: string; is_founder?: boolean }
 }
 
 type Comment = {
@@ -82,7 +82,7 @@ export default function UniversePage() {
 
       const { data } = await supabase
         .from('videos')
-        .select('*, accounts(username)')
+        .select('*, accounts(username, is_founder)')
         .eq('group_id', group.id)
         .order('like_count', { ascending: false })
 
@@ -339,6 +339,12 @@ export default function UniversePage() {
                       {video.accounts.username.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-white text-sm font-semibold truncate">@{video.accounts.username}</span>
+                    {video.accounts.is_founder && (
+                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                        ✦
+                      </span>
+                    )}
                   </Link>
                   <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                     style={{ background: `${accentColor}18`, color: accentColor }}>

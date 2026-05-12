@@ -19,6 +19,7 @@ type Account = {
   created_at: string
   gender: string
   nationality?: string
+  is_founder?: boolean
   equipped: Record<string, string>
   rpm_avatar_url?: string | null
   groups: { name: string; name_en: string }
@@ -233,7 +234,15 @@ export default function ProfilePage() {
             </div>
 
             {/* username */}
-            <h1 className="text-2xl font-black text-white leading-tight">@{account.username}</h1>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              <h1 className="text-2xl font-black text-white leading-tight">@{account.username}</h1>
+              {account.is_founder && (
+                <span className="text-xs font-black px-2.5 py-1 rounded-full"
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                  ✦ FOUNDER
+                </span>
+              )}
+            </div>
 
             {/* group badge */}
             <span className="mt-1.5 text-sm font-medium px-3 py-1 rounded-full" style={{ background: `${accent}22`, color: accent }}>

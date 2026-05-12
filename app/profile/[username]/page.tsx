@@ -18,6 +18,7 @@ type Account = {
   created_at: string
   gender: string
   nationality?: string
+  is_founder?: boolean
   equipped: Record<string, string>
   rpm_avatar_url?: string | null
   groups: { name: string; name_en: string }
@@ -127,10 +128,16 @@ export default function UserProfilePage() {
               username={profile.username}
             />
           </div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap justify-center">
             <h1 className="text-2xl font-black text-white">@{profile.username}</h1>
             {profile.nationality && (
               <img src={getFlagImageUrl(profile.nationality, 20)} alt={profile.nationality} className="w-5 h-3.5 rounded-sm object-cover" />
+            )}
+            {profile.is_founder && (
+              <span className="text-xs font-black px-2.5 py-1 rounded-full"
+                style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                ✦ FOUNDER
+              </span>
             )}
           </div>
           <span className="text-sm font-medium px-3 py-1 rounded-full mb-2" style={{ background: `${accent}22`, color: accent }}>

@@ -17,6 +17,7 @@ type Account = {
   group_id: string
   gender: string
   nationality?: string
+  is_founder?: boolean
   groups: { name: string; name_en: string }
 }
 
@@ -512,6 +513,12 @@ export default function FeedPage() {
                   alt={account.nationality || 'KR'}
                   className="w-6 h-4 rounded-sm object-cover"
                 />
+                {account.is_founder && (
+                  <span className="text-xs font-black px-2.5 py-0.5 rounded-full"
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                    ✦ FOUNDER
+                  </span>
+                )}
                 {isPlus && (
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                     style={{ background: 'linear-gradient(135deg, #FBBF24, #F59E0B)', color: 'black' }}>
