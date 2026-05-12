@@ -10,7 +10,7 @@ import { groupDisplayName } from '@/lib/groupThemes'
 import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 
-const MAX_DURATION_SEC = 300 // 5분
+const MAX_DURATION_SEC = 300
 
 function getVideoDuration(file: File): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -28,9 +28,11 @@ export default function UploadPage() {
   const t = useT()
   const { locale } = useLanguage()
   const fileRef = useRef<HTMLInputElement>(null)
+  const liveRef = useRef<HTMLInputElement>(null)
   const [account, setAccount] = useState<any>(null)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<'vocal' | 'dance'>('vocal')
+  const [uploadMode, setUploadMode] = useState<'normal' | 'live'>('normal')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -57,6 +59,13 @@ export default function UploadPage() {
     }
     load()
   }, [])
+
+  function handleModeChange(mode: 'normal' | 'live') {
+    setUploadMode(mode)
+    setFile(null)
+    setPreview(null)
+    setError('')
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
@@ -121,6 +130,7 @@ export default function UploadPage() {
       category,
       title: title.trim(),
       video_url: publicUrl,
+      is_live: uploadMode === 'live',
     })
 
     setProgress(100)
@@ -147,13 +157,48 @@ export default function UploadPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-black text-white mb-8">{t('upload.title')}</h1>
+        <h1 className="text-2xl font-black text-white mb-6">{t('upload.title')}</h1>
 
-        {!isMobile && (
+        {/* 업로드 모드 선택 */}
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={() => handleModeChange('normal')}
+            className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${
+              uploadMode === 'normal'
+                ? 'border-white/30 bg-white/10 text-white'
+                : 'border-white/10 text-white/40 hover:border-white/20'
+            }`}
+          >
+            📁 일반 커버
+            <p className="text-xs font-normal mt-0.5 opacity-60">갤러리에서 선택</p>
+          </button>
+          <button
+            onClick={() => handleModeChange('live')}
+            className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${
+              uploadMode === 'live'
+                ? 'border-red-500 bg-red-500/15 text-white'
+                : 'border-white/10 text-white/40 hover:border-white/20'
+            }`}
+          >
+            🔴 LIVE 인증
+            <p className="text-xs font-normal mt-0.5 opacity-60">실시간 촬영만 허용</p>
+          </button>
+        </div>
+
+        {uploadMode === 'live' && (
+          <div className="bg-red-500/10 border border-red-500/25 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <span className="text-red-400 text-lg">🔴</span>
+            <div>
+              <p className="text-red-300 text-sm font-medium">LIVE 인증 커버</p>
+              <p className="text-white/40 text-xs mt-0.5">지금 촬영한 영상만 업로드됩니다. 편집 없이 실력 그대로를 보여주는 인증 커버로 랭킹에 별도 표시됩니다.</p>
+            </div>
+          </div>
+        )}
+
+        {!isMobile && uploadMode === 'live' && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-5 mb-6 text-center">
             <div className="text-3xl mb-2">📱</div>
             <p className="text-red-400 font-medium text-sm">{t('upload.mobileOnly')}</p>
-            <p className="text-white/40 text-xs mt-1">{t('upload.mobileNote')}</p>
           </div>
         )}
 
@@ -164,7 +209,7 @@ export default function UploadPage() {
         )}
 
         <div className="flex flex-col gap-6">
-          {/* 카테고리 선택 */}
+          {/* 카테고리 */}
           <div>
             <label className="text-white/60 text-sm mb-3 block">{t('upload.category')}</label>
             <div className="flex gap-3">
@@ -219,17 +264,31 @@ export default function UploadPage() {
               </div>
             ) : (
               <button
-                onClick={() => fileRef.current?.click()}
-                disabled={!isMobile}
-                className="w-full border-2 border-dashed border-white/20 rounded-xl py-12 flex flex-col items-center gap-3 hover:border-pink-500/50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={() => uploadMode === 'live' ? liveRef.current?.click() : fileRef.current?.click()}
+                disabled={uploadMode === 'live' && !isMobile}
+                className="w-full border-2 border-dashed rounded-xl py-12 flex flex-col items-center gap-3 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  borderColor: uploadMode === 'live' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.2)',
+                }}
               >
-                <span className="text-4xl">🎬</span>
-                <span className="text-white/50 text-sm">{t('upload.tapCamera')}</span>
+                <span className="text-4xl">{uploadMode === 'live' ? '🎬' : '📁'}</span>
+                <span className="text-white/50 text-sm">
+                  {uploadMode === 'live' ? '탭하여 촬영 시작' : '갤러리에서 영상 선택'}
+                </span>
                 <span className="text-white/25 text-xs">{t('upload.maxInfo')}</span>
               </button>
             )}
+            {/* 갤러리 선택용 (일반 모드) */}
             <input
               ref={fileRef}
+              type="file"
+              accept="video/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            {/* 카메라 촬영용 (LIVE 모드) */}
+            <input
+              ref={liveRef}
               type="file"
               accept="video/*"
               capture="environment"
@@ -251,11 +310,17 @@ export default function UploadPage() {
 
           <button
             onClick={handleUpload}
-            disabled={!file || !title.trim() || uploading || !isMobile}
+            disabled={!file || !title.trim() || uploading}
             className="w-full disabled:opacity-40 text-white font-medium py-4 rounded-xl transition text-lg"
-            style={{ background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}
+            style={{
+              background: uploadMode === 'live'
+                ? 'linear-gradient(135deg, #ef4444, #E91E8C)'
+                : 'linear-gradient(135deg, #E91E8C, #7B2FBE)',
+            }}
           >
-            {uploading ? t('upload.uploading', { pct: progress }) : t('upload.btn')}
+            {uploading
+              ? t('upload.uploading', { pct: progress })
+              : uploadMode === 'live' ? '🔴 LIVE 커버 업로드' : t('upload.btn')}
           </button>
         </div>
       </div>

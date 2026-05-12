@@ -29,6 +29,7 @@ type Video = {
   view_count: number
   video_url: string
   created_at: string
+  is_live: boolean
   accounts: { username: string }
   groups: { name: string }
 }
@@ -416,7 +417,14 @@ export default function FeedPage() {
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold truncate">{video.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-semibold truncate">{video.title}</p>
+                    {video.is_live && (
+                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                        🔴 LIVE
+                      </span>
+                    )}
+                  </div>
                   <p className="text-white/40 text-sm">@{video.accounts.username}</p>
                   <div className="flex items-center gap-3 mt-1">
                     <span className="text-xs" style={{ color: accentColor }}>
