@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { GROUP_THEMES, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 
@@ -175,7 +176,7 @@ export default function SelectGroupPage() {
     <div className="min-h-screen bg-black px-6 py-16">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-12">
-          <KverseLogo size="xl" />
+          <Link href="/"><KverseLogo size="xl" /></Link>
           <h1 className="text-3xl font-black text-white mt-4">{t('sg.title')}</h1>
           <p className="text-white/40 mt-2 text-sm">{t('sg.desc')}</p>
         </div>
