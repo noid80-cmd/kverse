@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GroupTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import LanguageSwitcher from '@/app/components/LanguageSwitcher'
@@ -30,13 +30,14 @@ type Conversation = {
 
 export default function DMListPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const t = useT()
   const { locale } = useLanguage()
   const [account, setAccount] = useState<Account | null>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState<GroupTheme | null>(null)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(searchParams.get('to') || '')
   const [searchResults, setSearchResults] = useState<Account[]>([])
 
   useEffect(() => {

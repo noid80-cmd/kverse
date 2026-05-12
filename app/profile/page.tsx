@@ -32,6 +32,7 @@ type Video = {
   like_count: number
   view_count: number
   created_at: string
+  is_private: boolean
 }
 
 export default function ProfilePage() {
@@ -83,6 +84,16 @@ export default function ProfilePage() {
     ])
     setVideos(vids || [])
     setEquippedVisuals(equippedResult)
+  }
+
+  async function togglePrivacy(video: Video) {
+    const { error } = await supabase
+      .from('videos')
+      .update({ is_private: !video.is_private })
+      .eq('id', video.id)
+    if (!error) {
+      setVideos(prev => prev.map(v => v.id === video.id ? { ...v, is_private: !v.is_private } : v))
+    }
   }
 
   async function loadEquippedVisuals(equipped: Record<string, string>): Promise<EquippedItems> {
@@ -298,7 +309,7 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="flex flex-col gap-2.5 pb-10">
-            {videos.map((video, index) => (
+            {videos.map((video) => (
               <div
                 key={video.id}
                 className="rounded-xl p-4 flex items-center gap-3 border transition hover:opacity-90"
@@ -314,11 +325,20 @@ export default function ProfilePage() {
                   <p className="text-white font-semibold text-sm truncate">{video.title}</p>
                   <div className="flex items-center gap-3 mt-0.5">
                     <span className="text-xs" style={{ color: accent }}>♥ {video.like_count}</span>
-                    <span className="text-white/30 text-xs">{video.view_count} views</span>
+                    <span className="text-white/30 text-xs">{video.view_count} {t('feed.views')}</span>
                     <span className="text-white/20 text-xs">{new Date(video.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <span className="text-white/20 text-xs font-medium">#{index + 1}</span>
+                <button
+                  onClick={() => togglePrivacy(video)}
+                  className="text-xs px-2 py-1 rounded-full border transition shrink-0"
+                  style={video.is_private
+                    ? { borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }
+                    : { borderColor: `${accent}40`, color: accent }
+                  }
+                >
+                  {video.is_private ? '🔒' : '🌐'}
+                </button>
               </div>
             ))}
           </div>

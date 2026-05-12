@@ -36,6 +36,7 @@ type Video = {
 }
 
 type Period = 'all' | 'week' | 'today'
+type SortOrder = 'newest' | 'popular'
 
 export default function FeedPage() {
   const router = useRouter()
@@ -45,12 +46,14 @@ export default function FeedPage() {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<Period>('all')
+  const [sort, setSort] = useState<SortOrder>('newest')
   const [videosLoading, setVideosLoading] = useState(false)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [allAccounts, setAllAccounts] = useState<Account[]>([])
   const [showAccountMenu, setShowAccountMenu] = useState(false)
   const [isPlus, setIsPlus] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Video | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -79,7 +82,7 @@ export default function FeedPage() {
       }
 
       await Promise.all([
-        fetchVideos(data.group_id, 'all'),
+        fetchVideos(data.group_id, 'all', 'newest'),
         fetchLikedIds(data.id),
       ])
       setLoading(false)
@@ -89,17 +92,17 @@ export default function FeedPage() {
 
   useEffect(() => {
     if (!account) return
-    fetchVideos(account.group_id, period)
-  }, [period])
+    fetchVideos(account.group_id, period, sort)
+  }, [period, sort])
 
-  async function fetchVideos(groupId: string, p: Period) {
+  async function fetchVideos(groupId: string, p: Period, s: SortOrder) {
     setVideosLoading(true)
     let query = supabase
       .from('videos')
       .select('*, accounts(username), groups(name)')
       .eq('group_id', groupId)
       .or(`is_private.eq.false,account_id.eq.${account?.id}`)
-      .order('like_count', { ascending: false })
+      .order(s === 'newest' ? 'created_at' : 'like_count', { ascending: false })
       .limit(20)
 
     if (p === 'today') {
@@ -125,9 +128,8 @@ export default function FeedPage() {
     if (data) setLikedIds(new Set(data.map((r: { video_id: string }) => r.video_id)))
   }
 
-  async function deleteVideo(video: Video, e: React.MouseEvent) {
-    e.stopPropagation()
-    if (!confirm('이 영상을 삭제할까요?')) return
+  async function deleteVideo(video: Video) {
+    setDeleteTarget(null)
 
     // storage 경로 추출: .../videos/[path] → [path]
     const match = video.video_url.match(/\/videos\/(.+)$/)
@@ -258,7 +260,7 @@ export default function FeedPage() {
                           setActiveAccountId(acc.id)
                           setAccount(acc)
                           setShowAccountMenu(false)
-                          fetchVideos(acc.group_id, period)
+                          fetchVideos(acc.group_id, period, sort)
                           fetchLikedIds(acc.id)
                         }}
                         className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition text-left"
@@ -293,8 +295,9 @@ export default function FeedPage() {
           <Link href="/dm" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             💬
           </Link>
-          <Link href="/community" className="hidden sm:block px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
-            {t('nav.community')}
+          <Link href="/community" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
+            <span className="hidden sm:inline">{t('nav.community')}</span>
+            <span className="sm:hidden">📋</span>
           </Link>
           <Link
             href="/upload"
@@ -364,7 +367,16 @@ export default function FeedPage() {
           <h2 className="text-xl font-bold text-white">
             {account?.groups.name ? groupDisplayName(account.groups.name, locale) : ''} {t('feed.ranking')}
           </h2>
-          <span className="text-white/30 text-sm">{t('feed.byLikes')}</span>
+          <div className="flex gap-1">
+            <button onClick={() => setSort('newest')} className="px-3 py-1 rounded-full text-xs font-medium transition border"
+              style={sort === 'newest' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
+              {t('feed.byNewest')}
+            </button>
+            <button onClick={() => setSort('popular')} className="px-3 py-1 rounded-full text-xs font-medium transition border"
+              style={sort === 'popular' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
+              {t('feed.byLikes')}
+            </button>
+          </div>
         </div>
 
         {/* 기간 탭 */}
@@ -439,8 +451,8 @@ export default function FeedPage() {
                   <div className="flex items-center gap-2">
                     <p className="text-white font-semibold truncate">{video.title}</p>
                     {video.is_live && (
-                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
-                        🔴 LIVE
+                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                        {t('feed.liveBadge')}
                       </span>
                     )}
                     {video.is_private && (
@@ -454,14 +466,24 @@ export default function FeedPage() {
                     <span className="text-xs" style={{ color: accentColor }}>
                       <span style={likedIds.has(video.id) ? { color: accentColor } : { color: 'rgba(255,255,255,0.25)' }}>♥</span> {video.like_count}
                     </span>
-                    <span className="text-white/30 text-xs">{video.view_count} views</span>
+                    <span className="text-white/30 text-xs">{video.view_count} {t('feed.views')}</span>
                     <span className="text-white/20 text-xs">{video.category === 'vocal' ? t('common.vocal') : t('common.dance')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  {video.accounts.username !== account?.username && (
+                    <Link
+                      href={`/dm?to=${video.accounts.username}`}
+                      onClick={e => e.stopPropagation()}
+                      className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
+                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}
+                    >
+                      💬
+                    </Link>
+                  )}
                   {video.accounts.username === account?.username && (
                     <button
-                      onClick={e => deleteVideo(video, e)}
+                      onClick={e => { e.stopPropagation(); setDeleteTarget(video) }}
                       className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
                       style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}
                     >
@@ -486,6 +508,41 @@ export default function FeedPage() {
           </div>
         )}
       </div>
+
+      {/* 삭제 확인 모달 */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4"
+            style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">🗑</div>
+              <p className="text-white font-semibold">{t('feed.deleteConfirm')}</p>
+              <p className="text-white/40 text-sm mt-1">{t('feed.deleteConfirmDesc')}</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-white/50 text-sm font-medium"
+              >
+                {t('feed.cancelBtn')}
+              </button>
+              <button
+                onClick={() => deleteVideo(deleteTarget)}
+                className="flex-1 py-3 rounded-xl text-white text-sm font-medium"
+                style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+              >
+                {t('feed.deleteBtn')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
