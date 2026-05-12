@@ -20,10 +20,10 @@ type Dict = Record<string, string>
 const translations: Record<Locale, Dict> = {
   ko: {
     // nav / common
-    'nav.home': '홈', 'nav.feed': '피드', 'nav.shop': '상점', 'nav.messages': '메시지',
+    'nav.home': '홈', 'nav.feed': 'SNS', 'nav.shop': '상점', 'nav.messages': '메시지',
     'nav.community': '게시판', 'nav.profile': '프로필', 'nav.logout': '로그아웃',
-    'nav.upload': '올리기', 'nav.avatar': '아바타', 'nav.back': '← 피드',
-    'nav.allFeed': '전체 피드', 'nav.myFeed': '내 피드', 'nav.login': '로그인',
+    'nav.upload': '올리기', 'nav.avatar': '아바타', 'nav.back': '← SNS',
+    'nav.allFeed': '전체 SNS', 'nav.myFeed': '내 SNS', 'nav.login': '로그인',
     'common.loading': '불러오는 중...', 'common.processing': '처리 중...',
     'common.close': '닫기', 'common.all': '전체', 'common.vocal': '보컬', 'common.dance': '댄스',
     'common.justNow': '방금', 'common.minsAgo': '{n}분 전', 'common.hoursAgo': '{n}시간 전',
@@ -79,7 +79,7 @@ const translations: Record<Locale, Dict> = {
     'sg.fanNickDesc': '영문, 숫자, _ 조합으로 팬닉을 만들어보세요',
     'sg.nationality': '국적',
     'sg.creating': '생성 중...',
-    'sg.enterFeed': '전체 피드로 입장하기 →',
+    'sg.enterFeed': '전체 SNS로 입장하기 →',
     'sg.backToSelect': '← 그룹 선택으로 돌아가기',
     'sg.notSure': '아직 어떤 그룹을 좋아할지 모르겠다면?',
     'sg.justBrowse': '👀 일단 구경만 할게요',
@@ -175,7 +175,7 @@ const translations: Record<Locale, Dict> = {
     'up.b1': '팬닉 무제한 생성 (3개 → 무제한)',
     'up.b2': '프리미엄 아바타 아이템 매월 증정',
     'up.b3': '랭킹 배지 & 특별 프레임',
-    'up.b4': 'DM 무제한 + 피드 우선 노출',
+    'up.b4': 'DM 무제한 + SNS 우선 노출',
     'up.b5': '영상 업로드 용량 2배 (200MB → 500MB)',
     'up.domestic': '🇰🇷 국내 결제', 'up.international': '🌏 해외 결제',
     'up.priceLabel': '월 구독 요금',
@@ -188,9 +188,9 @@ const translations: Record<Locale, Dict> = {
     'up.cancelNote': '구독 해지는 마이페이지에서 언제든 가능해요',
     'up.alreadyPlus': '이미 Plus 구독 중이에요!',
     'up.expires': '구독 만료일: ',
-    'up.goFeed': '피드로 이동',
+    'up.goFeed': 'SNS로 이동',
     'up.successTitle': 'Kverse Plus 시작!',
-    'up.successDesc': '잠시 후 피드로 이동해요...',
+    'up.successDesc': '잠시 후 SNS로 이동해요...',
     'up.errPage': '결제 페이지를 불러오지 못했어요.',
     'up.errCancel': '결제가 취소됐거나 실패했어요.',
     // profile
@@ -229,10 +229,10 @@ const translations: Record<Locale, Dict> = {
   },
 
   en: {
-    'nav.home': 'Home', 'nav.feed': 'Feed', 'nav.shop': 'Shop', 'nav.messages': 'Messages',
+    'nav.home': 'Home', 'nav.feed': 'SNS', 'nav.shop': 'Shop', 'nav.messages': 'Messages',
     'nav.community': 'Community', 'nav.profile': 'Profile', 'nav.logout': 'Log out',
-    'nav.upload': 'Upload', 'nav.avatar': 'Avatar', 'nav.back': '← Feed',
-    'nav.allFeed': 'All Feed', 'nav.myFeed': 'My Feed', 'nav.login': 'Login',
+    'nav.upload': 'Upload', 'nav.avatar': 'Avatar', 'nav.back': '← SNS',
+    'nav.allFeed': 'All SNS', 'nav.myFeed': 'My SNS', 'nav.login': 'Login',
     'common.loading': 'Loading...', 'common.processing': 'Processing...',
     'common.close': 'Close', 'common.all': 'All', 'common.vocal': 'Vocal', 'common.dance': 'Dance',
     'common.justNow': 'Just now', 'common.minsAgo': '{n}m ago', 'common.hoursAgo': '{n}h ago',
@@ -422,10 +422,10 @@ const translations: Record<Locale, Dict> = {
   },
 
   es: {
-    'nav.home': 'Inicio', 'nav.feed': 'Feed', 'nav.shop': 'Tienda', 'nav.messages': 'Mensajes',
+    'nav.home': 'Inicio', 'nav.feed': 'SNS', 'nav.shop': 'Tienda', 'nav.messages': 'Mensajes',
     'nav.community': 'Comunidad', 'nav.profile': 'Perfil', 'nav.logout': 'Cerrar sesión',
-    'nav.upload': 'Subir', 'nav.avatar': 'Avatar', 'nav.back': '← Feed',
-    'nav.allFeed': 'Todo el Feed', 'nav.myFeed': 'Mi Feed', 'nav.login': 'Iniciar sesión',
+    'nav.upload': 'Subir', 'nav.avatar': 'Avatar', 'nav.back': '← SNS',
+    'nav.allFeed': 'Todo el SNS', 'nav.myFeed': 'Mi SNS', 'nav.login': 'Iniciar sesión',
     'common.loading': 'Cargando...', 'common.processing': 'Procesando...',
     'common.close': 'Cerrar', 'common.all': 'Todo', 'common.vocal': 'Vocal', 'common.dance': 'Baile',
     'common.justNow': 'Ahora mismo', 'common.minsAgo': 'hace {n}min', 'common.hoursAgo': 'hace {n}h',
@@ -584,10 +584,10 @@ const translations: Record<Locale, Dict> = {
   },
 
   zh: {
-    'nav.home': '首页', 'nav.feed': '动态', 'nav.shop': '商店', 'nav.messages': '消息',
+    'nav.home': '首页', 'nav.feed': 'SNS', 'nav.shop': '商店', 'nav.messages': '消息',
     'nav.community': '社区', 'nav.profile': '个人资料', 'nav.logout': '退出登录',
-    'nav.upload': '上传', 'nav.avatar': '头像', 'nav.back': '← 动态',
-    'nav.allFeed': '全部动态', 'nav.myFeed': '我的动态', 'nav.login': '登录',
+    'nav.upload': '上传', 'nav.avatar': '头像', 'nav.back': '← SNS',
+    'nav.allFeed': '全部SNS', 'nav.myFeed': '我的SNS', 'nav.login': '登录',
     'common.loading': '加载中...', 'common.processing': '处理中...',
     'common.close': '关闭', 'common.all': '全部', 'common.vocal': '歌唱', 'common.dance': '舞蹈',
     'common.justNow': '刚刚', 'common.minsAgo': '{n}分钟前', 'common.hoursAgo': '{n}小时前',
@@ -710,10 +710,10 @@ const translations: Record<Locale, Dict> = {
   },
 
   ja: {
-    'nav.home': 'ホーム', 'nav.feed': 'フィード', 'nav.shop': 'ショップ', 'nav.messages': 'メッセージ',
+    'nav.home': 'ホーム', 'nav.feed': 'SNS', 'nav.shop': 'ショップ', 'nav.messages': 'メッセージ',
     'nav.community': 'コミュニティ', 'nav.profile': 'プロフィール', 'nav.logout': 'ログアウト',
-    'nav.upload': 'アップロード', 'nav.avatar': 'アバター', 'nav.back': '← フィード',
-    'nav.allFeed': '全フィード', 'nav.myFeed': 'マイフィード', 'nav.login': 'ログイン',
+    'nav.upload': 'アップロード', 'nav.avatar': 'アバター', 'nav.back': '← SNS',
+    'nav.allFeed': '全SNS', 'nav.myFeed': 'マイSNS', 'nav.login': 'ログイン',
     'common.loading': '読み込み中...', 'common.processing': '処理中...',
     'common.close': '閉じる', 'common.all': 'すべて', 'common.vocal': 'ボーカル', 'common.dance': 'ダンス',
     'common.justNow': 'たった今', 'common.minsAgo': '{n}分前', 'common.hoursAgo': '{n}時間前',
@@ -836,10 +836,10 @@ const translations: Record<Locale, Dict> = {
   },
 
   fr: {
-    'nav.home': 'Accueil', 'nav.feed': 'Fil', 'nav.shop': 'Boutique', 'nav.messages': 'Messages',
+    'nav.home': 'Accueil', 'nav.feed': 'SNS', 'nav.shop': 'Boutique', 'nav.messages': 'Messages',
     'nav.community': 'Communauté', 'nav.profile': 'Profil', 'nav.logout': 'Déconnexion',
-    'nav.upload': 'Publier', 'nav.avatar': 'Avatar', 'nav.back': '← Fil',
-    'nav.allFeed': 'Tout le Fil', 'nav.myFeed': 'Mon Fil', 'nav.login': 'Connexion',
+    'nav.upload': 'Publier', 'nav.avatar': 'Avatar', 'nav.back': '← SNS',
+    'nav.allFeed': 'Tout le SNS', 'nav.myFeed': 'Mon SNS', 'nav.login': 'Connexion',
     'common.loading': 'Chargement...', 'common.processing': 'Traitement...',
     'common.close': 'Fermer', 'common.all': 'Tout', 'common.vocal': 'Vocal', 'common.dance': 'Danse',
     'common.justNow': "À l'instant", 'common.minsAgo': 'il y a {n}min', 'common.hoursAgo': 'il y a {n}h',
@@ -962,10 +962,10 @@ const translations: Record<Locale, Dict> = {
   },
 
   ar: {
-    'nav.home': 'الرئيسية', 'nav.feed': 'التغذية', 'nav.shop': 'المتجر', 'nav.messages': 'الرسائل',
+    'nav.home': 'الرئيسية', 'nav.feed': 'SNS', 'nav.shop': 'المتجر', 'nav.messages': 'الرسائل',
     'nav.community': 'المجتمع', 'nav.profile': 'الملف الشخصي', 'nav.logout': 'تسجيل الخروج',
-    'nav.upload': 'رفع', 'nav.avatar': 'الصورة الرمزية', 'nav.back': '→ التغذية',
-    'nav.allFeed': 'كل التغذية', 'nav.myFeed': 'تغذيتي', 'nav.login': 'تسجيل الدخول',
+    'nav.upload': 'رفع', 'nav.avatar': 'الصورة الرمزية', 'nav.back': '→ SNS',
+    'nav.allFeed': 'كل SNS', 'nav.myFeed': 'SNS الخاص بي', 'nav.login': 'تسجيل الدخول',
     'common.loading': 'جارٍ التحميل...', 'common.processing': 'جارٍ المعالجة...',
     'common.close': 'إغلاق', 'common.all': 'الكل', 'common.vocal': 'غناء', 'common.dance': 'رقص',
     'common.justNow': 'الآن', 'common.minsAgo': 'منذ {n} دقيقة', 'common.hoursAgo': 'منذ {n} ساعة',
