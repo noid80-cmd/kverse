@@ -34,6 +34,13 @@ type Video = {
   groups: { name: string }
 }
 
+type Comment = {
+  id: string
+  content: string
+  created_at: string
+  accounts: { username: string }
+}
+
 type Period = 'all' | 'week' | 'today'
 type SortOrder = 'newest' | 'popular'
 
@@ -55,6 +62,10 @@ export default function FeedPage() {
   const [reportTarget, setReportTarget] = useState<Video | null>(null)
   const [reportReason, setReportReason] = useState('')
   const [reportDone, setReportDone] = useState(false)
+  const [commentVideoId, setCommentVideoId] = useState<string | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [commentText, setCommentText] = useState('')
+  const [commentLoading, setCommentLoading] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
@@ -184,6 +195,35 @@ export default function FeedPage() {
     }
     await supabase.from('videos').delete().eq('id', video.id)
     setVideos(prev => prev.filter(v => v.id !== video.id))
+  }
+
+  async function fetchComments(videoId: string) {
+    setCommentLoading(true)
+    const { data } = await supabase
+      .from('video_comments')
+      .select('*, accounts(username)')
+      .eq('video_id', videoId)
+      .order('created_at', { ascending: true })
+    setComments(data || [])
+    setCommentLoading(false)
+  }
+
+  async function submitComment() {
+    if (!account || !commentVideoId || !commentText.trim()) return
+    const { data, error } = await supabase
+      .from('video_comments')
+      .insert({ video_id: commentVideoId, account_id: account.id, content: commentText.trim() })
+      .select('*, accounts(username)')
+      .single()
+    if (!error && data) {
+      setComments(prev => [...prev, data])
+      setCommentText('')
+    }
+  }
+
+  async function deleteComment(commentId: string) {
+    await supabase.from('video_comments').delete().eq('id', commentId)
+    setComments(prev => prev.filter(c => c.id !== commentId))
   }
 
   async function toggleLike(video: Video) {
@@ -504,6 +544,13 @@ export default function FeedPage() {
                       </button>
                     )}
                     <button
+                      onClick={() => { setCommentVideoId(video.id); fetchComments(video.id) }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"
+                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}
+                    >
+                      🗨️
+                    </button>
+                    <button
                       onClick={() => toggleLike(video)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition"
                       style={likedIds.has(video.id) ? {
@@ -579,6 +626,66 @@ export default function FeedPage() {
                 style={{ background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}
               >
                 {t('feed.reportSubmit')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 댓글 바텀 시트 */}
+      {commentVideoId && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setCommentVideoId(null)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-t-3xl flex flex-col"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '70vh' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+              <span className="text-white font-semibold">댓글</span>
+              <button onClick={() => setCommentVideoId(null)} className="text-white/30 text-2xl leading-none">×</button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4 min-h-0">
+              {commentLoading ? (
+                <div className="text-white/30 text-sm text-center py-8">불러오는 중...</div>
+              ) : comments.length === 0 ? (
+                <div className="text-white/20 text-sm text-center py-8">아직 댓글이 없어요. 첫 댓글을 달아보세요!</div>
+              ) : comments.map(comment => (
+                <div key={comment.id} className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                    style={{ background: theme?.gradient }}>
+                    {comment.accounts.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-white text-xs font-semibold">@{comment.accounts.username}</span>
+                    <p className="text-white/70 text-sm mt-0.5 leading-relaxed">{comment.content}</p>
+                  </div>
+                  {comment.accounts.username === account?.username && (
+                    <button onClick={() => deleteComment(comment.id)}
+                      className="text-white/20 hover:text-red-400 text-xs flex-shrink-0 transition">🗑</button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="px-4 py-4 border-t border-white/5 flex gap-3 flex-shrink-0">
+              <input
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() } }}
+                placeholder="댓글 달기..."
+                maxLength={200}
+                className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none border border-white/10"
+              />
+              <button
+                onClick={submitComment}
+                disabled={!commentText.trim()}
+                className="px-4 py-2 rounded-full text-white text-sm font-medium disabled:opacity-30 transition"
+                style={{ background: theme?.gradient }}
+              >
+                게시
               </button>
             </div>
           </div>
