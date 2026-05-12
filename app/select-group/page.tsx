@@ -238,11 +238,11 @@ export default function SelectGroupPage() {
         )}
 
         {/* 뷰어 진입 */}
-        <div className="mt-12 pt-8 border-t border-white/8 text-center">
-          <p className="text-white/25 text-sm mb-3">{t('sg.notSure')}</p>
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
+          <p className="text-white/40 text-sm mb-3">{t('sg.notSure')}</p>
           <button
             onClick={() => setStep('viewer')}
-            className="px-8 py-3 rounded-full border border-white/15 text-white/50 hover:text-white hover:border-white/30 text-sm font-medium transition"
+            className="px-8 py-3.5 rounded-full border border-white/30 text-white/80 hover:text-white hover:border-white/60 hover:bg-white/5 text-sm font-semibold transition"
           >
             {t('sg.justBrowse')}
           </button>
