@@ -107,9 +107,9 @@ export default function ProfilePage() {
     setUploadingPhoto(true)
     const ext = file.name.split('.').pop() || 'jpg'
     const path = `${account.id}/profile.${ext}`
-    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, { upsert: true })
     if (upErr) { setUploadingPhoto(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('아바타').getPublicUrl(path)
     await supabase.from('accounts').update({ rpm_avatar_url: publicUrl }).eq('id', account.id)
     setAccount(prev => prev ? { ...prev, rpm_avatar_url: publicUrl } : prev)
     setUploadingPhoto(false)
