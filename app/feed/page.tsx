@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
-import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
+import { getTheme, worldName, groupDisplayName, GROUP_THEMES } from '@/lib/groupThemes'
 import { getActiveAccountId, setActiveAccountId } from '@/lib/activeAccount'
 import Avatar from '@/app/components/Avatar'
 import Link from 'next/link'
@@ -41,6 +41,8 @@ type Comment = {
   accounts: { username: string }
 }
 
+type Group = { id: string; name: string; name_en: string }
+
 type Period = 'all' | 'week' | 'today'
 type SortOrder = 'newest' | 'popular'
 
@@ -62,6 +64,8 @@ export default function FeedPage() {
   const [reportTarget, setReportTarget] = useState<Video | null>(null)
   const [reportReason, setReportReason] = useState('')
   const [reportDone, setReportDone] = useState(false)
+  const [trendingVideo, setTrendingVideo] = useState<Video | null>(null)
+  const [allGroups, setAllGroups] = useState<Group[]>([])
   const [likeAnimating, setLikeAnimating] = useState<Set<string>>(new Set())
   const [commentVideoId, setCommentVideoId] = useState<string | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -95,10 +99,19 @@ export default function FeedPage() {
         setIsPlus(true)
       }
 
-      await Promise.all([
+      const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+      const [, , trendingRes, groupsRes] = await Promise.all([
         fetchVideos(data.group_id, 'all', 'newest', data.id),
         fetchLikedIds(data.id),
+        supabase.from('videos').select('*, accounts(username), groups(name)')
+          .eq('is_private', false)
+          .gte('created_at', oneWeekAgo.toISOString())
+          .order('like_count', { ascending: false })
+          .limit(1).single(),
+        supabase.from('groups').select('id, name, name_en').order('name'),
       ])
+      if (trendingRes.data) setTrendingVideo(trendingRes.data)
+      if (groupsRes.data) setAllGroups(groupsRes.data)
       setLoading(false)
     }
     load()
@@ -413,6 +426,67 @@ export default function FeedPage() {
               <p className="text-sm" style={{ color: accentColor }}>
                 {groupDisplayName(account.groups.name, locale)} · {worldName(theme, locale)}
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* 유니버스 빠른 탐색 */}
+        {allGroups.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide -mx-1 px-1">
+            {allGroups.map(group => {
+              const grpTheme = GROUP_THEMES[group.name]
+              if (!grpTheme) return null
+              const grpAccent = grpTheme.primary === '#FFFFFF' ? '#C9A96E' : grpTheme.primary
+              const isMyGroup = group.name === account?.groups.name
+              return (
+                <Link
+                  key={group.id}
+                  href={`/universe/${encodeURIComponent(group.name)}`}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition border whitespace-nowrap"
+                  style={isMyGroup ? {
+                    background: grpTheme.gradient, borderColor: 'transparent', color: 'white',
+                  } : {
+                    background: `${grpAccent}12`, borderColor: `${grpAccent}30`, color: grpAccent,
+                  }}
+                >
+                  {grpTheme.emoji} {groupDisplayName(group.name, locale)}
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
+        {/* 트렌딩 히어로 */}
+        {trendingVideo && (
+          <div className="rounded-2xl overflow-hidden border mb-6 relative"
+            style={{ borderColor: 'rgba(255,100,150,0.35)', boxShadow: '0 0 32px rgba(255,50,120,0.15)' }}>
+            <div className="flex items-center gap-2 px-4 py-2.5"
+              style={{ background: 'linear-gradient(to right, rgba(255,50,120,0.2), rgba(124,58,237,0.15))' }}>
+              <span className="text-xs font-black px-2.5 py-1 rounded-full text-white"
+                style={{ background: 'linear-gradient(135deg,#ff3278,#7c3aed)', animation: 'hotPulse 2s ease-in-out infinite' }}>
+                🔥 TRENDING NOW
+              </span>
+              <span className="text-white/35 text-xs">이번 주 전체 1위</span>
+              {trendingVideo.groups && (
+                <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                  {groupDisplayName(trendingVideo.groups.name, locale)}
+                </span>
+              )}
+            </div>
+            <video
+              ref={el => { videoRefs.current['trending'] = el }}
+              src={trendingVideo.video_url}
+              className="w-full block bg-black"
+              style={{ maxHeight: '55vh' }}
+              playsInline muted loop controls preload="none"
+            />
+            <div className="px-4 py-3 flex items-center justify-between"
+              style={{ background: 'linear-gradient(to right, rgba(255,50,120,0.1), rgba(124,58,237,0.08))' }}>
+              <div className="min-w-0">
+                <p className="text-white font-bold text-sm truncate">{trendingVideo.title}</p>
+                <p className="text-white/40 text-xs mt-0.5">@{trendingVideo.accounts.username} · ♥ {trendingVideo.like_count}</p>
+              </div>
             </div>
           </div>
         )}
