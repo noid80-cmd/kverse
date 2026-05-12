@@ -284,11 +284,20 @@ export default function FeedPage() {
         </div>
       </nav>
 
-      {/* 계정 전환 드롭다운 — nav 밖에서 fixed로 렌더링해야 backdrop-blur stacking context를 피할 수 있음 */}
+      {/* 계정 전환 모달 시트 */}
       {showAccountMenu && allAccounts.length > 1 && theme && account && (
-        <>
-          <div className="fixed inset-0 z-[90]" onClick={() => setShowAccountMenu(false)} />
-          <div className="fixed top-[65px] left-4 w-56 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden z-[100] shadow-2xl">
+        <div
+          className="fixed inset-0 flex items-end justify-center pb-8 px-4"
+          style={{ zIndex: 9999, background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setShowAccountMenu(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-white/5">
+              <p className="text-white/40 text-xs text-center">{t('feed.accountMgmt')}</p>
+            </div>
             {allAccounts.map(acc => {
               const accTheme = getTheme(acc.groups.name)
               const isActive = acc.id === account.id
@@ -302,17 +311,17 @@ export default function FeedPage() {
                     fetchVideos(acc.group_id, period, sort)
                     fetchLikedIds(acc.id)
                   }}
-                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition text-left"
+                  className="w-full px-4 py-3.5 flex items-center gap-3 hover:bg-white/5 transition text-left"
                   style={isActive ? { background: `${accTheme.primary}15` } : {}}
                 >
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0" style={{ background: accTheme.gradient }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0" style={{ background: accTheme.gradient }}>
                     {accTheme.emoji}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white text-xs font-semibold truncate">@{acc.username}</p>
+                    <p className="text-white text-sm font-semibold truncate">@{acc.username}</p>
                     <p className="text-white/30 text-xs truncate">{groupDisplayName(acc.groups.name, locale)}</p>
                   </div>
-                  {isActive && <span className="ml-auto text-xs" style={{ color: accTheme.primary === '#FFFFFF' ? '#C9A96E' : accTheme.primary }}>✓</span>}
+                  {isActive && <span className="ml-auto text-base" style={{ color: accTheme.primary === '#FFFFFF' ? '#C9A96E' : accTheme.primary }}>✓</span>}
                 </button>
               )
             })}
@@ -320,13 +329,13 @@ export default function FeedPage() {
               <Link
                 href="/select-account"
                 onClick={() => setShowAccountMenu(false)}
-                className="block px-4 py-2.5 text-white/30 hover:text-white/60 text-xs text-center transition"
+                className="block px-4 py-3 text-white/30 hover:text-white/60 text-sm text-center transition"
               >
-                {t('feed.accountMgmt')}
+                + {t('feed.accountMgmt')}
               </Link>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       <div className="max-w-2xl mx-auto px-6 py-10">
