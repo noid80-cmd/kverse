@@ -28,6 +28,7 @@ export default function AvatarPage() {
   const [uploading, setUploading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     async function load() {
@@ -66,11 +67,15 @@ export default function AvatarPage() {
   async function handlePhotoUpload(file: File) {
     if (!account) return
     setUploading(true)
-    const ext = file.name.split('.').pop() || 'jpg'
-    const path = `${account.id}/profile.${ext}`
-    const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, { upsert: true })
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg'
+    const path = `${account.id}/profile.${safeExt}`
+    const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, {
+      upsert: true,
+      contentType: file.type || `image/${safeExt}`,
+    })
     if (upErr) {
-      showToast('업로드 실패했어요')
+      showToast(`업로드 실패: ${upErr.message}`)
       setUploading(false)
       return
     }
@@ -146,12 +151,20 @@ export default function AvatarPage() {
         {/* 사진 업로드 */}
         <div className="w-full flex flex-col gap-3">
           <button
-            onClick={() => photoInputRef.current?.click()}
+            onClick={() => cameraInputRef.current?.click()}
             disabled={uploading}
             className="w-full py-4 rounded-2xl font-medium text-white transition disabled:opacity-50"
             style={{ background: theme.gradient }}
           >
-            {uploading ? '업로드 중...' : '📷 내 사진으로 변경'}
+            {uploading ? '업로드 중...' : '📷 카메라로 촬영'}
+          </button>
+
+          <button
+            onClick={() => photoInputRef.current?.click()}
+            disabled={uploading}
+            className="w-full py-4 rounded-2xl font-medium text-white border border-white/20 transition disabled:opacity-50"
+          >
+            🖼 갤러리에서 선택
           </button>
 
           {account?.rpm_avatar_url && (
@@ -168,6 +181,14 @@ export default function AvatarPage() {
           </p>
         </div>
 
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f) }}
+        />
         <input
           ref={photoInputRef}
           type="file"
