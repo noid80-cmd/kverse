@@ -7,7 +7,6 @@ import { getActiveAccountId } from '@/lib/activeAccount'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 
 type Video = {
@@ -185,7 +184,6 @@ export default function UniversePage() {
         </div>
         <KverseLogo />
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           {isLoggedIn ? (
             <Link href="/browse" className="text-white/40 hover:text-white transition text-sm">{t('nav.allFeed')}</Link>
           ) : (

@@ -8,7 +8,6 @@ import type { EquippedItems } from '@/app/components/Avatar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 import { getFlagImageUrl } from '@/lib/countries'
 
@@ -136,7 +135,6 @@ export default function ProfilePage() {
         </div>
         <KverseLogo />
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <button
             onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
             className="px-3 py-1.5 text-white/40 hover:text-white text-xs rounded-full border border-white/10 transition"

@@ -7,7 +7,6 @@ import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 
 type Account = {
   id: string
@@ -120,7 +119,6 @@ export default function ShopPage() {
         </div>
         <span className="font-black text-white">{t('shop.title')}</span>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <Link
             href="/shop/coins"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition hover:opacity-80"

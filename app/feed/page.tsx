@@ -8,7 +8,6 @@ import Avatar from '@/app/components/Avatar'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import { getFlagImageUrl } from '@/lib/countries'
 import KverseLogo from '@/app/components/KverseLogo'
 
@@ -325,7 +324,6 @@ export default function FeedPage() {
           <Link href="/profile" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             {t('nav.profile')}
           </Link>
-          <LanguageSwitcher />
         </div>
       </nav>
 

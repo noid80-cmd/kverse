@@ -6,7 +6,6 @@ import { getTheme, GROUP_THEMES } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 
 type Video = {
   id: string
@@ -165,7 +164,6 @@ export default function BrowsePage() {
           {t('nav.allFeed')}
         </span>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           {isLoggedIn ? (
             <>
               <Link href="/feed" className="text-white/40 hover:text-white text-sm transition">{t('nav.myFeed')}</Link>

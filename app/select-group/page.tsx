@@ -7,7 +7,6 @@ import { COUNTRIES, getFlagImageUrl } from '@/lib/countries'
 import Avatar from '@/app/components/Avatar'
 import { useRouter } from 'next/navigation'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 
 type Group = { id: string; name: string; name_en: string }
@@ -295,7 +294,6 @@ export default function SelectGroupPage() {
     <div className="min-h-screen bg-black px-6 py-16">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-12">
-          <div className="flex justify-end mb-2" dir="ltr"><LanguageSwitcher /></div>
           <KverseLogo size="xl" />
           <h1 className="text-3xl font-black text-white mt-4">{t('sg.title')}</h1>
           <p className="text-white/40 mt-2 text-sm">{t('sg.desc')}</p>

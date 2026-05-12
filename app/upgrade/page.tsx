@@ -5,7 +5,6 @@ import { supabase, getAuthUser } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 
 type PayStatus = 'idle' | 'processing' | 'success' | 'error'
 
@@ -104,7 +103,7 @@ export default function UpgradePage() {
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <Link href="/select-account" className="text-white/40 hover:text-white transition text-sm">{t('common.back')}</Link>
         <span className="font-black bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">Kverse Plus</span>
-        <LanguageSwitcher />
+        <div />
       </nav>
 
       <div className="max-w-sm mx-auto px-6 py-10">

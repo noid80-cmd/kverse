@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import { groupDisplayName } from '@/lib/groupThemes'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 
 const MAX_DURATION_SEC = 300
@@ -154,7 +153,6 @@ export default function UploadPage() {
             <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.back')}</Link>
           </div>
           <div className="flex items-center gap-3">
-            <LanguageSwitcher />
             <KverseLogo />
           </div>
         </div>

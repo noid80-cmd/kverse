@@ -8,7 +8,6 @@ import Avatar, { EquippedItems } from '@/app/components/Avatar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 
 type Account = {
@@ -107,9 +106,6 @@ export default function SelectAccountPage() {
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-10">
-          <div className="flex items-center justify-end mb-2" dir="ltr">
-            <LanguageSwitcher />
-          </div>
           <Link href="/"><KverseLogo size="xl" /></Link>
           <h1 className="text-2xl font-black text-white mt-4">{t('sa.title')}</h1>
           <p className="text-white/30 text-sm mt-2">{t('sa.desc')}</p>

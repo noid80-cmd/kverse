@@ -7,7 +7,6 @@ import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 
 type Account = {
   id: string
@@ -128,7 +127,7 @@ export default function DMListPage() {
           <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.back')}</Link>
         </div>
         <span className="font-black text-white">{t('dm.title')}</span>
-        <LanguageSwitcher />
+        <div />
       </nav>
 
       <div className="max-w-lg mx-auto px-6 py-8">

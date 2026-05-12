@@ -7,7 +7,6 @@ import Avatar from '@/app/components/Avatar'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
 import { getFlagImageUrl } from '@/lib/countries'
 
@@ -107,7 +106,7 @@ export default function UserProfilePage() {
           <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">← {t('nav.back')}</button>
         </div>
         <KverseLogo />
-        <LanguageSwitcher />
+        <div />
       </nav>
 
       {/* 히어로 배너 */}

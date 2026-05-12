@@ -6,7 +6,6 @@ import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 
 const COIN_PACKAGES = [
   { id: 'coins_100',  coins: 100,  price: 1000,  priceUsd: 0.99, bonus: 0,   labelKey: 'coins.starterPack' },
@@ -112,7 +111,6 @@ export default function CoinsPage() {
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/shop" className="text-white/40 hover:text-white transition text-sm">← {t('nav.shop')}</Link>
-          <LanguageSwitcher />
         </div>
         <span className="font-bold text-white">{t('coins.title')}</span>
         <div

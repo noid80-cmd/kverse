@@ -8,7 +8,6 @@ import Avatar, { EquippedItems } from '@/app/components/Avatar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 
 type Account = {
   id: string
@@ -146,7 +145,6 @@ export default function AvatarPage() {
         </div>
         <span className="font-black text-white">{t('nav.avatar')}</span>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <Link href="/shop" className="text-sm px-3 py-1.5 rounded-full border border-white/20 text-white/60 hover:text-white transition">
             🛍 {t('nav.shop')}
           </Link>
