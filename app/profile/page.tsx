@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GroupTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import Avatar from '@/app/components/Avatar'
@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
-import { getFlagImageUrl } from '@/lib/countries'
+import { COUNTRIES, getFlagImageUrl } from '@/lib/countries'
 
 type Account = {
   id: string
@@ -44,6 +44,11 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState<GroupTheme | null>(null)
   const [equippedVisuals, setEquippedVisuals] = useState<EquippedItems>({})
+  const [nationality, setNationality] = useState('KR')
+  const [editingNationality, setEditingNationality] = useState(false)
+  const [nationalitySearch, setNationalitySearch] = useState('')
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     async function load() {
@@ -61,6 +66,7 @@ export default function ProfilePage() {
       setAllAccounts(accounts)
       setAccount(accounts[0])
       setTheme(getTheme(accounts[0].groups.name))
+      setNationality(accounts[0].nationality || 'KR')
 
       const [{ data: vids }, equippedResult] = await Promise.all([
         supabase.from('videos').select('*').eq('account_id', accounts[0].id).order('created_at', { ascending: false }),
@@ -77,6 +83,7 @@ export default function ProfilePage() {
   async function switchAccount(acc: Account) {
     setAccount(acc)
     setTheme(getTheme(acc.groups.name))
+    setNationality(acc.nationality || 'KR')
     const [{ data: vids }, equippedResult] = await Promise.all([
       supabase.from('videos').select('*').eq('account_id', acc.id).order('created_at', { ascending: false }),
       loadEquippedVisuals(acc.equipped || {}),
@@ -93,6 +100,28 @@ export default function ProfilePage() {
     if (!error) {
       setVideos(prev => prev.map(v => v.id === video.id ? { ...v, is_private: !v.is_private } : v))
     }
+  }
+
+  async function handlePhotoUpload(file: File) {
+    if (!account) return
+    setUploadingPhoto(true)
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${account.id}/profile.${ext}`
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (upErr) { setUploadingPhoto(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    await supabase.from('accounts').update({ rpm_avatar_url: publicUrl }).eq('id', account.id)
+    setAccount(prev => prev ? { ...prev, rpm_avatar_url: publicUrl } : prev)
+    setUploadingPhoto(false)
+  }
+
+  async function updateNationality(code: string) {
+    if (!account) return
+    await supabase.from('accounts').update({ nationality: code }).eq('id', account.id)
+    setNationality(code)
+    setAccount(prev => prev ? { ...prev, nationality: code } : prev)
+    setEditingNationality(false)
+    setNationalitySearch('')
   }
 
   async function loadEquippedVisuals(equipped: Record<string, string>): Promise<EquippedItems> {
@@ -189,32 +218,48 @@ export default function ProfilePage() {
         {account && theme && (
           <div className="flex flex-col items-center -mt-12 mb-6">
             {/* avatar with glow ring */}
-            <Link href="/avatar" className="hover:opacity-90 transition relative group mb-3">
-              <div
-                className="rounded-2xl p-1.5"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}, ${accent}55)`,
-                  boxShadow: `0 0 0 3px #000`,
-                }}
-              >
-                <Avatar
-                  gender={(account.gender as 'male' | 'female') || 'female'}
-                  equipped={equippedVisuals}
-                  groupColor={accent}
-                  size={100}
-                  rpmAvatarUrl={account.rpm_avatar_url}
-                  username={account.username}
-                />
-              </div>
+            <div className="relative group mb-5">
+              <Link href="/avatar" className="hover:opacity-90 transition block">
+                <div
+                  className="rounded-2xl p-1.5"
+                  style={{
+                    background: `linear-gradient(135deg, ${accent}, ${accent}55)`,
+                    boxShadow: `0 0 0 3px #000`,
+                  }}
+                >
+                  <Avatar
+                    gender={(account.gender as 'male' | 'female') || 'female'}
+                    equipped={equippedVisuals}
+                    groupColor={accent}
+                    size={100}
+                    rpmAvatarUrl={account.rpm_avatar_url}
+                    username={account.username}
+                  />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-2xl bg-black/30 pointer-events-none">
+                  <span className="text-white text-xs font-medium">{t('nav.avatar')}</span>
+                </div>
+              </Link>
               <img
-                src={getFlagImageUrl(account.nationality || 'KR', 20)}
-                alt={account.nationality || 'KR'}
-                className="absolute -bottom-1 -right-1 w-5 h-3.5 rounded-sm object-cover shadow-lg border border-black/80 z-10"
+                src={getFlagImageUrl(nationality, 20)}
+                alt={nationality}
+                className="absolute -top-1 -right-1 w-5 h-3.5 rounded-sm object-cover shadow-lg border border-black/80 z-10"
               />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-2xl bg-black/30">
-                <span className="text-white text-xs font-medium">{t('nav.avatar')}</span>
-              </div>
-            </Link>
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full text-xs bg-black/80 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition whitespace-nowrap z-10"
+              >
+                {uploadingPhoto ? '...' : '📷'}
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f) }}
+              />
+            </div>
 
             {/* username */}
             <h1 className="text-2xl font-black text-white leading-tight">@{account.username}</h1>
@@ -228,6 +273,18 @@ export default function ProfilePage() {
             <p className="text-white/25 text-xs mt-1.5">
               {new Date(account.created_at).toLocaleDateString()} {t('common.joined')}
             </p>
+
+            {/* nationality (editable) */}
+            <button
+              onClick={() => setEditingNationality(true)}
+              className="flex items-center gap-1.5 mt-2 text-white/30 hover:text-white/50 transition"
+            >
+              <img src={getFlagImageUrl(nationality, 20)} alt={nationality} className="w-5 h-3.5 rounded-sm object-cover" />
+              <span className="text-xs">
+                {locale === 'ko' ? COUNTRIES.find(c => c.code === nationality)?.nameKo : COUNTRIES.find(c => c.code === nationality)?.name}
+              </span>
+              <span className="text-[10px] opacity-50">✏️</span>
+            </button>
           </div>
         )}
 
@@ -348,6 +405,44 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+      {/* nationality edit modal */}
+      {editingNationality && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end justify-center px-4 pb-8"
+          onClick={() => { setEditingNationality(false); setNationalitySearch('') }}
+        >
+          <div
+            className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-6"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-white font-bold mb-4 text-center">🌍 국적 변경</h2>
+            <input
+              type="text"
+              value={nationalitySearch}
+              onChange={e => setNationalitySearch(e.target.value)}
+              placeholder="나라 검색 / Search country"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none text-sm mb-2"
+              autoFocus
+            />
+            <div className="max-h-60 overflow-y-auto flex flex-col gap-0.5">
+              {COUNTRIES.filter(c =>
+                c.name.toLowerCase().includes(nationalitySearch.toLowerCase()) ||
+                c.nameKo.includes(nationalitySearch)
+              ).map(c => (
+                <button
+                  key={c.code}
+                  onClick={() => updateNationality(c.code)}
+                  className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-white/5 text-left text-sm rounded-lg"
+                >
+                  <img src={getFlagImageUrl(c.code, 20)} alt={c.code} className="w-6 h-4 rounded-sm object-cover flex-shrink-0" />
+                  <span className="text-white">{locale === 'ko' ? c.nameKo : c.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
