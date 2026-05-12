@@ -71,6 +71,8 @@ export default function FeedPage() {
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [newVideoNotif, setNewVideoNotif] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
@@ -133,6 +135,36 @@ export default function FeedPage() {
     document.addEventListener('visibilitychange', handleVisibility)
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [account, period, sort])
+
+  // 업로드 직후 축하 효과
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (localStorage.getItem('justUploaded')) {
+      localStorage.removeItem('justUploaded')
+      setShowCelebration(true)
+      setTimeout(() => setShowCelebration(false), 4000)
+    }
+  }, [])
+
+  // 실시간 새 영상 알림
+  useEffect(() => {
+    if (!account) return
+    const channel = supabase
+      .channel('new-videos')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'videos',
+        filter: `group_id=eq.${account.group_id}`,
+      }, payload => {
+        if ((payload.new as { account_id: string }).account_id !== account.id) {
+          setNewVideoNotif(true)
+          setTimeout(() => setNewVideoNotif(false), 5000)
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [account])
 
   // 화면에 들어온 영상 자동 재생
   useEffect(() => {
@@ -274,6 +306,16 @@ export default function FeedPage() {
     [...videos].sort((a, b) => b.like_count - a.like_count)
       .slice(0, 3).filter(v => v.like_count > 0).map(v => v.id)
   )
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+  const confettiItems = showCelebration
+    ? Array.from({ length: 18 }, (_, i) => ({
+        left: `${5 + (i * 5.5) % 92}%`,
+        color: ['#ff3278', '#7c3aed', '#fbbf24', '#34d399', '#60a5fa', '#f472b6'][i % 6],
+        delay: `${(i * 0.12).toFixed(2)}s`,
+        size: `${10 + (i % 4) * 4}px`,
+        dur: `${0.9 + (i % 3) * 0.3}s`,
+      }))
+    : []
 
   if (loading) {
     return (
@@ -285,6 +327,46 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-black">
+
+      {/* 업로드 축하 컨페티 */}
+      {showCelebration && (
+        <div className="fixed inset-0 pointer-events-none z-[200] overflow-hidden">
+          {confettiItems.map((c, i) => (
+            <div key={i} style={{
+              position: 'absolute', top: '-20px', left: c.left,
+              width: c.size, height: c.size,
+              background: c.color, borderRadius: i % 3 === 0 ? '50%' : '2px',
+              animation: `confettiFall ${c.dur} ease-in ${c.delay} forwards`,
+              opacity: 1,
+            }} />
+          ))}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div style={{ animation: 'celebrationPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards' }}
+              className="bg-zinc-900/95 border border-white/20 rounded-3xl px-8 py-6 text-center backdrop-blur">
+              <div className="text-4xl mb-2">🎉</div>
+              <p className="text-white font-black text-lg">업로드 완료!</p>
+              <p className="text-white/40 text-sm mt-1">커버 영상이 올라갔어요</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 실시간 새 영상 알림 배너 */}
+      {newVideoNotif && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+          style={{ animation: 'newBannerSlide 5s ease-in-out forwards' }}
+        >
+          <button
+            className="pointer-events-auto mt-2 px-5 py-2.5 rounded-full text-white text-sm font-bold flex items-center gap-2 border border-white/20"
+            style={{ background: 'rgba(20,20,20,0.95)', backdropFilter: 'blur(12px)' }}
+            onClick={() => { setNewVideoNotif(false); fetchVideos(account!.group_id, period, sort) }}
+          >
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'realtimeDot 1s ease-in-out infinite' }} />
+            새 커버 영상이 올라왔어요 · 탭해서 보기
+          </button>
+        </div>
+      )}
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
@@ -581,6 +663,12 @@ export default function FeedPage() {
                     <span className="text-white text-sm font-bold truncate">@{video.accounts.username}</span>
                   </Link>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {new Date(video.created_at) > oneHourAgo && (
+                      <span className="text-xs font-black px-2 py-0.5 rounded-full text-white"
+                        style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', animation: 'newBadgePulse 1.8s ease-in-out infinite' }}>
+                        NEW
+                      </span>
+                    )}
                     {topIds.has(video.id) && (
                       <span className="text-xs font-black px-2 py-0.5 rounded-full"
                         style={{ background: 'linear-gradient(135deg,#ff6b35,#ff0066)', color: 'white', animation: 'hotPulse 2s ease-in-out infinite' }}>

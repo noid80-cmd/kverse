@@ -139,6 +139,7 @@ export default function UploadPage() {
     if (dbError) {
       setError(t('upload.errSave') + dbError.message)
     } else {
+      localStorage.setItem('justUploaded', '1')
       router.push('/feed')
     }
     setUploading(false)
