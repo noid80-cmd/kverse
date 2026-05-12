@@ -17,7 +17,9 @@ export default function LanguageSwitcher() {
   function handleOpen() {
     if (btnRef.current) {
       const r = btnRef.current.getBoundingClientRect()
-      setPos({ top: r.bottom + 8, left: r.left })
+      const dropWidth = 160
+      const left = Math.min(r.left, window.innerWidth - dropWidth - 8)
+      setPos({ top: r.bottom + 8, left: Math.max(8, left) })
     }
     setOpen(o => !o)
   }

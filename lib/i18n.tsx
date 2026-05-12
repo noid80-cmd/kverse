@@ -241,7 +241,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': 'Saving...', 'common.back': '← Back',
     'home.welcome': 'Welcome to K-pop Universe',
     'home.heroTitle': 'Expand Your\nK-pop Universe',
-    'home.heroDesc': "From BTS's Purple Planet to BLACKPINK's Pink Kingdom.\nJourney into your favorite idol's world and shine with your own covers.",
+    'home.heroDesc': "From BTS's Purple Planet\nto BLACKPINK's Pink Kingdom.\nJourney into your favorite idol's world and shine with your own covers.",
     'home.startUniverse': 'Start My Universe',
     'home.enterUniverse': 'Enter Universe',
     'home.whichUniverse': 'Which universe will you explore?',

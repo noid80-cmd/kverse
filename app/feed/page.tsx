@@ -149,11 +149,6 @@ export default function FeedPage() {
     }
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   const theme = account ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
 
@@ -276,26 +271,20 @@ export default function FeedPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/dm" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition">
-            DM
-          </Link>
-          <Link href="/community" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition">
+          <Link href="/community" className="hidden sm:block px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             {t('nav.community')}
           </Link>
           <Link
             href="/upload"
-            className="px-3 py-2 text-white text-sm font-medium rounded-full transition"
+            className="px-3 py-2 text-white text-sm font-medium rounded-full transition whitespace-nowrap shrink-0"
             style={{ background: theme?.gradient }}
           >
             + {t('nav.upload')}
           </Link>
-          <Link href="/profile" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition">
+          <Link href="/profile" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             {t('nav.profile')}
           </Link>
           <LanguageSwitcher />
-          <button onClick={handleLogout} className="text-white/30 hover:text-white/60 text-sm transition">
-            {t('sa.logout')}
-          </button>
         </div>
       </nav>
 
