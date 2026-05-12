@@ -5,8 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Kverse',
   webDir: 'out',
   server: {
-    // 프로덕션 Vercel URL로 교체하세요 (예: https://kverse.vercel.app)
-    url: 'https://YOUR_VERCEL_URL.vercel.app',
+    url: 'https://kverse-nine.vercel.app',
     cleartext: false,
     androidScheme: 'https',
   },
