@@ -320,7 +320,7 @@ export default function FeedPage() {
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-6 py-10">
         {/* 계정 카드 */}
         {account && theme && (
           <div
@@ -368,8 +368,31 @@ export default function FeedPage() {
         )}
 
         {/* 필터 */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-1">
+        <div className="flex flex-col items-center gap-3 mb-6">
+          <div className="flex gap-2">
+            {([
+              { key: 'all', label: t('common.all') },
+              { key: 'week', label: t('feed.thisWeek') },
+              { key: 'today', label: t('feed.today') },
+            ] as { key: Period; label: string }[]).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setPeriod(key)}
+                className="px-4 py-1.5 rounded-full text-sm font-medium transition border"
+                style={period === key ? {
+                  background: theme?.gradient,
+                  borderColor: 'transparent',
+                  color: 'white',
+                } : {
+                  borderColor: `${accentColor}30`,
+                  color: `${accentColor}80`,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
             <button onClick={() => setSort('newest')} className="px-3 py-1 rounded-full text-xs font-medium transition border"
               style={sort === 'newest' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
               {t('feed.byNewest')}
@@ -378,32 +401,8 @@ export default function FeedPage() {
               style={sort === 'popular' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
               {t('feed.byLikes')}
             </button>
+            {videosLoading && <span className="text-white/20 text-sm self-center animate-pulse">...</span>}
           </div>
-        </div>
-
-        <div className="flex gap-2 mb-6">
-          {([
-            { key: 'all', label: t('common.all') },
-            { key: 'week', label: t('feed.thisWeek') },
-            { key: 'today', label: t('feed.today') },
-          ] as { key: Period; label: string }[]).map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setPeriod(key)}
-              className="px-4 py-1.5 rounded-full text-sm font-medium transition border"
-              style={period === key ? {
-                background: theme?.gradient,
-                borderColor: 'transparent',
-                color: 'white',
-              } : {
-                borderColor: `${accentColor}30`,
-                color: `${accentColor}80`,
-              }}
-            >
-              {label}
-            </button>
-          ))}
-          {videosLoading && <span className="text-white/20 text-sm self-center ml-1 animate-pulse">...</span>}
         </div>
 
         {/* 영상 목록 — 인라인 스크롤 피드 */}
