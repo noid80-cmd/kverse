@@ -392,7 +392,7 @@ export default function FeedPage() {
         {videos.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">{theme?.emoji}</div>
-            <p className="text-white/50 mb-6">{t('feed.noVideos')}<br />{t('feed.beFirst')}</p>
+            <p className="text-white/50 mb-6">{t('feed.beFirst')}</p>
             <Link
               href="/upload"
               className="px-8 py-3 text-white font-medium rounded-full transition"
