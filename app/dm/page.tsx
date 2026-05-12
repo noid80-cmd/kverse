@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GroupTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
@@ -27,7 +27,7 @@ type Conversation = {
   account2: ConvAccount
 }
 
-export default function DMListPage() {
+function DMListInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const t = useT()
@@ -203,5 +203,13 @@ export default function DMListPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function DMListPage() {
+  return (
+    <Suspense>
+      <DMListInner />
+    </Suspense>
   )
 }
