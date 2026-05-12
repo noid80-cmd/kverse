@@ -13,7 +13,6 @@ export default function AppleIcon() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
       }}
     >
       <svg width={180} height={180} viewBox="0 0 180 180">
@@ -24,36 +23,35 @@ export default function AppleIcon() {
           </linearGradient>
           <clipPath id="top"><rect x="0" y="0" width="180" height="90" /></clipPath>
           <clipPath id="bot"><rect x="0" y="90" width="180" height="90" /></clipPath>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
 
         {/* Back arc */}
-        <ellipse cx="90" cy="90" rx="81" ry="20"
+        <ellipse cx="90" cy="90" rx="82" ry="20"
           transform="rotate(-18 90 90)"
           stroke="url(#rg)" strokeWidth="8" fill="none"
-          clipPath="url(#top)" opacity="0.38"
+          clipPath="url(#top)" opacity="0.4"
         />
 
-        {/* K */}
-        <text
-          x="90" y="90"
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize="134"
-          fontWeight="900"
-          fontFamily="system-ui, -apple-system, Arial Black, sans-serif"
-          fill="#E91E8C"
-          stroke="#E91E8C"
-          strokeWidth="5"
-          strokeLinejoin="round"
-          filter="url(#glow)"
-        >K</text>
+        {/* K — vertical bar */}
+        <rect x="26" y="22" width="38" height="136" rx="7"
+          fill="#E91E8C" filter="url(#glow)" />
+
+        {/* K — upper arm */}
+        <line x1="53" y1="85" x2="157" y2="22"
+          stroke="#E91E8C" strokeWidth="33"
+          strokeLinecap="round" filter="url(#glow)" />
+
+        {/* K — lower arm */}
+        <line x1="53" y1="95" x2="157" y2="158"
+          stroke="#E91E8C" strokeWidth="33"
+          strokeLinecap="round" filter="url(#glow)" />
 
         {/* Front arc */}
-        <ellipse cx="90" cy="90" rx="81" ry="20"
+        <ellipse cx="90" cy="90" rx="82" ry="20"
           transform="rotate(-18 90 90)"
           stroke="url(#rg)" strokeWidth="8" fill="none"
           clipPath="url(#bot)"
