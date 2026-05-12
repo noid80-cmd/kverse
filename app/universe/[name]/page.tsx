@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
@@ -33,15 +33,14 @@ export default function UniversePage() {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('all')
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [totalCount, setTotalCount] = useState(0)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [accountId, setAccountId] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
     async function load() {
-      // 로그인 상태 확인
       const user = await getAuthUser()
       if (user) {
         setIsLoggedIn(true)
@@ -78,6 +77,26 @@ export default function UniversePage() {
     load()
   }, [groupName])
 
+  // 화면에 들어온 영상 자동 재생
+  useEffect(() => {
+    if (videos.length === 0) return
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          const video = entry.target as HTMLVideoElement
+          if (entry.isIntersecting) {
+            video.play().catch(() => {})
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+    Object.values(videoRefs.current).forEach(v => { if (v) observer.observe(v) })
+    return () => observer.disconnect()
+  }, [videos])
+
   async function toggleLike(video: Video) {
     if (!accountId) return
     const liked = likedIds.has(video.id)
@@ -90,9 +109,6 @@ export default function UniversePage() {
     setVideos(prev => prev.map(v =>
       v.id === video.id ? { ...v, like_count: v.like_count + (liked ? -1 : 1) } : v
     ))
-    if (selectedVideo?.id === video.id) {
-      setSelectedVideo(v => v ? { ...v, like_count: v.like_count + (liked ? -1 : 1) } : v)
-    }
 
     if (liked) {
       await supabase.from('likes').delete().eq('account_id', accountId).eq('video_id', video.id)
@@ -119,63 +135,6 @@ export default function UniversePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* 영상 재생 모달 */}
-      {selectedVideo && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4"
-          onClick={() => setSelectedVideo(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl overflow-hidden border"
-            style={{ borderColor: `${accentColor}40` }}
-            onClick={e => e.stopPropagation()}
-          >
-            <video
-              src={selectedVideo.video_url}
-              controls
-              autoPlay
-              className="w-full aspect-video bg-black"
-            />
-            <div className="bg-zinc-950 p-4">
-              <p className="text-white font-semibold text-lg">{selectedVideo.title}</p>
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-white/40 text-sm">@{selectedVideo.accounts.username}</span>
-                <span
-                  className="text-xs font-medium px-2 py-0.5 rounded-full"
-                  style={{ background: `${accentColor}20`, color: accentColor }}
-                >
-                  {selectedVideo.category === 'vocal' ? `VOCAL ${t('common.vocal')}` : `DANCE ${t('common.dance')}`}
-                </span>
-              </div>
-              <div className="flex items-center gap-4 mt-3">
-                {isLoggedIn && accountId ? (
-                  <button
-                    onClick={() => toggleLike(selectedVideo)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition"
-                    style={likedIds.has(selectedVideo.id)
-                      ? { background: theme.gradient, color: 'white' }
-                      : { background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}40` }
-                    }
-                  >
-                    <span style={likedIds.has(selectedVideo.id) ? { color: 'white' } : { color: accentColor }}>♥</span> {selectedVideo.like_count}
-                  </button>
-                ) : (
-                  <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-full text-sm border border-white/10 text-white/40">
-                    <span style={{ color: 'inherit' }}>♥</span> {selectedVideo.like_count} <span className="text-xs">({t('browse.loginToLike')})</span>
-                  </Link>
-                )}
-                <span className="text-white/30 text-sm">{selectedVideo.view_count} views</span>
-                <button
-                  onClick={() => setSelectedVideo(null)}
-                  className="ml-auto text-white/40 hover:text-white text-sm transition"
-                >
-                  {t('browse.close')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
@@ -192,7 +151,7 @@ export default function UniversePage() {
         </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="max-w-2xl mx-auto px-4 py-8">
         {/* 그룹 헤더 */}
         <div
           className="rounded-3xl p-8 mb-8 flex flex-col items-center text-center border gap-3"
@@ -255,7 +214,7 @@ export default function UniversePage() {
           ))}
         </div>
 
-        {/* 영상 목록 */}
+        {/* 영상 목록 — 인라인 스크롤 피드 */}
         {loading ? (
           <div className="text-center py-20">
             <div className="text-white/20 animate-pulse">{t('common.loading')}</div>
@@ -263,9 +222,9 @@ export default function UniversePage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white mb-4 mx-auto"
-            style={{ background: accentColor }}>
-            {groupDisplayName(groupName, 'en').charAt(0).toUpperCase()}
-          </div>
+              style={{ background: accentColor }}>
+              {groupDisplayName(groupName, 'en').charAt(0).toUpperCase()}
+            </div>
             <p className="text-white/30 text-sm">
               {filter === 'all'
                 ? t('uni.noVideos')
@@ -280,71 +239,74 @@ export default function UniversePage() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {filtered.map((video, index) => (
               <div
                 key={video.id}
-                className="rounded-2xl p-4 flex items-center gap-4 border cursor-pointer hover:scale-[1.01] transition-transform"
-                style={{
-                  background: `${accentColor}08`,
-                  borderColor: index === 0 ? `${accentColor}50` : `${accentColor}15`,
-                }}
-                onClick={() => setSelectedVideo(video)}
+                className="rounded-2xl overflow-hidden border"
+                style={{ borderColor: index === 0 ? `${accentColor}50` : `${accentColor}18` }}
               >
-                {/* 순위 */}
-                <div className="text-xl font-bold w-8 text-center flex-shrink-0" style={{
-                  color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'rgba(255,255,255,0.15)'
-                }}>
-                  {index + 1}
-                </div>
-
-                {/* 썸네일 자리 */}
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ background: `${accentColor}18`, color: accentColor }}
-                >
-                  {video.category === 'vocal' ? 'VOCAL' : 'DANCE'}
-                </div>
-
-                {/* 정보 */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="text-white font-semibold text-sm truncate">{video.title}</p>
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium"
-                      style={{ background: `${accentColor}20`, color: accentColor }}
-                    >
-                      {video.category === 'vocal' ? t('common.vocal') : t('common.dance')}
-                    </span>
-                  </div>
-                  <p className="text-white/40 text-xs">@{video.accounts.username} · {timeAgo(video.created_at)}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs" style={{ color: accentColor }}>♥ {video.like_count}</span>
-                    <span className="text-white/20 text-xs">{video.view_count} views</span>
-                  </div>
-                </div>
-
-                {/* 좋아요 / 재생 */}
-                <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                  {isLoggedIn && accountId ? (
-                    <button
-                      onClick={e => { e.stopPropagation(); toggleLike(video) }}
-                      className="w-9 h-9 rounded-full flex items-center justify-center transition text-base"
-                      style={likedIds.has(video.id)
-                        ? { background: theme.gradient }
-                        : { background: `${accentColor}15`, border: `1px solid ${accentColor}30` }
-                      }
-                    >
-                      <span style={likedIds.has(video.id) ? { color: 'white' } : { color: accentColor }}>♥</span>
-                    </button>
-                  ) : (
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm"
-                      style={{ background: theme.gradient }}
-                    >
-                      ▶
+                {/* 헤더 */}
+                <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${accentColor}08` }}>
+                  <span className="font-bold text-sm w-6 text-center flex-shrink-0"
+                    style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'rgba(255,255,255,0.2)' }}>
+                    {index + 1}
+                  </span>
+                  <Link href={isLoggedIn ? `/profile/${video.accounts.username}` : '/login'}
+                    className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                      style={{ background: theme.gradient }}>
+                      {video.accounts.username.charAt(0).toUpperCase()}
                     </div>
-                  )}
+                    <span className="text-white text-sm font-semibold truncate">@{video.accounts.username}</span>
+                  </Link>
+                  <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ background: `${accentColor}18`, color: accentColor }}>
+                    {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
+                  </span>
+                </div>
+
+                {/* 영상 */}
+                <video
+                  ref={el => { videoRefs.current[video.id] = el }}
+                  src={video.video_url}
+                  className="w-full block bg-black"
+                  style={{ maxHeight: '65vh' }}
+                  playsInline
+                  muted
+                  loop
+                  controls
+                  preload="none"
+                />
+
+                {/* 하단 정보 바 */}
+                <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${accentColor}06` }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{video.title}</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-white/25 text-xs">{video.view_count} views</span>
+                      <span className="text-white/20 text-xs">{timeAgo(video.created_at)}</span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {isLoggedIn && accountId ? (
+                      <button
+                        onClick={() => toggleLike(video)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition"
+                        style={likedIds.has(video.id)
+                          ? { background: theme.gradient, color: 'white' }
+                          : { background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}30` }
+                        }
+                      >
+                        ♥ {video.like_count}
+                      </button>
+                    ) : (
+                      <Link href="/login"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border border-white/10 text-white/40">
+                        ♥ {video.like_count}
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

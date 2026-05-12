@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId, setActiveAccountId } from '@/lib/activeAccount'
@@ -48,7 +48,6 @@ export default function FeedPage() {
   const [sort, setSort] = useState<SortOrder>('newest')
   const [videosLoading, setVideosLoading] = useState(false)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [allAccounts, setAllAccounts] = useState<Account[]>([])
   const [showAccountMenu, setShowAccountMenu] = useState(false)
   const [isPlus, setIsPlus] = useState(false)
@@ -56,6 +55,7 @@ export default function FeedPage() {
   const [reportTarget, setReportTarget] = useState<Video | null>(null)
   const [reportReason, setReportReason] = useState('')
   const [reportDone, setReportDone] = useState(false)
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
     async function load() {
@@ -96,6 +96,26 @@ export default function FeedPage() {
     if (!account) return
     fetchVideos(account.group_id, period, sort)
   }, [period, sort])
+
+  // 화면에 들어온 영상 자동 재생
+  useEffect(() => {
+    if (videos.length === 0) return
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          const video = entry.target as HTMLVideoElement
+          if (entry.isIntersecting) {
+            video.play().catch(() => {})
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+    Object.values(videoRefs.current).forEach(v => { if (v) observer.observe(v) })
+    return () => observer.disconnect()
+  }, [videos])
 
   async function fetchVideos(groupId: string, p: Period, s: SortOrder) {
     setVideosLoading(true)
@@ -145,22 +165,18 @@ export default function FeedPage() {
 
   async function deleteVideo(video: Video) {
     setDeleteTarget(null)
-
-    // storage 경로 추출: .../videos/[path] → [path]
     const match = video.video_url.match(/\/videos\/(.+)$/)
     if (match) {
       await supabase.storage.from('videos').remove([decodeURIComponent(match[1])])
     }
     await supabase.from('videos').delete().eq('id', video.id)
     setVideos(prev => prev.filter(v => v.id !== video.id))
-    if (selectedVideo?.id === video.id) setSelectedVideo(null)
   }
 
   async function toggleLike(video: Video) {
     if (!account) return
     const liked = likedIds.has(video.id)
 
-    // 낙관적 업데이트
     setLikedIds(prev => {
       const next = new Set(prev)
       liked ? next.delete(video.id) : next.add(video.id)
@@ -169,9 +185,6 @@ export default function FeedPage() {
     setVideos(prev => prev.map(v =>
       v.id === video.id ? { ...v, like_count: v.like_count + (liked ? -1 : 1) } : v
     ))
-    if (selectedVideo?.id === video.id) {
-      setSelectedVideo(v => v ? { ...v, like_count: v.like_count + (liked ? -1 : 1) } : v)
-    }
 
     if (liked) {
       await supabase.from('likes').delete()
@@ -196,62 +209,12 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* 영상 재생 모달 */}
-      {selectedVideo && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4"
-          onClick={() => setSelectedVideo(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl overflow-hidden border"
-            style={{ borderColor: `${accentColor}40` }}
-            onClick={e => e.stopPropagation()}
-          >
-            <video
-              src={selectedVideo.video_url}
-              controls
-              autoPlay
-              playsInline
-              className="w-full bg-black"
-              style={{ maxHeight: '65vh', display: 'block' }}
-            />
-            <div className="bg-black p-4">
-              <p className="text-white font-semibold text-lg">{selectedVideo.title}</p>
-              <p className="text-white/40 text-sm mt-1">@{selectedVideo.accounts.username} · {selectedVideo.category === 'vocal' ? t('common.vocal') : t('common.dance')}</p>
-              <div className="flex items-center gap-4 mt-4">
-                <button
-                  onClick={() => toggleLike(selectedVideo)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition"
-                  style={likedIds.has(selectedVideo.id) ? {
-                    background: theme?.gradient,
-                    color: 'white',
-                  } : {
-                    background: `${accentColor}15`,
-                    color: accentColor,
-                    border: `1px solid ${accentColor}40`,
-                  }}
-                >
-                  <span style={likedIds.has(selectedVideo.id) ? { color: 'white' } : { color: accentColor }}>♥</span> {selectedVideo.like_count}
-                </button>
-                <span className="text-white/30 text-sm">{selectedVideo.view_count} views</span>
-                <button
-                  onClick={() => setSelectedVideo(null)}
-                  className="ml-auto text-white/40 hover:text-white text-sm transition"
-                >
-                  {t('browse.close')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/"><KverseLogo /></Link>
 
-          {/* 계정 전환 버튼 */}
           {theme && account && (
             <button
               onClick={() => setShowAccountMenu(v => !v)}
@@ -284,7 +247,7 @@ export default function FeedPage() {
         </div>
       </nav>
 
-      {/* 계정 전환 모달 시트 */}
+      {/* 계정 전환 모달 */}
       {showAccountMenu && allAccounts.length > 1 && theme && account && (
         <div
           className="fixed inset-0 flex items-end justify-center pb-8 px-4"
@@ -338,11 +301,11 @@ export default function FeedPage() {
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="max-w-2xl mx-auto px-4 py-8">
         {/* 계정 카드 */}
         {account && theme && (
           <div
-            className="rounded-2xl p-5 mb-8 flex items-center gap-4 border relative overflow-hidden"
+            className="rounded-2xl p-5 mb-6 flex items-center gap-4 border relative overflow-hidden"
             style={isPlus ? {
               background: 'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.12))',
               borderColor: 'rgba(251,191,36,0.5)',
@@ -351,12 +314,10 @@ export default function FeedPage() {
               borderColor: `${theme.primary}40`,
             }}
           >
-            {/* Plus 배경 반짝임 */}
             {isPlus && (
               <div className="absolute inset-0 pointer-events-none"
                 style={{ background: 'linear-gradient(105deg, rgba(251,191,36,0.07) 0%, transparent 60%)' }} />
             )}
-
             <Link href="/avatar" className="flex-shrink-0 hover:opacity-80 transition relative z-10">
               <Avatar
                 gender={(account.gender as 'male' | 'female') || 'female'}
@@ -387,9 +348,9 @@ export default function FeedPage() {
           </div>
         )}
 
-        {/* 랭킹 헤더 */}
+        {/* 필터 */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-lg font-bold text-white">
             {account?.groups.name ? groupDisplayName(account.groups.name, locale) : ''} {t('feed.ranking')}
           </h2>
           <div className="flex gap-1">
@@ -404,7 +365,6 @@ export default function FeedPage() {
           </div>
         </div>
 
-        {/* 기간 탭 */}
         <div className="flex gap-2 mb-6">
           {([
             { key: 'all', label: t('common.all') },
@@ -430,7 +390,7 @@ export default function FeedPage() {
           {videosLoading && <span className="text-white/20 text-sm self-center ml-1 animate-pulse">...</span>}
         </div>
 
-        {/* 영상 목록 */}
+        {/* 영상 목록 — 인라인 스크롤 피드 */}
         {videos.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">{theme?.emoji}</div>
@@ -448,94 +408,98 @@ export default function FeedPage() {
             {videos.map((video, index) => (
               <div
                 key={video.id}
-                className="rounded-2xl p-5 flex items-center gap-4 transition border cursor-pointer hover:scale-[1.01]"
-                style={{
-                  background: `${theme?.primary}08`,
-                  borderColor: index === 0 ? `${accentColor}60` : `${accentColor}20`,
-                }}
-                onClick={() => setSelectedVideo(video)}
+                className="rounded-2xl overflow-hidden border"
+                style={{ borderColor: index === 0 ? `${accentColor}50` : `${accentColor}18` }}
               >
-                <div className="text-2xl font-bold text-white/20 w-8 text-center">
-                  {index + 1}
-                </div>
-                <div className="w-14 h-14 rounded-xl flex-shrink-0 relative overflow-hidden"
-                  style={{ background: `${accentColor}15` }}>
-                  <video
-                    src={`${video.video_url}#t=0.5`}
-                    className="w-full h-full object-cover"
-                    preload="metadata"
-                    muted
-                    playsInline
-                  />
-                  <span className="absolute bottom-0.5 left-0 right-0 text-center text-[9px] font-bold"
-                    style={{ color: accentColor, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-                    {video.category === 'vocal' ? '🎤' : '💃'}
+                {/* 헤더 */}
+                <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${theme?.primary}08` }}>
+                  <span className="text-white/20 font-bold text-sm w-6 text-center flex-shrink-0">
+                    {index + 1}
                   </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-white font-semibold truncate">{video.title}</p>
+                  <Link
+                    href={`/profile/${video.accounts.username}`}
+                    className="flex items-center gap-2 flex-1 min-w-0"
+                  >
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                      style={{ background: theme?.gradient }}>
+                      {video.accounts.username.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-white text-sm font-semibold truncate">@{video.accounts.username}</span>
+                  </Link>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
                     {video.is_live && (
-                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
                         {t('feed.liveBadge')}
                       </span>
                     )}
-                    {video.is_private && (
-                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/10 text-white/40 border border-white/15">
-                        🔒
-                      </span>
-                    )}
-                  </div>
-                  <Link href={`/profile/${video.accounts.username}`} onClick={e => e.stopPropagation()} className="text-white/40 text-sm hover:text-white/70 transition">@{video.accounts.username}</Link>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs" style={{ color: accentColor }}>
-                      <span style={likedIds.has(video.id) ? { color: accentColor } : { color: 'rgba(255,255,255,0.25)' }}>♥</span> {video.like_count}
+                    {video.is_private && <span className="text-white/30 text-xs">🔒</span>}
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${accentColor}18`, color: accentColor }}>
+                      {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
                     </span>
-                    <span className="text-white/30 text-xs">{video.view_count} {t('feed.views')}</span>
-                    <span className="text-white/20 text-xs">{video.category === 'vocal' ? t('common.vocal') : t('common.dance')}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {video.accounts.username !== account?.username && (
-                    <>
-                      <Link
-                        href={`/dm?to=${video.accounts.username}`}
-                        onClick={e => e.stopPropagation()}
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}
-                      >
-                        💬
-                      </Link>
+
+                {/* 영상 */}
+                <video
+                  ref={el => { videoRefs.current[video.id] = el }}
+                  src={video.video_url}
+                  className="w-full block bg-black"
+                  style={{ maxHeight: '65vh' }}
+                  playsInline
+                  muted
+                  loop
+                  controls
+                  preload="none"
+                />
+
+                {/* 하단 정보 바 */}
+                <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${theme?.primary}06` }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{video.title}</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-white/25 text-xs">{video.view_count} {t('feed.views')}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {video.accounts.username !== account?.username && (
+                      <>
+                        <Link
+                          href={`/dm?to=${video.accounts.username}`}
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}
+                        >
+                          💬
+                        </Link>
+                        <button
+                          onClick={() => { setReportTarget(video); setReportReason('') }}
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.2)' }}
+                        >
+                          🚩
+                        </button>
+                      </>
+                    )}
+                    {video.accounts.username === account?.username && (
                       <button
-                        onClick={e => { e.stopPropagation(); setReportTarget(video); setReportReason('') }}
+                        onClick={() => setDeleteTarget(video)}
                         className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.2)' }}
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}
                       >
-                        🚩
+                        🗑
                       </button>
-                    </>
-                  )}
-                  {video.accounts.username === account?.username && (
+                    )}
                     <button
-                      onClick={e => { e.stopPropagation(); setDeleteTarget(video) }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}
+                      onClick={() => toggleLike(video)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition"
+                      style={likedIds.has(video.id) ? {
+                        background: theme?.gradient, color: 'white',
+                      } : {
+                        background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}30`,
+                      }}
                     >
-                      🗑
+                      ♥ {video.like_count}
                     </button>
-                  )}
-                  <button
-                    onClick={e => { e.stopPropagation(); toggleLike(video) }}
-                    className="w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
-                    style={likedIds.has(video.id) ? {
-                      background: theme?.gradient,
-                    } : {
-                      background: `${accentColor}15`,
-                      border: `1px solid ${accentColor}30`,
-                    }}
-                  >
-                    <span style={likedIds.has(video.id) ? { color: 'white' } : { color: accentColor }}>♥</span>
-                  </button>
+                  </div>
                 </div>
               </div>
             ))}
