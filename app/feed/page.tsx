@@ -257,6 +257,12 @@ export default function FeedPage() {
           <Link href="/profile" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             {t('nav.profile')}
           </Link>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+            className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white/50 hover:text-white text-sm rounded-full transition whitespace-nowrap shrink-0"
+          >
+            {t('nav.logout')}
+          </button>
         </div>
       </nav>
 
