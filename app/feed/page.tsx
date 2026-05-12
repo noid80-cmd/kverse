@@ -97,6 +97,18 @@ export default function FeedPage() {
     fetchVideos(account.group_id, period, sort)
   }, [period, sort])
 
+  // 다른 페이지에서 돌아올 때 자동 새로고침
+  useEffect(() => {
+    if (!account) return
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchVideos(account.group_id, period, sort)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [account, period, sort])
+
   // 화면에 들어온 영상 자동 재생
   useEffect(() => {
     if (videos.length === 0) return
