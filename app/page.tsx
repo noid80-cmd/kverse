@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { GROUP_THEMES, groupDisplayName } from '@/lib/groupThemes'
 import FandomRanking from './components/FandomRanking'
 import { useT, useLanguage } from '@/lib/i18n'
 import LanguageSwitcher from '@/app/components/LanguageSwitcher'
 import KverseLogo from '@/app/components/KverseLogo'
+import { getAuthUser } from '@/lib/supabase'
 
 const ALL_WORLDS = Object.entries(GROUP_THEMES).map(([name, theme]) => ({
   name,
@@ -28,6 +30,11 @@ const BRAND_TEXT: React.CSSProperties = {
 export default function Home() {
   const t = useT()
   const { locale } = useLanguage()
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    getAuthUser().then(u => setLoggedIn(!!u))
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#080808] text-white overflow-hidden">
@@ -41,15 +48,25 @@ export default function Home() {
           <KverseLogo size="lg" />
         </div>
         <div className="flex items-center justify-end gap-2">
-          <Link href="/login"
-            className="hidden sm:block px-5 py-2 rounded-full border border-white/10 text-sm font-medium text-white/50 hover:text-white hover:border-white/25 transition">
-            {t('auth.login')}
-          </Link>
-          <Link href="/signup"
-            className="px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
-            style={{ background: BRAND_GRADIENT }}>
-            {t('home.enterUniverse')}
-          </Link>
+          {loggedIn ? (
+            <Link href="/feed"
+              className="px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
+              style={{ background: BRAND_GRADIENT }}>
+              내 SNS
+            </Link>
+          ) : (
+            <>
+              <Link href="/login"
+                className="hidden sm:block px-5 py-2 rounded-full border border-white/10 text-sm font-medium text-white/50 hover:text-white hover:border-white/25 transition">
+                {t('auth.login')}
+              </Link>
+              <Link href="/signup"
+                className="px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
+                style={{ background: BRAND_GRADIENT }}>
+                {t('home.enterUniverse')}
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
