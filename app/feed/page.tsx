@@ -251,59 +251,16 @@ export default function FeedPage() {
         <div className="flex items-center gap-3">
           <Link href="/"><KverseLogo /></Link>
 
-          {/* 계정 전환 드롭다운 */}
+          {/* 계정 전환 버튼 */}
           {theme && account && (
-            <div className="relative">
-              <button
-                onClick={() => setShowAccountMenu(v => !v)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition hover:opacity-80"
-                style={{ color: accentColor, borderColor: accentColor, backgroundColor: `${theme.primary}15` }}
-              >
-                {account.username}
-                <span className="text-white/30 ml-0.5">{allAccounts.length > 1 ? '▾' : ''}</span>
-              </button>
-
-              {showAccountMenu && allAccounts.length > 1 && (
-                <div className="absolute top-full left-0 mt-1 w-52 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl">
-                  {allAccounts.map(acc => {
-                    const accTheme = getTheme(acc.groups.name)
-                    const isActive = acc.id === account.id
-                    return (
-                      <button
-                        key={acc.id}
-                        onClick={() => {
-                          setActiveAccountId(acc.id)
-                          setAccount(acc)
-                          setShowAccountMenu(false)
-                          fetchVideos(acc.group_id, period, sort)
-                          fetchLikedIds(acc.id)
-                        }}
-                        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition text-left"
-                        style={isActive ? { background: `${accTheme.primary}15` } : {}}
-                      >
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0" style={{ background: accTheme.gradient }}>
-                          {accTheme.emoji}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-white text-xs font-semibold truncate">@{acc.username}</p>
-                          <p className="text-white/30 text-xs truncate">{groupDisplayName(acc.groups.name, locale)}</p>
-                        </div>
-                        {isActive && <span className="ml-auto text-xs" style={{ color: accTheme.primary === '#FFFFFF' ? '#C9A96E' : accTheme.primary }}>✓</span>}
-                      </button>
-                    )
-                  })}
-                  <div className="border-t border-white/5">
-                    <Link
-                      href="/select-account"
-                      onClick={() => setShowAccountMenu(false)}
-                      className="block px-4 py-2.5 text-white/30 hover:text-white/60 text-xs text-center transition"
-                    >
-                      {t('feed.accountMgmt')}
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setShowAccountMenu(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition hover:opacity-80"
+              style={{ color: accentColor, borderColor: accentColor, backgroundColor: `${theme.primary}15` }}
+            >
+              {account.username}
+              <span className="text-white/30 ml-0.5">{allAccounts.length > 1 ? '▾' : ''}</span>
+            </button>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -326,6 +283,51 @@ export default function FeedPage() {
           </Link>
         </div>
       </nav>
+
+      {/* 계정 전환 드롭다운 — nav 밖에서 fixed로 렌더링해야 backdrop-blur stacking context를 피할 수 있음 */}
+      {showAccountMenu && allAccounts.length > 1 && theme && account && (
+        <>
+          <div className="fixed inset-0 z-[90]" onClick={() => setShowAccountMenu(false)} />
+          <div className="fixed top-[65px] left-4 w-56 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden z-[100] shadow-2xl">
+            {allAccounts.map(acc => {
+              const accTheme = getTheme(acc.groups.name)
+              const isActive = acc.id === account.id
+              return (
+                <button
+                  key={acc.id}
+                  onClick={() => {
+                    setActiveAccountId(acc.id)
+                    setAccount(acc)
+                    setShowAccountMenu(false)
+                    fetchVideos(acc.group_id, period, sort)
+                    fetchLikedIds(acc.id)
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition text-left"
+                  style={isActive ? { background: `${accTheme.primary}15` } : {}}
+                >
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0" style={{ background: accTheme.gradient }}>
+                    {accTheme.emoji}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white text-xs font-semibold truncate">@{acc.username}</p>
+                    <p className="text-white/30 text-xs truncate">{groupDisplayName(acc.groups.name, locale)}</p>
+                  </div>
+                  {isActive && <span className="ml-auto text-xs" style={{ color: accTheme.primary === '#FFFFFF' ? '#C9A96E' : accTheme.primary }}>✓</span>}
+                </button>
+              )
+            })}
+            <div className="border-t border-white/5">
+              <Link
+                href="/select-account"
+                onClick={() => setShowAccountMenu(false)}
+                className="block px-4 py-2.5 text-white/30 hover:text-white/60 text-xs text-center transition"
+              >
+                {t('feed.accountMgmt')}
+              </Link>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="max-w-2xl mx-auto px-6 py-10">
         {/* 계정 카드 */}
