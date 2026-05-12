@@ -70,7 +70,7 @@ export default function AvatarPage() {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
     const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg'
     const path = `${account.id}/profile_${Date.now()}.${safeExt}`
-    const { error: upErr } = await supabase.storage.from('아바타').upload(path, file, {
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, {
       contentType: file.type || `image/${safeExt}`,
     })
     if (upErr) {
@@ -78,7 +78,7 @@ export default function AvatarPage() {
       setUploading(false)
       return
     }
-    const { data: { publicUrl } } = supabase.storage.from('아바타').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
     await supabase.from('accounts').update({ rpm_avatar_url: publicUrl }).eq('id', account.id)
     setAccount(prev => prev ? { ...prev, rpm_avatar_url: publicUrl } : prev)
     showToast('사진이 업데이트됐어요 ✓')
