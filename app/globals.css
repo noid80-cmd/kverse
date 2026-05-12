@@ -19,3 +19,26 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@keyframes heartFloat {
+  0%   { opacity: 1; transform: translateY(0) scale(1.4); }
+  60%  { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(-80px) scale(0.3); }
+}
+
+@keyframes likePop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.4); }
+  65%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+@keyframes hotPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}

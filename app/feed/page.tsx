@@ -62,6 +62,7 @@ export default function FeedPage() {
   const [reportTarget, setReportTarget] = useState<Video | null>(null)
   const [reportReason, setReportReason] = useState('')
   const [reportDone, setReportDone] = useState(false)
+  const [likeAnimating, setLikeAnimating] = useState<Set<string>>(new Set())
   const [commentVideoId, setCommentVideoId] = useState<string | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
@@ -229,6 +230,10 @@ export default function FeedPage() {
   async function toggleLike(video: Video) {
     if (!account) return
     const liked = likedIds.has(video.id)
+    if (!liked) {
+      setLikeAnimating(prev => new Set([...prev, video.id]))
+      setTimeout(() => setLikeAnimating(prev => { const n = new Set(prev); n.delete(video.id); return n }), 900)
+    }
 
     setLikedIds(prev => {
       const next = new Set(prev)
@@ -251,6 +256,11 @@ export default function FeedPage() {
 
   const theme = account ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
+  const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']
+  const topIds = new Set(
+    [...videos].sort((a, b) => b.like_count - a.like_count)
+      .slice(0, 3).filter(v => v.like_count > 0).map(v => v.id)
+  )
 
   if (loading) {
     return (
@@ -459,36 +469,57 @@ export default function FeedPage() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             {videos.map((video, index) => (
               <div
                 key={video.id}
-                className="rounded-2xl overflow-hidden border"
-                style={{ borderColor: index === 0 ? `${accentColor}50` : `${accentColor}18` }}
+                className="rounded-2xl overflow-hidden border relative"
+                style={{
+                  borderColor: index === 0 ? `${accentColor}60` : index < 3 ? `${accentColor}35` : `${accentColor}18`,
+                  boxShadow: index === 0
+                    ? `0 0 32px ${accentColor}28, 0 4px 16px rgba(0,0,0,0.5)`
+                    : index < 3
+                    ? `0 0 16px ${accentColor}15, 0 2px 8px rgba(0,0,0,0.4)`
+                    : '0 2px 8px rgba(0,0,0,0.3)',
+                }}
               >
+                {/* 왼쪽 랭크 컬러 바 */}
+                {index < 3 && (
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: rankColors[index], zIndex: 1 }} />
+                )}
+
                 {/* 헤더 */}
-                <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${theme?.primary}08` }}>
-                  <span className="text-white/20 font-bold text-sm w-6 text-center flex-shrink-0">
+                <div
+                  className="flex items-center gap-3 px-4 py-3 pl-5"
+                  style={{ background: `linear-gradient(to right, ${accentColor}22, ${accentColor}08)` }}
+                >
+                  <span
+                    className="font-black text-sm w-6 text-center flex-shrink-0"
+                    style={{ color: index < 3 ? rankColors[index] : 'rgba(255,255,255,0.2)', textShadow: index === 0 ? `0 0 8px ${rankColors[0]}80` : 'none' }}
+                  >
                     {index + 1}
                   </span>
-                  <Link
-                    href={`/profile/${video.accounts.username}`}
-                    className="flex items-center gap-2 flex-1 min-w-0"
-                  >
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
-                      style={{ background: theme?.gradient }}>
+                  <Link href={`/profile/${video.accounts.username}`} className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                      style={{ background: theme?.gradient, boxShadow: `0 0 8px ${accentColor}50` }}>
                       {video.accounts.username.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-white text-sm font-semibold truncate">@{video.accounts.username}</span>
+                    <span className="text-white text-sm font-bold truncate">@{video.accounts.username}</span>
                   </Link>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {topIds.has(video.id) && (
+                      <span className="text-xs font-black px-2 py-0.5 rounded-full"
+                        style={{ background: 'linear-gradient(135deg,#ff6b35,#ff0066)', color: 'white', animation: 'hotPulse 2s ease-in-out infinite' }}>
+                        🔥 HOT
+                      </span>
+                    )}
                     {video.is_live && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
                         {t('feed.liveBadge')}
                       </span>
                     )}
                     {video.is_private && <span className="text-white/30 text-xs">🔒</span>}
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${accentColor}18`, color: accentColor }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${accentColor}25`, color: accentColor }}>
                       {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
                     </span>
                   </div>
@@ -500,63 +531,71 @@ export default function FeedPage() {
                   src={video.video_url}
                   className="w-full block bg-black"
                   style={{ maxHeight: '65vh' }}
-                  playsInline
-                  muted
-                  loop
-                  controls
-                  preload="none"
+                  playsInline muted loop controls preload="none"
                 />
 
                 {/* 하단 정보 바 */}
-                <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${theme?.primary}06` }}>
+                <div className="px-4 py-3 flex items-center gap-2 relative"
+                  style={{ background: `linear-gradient(to right, ${accentColor}14, ${accentColor}06)` }}>
+
+                  {/* 하트 파티클 */}
+                  {likeAnimating.has(video.id) && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 10 }}>
+                      {[-28, -14, 0, 14, 28].map((hx, i) => (
+                        <div key={i} style={{
+                          position: 'absolute', right: `${16 - hx}px`, bottom: 14,
+                          color: i % 2 === 0 ? '#ff4d8d' : '#ff85b3',
+                          fontSize: `${0.7 + i * 0.12}rem`,
+                          animation: `heartFloat 0.85s ease-out ${i * 0.08}s forwards`,
+                          opacity: 0,
+                        }}>♥</div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-semibold truncate">{video.title}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-white/25 text-xs">{video.view_count} {t('feed.views')}</span>
+                    <p className="text-white text-sm font-bold truncate">{video.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-white/30 text-xs">👁 {video.view_count}</span>
+                      <span className="text-white/15 text-xs">·</span>
+                      <span className="text-white/30 text-xs">♥ {video.like_count}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     {video.accounts.username !== account?.username && (
                       <>
-                        <Link
-                          href={`/dm?to=${video.accounts.username}`}
+                        <Link href={`/dm?to=${video.accounts.username}`}
                           className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                          style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}
-                        >
+                          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
                           💬
                         </Link>
-                        <button
-                          onClick={() => { setReportTarget(video); setReportReason('') }}
+                        <button onClick={() => { setReportTarget(video); setReportReason('') }}
                           className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                          style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.2)' }}
-                        >
+                          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)' }}>
                           🚩
                         </button>
                       </>
                     )}
                     {video.accounts.username === account?.username && (
-                      <button
-                        onClick={() => setDeleteTarget(video)}
+                      <button onClick={() => setDeleteTarget(video)}
                         className="w-8 h-8 rounded-full flex items-center justify-center transition text-sm"
-                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}
-                      >
+                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)' }}>
                         🗑
                       </button>
                     )}
-                    <button
-                      onClick={() => { setCommentVideoId(video.id); fetchComments(video.id) }}
+                    <button onClick={() => { setCommentVideoId(video.id); fetchComments(video.id) }}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"
-                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}
-                    >
+                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
                       🗨️
                     </button>
                     <button
                       onClick={() => toggleLike(video)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition"
-                      style={likedIds.has(video.id) ? {
-                        background: theme?.gradient, color: 'white',
-                      } : {
-                        background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}30`,
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition"
+                      style={{
+                        animation: likeAnimating.has(video.id) ? 'likePop 0.35s ease-out' : 'none',
+                        ...(likedIds.has(video.id)
+                          ? { background: theme?.gradient, color: 'white', boxShadow: `0 0 12px ${accentColor}60` }
+                          : { background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}35` })
                       }}
                     >
                       ♥ {video.like_count}
