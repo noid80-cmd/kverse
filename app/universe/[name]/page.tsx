@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -34,7 +34,6 @@ export default function UniversePage() {
   const t = useT()
   const { locale } = useLanguage()
   const { name } = useParams<{ name: string }>()
-  const searchParams = useSearchParams()
   const groupName = decodeURIComponent(name)
   const theme = getTheme(groupName)
   const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
@@ -95,14 +94,14 @@ export default function UniversePage() {
 
   // 공유 링크로 들어왔을 때 해당 영상으로 스크롤
   useEffect(() => {
-    const videoId = searchParams.get('video')
+    const videoId = new URLSearchParams(window.location.search).get('video')
     if (!videoId || videos.length === 0) return
     setHighlightId(videoId)
     setTimeout(() => {
       cardRefs.current[videoId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 300)
     setTimeout(() => setHighlightId(null), 3000)
-  }, [videos, searchParams])
+  }, [videos])
 
   // 화면에 들어온 영상 자동 재생
   useEffect(() => {
