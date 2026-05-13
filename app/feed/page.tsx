@@ -83,6 +83,7 @@ export default function FeedPage() {
   const [suggestedAccounts, setSuggestedAccounts] = useState<{ id: string; username: string; groups: { name: string } | null }[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const viewedIds = useRef<Set<string>>(new Set())
+  const swipeStartX = useRef<number | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -377,6 +378,25 @@ export default function FeedPage() {
     }
   }
 
+  function handleSwipeStart(e: React.TouchEvent) {
+    swipeStartX.current = e.touches[0].clientX
+  }
+
+  function handleSwipeEnd(e: React.TouchEvent) {
+    if (swipeStartX.current === null || allAccounts.length <= 1) return
+    const diff = e.changedTouches[0].clientX - swipeStartX.current
+    swipeStartX.current = null
+    if (Math.abs(diff) < 60) return
+    const currentIdx = allAccounts.findIndex(a => a.id === account?.id)
+    const nextIdx = diff < 0 ? currentIdx + 1 : currentIdx - 1
+    if (nextIdx < 0 || nextIdx >= allAccounts.length) return
+    const next = allAccounts[nextIdx]
+    setActiveAccountId(next.id)
+    setAccount(next)
+    fetchVideos(next.group_id, period, sort, next.id)
+    fetchLikedIds(next.id)
+  }
+
   async function handleVideoPlay(videoId: string, currentCount: number) {
     if (viewedIds.current.has(videoId)) return
     viewedIds.current.add(videoId)
@@ -543,8 +563,9 @@ export default function FeedPage() {
       <div className="max-w-2xl mx-auto px-6 py-10">
         {/* 계정 카드 */}
         {account && theme && (
+          <>
           <div
-            className="rounded-2xl p-5 mb-6 flex items-center gap-4 border relative overflow-hidden"
+            className="rounded-2xl p-5 mb-3 flex items-center gap-4 border relative overflow-hidden select-none"
             style={isPlus ? {
               background: 'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.12))',
               borderColor: 'rgba(251,191,36,0.5)',
@@ -552,6 +573,8 @@ export default function FeedPage() {
               background: `${theme.primary}10`,
               borderColor: `${theme.primary}40`,
             }}
+            onTouchStart={handleSwipeStart}
+            onTouchEnd={handleSwipeEnd}
           >
             {isPlus && (
               <div className="absolute inset-0 pointer-events-none"
@@ -591,6 +614,22 @@ export default function FeedPage() {
               </p>
             </div>
           </div>
+          {allAccounts.length > 1 && (
+            <div className="flex gap-1.5 justify-center mb-4">
+              {allAccounts.map((acc) => (
+                <div
+                  key={acc.id}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width: acc.id === account.id ? 20 : 6,
+                    height: 6,
+                    background: acc.id === account.id ? accentColor : 'rgba(255,255,255,0.2)',
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          </>
         )}
 
         {/* 유니버스 빠른 탐색 */}
