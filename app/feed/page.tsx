@@ -383,7 +383,7 @@ export default function FeedPage() {
     await supabase.from('videos').update({ view_count: currentCount + 1 }).eq('id', videoId)
     setVideos(prev => prev.map(v => v.id === videoId ? { ...v, view_count: v.view_count + 1 } : v))
     setFollowingVideos(prev => prev.map(v => v.id === videoId ? { ...v, view_count: v.view_count + 1 } : v))
-    setTrendingVideo(prev => prev?.id === videoId ? { ...prev, view_count: prev.view_count + 1 } : prev)
+    setTrendingVideo(prev => prev && prev.id === videoId ? { ...prev, view_count: prev.view_count + 1 } : prev)
   }
 
   const theme = account ? getTheme(account.groups.name) : null
