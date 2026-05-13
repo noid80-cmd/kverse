@@ -53,34 +53,38 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function load() {
-      const user = await getAuthUser()
-      if (!user) { router.push('/login'); return }
+      try {
+        const user = await getAuthUser()
+        if (!user) { router.push('/login'); return }
 
-      const { data: accounts } = await supabase
-        .from('accounts')
-        .select('*, groups(name, name_en)')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true })
+        const { data: accounts } = await supabase
+          .from('accounts')
+          .select('*, groups(name, name_en)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true })
 
-      if (!accounts || accounts.length === 0) { router.push('/select-group'); return }
+        if (!accounts || accounts.length === 0) { router.push('/select-group'); return }
 
-      setAllAccounts(accounts)
-      setAccount(accounts[0])
-      setTheme(getTheme(accounts[0].groups.name))
-      setNationality(accounts[0].nationality || 'KR')
+        setAllAccounts(accounts)
+        setAccount(accounts[0])
+        setTheme(getTheme(accounts[0].groups.name))
+        setNationality(accounts[0].nationality || 'KR')
 
-      const [{ data: vids }, equippedResult, { count: fc }, { count: fg }] = await Promise.all([
-        supabase.from('videos').select('*').eq('account_id', accounts[0].id).order('created_at', { ascending: false }),
-        loadEquippedVisuals(accounts[0].equipped || {}),
-        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', accounts[0].id),
-        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', accounts[0].id),
-      ])
-      setFollowerCount(fc || 0)
-      setFollowingCount(fg || 0)
-
-      setVideos(vids || [])
-      setEquippedVisuals(equippedResult)
-      setLoading(false)
+        const [videosRes, equippedResult, followersRes, followingRes] = await Promise.all([
+          supabase.from('videos').select('*').eq('account_id', accounts[0].id).order('created_at', { ascending: false }),
+          loadEquippedVisuals(accounts[0].equipped || {}),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', accounts[0].id),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', accounts[0].id),
+        ])
+        setFollowerCount(followersRes.count || 0)
+        setFollowingCount(followingRes.count || 0)
+        setVideos(videosRes.data || [])
+        setEquippedVisuals(equippedResult)
+        setLoading(false)
+      } catch (e) {
+        console.error('Profile load error:', e)
+        setLoading(false)
+      }
     }
     load()
   }, [])
@@ -89,16 +93,16 @@ export default function ProfilePage() {
     setAccount(acc)
     setTheme(getTheme(acc.groups.name))
     setNationality(acc.nationality || 'KR')
-    const [{ data: vids }, equippedResult, { count: fc }, { count: fg }] = await Promise.all([
+    const [videosRes, equippedResult, followersRes, followingRes] = await Promise.all([
       supabase.from('videos').select('*').eq('account_id', acc.id).order('created_at', { ascending: false }),
       loadEquippedVisuals(acc.equipped || {}),
       supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', acc.id),
       supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', acc.id),
     ])
-    setVideos(vids || [])
+    setVideos(videosRes.data || [])
     setEquippedVisuals(equippedResult)
-    setFollowerCount(fc || 0)
-    setFollowingCount(fg || 0)
+    setFollowerCount(followersRes.count || 0)
+    setFollowingCount(followingRes.count || 0)
   }
 
   async function togglePrivacy(video: Video) {
