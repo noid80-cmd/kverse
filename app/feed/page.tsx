@@ -6,7 +6,6 @@ import { getTheme, worldName, groupDisplayName, GROUP_THEMES } from '@/lib/group
 import { getActiveAccountId, setActiveAccountId } from '@/lib/activeAccount'
 import Avatar from '@/app/components/Avatar'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useT, useLanguage } from '@/lib/i18n'
 import { getFlagImageUrl } from '@/lib/countries'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -47,7 +46,6 @@ type Comment = {
 type Group = { id: string; name: string; name_en: string }
 
 export default function FeedPage() {
-  const router = useRouter()
   const t = useT()
   const { locale } = useLanguage()
   const [account, setAccount] = useState<Account | null>(null)
@@ -91,7 +89,7 @@ export default function FeedPage() {
       if (activeId) q = q.eq('id', activeId)
       const { data } = await q.limit(1).single()
 
-      if (!data) { router.push('/select-account'); return }
+      if (!data) { setAuthReady(true); setLoading(false); return }
       setAccount(data)
 
       const { data: all } = await supabase
