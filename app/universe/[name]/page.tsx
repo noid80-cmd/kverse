@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
-import { getActiveAccountId } from '@/lib/activeAccount'
-import { useParams } from 'next/navigation'
+import { getActiveAccountId, setActiveAccountId } from '@/lib/activeAccount'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -32,6 +32,7 @@ type Filter = 'all' | 'vocal' | 'dance'
 
 export default function UniversePage() {
   const t = useT()
+  const router = useRouter()
   const { locale } = useLanguage()
   const { name } = useParams<{ name: string }>()
   const groupName = decodeURIComponent(name)
@@ -51,6 +52,7 @@ export default function UniversePage() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
+  const [showUploadModal, setShowUploadModal] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const viewedIds = useRef<Set<string>>(new Set())
@@ -151,6 +153,22 @@ export default function UniversePage() {
   async function deleteComment(commentId: string) {
     await supabase.from('video_comments').delete().eq('id', commentId)
     setComments(prev => prev.filter(c => c.id !== commentId))
+  }
+
+  async function handleUploadClick() {
+    const user = await getAuthUser()
+    if (!user) { router.push('/login'); return }
+    const { data: accounts } = await supabase
+      .from('accounts')
+      .select('id, groups(name)')
+      .eq('user_id', user.id)
+    const match = (accounts || []).find((a: { id: string; groups: { name: string } | null }) => a.groups?.name === groupName)
+    if (match) {
+      setActiveAccountId(match.id)
+      router.push('/upload')
+    } else {
+      setShowUploadModal(true)
+    }
   }
 
   async function shareVideo(video: Video) {
@@ -306,13 +324,19 @@ export default function UniversePage() {
                 ? t('uni.noVideos')
                 : `${filter === 'vocal' ? t('common.vocal') : t('common.dance')} 커버가 아직 없어요`}
             </p>
-            <Link
-              href={isLoggedIn ? '/upload' : '/signup'}
-              className="inline-block mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
-              style={{ background: theme.gradient }}
-            >
-              {t('uni.uploadCover')}
-            </Link>
+            {isLoggedIn ? (
+              <button
+                onClick={handleUploadClick}
+                className="mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
+                style={{ background: theme.gradient }}
+              >
+                {t('uni.uploadCover')}
+              </button>
+            ) : (
+              <Link href="/signup" className="inline-block mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition" style={{ background: theme.gradient }}>
+                {t('uni.uploadCover')}
+              </Link>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -484,16 +508,60 @@ export default function UniversePage() {
         {!loading && (
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
-            <Link
-              href={isLoggedIn ? '/upload' : '/signup'}
-              className="inline-block px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
-              style={{ background: theme.gradient }}
-            >
-              {worldName(theme, locale)}
-            </Link>
+            {isLoggedIn ? (
+              <button
+                onClick={handleUploadClick}
+                className="px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
+                style={{ background: theme.gradient }}
+              >
+                {worldName(theme, locale)}
+              </button>
+            ) : (
+              <Link href="/signup" className="inline-block px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90" style={{ background: theme.gradient }}>
+                {worldName(theme, locale)}
+              </Link>
+            )}
           </div>
         )}
       </div>
+
+      {showUploadModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4"
+          style={{ background: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setShowUploadModal(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="text-4xl mb-3">{theme.emoji}</div>
+              <h2 className="text-white font-bold text-lg mb-2">
+                {groupDisplayName(groupName, locale)} 계정이 없어요
+              </h2>
+              <p className="text-white/40 text-sm leading-relaxed">
+                {groupDisplayName(groupName, locale)} 커버를 올리려면 먼저 팬닉을 만들어야 해요
+              </p>
+            </div>
+            <div className="border-t border-white/5 flex">
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="flex-1 py-4 text-white/40 hover:text-white text-sm transition border-r border-white/5"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => router.push('/select-group')}
+                className="flex-1 py-4 text-sm font-bold transition"
+                style={{ color: accentColor }}
+              >
+                팬닉 만들기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
