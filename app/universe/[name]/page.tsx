@@ -101,6 +101,7 @@ export default function UniversePage() {
         .from('videos')
         .select('*, accounts(username, is_founder)')
         .eq('group_id', group.id)
+        .eq('is_private', false)
         .order('like_count', { ascending: false })
 
       const validVideos = (data || []).filter((v: Video) => v.accounts != null)
