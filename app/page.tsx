@@ -182,17 +182,11 @@ export default function Home() {
         <p className="text-white/45 text-xs font-medium tracking-[0.2em] uppercase">{t('home.ctaDesc')}</p>
         <h2 className="text-4xl sm:text-5xl font-bold text-white break-keep">{t('home.ctaTitle')}</h2>
         {loggedIn ? (
-          <div className="flex gap-3">
-            <Link href="/feed"
-              className="px-10 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
-              style={{ background: BRAND_GRADIENT }}>
-              {t('home.enterUniverse')}
-            </Link>
-            <Link href="/select-group"
-              className="px-10 py-4 rounded-full border border-white/10 font-medium text-base text-white/50 hover:text-white hover:border-white/25 transition">
-              + {t('sa.addFanNick')}
-            </Link>
-          </div>
+          <Link href="/feed"
+            className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
+            style={{ background: BRAND_GRADIENT }}>
+            {t('home.enterUniverse')}
+          </Link>
         ) : (
           <Link href="/signup"
             className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"

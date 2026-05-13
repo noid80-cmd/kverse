@@ -548,7 +548,7 @@ export default function UniversePage() {
                 {groupDisplayName(groupName, locale)} 계정이 없어요
               </h2>
               <p className="text-white/40 text-sm leading-relaxed">
-                {groupDisplayName(groupName, locale)} 커버를 올리려면 먼저 팬닉을 만들어야 해요
+                {groupDisplayName(groupName, locale)} 커버를 올리려면 먼저 계정을 만들어야 해요
               </p>
             </div>
             <div className="border-t border-white/5 flex">
@@ -558,13 +558,13 @@ export default function UniversePage() {
               >
                 취소
               </button>
-              <button
-                onClick={() => router.push('/select-group')}
-                className="flex-1 py-4 text-sm font-bold transition"
+              <Link
+                href="/select-group"
+                className="flex-1 py-4 text-sm font-bold transition text-center"
                 style={{ color: accentColor }}
               >
-                팬닉 만들기
-              </button>
+                계정 만들기
+              </Link>
             </div>
           </div>
         </div>
