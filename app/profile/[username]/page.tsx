@@ -180,9 +180,11 @@ export default function UserProfilePage() {
               </span>
             )}
           </div>
-          <span className="text-sm font-medium px-3 py-1 rounded-full mb-2" style={{ background: `${accent}22`, color: accent }}>
-            {groupDisplayName(profile.groups.name, locale)}
-          </span>
+          {profile.groups && (
+            <span className="text-sm font-medium px-3 py-1 rounded-full mb-2" style={{ background: `${accent}22`, color: accent }}>
+              {groupDisplayName(profile.groups.name, locale)}
+            </span>
+          )}
           {profile.bio && <p className="text-white/50 text-sm text-center max-w-xs">{profile.bio}</p>}
 
           <div className="flex gap-6 mt-4">
@@ -244,7 +246,7 @@ export default function UserProfilePage() {
             {videos.map((video) => (
               <Link
                 key={video.id}
-                href={`/universe/${encodeURIComponent(profile.groups.name)}?video=${video.id}`}
+                href={profile.groups ? `/universe/${encodeURIComponent(profile.groups.name)}?video=${video.id}` : '/feed'}
                 className="rounded-xl p-4 flex items-center gap-3 border block hover:opacity-80 transition"
                 style={{ background: `${accent}08`, borderColor: `${accent}18` }}
               >

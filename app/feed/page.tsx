@@ -320,7 +320,7 @@ export default function FeedPage() {
   }
 
   async function shareVideo(video: Video) {
-    const groupName = video.groups?.name || account?.groups.name || ''
+    const groupName = video.groups?.name || account?.groups?.name || ''
     const url = `https://kverse-nine.vercel.app/universe/${encodeURIComponent(groupName)}?video=${video.id}`
     const text = `@${video.accounts.username}의 ${groupName} 커버 영상을 Kverse에서 보세요!`
     if (navigator.share) {
@@ -558,7 +558,7 @@ export default function FeedPage() {
             {allGroups.map(group => {
               const grpTheme = GROUP_THEMES[group.name]
               if (!grpTheme) return null
-              const isMyGroup = group.name === account?.groups.name
+              const isMyGroup = group.name === account?.groups?.name
               return (
                 <Link
                   key={group.id}
@@ -744,7 +744,7 @@ export default function FeedPage() {
               <div>
                 <p className="text-white/20 text-xs text-center mb-4">다른 유니버스 둘러보기</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {allGroups.filter(g => g.name !== account?.groups.name).slice(0, 4).map(group => {
+                  {allGroups.filter(g => g.name !== account?.groups?.name).slice(0, 4).map(group => {
                     const grpTheme = GROUP_THEMES[group.name]
                     if (!grpTheme) return null
                     return (
