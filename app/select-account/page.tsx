@@ -41,21 +41,23 @@ export default function SelectAccountPage() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
 
-      if (!data || data.length === 0) {
+      const validData = (data || []).filter((a: Account) => a.groups != null)
+
+      if (validData.length === 0) {
         router.push('/select-group')
         return
       }
 
       // 계정이 1개면 바로 선택 후 피드로
-      if (data.length === 1) {
-        setActiveAccountId(data[0].id)
+      if (validData.length === 1) {
+        setActiveAccountId(validData[0].id)
         router.push('/feed')
         return
       }
 
       // 모든 계정의 장착 아이템 ID를 한번에 배치 로드
       const allItemIds = [...new Set(
-        data.flatMap(acc => Object.values(acc.equipped || {}).filter(Boolean) as string[])
+        validData.flatMap((acc: Account) => Object.values(acc.equipped || {}).filter(Boolean) as string[])
       )]
 
       const itemMap: Record<string, any> = {}
@@ -68,7 +70,7 @@ export default function SelectAccountPage() {
       }
 
       const built: Record<string, EquippedItems> = {}
-      for (const acc of data) {
+      for (const acc of validData) {
         const result: EquippedItems = {}
         for (const [slot, itemId] of Object.entries(acc.equipped || {})) {
           const item = itemMap[itemId as string]
@@ -83,7 +85,7 @@ export default function SelectAccountPage() {
         built[acc.id] = result
       }
 
-      setAccounts(data)
+      setAccounts(validData)
       setEquippedMap(built)
       setLoading(false)
     }

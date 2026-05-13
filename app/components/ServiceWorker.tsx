@@ -5,9 +5,10 @@ export default function ServiceWorker() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
+    // Register the self-destructing SW to clear all stale caches
     navigator.serviceWorker.register('/sw.js').catch(() => {})
 
-    // When a new SW takes control, reload once to get fresh JS/CSS
+    // After SW unregisters itself, reload once to get fresh resources
     let reloading = false
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (reloading) return
