@@ -80,7 +80,7 @@ export default function FeedPage() {
   const [feedTab, setFeedTab] = useState<'all' | 'following'>('all')
   const [followingVideos, setFollowingVideos] = useState<Video[]>([])
   const [followingLoading, setFollowingLoading] = useState(false)
-  const [suggestedAccounts, setSuggestedAccounts] = useState<{ id: string; username: string; groups: { name: string } }[]>([])
+  const [suggestedAccounts, setSuggestedAccounts] = useState<{ id: string; username: string; groups: { name: string } | null }[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
@@ -211,7 +211,10 @@ export default function FeedPage() {
         .select('id, username, groups(name)')
         .neq('id', accountId)
         .limit(6)
-      setSuggestedAccounts((suggested || []) as { id: string; username: string; groups: { name: string } }[])
+      setSuggestedAccounts((suggested || []).map((a: { id: string; username: string; groups: { name: string } | { name: string }[] | null }) => ({
+        ...a,
+        groups: Array.isArray(a.groups) ? a.groups[0] ?? null : a.groups,
+      })))
       setFollowingLoading(false)
       return
     }
