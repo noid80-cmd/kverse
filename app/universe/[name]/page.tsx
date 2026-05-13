@@ -298,7 +298,7 @@ export default function UniversePage() {
               className="px-6 py-2.5 rounded-full text-white text-sm font-bold transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >
-              {groupDisplayName(groupName, locale)} 합류하기
+              팬으로 참여하기
             </button>
           )}
         </div>
@@ -567,7 +567,7 @@ export default function UniversePage() {
                 className="flex-1 py-4 text-sm font-bold"
                 style={{ color: accentColor }}
               >
-                합류하기
+                팬으로 참여하기
               </button>
             </div>
           </div>
