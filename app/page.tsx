@@ -150,39 +150,6 @@ export default function Home() {
       {/* 팬덤 랭킹 */}
       <FandomRanking />
 
-      {/* 기능 */}
-      <section className="relative px-6 py-20 border-t border-white/5">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-white/25 text-xs font-medium tracking-[0.2em] uppercase mb-4">{t('home.whatYouCan')}</p>
-            <h2 className="text-3xl font-bold text-white">
-              Kverse <span style={{ color: '#E91E8C' }}>Universe</span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {[
-              { num: '01', title: t('home.feat1Title'), desc: t('home.feat1Desc') },
-              { num: '02', title: t('home.feat2Title'), desc: t('home.feat2Desc') },
-              { num: '03', title: t('home.feat3Title'), desc: t('home.feat3Desc') },
-              { num: '04', title: t('home.feat4Title'), desc: t('home.feat4Desc') },
-            ].map((item) => (
-              <div key={item.title}
-                className="flex gap-4 p-6 rounded-2xl border border-white/6 transition-colors hover:border-white/8"
-                style={{ background: 'rgba(255,255,255,0.025)' }}>
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold tabular-nums"
-                  style={{ background: 'rgba(233,30,140,0.12)', color: '#E91E8C' }}>
-                  {item.num}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-1.5 text-[15px]">{item.title}</h3>
-                  <p className="text-white/35 text-sm leading-relaxed font-normal">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="flex flex-col items-center justify-center text-center px-6 py-24 gap-6 border-t border-white/5">
         <p className="text-white/45 text-xs font-medium tracking-[0.2em] uppercase">{t('home.ctaDesc')}</p>
