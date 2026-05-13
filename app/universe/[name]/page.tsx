@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
-import { getActiveAccountId, setActiveAccountId } from '@/lib/activeAccount'
+
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
@@ -52,8 +52,10 @@ export default function UniversePage() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
-  const [groupAccountId, setGroupAccountId] = useState<string | null>(null)
-  const [showNoAccountModal, setShowNoAccountModal] = useState(false)
+  const [isFan, setIsFan] = useState(false)
+  const [fanCount, setFanCount] = useState(0)
+  const [fanLoading, setFanLoading] = useState(false)
+
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const viewedIds = useRef<Set<string>>(new Set())
@@ -77,23 +79,18 @@ export default function UniversePage() {
       if (!group) { setLoading(false); return }
 
       if (user) {
-        // 이 그룹 계정 있으면 ID 저장, 없으면 null 유지 → 모달 표시
-        const { data: groupAcc } = await supabase
-          .from('accounts').select('id')
-          .eq('user_id', user.id)
-          .eq('group_id', group.id)
-          .limit(1).maybeSingle()
-        if (groupAcc) setGroupAccountId(groupAcc.id)
-        // 활성 계정 좋아요 로드
-        const activeId = getActiveAccountId()
-        let q = supabase.from('accounts').select('id').eq('user_id', user.id)
-        if (activeId) q = q.eq('id', activeId)
-        const { data: acc } = await q.limit(1).maybeSingle()
+        const { data: acc } = await supabase
+          .from('accounts').select('id').eq('user_id', user.id).limit(1).maybeSingle()
         if (acc) {
           setAccountId(acc.id)
-          const { data: liked } = await supabase
-            .from('likes').select('video_id').eq('account_id', acc.id)
-          if (liked) setLikedIds(new Set(liked.map((r: { video_id: string }) => r.video_id)))
+          const [likedRes, fanRes, fanCountRes] = await Promise.all([
+            supabase.from('likes').select('video_id').eq('account_id', acc.id),
+            supabase.from('fandom_members').select('id').eq('account_id', acc.id).eq('group_name', groupName).maybeSingle(),
+            supabase.from('fandom_members').select('*', { count: 'exact', head: true }).eq('group_name', groupName),
+          ])
+          if (likedRes.data) setLikedIds(new Set(likedRes.data.map((r: { video_id: string }) => r.video_id)))
+          setIsFan(!!fanRes.data)
+          setFanCount(fanCountRes.count || 0)
         }
       }
 
@@ -164,6 +161,21 @@ export default function UniversePage() {
     Object.values(videoRefs.current).forEach(v => { if (v) observer.observe(v) })
     return () => observer.disconnect()
   }, [videos])
+
+  async function toggleFan() {
+    if (!accountId || fanLoading) return
+    setFanLoading(true)
+    if (isFan) {
+      await supabase.from('fandom_members').delete().eq('account_id', accountId).eq('group_name', groupName)
+      setIsFan(false)
+      setFanCount(c => Math.max(0, c - 1))
+    } else {
+      await supabase.from('fandom_members').insert({ account_id: accountId, group_name: groupName })
+      setIsFan(true)
+      setFanCount(c => c + 1)
+    }
+    setFanLoading(false)
+  }
 
   async function fetchComments(videoId: string) {
     setCommentLoading(true)
@@ -298,14 +310,21 @@ export default function UniversePage() {
             <h1 className="text-3xl font-black text-white">{groupDisplayName(groupName, locale)}</h1>
             <p className="text-sm mt-1" style={{ color: `${accentColor}90` }}>{worldName(theme, locale)}</p>
           </div>
-          {isLoggedIn && !groupAccountId && (
-            <button
-              onClick={() => { window.location.href = `/select-group?group=${encodeURIComponent(groupName)}&back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` }}
-              className="px-6 py-2.5 rounded-full text-white text-sm font-bold transition hover:opacity-90"
-              style={{ background: theme.gradient }}
-            >
-              팬으로 참여하기
-            </button>
+          {isLoggedIn && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleFan}
+                disabled={fanLoading}
+                className="px-5 py-2 rounded-full text-sm font-bold transition"
+                style={isFan
+                  ? { background: theme.gradient, color: 'white' }
+                  : { border: `1.5px solid ${accentColor}60`, color: accentColor, background: 'transparent' }
+                }
+              >
+                {isFan ? `✓ ${groupDisplayName(groupName, locale)} 팬` : '팬으로 참여하기'}
+              </button>
+              <span className="text-white/25 text-xs">{fanCount.toLocaleString()}명</span>
+            </div>
           )}
         </div>
 
@@ -350,23 +369,14 @@ export default function UniversePage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white mb-4 mx-auto"
-              style={{ background: accentColor }}>
-              {groupDisplayName(groupName, 'en').charAt(0).toUpperCase()}
-            </div>
-            <p className="text-white/30 text-sm">
-              {filter === 'all'
-                ? t('uni.noVideos')
-                : `${filter === 'vocal' ? t('common.vocal') : t('common.dance')} 커버가 아직 없어요`}
-            </p>
+            <p className="text-white/30 text-sm mb-1">아직 커버 영상이 없어요.</p>
+            <p className="text-white/50 text-sm font-medium mb-5">첫 번째 커버의 주인공이 되어보세요!</p>
             <button
               onClick={() => {
-                const back = encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)
-                if (!isLoggedIn) { window.location.href = `/login?back=${back}`; return }
-                if (groupAccountId) { setActiveAccountId(groupAccountId); window.location.href = '/upload' }
-                else setShowNoAccountModal(true)
+                if (!isLoggedIn) { window.location.href = `/login?back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` ; return }
+                window.location.href = '/upload'
               }}
-              className="mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
+              className="px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
               style={{ background: theme.gradient }}
             >
               {t('uni.uploadCover')}
@@ -397,7 +407,7 @@ export default function UniversePage() {
                       {(video.accounts?.username ?? '?').charAt(0).toUpperCase()}
                     </div>
                     <span className="text-white text-sm font-semibold truncate">@{video.accounts?.username ?? '알 수 없음'}</span>
-                    {video.accounts.is_founder && (
+                    {video.accounts?.is_founder && (
                       <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
                         style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
                         ✦
@@ -538,12 +548,12 @@ export default function UniversePage() {
         </div>
       )}
 
-        {/* 하단 CTA - 이 그룹 계정 있는 유저에게만 표시 */}
-        {!loading && isLoggedIn && groupAccountId && (
+        {/* 하단 CTA */}
+        {!loading && isLoggedIn && (
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
             <button
-              onClick={() => { setActiveAccountId(groupAccountId); window.location.href = '/upload' }}
+              onClick={() => { window.location.href = '/upload' }}
               className="px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >
@@ -553,32 +563,6 @@ export default function UniversePage() {
         )}
       </div>
 
-      {showNoAccountModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
-          <div className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
-            <div className="p-6 text-center">
-              <div className="text-4xl mb-3">{theme.emoji}</div>
-              <h2 className="text-white font-bold text-lg mb-2">{groupDisplayName(groupName, locale)} 계정이 없어요</h2>
-              <p className="text-white/40 text-sm leading-relaxed">커버를 올리려면 먼저 계정을 만들어야 해요</p>
-            </div>
-            <div className="border-t border-white/5 flex">
-              <button
-                onClick={() => setShowNoAccountModal(false)}
-                className="flex-1 py-4 text-white/40 text-sm border-r border-white/5 transition hover:text-white"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => { window.location.href = `/select-group?group=${encodeURIComponent(groupName)}&back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` }}
-                className="flex-1 py-4 text-sm font-bold"
-                style={{ color: accentColor }}
-              >
-                팬으로 참여하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   )

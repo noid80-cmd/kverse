@@ -1,15 +1,21 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
-import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
-import { groupDisplayName } from '@/lib/groupThemes'
+import { GROUP_THEMES, groupDisplayName } from '@/lib/groupThemes'
 import KverseLogo from '@/app/components/KverseLogo'
 
 const MAX_DURATION_SEC = 300
+
+const ALL_GROUPS = Object.entries(GROUP_THEMES).map(([name, theme]) => ({
+  name,
+  emoji: theme.emoji,
+  gradient: theme.gradient,
+  primary: theme.primary,
+}))
 
 function getVideoDuration(file: File): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -28,10 +34,12 @@ export default function UploadPage() {
   const { locale } = useLanguage()
   const fileRef = useRef<HTMLInputElement>(null)
   const liveRef = useRef<HTMLInputElement>(null)
-  const [account, setAccount] = useState<any>(null)
+  const [accountId, setAccountId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<'vocal' | 'dance'>('vocal')
   const [uploadMode, setUploadMode] = useState<'normal' | 'live'>('normal')
+  const [selectedGroup, setSelectedGroup] = useState('')
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -49,16 +57,24 @@ export default function UploadPage() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
 
-      const activeId = getActiveAccountId()
-      let q = supabase.from('accounts').select('*, groups(name)').eq('user_id', user.id)
-      if (activeId) q = q.eq('id', activeId)
-      const { data } = await q.limit(1).single()
+      const { data } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
 
-      if (!data) { router.push('/select-account'); return }
-      setAccount(data)
+      if (!data) { router.push('/signup'); return }
+      setAccountId(data.id)
     }
     load()
   }, [])
+
+  async function handleGroupSelect(groupName: string) {
+    setSelectedGroup(groupName)
+    const { data } = await supabase.from('groups').select('id').eq('name', groupName).maybeSingle()
+    setSelectedGroupId(data?.id || null)
+  }
 
   function handleModeChange(mode: 'normal' | 'live') {
     setUploadMode(mode)
@@ -100,13 +116,13 @@ export default function UploadPage() {
   }
 
   async function handleUpload() {
-    if (!file || !title.trim() || !account) return
+    if (!file || !title.trim() || !accountId || !selectedGroupId) return
     setError('')
     setUploading(true)
     setProgress(10)
 
     const ext = file.name.split('.').pop()
-    const fileName = `${account.id}/${Date.now()}.${ext}`
+    const fileName = `${accountId}/${Date.now()}.${ext}`
 
     const { error: uploadError } = await supabase.storage
       .from('videos')
@@ -125,8 +141,8 @@ export default function UploadPage() {
       .getPublicUrl(fileName)
 
     const { error: dbError } = await supabase.from('videos').insert({
-      account_id: account.id,
-      group_id: account.group_id,
+      account_id: accountId,
+      group_id: selectedGroupId,
       category,
       title: title.trim(),
       video_url: publicUrl,
@@ -140,10 +156,12 @@ export default function UploadPage() {
       setError(t('upload.errSave') + dbError.message)
     } else {
       localStorage.setItem('justUploaded', '1')
-      router.push('/feed')
+      router.push(`/universe/${encodeURIComponent(selectedGroup)}`)
     }
     setUploading(false)
   }
+
+  const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading
 
   return (
     <div className="min-h-screen bg-black px-6 py-10">
@@ -153,9 +171,7 @@ export default function UploadPage() {
             <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠 {t('nav.home')}</Link>
             <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.back')}</Link>
           </div>
-          <div className="flex items-center gap-3">
-            <KverseLogo />
-          </div>
+          <KverseLogo />
         </div>
 
         <h1 className="text-2xl font-black text-white mb-6">{t('upload.title')}</h1>
@@ -203,13 +219,38 @@ export default function UploadPage() {
           </div>
         )}
 
-        {account && (
-          <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-4 mb-6 text-sm text-pink-300">
-            📌 {t('upload.groupOnly', { group: groupDisplayName(account.groups.name, locale) })}
-          </div>
-        )}
-
         <div className="flex flex-col gap-6">
+
+          {/* 아티스트 선택 */}
+          <div>
+            <label className="text-white/60 text-sm mb-3 block">어느 아티스트 커버인가요?</label>
+            <div className="grid grid-cols-3 gap-2">
+              {ALL_GROUPS.map((g) => {
+                const isSelected = selectedGroup === g.name
+                const accent = g.primary === '#FFFFFF' ? '#C9A96E' : g.primary
+                return (
+                  <button
+                    key={g.name}
+                    onClick={() => handleGroupSelect(g.name)}
+                    className="relative rounded-xl py-3 px-2 text-center transition border-2 flex flex-col items-center gap-1"
+                    style={isSelected
+                      ? { background: g.gradient, borderColor: 'transparent' }
+                      : { background: `${accent}10`, borderColor: `${accent}25` }
+                    }
+                  >
+                    <span className="text-xl">{g.emoji}</span>
+                    <span className="text-xs font-medium text-white leading-tight">
+                      {groupDisplayName(g.name, locale)}
+                    </span>
+                    {isSelected && (
+                      <span className="absolute top-1 right-1.5 text-white text-[10px]">✓</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* 카테고리 */}
           <div>
             <label className="text-white/60 text-sm mb-3 block">{t('upload.category')}</label>
@@ -279,23 +320,8 @@ export default function UploadPage() {
                 <span className="text-white/25 text-xs">{t('upload.maxInfo')}</span>
               </button>
             )}
-            {/* 갤러리 선택용 (일반 모드) */}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="video/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            {/* 카메라 촬영용 (LIVE 모드) */}
-            <input
-              ref={liveRef}
-              type="file"
-              accept="video/*"
-              capture="environment"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+            <input ref={fileRef} type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
+            <input ref={liveRef} type="file" accept="video/*" capture="environment" onChange={handleFileChange} className="hidden" />
           </div>
 
           {/* 공개/비공개 토글 */}
@@ -326,7 +352,7 @@ export default function UploadPage() {
 
           <button
             onClick={handleUpload}
-            disabled={!file || !title.trim() || uploading}
+            disabled={!canUpload}
             className="w-full disabled:opacity-40 text-white font-medium py-4 rounded-xl transition text-lg"
             style={{
               background: uploadMode === 'live'

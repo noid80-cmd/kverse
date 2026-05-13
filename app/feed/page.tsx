@@ -18,7 +18,7 @@ type Account = {
   gender: string
   nationality?: string
   is_founder?: boolean
-  groups: { name: string; name_en: string }
+  groups: { name: string; name_en: string } | null
 }
 
 type Video = {
@@ -84,17 +84,11 @@ export default function FeedPage() {
       if (!user) { window.location.href = '/login'; return }
       setAuthReady(true)
 
-      const activeId = getActiveAccountId()
-      let q = supabase.from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id)
-      if (activeId) q = q.eq('id', activeId)
-      const { data } = await q.limit(1).single()
+      const { data } = await supabase
+        .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id).limit(1).maybeSingle()
 
       if (!data) { setAuthReady(true); setLoading(false); return }
       setAccount(data)
-
-      const { data: all } = await supabase
-        .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id)
-      setAllAccounts((all || []).filter((a: Account) => a.groups != null))
 
       const { data: sub } = await supabase
         .from('subscriptions')
@@ -127,7 +121,7 @@ export default function FeedPage() {
     if (feedTab === 'following') {
       fetchFollowingVideos(account.id)
     } else {
-      fetchVideos(account.group_id, feedTab, account.id)
+      fetchVideos(feedTab, account.id)
     }
   }, [feedTab, account])
 
@@ -136,7 +130,7 @@ export default function FeedPage() {
     if (!account) return
     const handleVisibility = () => {
       if (document.visibilityState === 'visible' && feedTab !== 'following') {
-        fetchVideos(account.group_id, feedTab, account.id)
+        fetchVideos(feedTab, account.id)
       }
     }
     document.addEventListener('visibilitychange', handleVisibility)
@@ -162,7 +156,7 @@ export default function FeedPage() {
         event: 'INSERT',
         schema: 'public',
         table: 'videos',
-        filter: `group_id=eq.${account.group_id}`,
+        filter: `account_id=neq.${account.id}`,
       }, payload => {
         if ((payload.new as { account_id: string }).account_id !== account.id) {
           setNewVideoNotif(true)
@@ -241,13 +235,12 @@ export default function FeedPage() {
     setFollowingLoading(false)
   }
 
-  async function fetchVideos(groupId: string, tab: 'all' | 'popular' = 'all', accId?: string) {
+  async function fetchVideos(tab: 'all' | 'popular' = 'all', accId?: string) {
     setVideosLoading(true)
     const id = accId ?? account?.id
     const { data: vids } = await supabase
       .from('videos')
       .select('*, accounts(username), groups(name)')
-      .eq('group_id', groupId)
       .or(id ? `is_private.eq.false,account_id.eq.${id}` : 'is_private.eq.false')
       .order(tab === 'popular' ? 'like_count' : 'created_at', { ascending: false })
       .limit(20)
@@ -404,7 +397,7 @@ export default function FeedPage() {
     setTrendingVideo(prev => prev && prev.id === videoId ? { ...prev, view_count: prev.view_count + 1 } : prev)
   }
 
-  const theme = account ? getTheme(account.groups.name) : null
+  const theme = account?.groups ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
   const confettiItems = showCelebration
@@ -462,7 +455,7 @@ export default function FeedPage() {
           <button
             className="pointer-events-auto mt-2 px-5 py-2.5 rounded-full text-white text-sm font-bold flex items-center gap-2 border border-white/20"
             style={{ background: 'rgba(20,20,20,0.95)', backdropFilter: 'blur(12px)' }}
-            onClick={() => { setNewVideoNotif(false); fetchVideos(account!.group_id, feedTab === 'following' ? 'all' : feedTab) }}
+            onClick={() => { setNewVideoNotif(false); fetchVideos(feedTab === 'following' ? 'all' : feedTab) }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'realtimeDot 1s ease-in-out infinite' }} />
             새 커버 영상이 올라왔어요 · 탭해서 보기
@@ -537,7 +530,7 @@ export default function FeedPage() {
                 )}
               </div>
               <p className="text-sm" style={{ color: accentColor }}>
-                {groupDisplayName(account.groups.name, locale)} · {worldName(theme, locale)}
+                {account.groups ? `${groupDisplayName(account.groups.name, locale)} · ${worldName(theme!, locale)}` : 'Kverse'}
               </p>
             </div>
           </div>

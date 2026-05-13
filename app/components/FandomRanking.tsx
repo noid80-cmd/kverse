@@ -9,6 +9,8 @@ type GroupRank = {
   id: string
   name: string
   videoCount: number
+  fanCount: number
+  score: number
 }
 
 const MEDAL_COLORS = ['#FFD700', '#A8A8A8', '#B87333']
@@ -21,19 +23,25 @@ export default function FandomRanking() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('groups')
-        .select('id, name, videos(count)')
+      const [groupsRes, fandomRes] = await Promise.all([
+        supabase.from('groups').select('id, name, videos(count)'),
+        supabase.from('fandom_members').select('group_name'),
+      ])
 
-      if (!data) { setLoading(false); return }
+      if (!groupsRes.data) { setLoading(false); return }
 
-      const ranked = (data as any[])
-        .map(g => ({
-          id: g.id,
-          name: g.name,
-          videoCount: g.videos?.[0]?.count ?? 0,
-        }))
-        .sort((a, b) => b.videoCount - a.videoCount)
+      const fanCounts: Record<string, number> = {}
+      for (const row of fandomRes.data || []) {
+        fanCounts[row.group_name] = (fanCounts[row.group_name] || 0) + 1
+      }
+
+      const ranked = (groupsRes.data as any[])
+        .map(g => {
+          const videoCount = g.videos?.[0]?.count ?? 0
+          const fanCount = fanCounts[g.name] || 0
+          return { id: g.id, name: g.name, videoCount, fanCount, score: videoCount * 5 + fanCount }
+        })
+        .sort((a, b) => b.score - a.score)
         .slice(0, 5)
 
       setRanking(ranked)
@@ -42,7 +50,7 @@ export default function FandomRanking() {
     load()
   }, [])
 
-  const maxCount = ranking[0]?.videoCount || 1
+  const maxScore = ranking[0]?.score || 1
 
   return (
     <section className="relative px-6 py-20 border-y border-white/5">
@@ -72,7 +80,7 @@ export default function FandomRanking() {
             {ranking.map((group, index) => {
               const theme = getTheme(group.name)
               const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
-              const barWidth = maxCount > 0 ? Math.max((group.videoCount / maxCount) * 100, 4) : 4
+              const barWidth = maxScore > 0 ? Math.max((group.score / maxScore) * 100, 4) : 4
               const isMedal = index < 3
               const initial = groupDisplayName(group.name, 'en').charAt(0).toUpperCase()
 
@@ -123,10 +131,10 @@ export default function FandomRanking() {
                     </p>
                   </div>
 
-                  {/* 커버 수 */}
+                  {/* 활동 지표 */}
                   <div className="relative z-10 text-right flex-shrink-0">
-                    <p className="text-white font-semibold text-base tabular-nums">{group.videoCount}</p>
-                    <p className="text-white/25 text-xs font-normal">{t('home.covers')}</p>
+                    <p className="text-white font-semibold text-sm tabular-nums">{group.videoCount} <span className="text-white/30 text-xs font-normal">{t('home.covers')}</span></p>
+                    <p className="text-xs tabular-nums mt-0.5" style={{ color: `${accentColor}70` }}>{group.fanCount.toLocaleString()}명 팬</p>
                   </div>
                 </div>
               )

@@ -21,7 +21,7 @@ type Account = {
   is_founder?: boolean
   equipped: Record<string, string>
   rpm_avatar_url?: string | null
-  groups: { name: string; name_en: string }
+  groups: { name: string; name_en: string } | null
 }
 
 type Video = {
@@ -64,7 +64,7 @@ export default function UserProfilePage() {
       if (!acc) { router.push('/feed'); return }
 
       setProfile(acc)
-      setTheme(getTheme(acc.groups.name))
+      if (acc.groups) setTheme(getTheme(acc.groups.name))
 
       const { data: vids } = await supabase
         .from('videos')

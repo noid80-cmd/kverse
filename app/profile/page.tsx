@@ -22,7 +22,7 @@ type Account = {
   is_founder?: boolean
   equipped: Record<string, string>
   rpm_avatar_url?: string | null
-  groups: { name: string; name_en: string }
+  groups: { name: string; name_en: string } | null
 }
 
 type Video = {
@@ -52,6 +52,7 @@ export default function ProfilePage() {
   const [followingCount, setFollowingCount] = useState(0)
   const [tab, setTab] = useState<'videos' | 'liked'>('videos')
   const [likedVideos, setLikedVideos] = useState<any[]>([])
+  const [joinedFandoms, setJoinedFandoms] = useState<string[]>([])
 
   useEffect(() => {
     async function load() {
@@ -65,29 +66,37 @@ export default function ProfilePage() {
           .eq('user_id', user.id)
           .order('created_at', { ascending: true })
 
-        if (!accounts || accounts.length === 0) { router.push('/select-group'); return }
+        if (!accounts || accounts.length === 0) { router.push('/login'); return }
 
-        // 그룹이 있는 계정만 필터 (fan-only 계정은 groups가 null)
-        const validAccounts = accounts.filter((a: Account) => a.groups != null)
-        if (validAccounts.length === 0) { router.push('/select-group'); return }
+        // 그룹 계정 우선, 없으면 시민 계정 사용
+        const groupAccounts = accounts.filter((a: any) => a.groups != null)
+        const citizenAccount = accounts.find((a: any) => a.groups == null)
+        const activeAccount = groupAccounts.length > 0 ? groupAccounts[0] : citizenAccount
 
+        if (!activeAccount) { router.push('/login'); return }
+
+        const validAccounts = groupAccounts
         setAllAccounts(validAccounts)
-        setAccount(validAccounts[0])
-        setTheme(getTheme(validAccounts[0].groups.name))
-        setNationality(validAccounts[0].nationality || 'KR')
+        setAccount(activeAccount)
+        if (activeAccount.groups) {
+          setTheme(getTheme(activeAccount.groups.name))
+        }
+        setNationality(activeAccount.nationality || 'KR')
 
-        const [videosRes, equippedResult, followersRes, followingRes, likedRes] = await Promise.all([
-          supabase.from('videos').select('*').eq('account_id', validAccounts[0].id).order('created_at', { ascending: false }),
-          loadEquippedVisuals(validAccounts[0].equipped || {}),
-          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', validAccounts[0].id),
-          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', validAccounts[0].id),
-          supabase.from('likes').select('videos(*)').eq('account_id', validAccounts[0].id),
+        const [videosRes, equippedResult, followersRes, followingRes, likedRes, fandomRes] = await Promise.all([
+          supabase.from('videos').select('*').eq('account_id', activeAccount.id).order('created_at', { ascending: false }),
+          loadEquippedVisuals(activeAccount.equipped || {}),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', activeAccount.id),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', activeAccount.id),
+          supabase.from('likes').select('videos(*)').eq('account_id', activeAccount.id),
+          supabase.from('fandom_members').select('group_name').eq('account_id', activeAccount.id),
         ])
         setFollowerCount(followersRes.count || 0)
         setFollowingCount(followingRes.count || 0)
         setVideos(videosRes.data || [])
         setEquippedVisuals(equippedResult)
         setLikedVideos((likedRes.data || []).map((r: any) => r.videos).filter(Boolean))
+        setJoinedFandoms((fandomRes.data || []).map((r: any) => r.group_name))
         setLoading(false)
       } catch (e) {
         console.error('Profile load error:', e)
@@ -99,7 +108,7 @@ export default function ProfilePage() {
 
   async function switchAccount(acc: Account) {
     setAccount(acc)
-    setTheme(getTheme(acc.groups.name))
+    if (acc.groups) setTheme(getTheme(acc.groups.name))
     setNationality(acc.nationality || 'KR')
     const [videosRes, equippedResult, followersRes, followingRes] = await Promise.all([
       supabase.from('videos').select('*').eq('account_id', acc.id).order('created_at', { ascending: false }),
@@ -181,7 +190,7 @@ export default function ProfilePage() {
           >
             {t('nav.logout')}
           </button>
-          <Link href="/upload" className="px-3 py-1.5 text-white text-xs font-medium rounded-full" style={{ background: theme?.gradient }}>
+          <Link href="/upload" className="px-3 py-1.5 text-white text-xs font-medium rounded-full" style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
             {t('prof.upload')}
           </Link>
         </div>
@@ -217,7 +226,7 @@ export default function ProfilePage() {
               {worldName(theme, locale)}
             </p>
             <p className="text-white/70 text-sm font-medium">
-              {groupDisplayName(account.groups.name, locale)}
+              {account.groups && groupDisplayName(account.groups.name, locale)}
             </p>
           </div>
         </div>
@@ -226,8 +235,8 @@ export default function ProfilePage() {
       <div className="max-w-2xl mx-auto px-5">
 
         {/* ── PROFILE SECTION (centered, overlapping hero) ── */}
-        {account && theme && (
-          <div className="flex flex-col items-center -mt-12 mb-6">
+        {account && (
+          <div className={`flex flex-col items-center ${theme ? '-mt-12' : 'mt-8'} mb-6`}>
             {/* avatar with glow ring */}
             <div className="relative group mb-5">
               <Link href="/avatar" className="hover:opacity-90 transition block">
@@ -270,9 +279,15 @@ export default function ProfilePage() {
             </div>
 
             {/* group badge */}
-            <span className="mt-1.5 text-sm font-medium px-3 py-1 rounded-full" style={{ background: `${accent}22`, color: accent }}>
-              {groupDisplayName(account.groups.name, locale)}
-            </span>
+            {account.groups ? (
+              <span className="mt-1.5 text-sm font-medium px-3 py-1 rounded-full" style={{ background: `${accent}22`, color: accent }}>
+                {groupDisplayName(account.groups.name, locale)}
+              </span>
+            ) : (
+              <span className="mt-1.5 text-sm font-medium px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
+                Kverse 시민
+              </span>
+            )}
 
             {/* joined date */}
             <p className="text-white/25 text-xs mt-1.5">
@@ -297,7 +312,7 @@ export default function ProfilePage() {
         {allAccounts.length > 1 && (
           <div className="flex gap-2 mb-5 overflow-x-auto pb-1 justify-center">
             {allAccounts.map((acc) => {
-              const accT = getTheme(acc.groups.name)
+              const accT = getTheme(acc.groups?.name || '')
               const isActive = account?.id === acc.id
               const accAccent = accT.primary === '#FFFFFF' ? '#C9A96E' : accT.primary
               return (
@@ -318,7 +333,7 @@ export default function ProfilePage() {
         )}
 
         {/* ── STATS CARD ── */}
-        {account && theme && (
+        {account && (
           <div
             className="rounded-2xl p-5 mb-5 border"
             style={{ background: `${accent}0A`, borderColor: `${accent}25` }}
@@ -350,25 +365,28 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* ── ADD ACCOUNT ── */}
-        {allAccounts.length < 3 ? (
-          <Link
-            href="/select-group"
-            className="flex items-center justify-center gap-2 border border-dashed rounded-xl py-3 text-sm mb-6 transition hover:opacity-70"
-            style={{ borderColor: `${accent}30`, color: `${accent}60` }}
-          >
-            + {t('prof.addAccount')} ({allAccounts.length}/3)
-          </Link>
-        ) : (
-          <Link
-            href="/upgrade"
-            className="flex items-center justify-center gap-2 border border-dashed rounded-xl py-3 text-sm mb-6 transition hover:opacity-80"
-            style={{ borderColor: 'rgba(251,191,36,0.25)', color: 'rgba(251,191,36,0.5)' }}
-          >
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(251,191,36,0.15)', color: '#FBBF24' }}>PLUS</span>
-            {t('prof.addAccount')} (3/3)
-          </Link>
+        {/* ── 내 팬덤 ── */}
+        {joinedFandoms.length > 0 && (
+          <div className="mb-5">
+            <p className="text-white/30 text-xs font-medium mb-2.5 tracking-widest uppercase">내 팬덤</p>
+            <div className="flex flex-wrap gap-2">
+              {joinedFandoms.map(gn => {
+                const gt = getTheme(gn)
+                return (
+                  <button
+                    key={gn}
+                    onClick={() => { window.location.href = `/universe/${encodeURIComponent(gn)}` }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition hover:opacity-80"
+                    style={{ background: gt.gradient, color: 'white' }}
+                  >
+                    {gt.emoji} {groupDisplayName(gn, locale)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         )}
+
 
         {/* ── TABS ── */}
         <div className="flex gap-2 mb-4 justify-center">
@@ -378,7 +396,7 @@ export default function ProfilePage() {
               onClick={() => setTab(t2)}
               className="px-5 py-2 rounded-full text-sm font-medium transition border"
               style={tab === t2
-                ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' }
+                ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', borderColor: 'transparent', color: 'white' }
                 : { borderColor: `${accent}30`, color: `${accent}70` }
               }
             >
@@ -407,12 +425,12 @@ export default function ProfilePage() {
           )
         ) : videos.length === 0 ? (
           <div className="text-center py-14 rounded-2xl border" style={{ borderColor: `${accent}15` }}>
-            <div className="text-5xl mb-3">{theme?.emoji}</div>
+            <div className="text-5xl mb-3">{theme?.emoji || '🎤'}</div>
             <p className="text-white/30 text-sm mb-4">{t('prof.noVideos')}</p>
             <Link
               href="/upload"
               className="px-6 py-2.5 text-white font-medium rounded-full text-sm"
-              style={{ background: theme?.gradient }}
+              style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}
             >
               {t('prof.uploadFirst')}
             </Link>

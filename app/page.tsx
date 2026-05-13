@@ -81,7 +81,7 @@ export default function Home() {
             <Link href="/feed"
               className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
               style={{ background: BRAND_GRADIENT }}>
-              커버 영상 보러가기
+              나의 SNS
             </Link>
           ) : (
             <>
