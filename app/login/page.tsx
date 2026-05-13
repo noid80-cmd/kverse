@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
@@ -12,6 +12,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [signupUrl, setSignupUrl] = useState('/signup')
+
+  useEffect(() => {
+    const back = new URLSearchParams(window.location.search).get('back') || ''
+    setSignupUrl(back ? `/signup?back=${back}` : '/signup')
+  }, [])
 
   function getBackUrl() {
     const params = new URLSearchParams(window.location.search)
@@ -96,10 +102,7 @@ export default function LoginPage() {
 
         <p className="text-center text-white/40 text-sm mt-4">
           {t('auth.noAccount')}{' '}
-          <a
-            href={`/signup?back=${new URLSearchParams(window.location.search).get('back') || ''}`}
-            className="text-pink-400 hover:underline"
-          >
+          <a href={signupUrl} className="text-pink-400 hover:underline">
             {t('auth.signup')}
           </a>
         </p>
