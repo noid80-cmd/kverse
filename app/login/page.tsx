@@ -48,9 +48,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-black flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-4">
-          <Link href="/" className="w-9 h-9 flex items-center justify-center rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition">
+          <button onClick={() => history.length > 1 ? history.back() : window.location.href = '/'} className="w-9 h-9 flex items-center justify-center rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </Link>
+          </button>
         </div>
         <div className="text-center mb-10">
           <Link href="/"><KverseLogo size="xl" /></Link>
