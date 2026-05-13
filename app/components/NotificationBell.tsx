@@ -10,6 +10,7 @@ type Notification = {
   from_username: string
   video_id: string
   video_title: string
+  video_group?: string
   is_read: boolean
   created_at: string
 }
@@ -130,7 +131,7 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
             ) : notifs.map(n => (
               <Link
                 key={n.id}
-                href={`/universe/${encodeURIComponent('')}?video=${n.video_id}`}
+                href={n.video_group ? `/universe/${encodeURIComponent(n.video_group)}?video=${n.video_id}` : `/feed`}
                 onClick={() => setOpen(false)}
                 className="flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition border-b border-white/5 last:border-0"
                 style={{ background: n.is_read ? 'transparent' : 'rgba(233,30,140,0.05)' }}

@@ -301,6 +301,7 @@ export default function FeedPage() {
           from_username: account.username,
           video_id: video.id,
           video_title: video.title,
+          video_group: video.groups?.name,
         })
       }
     }
@@ -355,6 +356,7 @@ export default function FeedPage() {
           from_username: account.username,
           video_id: video.id,
           video_title: video.title,
+          video_group: video.groups?.name,
         })
       }
     }

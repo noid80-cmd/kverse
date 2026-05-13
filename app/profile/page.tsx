@@ -308,28 +308,32 @@ export default function ProfilePage() {
         {/* ── STATS CARD ── */}
         {account && theme && (
           <div
-            className="rounded-2xl p-5 mb-5 border grid grid-cols-5 gap-0"
+            className="rounded-2xl p-5 mb-5 border"
             style={{ background: `${accent}0A`, borderColor: `${accent}25` }}
           >
-            <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
-              <p className="text-2xl font-bold text-white">{videos.length}</p>
-              <p className="text-white/40 text-xs mt-1">{t('prof.coverVideos')}</p>
+            <div className="grid grid-cols-3 gap-0 mb-4 pb-4 border-b" style={{ borderColor: `${accent}20` }}>
+              <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
+                <p className="text-3xl font-bold text-white">{videos.length}</p>
+                <p className="text-white/40 text-xs mt-1">{t('prof.coverVideos')}</p>
+              </div>
+              <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
+                <p className="text-3xl font-bold" style={{ color: accent }}>{totalLikes}</p>
+                <p className="text-white/40 text-xs mt-1">{t('prof.totalLikes')}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-white">{totalViews}</p>
+                <p className="text-white/40 text-xs mt-1">{t('prof.totalViews')}</p>
+              </div>
             </div>
-            <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
-              <p className="text-2xl font-bold" style={{ color: accent }}>{totalLikes}</p>
-              <p className="text-white/40 text-xs mt-1">{t('prof.totalLikes')}</p>
-            </div>
-            <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
-              <p className="text-2xl font-bold text-white">{totalViews}</p>
-              <p className="text-white/40 text-xs mt-1">{t('prof.totalViews')}</p>
-            </div>
-            <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
-              <p className="text-2xl font-bold text-white">{followerCount}</p>
-              <p className="text-white/40 text-xs mt-1">{t('prof.followers')}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-white">{followingCount}</p>
-              <p className="text-white/40 text-xs mt-1">{t('prof.following')}</p>
+            <div className="grid grid-cols-2 gap-0">
+              <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
+                <p className="text-2xl font-bold text-white">{followerCount}</p>
+                <p className="text-white/40 text-xs mt-1">{t('prof.followers')}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-white">{followingCount}</p>
+                <p className="text-white/40 text-xs mt-1">{t('prof.following')}</p>
+              </div>
             </div>
           </div>
         )}
