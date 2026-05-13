@@ -158,12 +158,18 @@ export default function UniversePage() {
   async function handleUploadClick() {
     const user = await getAuthUser()
     if (!user) { router.push('/login'); return }
-    const { data: accounts } = await supabase
-      .from('accounts')
-      .select('id, group_id, groups(name)')
+
+    const { data: group } = await supabase
+      .from('groups').select('id').eq('name', groupName).single()
+
+    if (!group) { setShowUploadModal(true); return }
+
+    const { data: match } = await supabase
+      .from('accounts').select('id')
       .eq('user_id', user.id)
-    const all = accounts || []
-    const match = all.find((a: { id: string; groups: { name: string } | null }) => a.groups?.name === groupName)
+      .eq('group_id', group.id)
+      .limit(1).maybeSingle()
+
     if (match) {
       setActiveAccountId(match.id)
       router.push('/upload')
