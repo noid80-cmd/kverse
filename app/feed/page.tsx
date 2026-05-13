@@ -82,6 +82,7 @@ export default function FeedPage() {
   const [followingLoading, setFollowingLoading] = useState(false)
   const [suggestedAccounts, setSuggestedAccounts] = useState<{ id: string; username: string; groups: { name: string } | null }[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+  const viewedIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     async function load() {
@@ -376,6 +377,15 @@ export default function FeedPage() {
     }
   }
 
+  async function handleVideoPlay(videoId: string, currentCount: number) {
+    if (viewedIds.current.has(videoId)) return
+    viewedIds.current.add(videoId)
+    await supabase.from('videos').update({ view_count: currentCount + 1 }).eq('id', videoId)
+    setVideos(prev => prev.map(v => v.id === videoId ? { ...v, view_count: v.view_count + 1 } : v))
+    setFollowingVideos(prev => prev.map(v => v.id === videoId ? { ...v, view_count: v.view_count + 1 } : v))
+    setTrendingVideo(prev => prev?.id === videoId ? { ...prev, view_count: prev.view_count + 1 } : prev)
+  }
+
   const theme = account ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
   const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']
@@ -638,6 +648,7 @@ export default function FeedPage() {
               className="w-full block bg-black"
               style={{ maxHeight: '55vh' }}
               playsInline muted loop controls preload="none"
+              onPlay={() => handleVideoPlay(trendingVideo.id, trendingVideo.view_count)}
             />
             <div className="px-4 py-3 flex items-center justify-between"
               style={{ background: 'linear-gradient(to right, rgba(255,50,120,0.1), rgba(124,58,237,0.08))' }}>
@@ -766,7 +777,8 @@ export default function FeedPage() {
                     </span>
                   </div>
                   <video src={video.video_url} className="w-full block bg-black" style={{ maxHeight: '65vh' }}
-                    playsInline muted loop controls preload="none" />
+                    playsInline muted loop controls preload="none"
+                    onPlay={() => handleVideoPlay(video.id, video.view_count)} />
                   <div className="px-4 py-3 flex items-center gap-2"
                     style={{ background: `linear-gradient(to right, ${accentColor}14, ${accentColor}06)` }}>
                     <div className="flex-1 min-w-0">
@@ -901,6 +913,7 @@ export default function FeedPage() {
                   className="w-full block bg-black"
                   style={{ maxHeight: '65vh' }}
                   playsInline muted loop controls preload="none"
+                  onPlay={() => handleVideoPlay(video.id, video.view_count)}
                 />
 
                 {/* 하단 정보 바 */}

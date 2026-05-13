@@ -242,7 +242,12 @@ export default function UserProfilePage() {
         ) : (
           <div className="flex flex-col gap-2.5 pb-10">
             {videos.map((video) => (
-              <div key={video.id} className="rounded-xl p-4 flex items-center gap-3 border" style={{ background: `${accent}08`, borderColor: `${accent}18` }}>
+              <Link
+                key={video.id}
+                href={`/universe/${encodeURIComponent(profile.groups.name)}?video=${video.id}`}
+                className="rounded-xl p-4 flex items-center gap-3 border block hover:opacity-80 transition"
+                style={{ background: `${accent}08`, borderColor: `${accent}18` }}
+              >
                 <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: `${accent}20` }}>
                   {video.category === 'vocal' ? '🎤' : '💃'}
                 </div>
@@ -261,7 +266,8 @@ export default function UserProfilePage() {
                     <span className="text-white/20 text-xs">{new Date(video.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-              </div>
+                <span className="text-white/20 text-xs flex-shrink-0">▶</span>
+              </Link>
             ))}
           </div>
         )}

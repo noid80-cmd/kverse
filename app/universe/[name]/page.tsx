@@ -53,6 +53,7 @@ export default function UniversePage() {
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const viewedIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     async function load() {
@@ -184,6 +185,13 @@ export default function UniversePage() {
       await supabase.from('likes').insert({ account_id: accountId, video_id: video.id })
       await supabase.from('videos').update({ like_count: video.like_count + 1 }).eq('id', video.id)
     }
+  }
+
+  async function handleVideoPlay(video: Video) {
+    if (viewedIds.current.has(video.id)) return
+    viewedIds.current.add(video.id)
+    await supabase.from('videos').update({ view_count: video.view_count + 1 }).eq('id', video.id)
+    setVideos(prev => prev.map(v => v.id === video.id ? { ...v, view_count: v.view_count + 1 } : v))
   }
 
   const filtered = filter === 'all' ? videos : videos.filter(v => v.category === filter)
@@ -362,6 +370,7 @@ export default function UniversePage() {
                   loop
                   controls
                   preload="none"
+                  onPlay={() => handleVideoPlay(video)}
                 />
 
                 {/* 하단 정보 바 */}
