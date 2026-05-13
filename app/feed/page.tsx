@@ -609,7 +609,7 @@ export default function FeedPage() {
               src={trendingVideo.video_url}
               className="w-full block bg-black"
               style={{ maxHeight: '55vh' }}
-              muted loop controls preload="none"
+              playsInline muted loop controls preload="none"
               onPlay={() => handleVideoPlay(trendingVideo.id, trendingVideo.view_count)}
             />
             <div className="px-4 py-3 flex items-center justify-between"
@@ -706,7 +706,7 @@ export default function FeedPage() {
                     </span>
                   </div>
                   <video src={video.video_url} className="w-full block bg-black" style={{ maxHeight: '65vh' }}
-                    muted loop controls preload="none"
+                    playsInline muted loop controls preload="none"
                     onPlay={() => handleVideoPlay(video.id, video.view_count)} />
                   <div className="px-4 py-3 flex items-center gap-2"
                     style={{ background: 'rgba(255,255,255,0.02)' }}>
@@ -827,7 +827,7 @@ export default function FeedPage() {
                   src={video.video_url}
                   className="w-full block bg-black"
                   style={{ maxHeight: '65vh' }}
-                  muted loop controls preload="none"
+                  playsInline muted loop controls preload="none"
                   onPlay={() => handleVideoPlay(video.id, video.view_count)}
                 />
 

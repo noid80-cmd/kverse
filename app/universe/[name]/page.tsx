@@ -401,7 +401,7 @@ export default function UniversePage() {
                   src={video.video_url}
                   className="w-full block bg-black"
                   style={{ maxHeight: '65vh' }}
-                  playsInline={false}
+                  playsInline
                   muted
                   loop
                   controls
