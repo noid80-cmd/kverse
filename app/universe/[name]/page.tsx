@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
-import { getActiveAccountId } from '@/lib/activeAccount'
+import { getActiveAccountId, setActiveAccountId } from '@/lib/activeAccount'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
@@ -52,6 +52,7 @@ export default function UniversePage() {
   const [shareToast, setShareToast] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const [uploadHref, setUploadHref] = useState('/login')
+  const [groupAccountId, setGroupAccountId] = useState<string | null>(null)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const viewedIds = useRef<Set<string>>(new Set())
@@ -80,7 +81,8 @@ export default function UniversePage() {
           .eq('user_id', user.id)
           .eq('group_id', group.id)
           .limit(1).maybeSingle()
-        setUploadHref(groupAcc ? '/upload' : '/select-group')
+        if (groupAcc) { setUploadHref('/upload'); setGroupAccountId(groupAcc.id) }
+        else setUploadHref('/select-group')
         // 활성 계정 좋아요 로드
         const activeId = getActiveAccountId()
         let q = supabase.from('accounts').select('id').eq('user_id', user.id)
@@ -323,6 +325,7 @@ export default function UniversePage() {
             </p>
             <a
               href={isLoggedIn ? uploadHref : '/signup'}
+              onClick={() => { if (groupAccountId) setActiveAccountId(groupAccountId) }}
               className="inline-block mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
               style={{ background: theme.gradient }}
             >
@@ -501,6 +504,7 @@ export default function UniversePage() {
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
             <a
               href={isLoggedIn ? uploadHref : '/signup'}
+              onClick={() => { if (groupAccountId) setActiveAccountId(groupAccountId) }}
               className="inline-block px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >
