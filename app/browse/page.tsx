@@ -32,12 +32,15 @@ export default function BrowsePage() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [accountId, setAccountId] = useState<string | null>(null)
+  const [authReady, setAuthReady] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     async function init() {
       // 로그인 상태 확인 + 계정 가져오기
       const user = await getAuthUser()
+      if (!user) { window.location.href = '/login'; return }
+      setAuthReady(true)
       if (user) {
         setIsLoggedIn(true)
         const activeId = getActiveAccountId()
@@ -105,6 +108,8 @@ export default function BrowsePage() {
     if (h < 24) return t('common.hoursAgo', { n: h })
     return t('common.daysAgo', { n: Math.floor(h / 24) })
   }
+
+  if (!authReady) return <div className="min-h-screen bg-black" />
 
   return (
     <div className="min-h-screen bg-black text-white">

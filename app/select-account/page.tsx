@@ -5,7 +5,6 @@ import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { setActiveAccountId } from '@/lib/activeAccount'
 import Avatar, { EquippedItems } from '@/app/components/Avatar'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -20,7 +19,6 @@ type Account = {
 }
 
 export default function SelectAccountPage() {
-  const router = useRouter()
   const t = useT()
   const { locale } = useLanguage()
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -30,10 +28,15 @@ export default function SelectAccountPage() {
   const [deleteTarget, setDeleteTarget] = useState<Account | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  function getBackUrl() {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('back') || '/feed'
+  }
+
   useEffect(() => {
     async function load() {
       const user = await getAuthUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { window.location.href = '/login'; return }
 
       const { data } = await supabase
         .from('accounts')
@@ -44,14 +47,14 @@ export default function SelectAccountPage() {
       const validData = (data || []).filter((a: Account) => a.groups != null)
 
       if (validData.length === 0) {
-        router.push('/select-group')
+        window.location.href = '/select-group'
         return
       }
 
-      // 계정이 1개면 바로 선택 후 피드로
+      // 계정이 1개면 바로 선택 후 이동
       if (validData.length === 1) {
         setActiveAccountId(validData[0].id)
-        router.push('/feed')
+        window.location.href = getBackUrl()
         return
       }
 
@@ -94,7 +97,7 @@ export default function SelectAccountPage() {
 
   function handleSelect(account: Account) {
     setActiveAccountId(account.id)
-    router.push('/feed')
+    window.location.href = getBackUrl()
   }
 
   async function deleteAccount(account: Account) {
@@ -106,10 +109,10 @@ export default function SelectAccountPage() {
     setDeleteTarget(null)
     setDeleting(false)
     if (remaining.length === 0) {
-      router.push('/select-group')
+      window.location.href = '/select-group'
     } else if (remaining.length === 1) {
       setActiveAccountId(remaining[0].id)
-      router.push('/feed')
+      window.location.href = '/feed'
     }
   }
 
@@ -190,7 +193,7 @@ export default function SelectAccountPage() {
 
         {/* 로그아웃 */}
         <button
-          onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+          onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
           className="mt-6 w-full text-center text-white/20 hover:text-white/40 text-sm transition"
         >
           {t('sa.logout')}

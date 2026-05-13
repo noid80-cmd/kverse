@@ -31,10 +31,17 @@ export default function Home() {
   const t = useT()
   const { locale } = useLanguage()
   const [loggedIn, setLoggedIn] = useState(false)
+  const [authReady, setAuthReady] = useState(false)
 
   useEffect(() => {
-    getAuthUser().then(u => setLoggedIn(!!u))
+    getAuthUser().then(u => {
+      if (!u) { window.location.href = '/login'; return }
+      setLoggedIn(true)
+      setAuthReady(true)
+    })
   }, [])
+
+  if (!authReady) return <div className="min-h-screen bg-[#080808]" />
 
   return (
     <div className="min-h-screen bg-[#080808] text-white overflow-hidden">
@@ -97,9 +104,9 @@ export default function Home() {
                 style={{ background: BRAND_GRADIENT }}>
                 {t('home.startUniverse')}
               </Link>
-              <Link href="/browse"
+              <Link href="/login"
                 className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">
-                {t('home.viewCovers')}
+                {t('auth.login')}
               </Link>
             </>
           )}

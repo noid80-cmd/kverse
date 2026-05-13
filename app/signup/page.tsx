@@ -2,26 +2,65 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 
+const COUNTRIES = [
+  { code: 'KR', name: '🇰🇷 South Korea' },
+  { code: 'US', name: '🇺🇸 United States' },
+  { code: 'JP', name: '🇯🇵 Japan' },
+  { code: 'CN', name: '🇨🇳 China' },
+  { code: 'TH', name: '🇹🇭 Thailand' },
+  { code: 'PH', name: '🇵🇭 Philippines' },
+  { code: 'ID', name: '🇮🇩 Indonesia' },
+  { code: 'MY', name: '🇲🇾 Malaysia' },
+  { code: 'VN', name: '🇻🇳 Vietnam' },
+  { code: 'TW', name: '🇹🇼 Taiwan' },
+  { code: 'SG', name: '🇸🇬 Singapore' },
+  { code: 'BR', name: '🇧🇷 Brazil' },
+  { code: 'MX', name: '🇲🇽 Mexico' },
+  { code: 'GB', name: '🇬🇧 United Kingdom' },
+  { code: 'FR', name: '🇫🇷 France' },
+  { code: 'DE', name: '🇩🇪 Germany' },
+  { code: 'AU', name: '🇦🇺 Australia' },
+  { code: 'CA', name: '🇨🇦 Canada' },
+  { code: 'IN', name: '🇮🇳 India' },
+  { code: 'SA', name: '🇸🇦 Saudi Arabia' },
+  { code: 'TR', name: '🇹🇷 Turkey' },
+  { code: 'AR', name: '🇦🇷 Argentina' },
+  { code: 'CL', name: '🇨🇱 Chile' },
+  { code: 'CO', name: '🇨🇴 Colombia' },
+  { code: 'PE', name: '🇵🇪 Peru' },
+  { code: 'EG', name: '🇪🇬 Egypt' },
+  { code: 'NG', name: '🇳🇬 Nigeria' },
+  { code: 'OTHER', name: '🌍 Other' },
+]
+
 export default function SignupPage() {
-  const router = useRouter()
   const t = useT()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [country, setCountry] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+
+  function getBackUrl() {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('back') || '/'
+  }
 
   async function handleSignup(e: React.SyntheticEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { country } },
+    })
 
     if (error) {
       setError(error.message)
@@ -29,11 +68,9 @@ export default function SignupPage() {
       return
     }
 
-    // 이메일 확인이 꺼져 있으면 세션이 바로 생성됨
     if (data.session) {
-      router.push('/select-group')
+      window.location.href = getBackUrl()
     } else {
-      // 이메일 확인이 켜져 있으면 안내 화면 표시
       setDone(true)
     }
     setLoading(false)
@@ -93,6 +130,22 @@ export default function SignupPage() {
               dir="ltr"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-pink-500 transition"
             />
+          </div>
+
+          <div>
+            <label className="text-white/60 text-sm mb-1.5 block text-start">{t('auth.country')}</label>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition appearance-none"
+              style={{ colorScheme: 'dark' }}
+            >
+              <option value="" disabled style={{ background: '#111' }}>— select —</option>
+              {COUNTRIES.map(c => (
+                <option key={c.code} value={c.code} style={{ background: '#111' }}>{c.name}</option>
+              ))}
+            </select>
           </div>
 
           {error && (

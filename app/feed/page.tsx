@@ -51,6 +51,7 @@ export default function FeedPage() {
   const t = useT()
   const { locale } = useLanguage()
   const [account, setAccount] = useState<Account | null>(null)
+  const [authReady, setAuthReady] = useState(false)
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [videosLoading, setVideosLoading] = useState(false)
@@ -82,7 +83,8 @@ export default function FeedPage() {
   useEffect(() => {
     async function load() {
       const user = await getAuthUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { window.location.href = '/login'; return }
+      setAuthReady(true)
 
       const activeId = getActiveAccountId()
       let q = supabase.from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id)
@@ -172,6 +174,24 @@ export default function FeedPage() {
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [account])
+
+  // 전체화면 진입 시 가로 전환, 종료 시 복귀
+  useEffect(() => {
+    function onFullscreen() {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement)
+      if (isFs) {
+        try { (screen.orientation as any)?.lock('landscape').catch(() => {}) } catch {}
+      } else {
+        try { screen.orientation?.unlock() } catch {}
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreen)
+    document.addEventListener('webkitfullscreenchange', onFullscreen)
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreen)
+      document.removeEventListener('webkitfullscreenchange', onFullscreen)
+    }
+  }, [])
 
   // 화면에 들어온 영상 자동 재생
   useEffect(() => {
@@ -407,6 +427,8 @@ export default function FeedPage() {
     )
   }
 
+  if (!authReady) return <div className="min-h-screen bg-black" />
+
   return (
     <div className="min-h-screen bg-black">
 
@@ -545,7 +567,6 @@ export default function FeedPage() {
             {allGroups.map(group => {
               const grpTheme = GROUP_THEMES[group.name]
               if (!grpTheme) return null
-              const grpAccent = grpTheme.primary === '#FFFFFF' ? '#C9A96E' : grpTheme.primary
               const isMyGroup = group.name === account?.groups.name
               return (
                 <Link
@@ -588,7 +609,7 @@ export default function FeedPage() {
               src={trendingVideo.video_url}
               className="w-full block bg-black"
               style={{ maxHeight: '55vh' }}
-              playsInline muted loop controls preload="none"
+              muted loop controls preload="none"
               onPlay={() => handleVideoPlay(trendingVideo.id, trendingVideo.view_count)}
             />
             <div className="px-4 py-3 flex items-center justify-between"
@@ -685,7 +706,7 @@ export default function FeedPage() {
                     </span>
                   </div>
                   <video src={video.video_url} className="w-full block bg-black" style={{ maxHeight: '65vh' }}
-                    playsInline muted loop controls preload="none"
+                    muted loop controls preload="none"
                     onPlay={() => handleVideoPlay(video.id, video.view_count)} />
                   <div className="px-4 py-3 flex items-center gap-2"
                     style={{ background: 'rgba(255,255,255,0.02)' }}>
@@ -806,7 +827,7 @@ export default function FeedPage() {
                   src={video.video_url}
                   className="w-full block bg-black"
                   style={{ maxHeight: '65vh' }}
-                  playsInline muted loop controls preload="none"
+                  muted loop controls preload="none"
                   onPlay={() => handleVideoPlay(video.id, video.view_count)}
                 />
 

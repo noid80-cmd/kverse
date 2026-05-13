@@ -38,6 +38,7 @@ export default function UniversePage() {
   const theme = getTheme(groupName)
   const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
 
+  const [authReady, setAuthReady] = useState(false)
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('all')
@@ -60,7 +61,12 @@ export default function UniversePage() {
   useEffect(() => {
     async function load() {
       const user = await getAuthUser()
-      if (user) setIsLoggedIn(true)
+      if (!user) {
+        window.location.href = `/login?back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}`
+        return
+      }
+      setAuthReady(true)
+      setIsLoggedIn(true)
 
       const { data: group } = await supabase
         .from('groups')
@@ -114,6 +120,24 @@ export default function UniversePage() {
     }, 300)
     setTimeout(() => setHighlightId(null), 3000)
   }, [videos])
+
+  // 전체화면 진입 시 가로 전환, 종료 시 복귀
+  useEffect(() => {
+    function onFullscreen() {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement)
+      if (isFs) {
+        try { (screen.orientation as any)?.lock('landscape').catch(() => {}) } catch {}
+      } else {
+        try { screen.orientation?.unlock() } catch {}
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreen)
+    document.addEventListener('webkitfullscreenchange', onFullscreen)
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreen)
+      document.removeEventListener('webkitfullscreenchange', onFullscreen)
+    }
+  }, [])
 
   // 화면에 들어온 영상 자동 재생
   useEffect(() => {
@@ -220,6 +244,8 @@ export default function UniversePage() {
     return t('common.daysAgo', { n: Math.floor(h / 24) })
   }
 
+  if (!authReady) return <div className="min-h-screen bg-black" />
+
   return (
     <div className="min-h-screen bg-black text-white">
 
@@ -320,7 +346,8 @@ export default function UniversePage() {
             </p>
             <button
               onClick={() => {
-                if (!isLoggedIn) { window.location.href = '/signup'; return }
+                const back = encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)
+                if (!isLoggedIn) { window.location.href = `/login?back=${back}`; return }
                 if (groupAccountId) { setActiveAccountId(groupAccountId); window.location.href = '/upload' }
                 else setShowNoAccountModal(true)
               }}
@@ -374,7 +401,7 @@ export default function UniversePage() {
                   src={video.video_url}
                   className="w-full block bg-black"
                   style={{ maxHeight: '65vh' }}
-                  playsInline
+                  playsInline={false}
                   muted
                   loop
                   controls
@@ -496,20 +523,16 @@ export default function UniversePage() {
         </div>
       )}
 
-        {/* 하단 CTA */}
-        {!loading && (
+        {/* 하단 CTA - 이 그룹 계정 있는 유저에게만 표시 */}
+        {!loading && isLoggedIn && groupAccountId && (
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
             <button
-              onClick={() => {
-                if (!isLoggedIn) { window.location.href = '/signup'; return }
-                if (groupAccountId) { setActiveAccountId(groupAccountId); window.location.href = '/upload' }
-                else setShowNoAccountModal(true)
-              }}
+              onClick={() => { setActiveAccountId(groupAccountId); window.location.href = '/upload' }}
               className="px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >
-              {worldName(theme, locale)}
+              {t('uni.uploadCover')}
             </button>
           </div>
         )}
@@ -530,13 +553,13 @@ export default function UniversePage() {
               >
                 취소
               </button>
-              <a
-                href="/select-group"
-                className="flex-1 py-4 text-sm font-bold text-center"
+              <button
+                onClick={() => { window.location.href = `/select-group?group=${encodeURIComponent(groupName)}&back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` }}
+                className="flex-1 py-4 text-sm font-bold"
                 style={{ color: accentColor }}
               >
                 계정 만들기
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { GROUP_THEMES, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { setActiveAccountId } from '@/lib/activeAccount'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -12,7 +11,6 @@ import KverseLogo from '@/app/components/KverseLogo'
 type Group = { id: string; name: string; name_en: string }
 
 export default function SelectGroupPage() {
-  const router = useRouter()
   const t = useT()
   const { locale } = useLanguage()
   const [groups, setGroups] = useState<Group[]>([])
@@ -21,10 +19,24 @@ export default function SelectGroupPage() {
   const [step, setStep] = useState<'group' | 'username' | 'viewer'>('group')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [backUrl, setBackUrl] = useState('/feed')
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const back = params.get('back')
+    if (back) setBackUrl(back)
+    const groupParam = params.get('group')
     supabase.from('groups').select('*').then(({ data }) => {
-      if (data) setGroups(data)
+      if (data) {
+        setGroups(data)
+        if (groupParam) {
+          const match = data.find((g: Group) => g.name === groupParam)
+          if (match) {
+            setSelected(match)
+            setStep('username')
+          }
+        }
+      }
     })
   }, [])
 
@@ -34,7 +46,7 @@ export default function SelectGroupPage() {
     setLoading(true)
 
     const user = await getAuthUser()
-    if (!user) { router.push('/login'); return }
+    if (!user) { window.location.href = '/login'; return }
 
     const { data: newAcc, error } = await supabase.from('accounts').insert({
       user_id: user.id,
@@ -48,7 +60,7 @@ export default function SelectGroupPage() {
       setError(error.code === '23505' ? '이미 사용 중인 팬닉이에요.' : '오류가 발생했어요.')
     } else {
       if (newAcc) setActiveAccountId(newAcc.id)
-      router.push('/feed')
+      window.location.href = backUrl
     }
     setLoading(false)
   }
@@ -59,7 +71,7 @@ export default function SelectGroupPage() {
     setLoading(true)
 
     const user = await getAuthUser()
-    if (!user) { router.push('/login'); return }
+    if (!user) { window.location.href = '/login'; return }
 
     const { data: newAcc, error } = await supabase.from('accounts').insert({
       user_id: user.id,
@@ -72,7 +84,7 @@ export default function SelectGroupPage() {
       setError(error.code === '23505' ? '이미 사용 중인 팬닉이에요.' : '오류가 발생했어요.')
     } else {
       if (newAcc) setActiveAccountId(newAcc.id)
-      router.push('/browse')
+      window.location.href = '/browse'
     }
     setLoading(false)
   }

@@ -3,17 +3,20 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 
 export default function LoginPage() {
-  const router = useRouter()
   const t = useT()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  function getBackUrl() {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('back') || '/'
+  }
 
   async function handleLogin(e: React.SyntheticEvent) {
     e.preventDefault()
@@ -25,7 +28,8 @@ export default function LoginPage() {
     if (error) {
       setError(t('auth.loginError'))
     } else {
-      router.push('/select-account')
+      const back = getBackUrl()
+      window.location.href = `/select-account?back=${encodeURIComponent(back)}`
     }
     setLoading(false)
   }
@@ -92,9 +96,12 @@ export default function LoginPage() {
 
         <p className="text-center text-white/40 text-sm mt-4">
           {t('auth.noAccount')}{' '}
-          <Link href="/signup" className="text-pink-400 hover:underline">
+          <a
+            href={`/signup?back=${new URLSearchParams(window.location.search).get('back') || ''}`}
+            className="text-pink-400 hover:underline"
+          >
             {t('auth.signup')}
-          </Link>
+          </a>
         </p>
       </div>
     </div>
