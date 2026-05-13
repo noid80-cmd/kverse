@@ -54,12 +54,6 @@ export default function Home() {
           <KverseLogo size="lg" />
         </div>
         <div className="flex items-center justify-end gap-2">
-          {!loggedIn && (
-            <Link href="/login"
-              className="px-5 py-2 rounded-full border border-white/10 text-sm font-medium text-white/50 hover:text-white hover:border-white/25 transition">
-              {t('auth.login')}
-            </Link>
-          )}
         </div>
       </nav>
 
