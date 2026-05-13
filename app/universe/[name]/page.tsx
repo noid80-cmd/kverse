@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -32,7 +32,6 @@ type Filter = 'all' | 'vocal' | 'dance'
 
 export default function UniversePage() {
   const t = useT()
-  const router = useRouter()
   const { locale } = useLanguage()
   const { name } = useParams<{ name: string }>()
   const groupName = decodeURIComponent(name)
@@ -60,6 +59,7 @@ export default function UniversePage() {
   useEffect(() => {
     async function load() {
       const user = await getAuthUser()
+      if (user) setIsLoggedIn(true)
 
       const { data: group } = await supabase
         .from('groups')
@@ -67,10 +67,13 @@ export default function UniversePage() {
         .eq('name', groupName)
         .single()
 
-      if (!group) { setLoading(false); return }
+      if (!group) {
+        if (user) setUploadHref('/select-group')
+        setLoading(false)
+        return
+      }
 
       if (user) {
-        setIsLoggedIn(true)
         // 이 유니버스 계정 있으면 /upload, 없으면 /select-group
         const { data: groupAcc } = await supabase
           .from('accounts').select('id')
