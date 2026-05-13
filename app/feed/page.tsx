@@ -100,7 +100,7 @@ export default function FeedPage() {
 
       const { data: all } = await supabase
         .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id)
-      setAllAccounts(all || [])
+      setAllAccounts((all || []).filter((a: Account) => a.groups != null))
 
       const { data: sub } = await supabase
         .from('subscriptions')
