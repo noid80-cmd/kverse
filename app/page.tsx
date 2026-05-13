@@ -48,13 +48,7 @@ export default function Home() {
           <KverseLogo size="lg" />
         </div>
         <div className="flex items-center justify-end gap-2">
-          {loggedIn ? (
-            <Link href="/feed"
-              className="px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
-              style={{ background: BRAND_GRADIENT }}>
-              내 SNS
-            </Link>
-          ) : (
+          {!loggedIn && (
             <>
               <Link href="/login"
                 className="hidden sm:block px-5 py-2 rounded-full border border-white/10 text-sm font-medium text-white/50 hover:text-white hover:border-white/25 transition">
@@ -91,17 +85,11 @@ export default function Home() {
 
         <div className="flex gap-3">
           {loggedIn ? (
-            <>
-              <Link href="/feed"
-                className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
-                style={{ background: BRAND_GRADIENT }}>
-                {t('home.enterUniverse')}
-              </Link>
-              <Link href="/select-group"
-                className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">
-                + {t('sa.addFanNick')}
-              </Link>
-            </>
+            <Link href="/feed"
+              className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
+              style={{ background: BRAND_GRADIENT }}>
+              {t('home.enterUniverse')}
+            </Link>
           ) : (
             <>
               <Link href="/signup"
