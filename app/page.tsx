@@ -150,25 +150,6 @@ export default function Home() {
       {/* 팬덤 랭킹 */}
       <FandomRanking />
 
-      {/* CTA */}
-      <section className="flex flex-col items-center justify-center text-center px-6 py-24 gap-6 border-t border-white/5">
-        <p className="text-white/45 text-xs font-medium tracking-[0.2em] uppercase">{t('home.ctaDesc')}</p>
-        <h2 className="text-4xl sm:text-5xl font-bold text-white break-keep">{t('home.ctaTitle')}</h2>
-        {loggedIn ? (
-          <Link href="/feed"
-            className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
-            style={{ background: BRAND_GRADIENT }}>
-            커버 영상 보러가기
-          </Link>
-        ) : (
-          <Link href="/signup"
-            className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
-            style={{ background: BRAND_GRADIENT }}>
-            가입하기
-          </Link>
-        )}
-      </section>
-
       <footer className="border-t border-white/5 px-8 py-10 text-center">
         <p className="text-white/35 text-sm font-normal mb-4">© 2026 Kverse — K-pop Universe. All rights reserved.</p>
         <p className="text-white/25 text-xs max-w-2xl mx-auto leading-relaxed font-normal">

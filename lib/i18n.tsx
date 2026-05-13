@@ -56,7 +56,7 @@ const translations: Record<Locale, Dict> = {
     'home.rankingEmpty': '아직 커버 영상이 없어요. 첫 번째 주인공이 되어보세요!',
     'home.rankingLocked': '나머지 {n}개 유니버스 순위는 로그인 후 확인',
     // auth
-    'auth.login': '로그인', 'auth.signup': '회원가입',
+    'auth.login': '로그인', 'auth.signup': '가입하기',
     'auth.email': '이메일', 'auth.password': '비밀번호',
     'auth.passwordPlaceholder': '비밀번호 입력', 'auth.passwordMinPlaceholder': '6자 이상 입력',
     'auth.loginError': '이메일 또는 비밀번호가 올바르지 않아요.',
