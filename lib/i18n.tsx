@@ -23,7 +23,7 @@ const translations: Record<Locale, Dict> = {
     'nav.home': '홈', 'nav.feed': 'SNS', 'nav.shop': '상점', 'nav.messages': '메시지',
     'nav.community': '게시판', 'nav.profile': '프로필', 'nav.logout': '로그아웃',
     'nav.upload': '올리기', 'nav.avatar': '아바타', 'nav.back': '← SNS',
-    'nav.allFeed': '전체 SNS', 'nav.myFeed': '내 SNS', 'nav.login': '로그인',
+    'nav.allFeed': '전체 영상', 'nav.myFeed': '내 영상', 'nav.login': '로그인',
     'common.loading': '불러오는 중...', 'common.processing': '처리 중...',
     'common.close': '닫기', 'common.all': '전체', 'common.vocal': '보컬', 'common.dance': '댄스',
     'common.justNow': '방금', 'common.minsAgo': '{n}분 전', 'common.hoursAgo': '{n}시간 전',

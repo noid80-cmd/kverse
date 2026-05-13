@@ -253,13 +253,6 @@ export default function UniversePage() {
             <p className="text-white/40 text-xs font-medium tracking-widest uppercase mb-1">{theme.world}</p>
             <h1 className="text-3xl font-black text-white">{groupDisplayName(groupName, locale)}</h1>
             <p className="text-sm mt-1" style={{ color: `${accentColor}90` }}>{worldName(theme, locale)}</p>
-            <div className="flex items-center justify-center gap-3 mt-2">
-              <span className="text-white/30 text-xs">{t('uni.videoCount', { count: totalCount })}</span>
-              <span className="text-white/20 text-xs">·</span>
-              <span className="text-white/30 text-xs">VOCAL {t('common.vocal')} {vocalCount}</span>
-              <span className="text-white/20 text-xs">·</span>
-              <span className="text-white/30 text-xs">DANCE {t('common.dance')} {danceCount}</span>
-            </div>
           </div>
         </div>
 
