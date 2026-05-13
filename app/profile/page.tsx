@@ -65,16 +65,20 @@ export default function ProfilePage() {
 
         if (!accounts || accounts.length === 0) { router.push('/select-group'); return }
 
-        setAllAccounts(accounts)
-        setAccount(accounts[0])
-        setTheme(getTheme(accounts[0].groups.name))
-        setNationality(accounts[0].nationality || 'KR')
+        // 그룹이 있는 계정만 필터 (fan-only 계정은 groups가 null)
+        const validAccounts = accounts.filter((a: Account) => a.groups != null)
+        if (validAccounts.length === 0) { router.push('/select-group'); return }
+
+        setAllAccounts(validAccounts)
+        setAccount(validAccounts[0])
+        setTheme(getTheme(validAccounts[0].groups.name))
+        setNationality(validAccounts[0].nationality || 'KR')
 
         const [videosRes, equippedResult, followersRes, followingRes] = await Promise.all([
-          supabase.from('videos').select('*').eq('account_id', accounts[0].id).order('created_at', { ascending: false }),
-          loadEquippedVisuals(accounts[0].equipped || {}),
-          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', accounts[0].id),
-          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', accounts[0].id),
+          supabase.from('videos').select('*').eq('account_id', validAccounts[0].id).order('created_at', { ascending: false }),
+          loadEquippedVisuals(validAccounts[0].equipped || {}),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', validAccounts[0].id),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', validAccounts[0].id),
         ])
         setFollowerCount(followersRes.count || 0)
         setFollowingCount(followingRes.count || 0)
