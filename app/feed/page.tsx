@@ -388,11 +388,6 @@ export default function FeedPage() {
 
   const theme = account ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
-  const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']
-  const topIds = new Set(
-    [...videos].sort((a, b) => b.like_count - a.like_count)
-      .slice(0, 3).filter(v => v.like_count > 0).map(v => v.id)
-  )
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
   const confettiItems = showCelebration
     ? Array.from({ length: 18 }, (_, i) => ({
@@ -612,9 +607,9 @@ export default function FeedPage() {
                   href={`/universe/${encodeURIComponent(group.name)}`}
                   className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition border whitespace-nowrap"
                   style={isMyGroup ? {
-                    background: grpTheme.gradient, borderColor: 'transparent', color: 'white',
+                    background: theme?.gradient, borderColor: 'transparent', color: 'white',
                   } : {
-                    background: `${grpAccent}12`, borderColor: `${grpAccent}30`, color: grpAccent,
+                    background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)',
                   }}
                 >
                   {grpTheme.emoji} {groupDisplayName(group.name, locale)}
@@ -761,9 +756,9 @@ export default function FeedPage() {
             <div className="flex flex-col gap-5">
               {followingVideos.map((video) => (
                 <div key={video.id} className="rounded-2xl overflow-hidden border relative"
-                  style={{ borderColor: `${accentColor}25`, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
                   <div className="flex items-center gap-3 px-4 py-3"
-                    style={{ background: `linear-gradient(to right, ${accentColor}22, ${accentColor}08)` }}>
+                    style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <Link href={`/profile/${video.accounts.username}`} className="flex items-center gap-2 flex-1 min-w-0">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
                         style={{ background: theme?.gradient }}>
@@ -780,7 +775,7 @@ export default function FeedPage() {
                     playsInline muted loop controls preload="none"
                     onPlay={() => handleVideoPlay(video.id, video.view_count)} />
                   <div className="px-4 py-3 flex items-center gap-2"
-                    style={{ background: `linear-gradient(to right, ${accentColor}14, ${accentColor}06)` }}>
+                    style={{ background: 'rgba(255,255,255,0.02)' }}>
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm font-bold truncate">{video.title}</p>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -850,27 +845,19 @@ export default function FeedPage() {
                 key={video.id}
                 className="rounded-2xl overflow-hidden border relative"
                 style={{
-                  borderColor: index === 0 ? `${accentColor}60` : index < 3 ? `${accentColor}35` : `${accentColor}18`,
-                  boxShadow: index === 0
-                    ? `0 0 32px ${accentColor}28, 0 4px 16px rgba(0,0,0,0.5)`
-                    : index < 3
-                    ? `0 0 16px ${accentColor}15, 0 2px 8px rgba(0,0,0,0.4)`
-                    : '0 2px 8px rgba(0,0,0,0.3)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                 }}
               >
-                {/* 왼쪽 랭크 컬러 바 */}
-                {index < 3 && (
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: rankColors[index], zIndex: 1 }} />
-                )}
 
                 {/* 헤더 */}
                 <div
-                  className="flex items-center gap-3 px-4 py-3 pl-5"
-                  style={{ background: `linear-gradient(to right, ${accentColor}22, ${accentColor}08)` }}
+                  className="flex items-center gap-3 px-4 py-3"
+                  style={{ background: 'rgba(255,255,255,0.03)' }}
                 >
                   <span
-                    className="font-black text-sm w-6 text-center flex-shrink-0"
-                    style={{ color: index < 3 ? rankColors[index] : 'rgba(255,255,255,0.2)', textShadow: index === 0 ? `0 0 8px ${rankColors[0]}80` : 'none' }}
+                    className="text-sm w-6 text-center flex-shrink-0 font-medium"
+                    style={{ color: 'rgba(255,255,255,0.25)' }}
                   >
                     {index + 1}
                   </span>
@@ -886,12 +873,6 @@ export default function FeedPage() {
                       <span className="text-xs font-black px-2 py-0.5 rounded-full text-white"
                         style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', animation: 'newBadgePulse 1.8s ease-in-out infinite' }}>
                         NEW
-                      </span>
-                    )}
-                    {topIds.has(video.id) && (
-                      <span className="text-xs font-black px-2 py-0.5 rounded-full"
-                        style={{ background: 'linear-gradient(135deg,#ff6b35,#ff0066)', color: 'white', animation: 'hotPulse 2s ease-in-out infinite' }}>
-                        🔥 HOT
                       </span>
                     )}
                     {video.is_live && (
@@ -918,7 +899,7 @@ export default function FeedPage() {
 
                 {/* 하단 정보 바 */}
                 <div className="px-4 py-3 flex items-center gap-2 relative"
-                  style={{ background: `linear-gradient(to right, ${accentColor}14, ${accentColor}06)` }}>
+                  style={{ background: 'rgba(255,255,255,0.02)' }}>
 
                   {/* 하트 파티클 */}
                   {likeAnimating.has(video.id) && (
