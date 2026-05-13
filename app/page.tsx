@@ -191,13 +191,13 @@ export default function Home() {
           <Link href="/feed"
             className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
             style={{ background: BRAND_GRADIENT }}>
-            {t('home.enterUniverse')}
+            커버 영상 보러가기
           </Link>
         ) : (
           <Link href="/signup"
             className="px-12 py-4 rounded-full font-medium text-base hover:opacity-90 transition"
             style={{ background: BRAND_GRADIENT }}>
-            {t('home.ctaBtn')}
+            가입하기
           </Link>
         )}
       </section>
