@@ -80,6 +80,7 @@ export default function FeedPage() {
   const [feedTab, setFeedTab] = useState<'all' | 'following'>('all')
   const [followingVideos, setFollowingVideos] = useState<Video[]>([])
   const [followingLoading, setFollowingLoading] = useState(false)
+  const [suggestedAccounts, setSuggestedAccounts] = useState<{ id: string; username: string; groups: { name: string } }[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
@@ -203,7 +204,17 @@ export default function FeedPage() {
     const { data: followRows } = await supabase
       .from('follows').select('following_id').eq('follower_id', accountId)
     const ids = (followRows || []).map((r: { following_id: string }) => r.following_id)
-    if (ids.length === 0) { setFollowingVideos([]); setFollowingLoading(false); return }
+    if (ids.length === 0) {
+      setFollowingVideos([])
+      const { data: suggested } = await supabase
+        .from('accounts')
+        .select('id, username, groups(name)')
+        .neq('id', accountId)
+        .limit(6)
+      setSuggestedAccounts((suggested || []) as { id: string; username: string; groups: { name: string } }[])
+      setFollowingLoading(false)
+      return
+    }
     const { data: vids } = await supabase
       .from('videos')
       .select('*, accounts(username), groups(name)')
@@ -695,10 +706,42 @@ export default function FeedPage() {
           followingLoading ? (
             <div className="text-white/30 text-sm text-center py-20 animate-pulse">...</div>
           ) : followingVideos.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">👥</div>
-              <p className="text-white/50 mb-2">{t('feed.noFollowingVideos')}</p>
-              <p className="text-white/20 text-sm">{t('feed.followSomeone')}</p>
+            <div className="py-10">
+              <div className="text-center mb-8">
+                <div className="text-5xl mb-3">👥</div>
+                <p className="text-white/50 text-sm">{t('feed.noFollowingVideos')}</p>
+              </div>
+              {suggestedAccounts.length > 0 && (
+                <div>
+                  <p className="text-white/30 text-xs text-center mb-4">{t('feed.followSomeone')}</p>
+                  <div className="flex flex-col gap-2">
+                    {suggestedAccounts.map(acc => {
+                      const accTheme = acc.groups?.name ? GROUP_THEMES[acc.groups.name] : null
+                      const accAccent = accTheme?.primary === '#FFFFFF' ? '#C9A96E' : (accTheme?.primary || '#7C3AED')
+                      return (
+                        <Link
+                          key={acc.id}
+                          href={`/profile/${acc.username}`}
+                          className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/8 transition hover:bg-white/5"
+                          style={{ background: 'rgba(255,255,255,0.03)' }}
+                        >
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white"
+                            style={{ background: accTheme?.gradient || theme?.gradient }}>
+                            {acc.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm font-semibold">@{acc.username}</p>
+                            <p className="text-xs mt-0.5" style={{ color: accAccent }}>
+                              {acc.groups?.name ? groupDisplayName(acc.groups.name, locale) : ''}
+                            </p>
+                          </div>
+                          <span className="text-white/20 text-xs">프로필 →</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-5">
@@ -750,16 +793,40 @@ export default function FeedPage() {
 
         {/* 영상 목록 — 인라인 스크롤 피드 */}
         {feedTab === 'all' && (videos.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">{theme?.emoji}</div>
-            <p className="text-white/50 mb-6">{t('feed.beFirst')}</p>
-            <Link
-              href="/upload"
-              className="px-8 py-3 text-white font-medium rounded-full transition"
-              style={{ background: theme?.gradient }}
-            >
-              {t('feed.uploadFirst')}
-            </Link>
+          <div className="py-10">
+            <div className="text-center mb-8">
+              <div className="text-6xl mb-4">{theme?.emoji}</div>
+              <p className="text-white/50 mb-5">{t('feed.beFirst')}</p>
+              <Link
+                href="/upload"
+                className="px-8 py-3 text-white font-medium rounded-full transition"
+                style={{ background: theme?.gradient }}
+              >
+                {t('feed.uploadFirst')}
+              </Link>
+            </div>
+            {allGroups.length > 0 && (
+              <div>
+                <p className="text-white/20 text-xs text-center mb-4">다른 유니버스 둘러보기</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {allGroups.filter(g => g.name !== account?.groups.name).slice(0, 4).map(group => {
+                    const grpTheme = GROUP_THEMES[group.name]
+                    if (!grpTheme) return null
+                    return (
+                      <Link
+                        key={group.id}
+                        href={`/universe/${encodeURIComponent(group.name)}`}
+                        className="rounded-2xl p-4 flex items-center gap-3 border transition hover:opacity-80"
+                        style={{ background: `${grpTheme.primary === '#FFFFFF' ? '#C9A96E' : grpTheme.primary}15`, borderColor: `${grpTheme.primary === '#FFFFFF' ? '#C9A96E' : grpTheme.primary}30` }}
+                      >
+                        <span className="text-2xl">{grpTheme.emoji}</span>
+                        <span className="text-white text-sm font-semibold">{groupDisplayName(group.name, locale)}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-5">
