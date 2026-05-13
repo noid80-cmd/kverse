@@ -307,7 +307,7 @@ export default function UniversePage() {
                 : `${filter === 'vocal' ? t('common.vocal') : t('common.dance')} 커버가 아직 없어요`}
             </p>
             <Link
-              href="/signup"
+              href={isLoggedIn ? '/upload' : '/signup'}
               className="inline-block mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
               style={{ background: theme.gradient }}
             >
@@ -485,7 +485,7 @@ export default function UniversePage() {
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
             <Link
-              href="/signup"
+              href={isLoggedIn ? '/upload' : '/signup'}
               className="inline-block px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >
