@@ -33,8 +33,8 @@ type Filter = 'all' | 'vocal' | 'dance'
 export default function UniversePage() {
   const t = useT()
   const { locale } = useLanguage()
-  const { name } = useParams<{ name: string }>()
-  const groupName = decodeURIComponent(name)
+  const params = useParams<{ name: string }>()
+  const groupName = params?.name ? decodeURIComponent(params.name) : ''
   const theme = getTheme(groupName)
   const accentColor = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
 
