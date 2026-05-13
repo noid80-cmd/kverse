@@ -94,14 +94,14 @@ export default function Home() {
             <Link href="/feed"
               className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
               style={{ background: BRAND_GRADIENT }}>
-              {t('home.enterUniverse')}
+              커버 영상 보러가기
             </Link>
           ) : (
             <>
               <Link href="/signup"
                 className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
                 style={{ background: BRAND_GRADIENT }}>
-                {t('home.startUniverse')}
+                가입하기
               </Link>
               <Link href="/login"
                 className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">
