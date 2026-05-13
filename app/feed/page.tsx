@@ -566,15 +566,17 @@ export default function FeedPage() {
           <>
           <div
             className="rounded-2xl p-5 mb-3 flex items-center gap-4 border relative overflow-hidden select-none"
+            onTouchStart={handleSwipeStart}
+            onTouchEnd={handleSwipeEnd}
             style={isPlus ? {
               background: 'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.12))',
               borderColor: 'rgba(251,191,36,0.5)',
+              touchAction: 'pan-y',
             } : {
               background: `${theme.primary}10`,
               borderColor: `${theme.primary}40`,
+              touchAction: 'pan-y',
             }}
-            onTouchStart={handleSwipeStart}
-            onTouchEnd={handleSwipeEnd}
           >
             {isPlus && (
               <div className="absolute inset-0 pointer-events-none"
