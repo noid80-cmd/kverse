@@ -251,7 +251,7 @@ export default function FeedPage() {
       .or(id ? `is_private.eq.false,account_id.eq.${id}` : 'is_private.eq.false')
       .order(tab === 'popular' ? 'like_count' : 'created_at', { ascending: false })
       .limit(20)
-    setVideos(vids || [])
+    setVideos((vids || []).filter((v: any) => v.accounts != null))
     setVideosLoading(false)
   }
 

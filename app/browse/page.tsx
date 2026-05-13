@@ -62,7 +62,7 @@ export default function BrowsePage() {
         .eq('is_private', false)
         .order('like_count', { ascending: false })
         .limit(100)
-      setVideos(data || [])
+      setVideos((data || []).filter((v: any) => v.accounts != null))
       setLoading(false)
     }
     init()

@@ -103,8 +103,9 @@ export default function UniversePage() {
         .eq('group_id', group.id)
         .order('like_count', { ascending: false })
 
-      setVideos(data || [])
-      setTotalCount((data || []).length)
+      const validVideos = (data || []).filter((v: Video) => v.accounts != null)
+      setVideos(validVideos)
+      setTotalCount(validVideos.length)
       setLoading(false)
     }
     load()
@@ -191,7 +192,7 @@ export default function UniversePage() {
 
   async function shareVideo(video: Video) {
     const url = `https://kverse-nine.vercel.app/universe/${encodeURIComponent(groupName)}?video=${video.id}`
-    const text = `@${video.accounts.username}의 ${groupDisplayName(groupName, locale)} 커버 영상을 Kverse에서 보세요!`
+    const text = `@${video.accounts?.username ?? ''}의 ${groupDisplayName(groupName, locale)} 커버 영상을 Kverse에서 보세요!`
     if (navigator.share) {
       await navigator.share({ title: video.title, text, url }).catch(() => {})
     } else {
@@ -384,13 +385,13 @@ export default function UniversePage() {
                     style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'rgba(255,255,255,0.2)' }}>
                     {index + 1}
                   </span>
-                  <Link href={isLoggedIn ? `/profile/${video.accounts.username}` : '/login'}
+                  <Link href={isLoggedIn ? `/profile/${video.accounts?.username ?? ''}` : '/login'}
                     className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
                       style={{ background: theme.gradient }}>
-                      {video.accounts.username.charAt(0).toUpperCase()}
+                      {(video.accounts?.username ?? '?').charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-white text-sm font-semibold truncate">@{video.accounts.username}</span>
+                    <span className="text-white text-sm font-semibold truncate">@{video.accounts?.username ?? '알 수 없음'}</span>
                     {video.accounts.is_founder && (
                       <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
                         style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
