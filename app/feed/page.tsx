@@ -46,9 +46,6 @@ type Comment = {
 
 type Group = { id: string; name: string; name_en: string }
 
-type Period = 'all' | 'week' | 'today'
-type SortOrder = 'newest' | 'popular'
-
 export default function FeedPage() {
   const router = useRouter()
   const t = useT()
@@ -56,12 +53,9 @@ export default function FeedPage() {
   const [account, setAccount] = useState<Account | null>(null)
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('all')
-  const [sort, setSort] = useState<SortOrder>('newest')
   const [videosLoading, setVideosLoading] = useState(false)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [allAccounts, setAllAccounts] = useState<Account[]>([])
-  const [showAccountMenu, setShowAccountMenu] = useState(false)
   const [isPlus, setIsPlus] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Video | null>(null)
   const [reportTarget, setReportTarget] = useState<Video | null>(null)
@@ -77,7 +71,7 @@ export default function FeedPage() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [newVideoNotif, setNewVideoNotif] = useState(false)
   const [shareToast, setShareToast] = useState(false)
-  const [feedTab, setFeedTab] = useState<'all' | 'following'>('all')
+  const [feedTab, setFeedTab] = useState<'all' | 'popular' | 'following'>('all')
   const [followingVideos, setFollowingVideos] = useState<Video[]>([])
   const [followingLoading, setFollowingLoading] = useState(false)
   const [suggestedAccounts, setSuggestedAccounts] = useState<{ id: string; username: string; groups: { name: string } | null }[]>([])
@@ -112,8 +106,7 @@ export default function FeedPage() {
       }
 
       const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-      const [, , trendingRes, groupsRes] = await Promise.all([
-        fetchVideos(data.group_id, 'all', 'newest', data.id),
+      const [, trendingRes, groupsRes] = await Promise.all([
         fetchLikedIds(data.id),
         supabase.from('videos').select('*, accounts(username), groups(name)')
           .eq('is_private', false)
@@ -131,25 +124,24 @@ export default function FeedPage() {
 
   useEffect(() => {
     if (!account) return
-    fetchVideos(account.group_id, period, sort)
-  }, [period, sort])
-
-  useEffect(() => {
-    if (!account || feedTab !== 'following') return
-    fetchFollowingVideos(account.id)
+    if (feedTab === 'following') {
+      fetchFollowingVideos(account.id)
+    } else {
+      fetchVideos(account.group_id, feedTab, account.id)
+    }
   }, [feedTab, account])
 
   // 다른 페이지에서 돌아올 때 자동 새로고침
   useEffect(() => {
     if (!account) return
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        fetchVideos(account.group_id, period, sort)
+      if (document.visibilityState === 'visible' && feedTab !== 'following') {
+        fetchVideos(account.group_id, feedTab, account.id)
       }
     }
     document.addEventListener('visibilitychange', handleVisibility)
     return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [account, period, sort])
+  }, [account, feedTab])
 
   // 업로드 직후 축하 효과
   useEffect(() => {
@@ -231,28 +223,16 @@ export default function FeedPage() {
     setFollowingLoading(false)
   }
 
-  async function fetchVideos(groupId: string, p: Period, s: SortOrder, accId?: string) {
+  async function fetchVideos(groupId: string, tab: 'all' | 'popular' = 'all', accId?: string) {
     setVideosLoading(true)
     const id = accId ?? account?.id
-    let query = supabase
+    const { data: vids } = await supabase
       .from('videos')
       .select('*, accounts(username), groups(name)')
       .eq('group_id', groupId)
       .or(id ? `is_private.eq.false,account_id.eq.${id}` : 'is_private.eq.false')
-      .order(s === 'newest' ? 'created_at' : 'like_count', { ascending: false })
+      .order(tab === 'popular' ? 'like_count' : 'created_at', { ascending: false })
       .limit(20)
-
-    if (p === 'today') {
-      const start = new Date()
-      start.setHours(0, 0, 0, 0)
-      query = query.gte('created_at', start.toISOString())
-    } else if (p === 'week') {
-      const start = new Date()
-      start.setDate(start.getDate() - 7)
-      query = query.gte('created_at', start.toISOString())
-    }
-
-    const { data: vids } = await query
     setVideos(vids || [])
     setVideosLoading(false)
   }
@@ -393,7 +373,7 @@ export default function FeedPage() {
     const next = allAccounts[nextIdx]
     setActiveAccountId(next.id)
     setAccount(next)
-    fetchVideos(next.group_id, period, sort, next.id)
+    fetchVideos(next.group_id, feedTab === 'following' ? 'all' : feedTab, next.id)
     fetchLikedIds(next.id)
   }
 
@@ -462,7 +442,7 @@ export default function FeedPage() {
           <button
             className="pointer-events-auto mt-2 px-5 py-2.5 rounded-full text-white text-sm font-bold flex items-center gap-2 border border-white/20"
             style={{ background: 'rgba(20,20,20,0.95)', backdropFilter: 'blur(12px)' }}
-            onClick={() => { setNewVideoNotif(false); fetchVideos(account!.group_id, period, sort) }}
+            onClick={() => { setNewVideoNotif(false); fetchVideos(account!.group_id, feedTab === 'following' ? 'all' : feedTab) }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'realtimeDot 1s ease-in-out infinite' }} />
             새 커버 영상이 올라왔어요 · 탭해서 보기
@@ -472,33 +452,11 @@ export default function FeedPage() {
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/"><KverseLogo /></Link>
-
-          {theme && account && (
-            <button
-              onClick={() => setShowAccountMenu(v => !v)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition hover:opacity-80"
-              style={{ color: accentColor, borderColor: accentColor, backgroundColor: `${theme.primary}15` }}
-            >
-              {account.username}
-              <span className="text-white/30 ml-0.5">{allAccounts.length > 1 ? '▾' : ''}</span>
-            </button>
-          )}
-        </div>
+        <Link href="/"><KverseLogo /></Link>
         <div className="flex items-center gap-2">
-          {account && (
-            <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />
-          )}
-          <Link href="/dm" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
-            💬
-          </Link>
-          <Link
-            href="/upload"
-            className="px-3 py-2 text-white text-sm font-medium rounded-full transition whitespace-nowrap shrink-0"
-            style={{ background: theme?.gradient }}
-          >
-            + {t('nav.upload')}
+          {account && <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />}
+          <Link href="/upload" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
+            ✚
           </Link>
           <Link href="/profile" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
             👤
@@ -506,59 +464,6 @@ export default function FeedPage() {
         </div>
       </nav>
 
-      {/* 계정 전환 모달 */}
-      {showAccountMenu && allAccounts.length > 1 && theme && account && (
-        <div
-          className="fixed inset-0 flex items-end justify-center pb-8 px-4"
-          style={{ zIndex: 9999, background: 'rgba(0,0,0,0.7)' }}
-          onClick={() => setShowAccountMenu(false)}
-        >
-          <div
-            className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="px-4 py-3 border-b border-white/5">
-              <p className="text-white/40 text-xs text-center">{t('feed.accountMgmt')}</p>
-            </div>
-            {allAccounts.map(acc => {
-              const accTheme = getTheme(acc.groups.name)
-              const isActive = acc.id === account.id
-              return (
-                <button
-                  key={acc.id}
-                  onClick={() => {
-                    setActiveAccountId(acc.id)
-                    setAccount(acc)
-                    setShowAccountMenu(false)
-                    fetchVideos(acc.group_id, period, sort, acc.id)
-                    fetchLikedIds(acc.id)
-                  }}
-                  className="w-full px-4 py-3.5 flex items-center gap-3 hover:bg-white/5 transition text-left"
-                  style={isActive ? { background: `${accTheme.primary}15` } : {}}
-                >
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0" style={{ background: accTheme.gradient }}>
-                    {accTheme.emoji}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white text-sm font-semibold truncate">@{acc.username}</p>
-                    <p className="text-white/30 text-xs truncate">{groupDisplayName(acc.groups.name, locale)}</p>
-                  </div>
-                  {isActive && <span className="ml-auto text-base" style={{ color: accTheme.primary === '#FFFFFF' ? '#C9A96E' : accTheme.primary }}>✓</span>}
-                </button>
-              )
-            })}
-            <div className="border-t border-white/5">
-              <Link
-                href="/select-account"
-                onClick={() => setShowAccountMenu(false)}
-                className="block px-4 py-3 text-white/30 hover:text-white/60 text-sm text-center transition"
-              >
-                + {t('feed.accountMgmt')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="max-w-2xl mx-auto px-6 py-10">
         {/* 계정 카드 */}
@@ -697,58 +602,25 @@ export default function FeedPage() {
         )}
 
         {/* 피드 탭 */}
-        <div className="flex gap-2 mb-5 justify-center">
-          {(['all', 'following'] as const).map(tab => (
+        <div className="flex gap-2 mb-6 justify-center">
+          {([
+            { key: 'all', label: t('feed.allTab') },
+            { key: 'popular', label: '인기' },
+            { key: 'following', label: t('feed.followingTab') },
+          ] as { key: 'all' | 'popular' | 'following'; label: string }[]).map(({ key, label }) => (
             <button
-              key={tab}
-              onClick={() => setFeedTab(tab)}
+              key={key}
+              onClick={() => setFeedTab(key)}
               className="px-5 py-2 rounded-full text-sm font-bold transition border"
-              style={feedTab === tab
+              style={feedTab === key
                 ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' }
                 : { borderColor: `${accentColor}30`, color: `${accentColor}80` }
               }
             >
-              {tab === 'all' ? t('feed.allTab') : t('feed.followingTab')}
+              {label}
             </button>
           ))}
-        </div>
-
-        {/* 필터 */}
-        <div className="flex flex-col items-center gap-3 mb-6" style={{ display: feedTab === 'following' ? 'none' : undefined }}>
-          <div className="flex gap-2">
-            {([
-              { key: 'all', label: t('common.all') },
-              { key: 'week', label: t('feed.thisWeek') },
-              { key: 'today', label: t('feed.today') },
-            ] as { key: Period; label: string }[]).map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setPeriod(key)}
-                className="px-4 py-1.5 rounded-full text-sm font-medium transition border"
-                style={period === key ? {
-                  background: theme?.gradient,
-                  borderColor: 'transparent',
-                  color: 'white',
-                } : {
-                  borderColor: `${accentColor}30`,
-                  color: `${accentColor}80`,
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => setSort('newest')} className="px-3 py-1 rounded-full text-xs font-medium transition border"
-              style={sort === 'newest' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
-              {t('feed.byNewest')}
-            </button>
-            <button onClick={() => setSort('popular')} className="px-3 py-1 rounded-full text-xs font-medium transition border"
-              style={sort === 'popular' ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' } : { borderColor: `${accentColor}30`, color: `${accentColor}80` }}>
-              {t('feed.byLikes')}
-            </button>
-            {videosLoading && <span className="text-white/20 text-sm self-center animate-pulse">...</span>}
-          </div>
+          {videosLoading && <span className="text-white/20 text-sm self-center animate-pulse">...</span>}
         </div>
 
         {/* 팔로잉 피드 */}
