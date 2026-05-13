@@ -36,15 +36,6 @@ export default function SelectGroupPage() {
     const user = await getAuthUser()
     if (!user) { router.push('/login'); return }
 
-    const { data: existing } = await supabase
-      .from('accounts').select('id, group_id').eq('user_id', user.id)
-
-    if (existing && existing.filter((a: { group_id: string | null }) => a.group_id != null).length >= 3) {
-      setError('무료 계정은 최대 3개까지 만들 수 있어요.')
-      setLoading(false)
-      return
-    }
-
     const { data: newAcc, error } = await supabase.from('accounts').insert({
       user_id: user.id,
       group_id: selected.id,

@@ -160,9 +160,10 @@ export default function UniversePage() {
     if (!user) { router.push('/login'); return }
     const { data: accounts } = await supabase
       .from('accounts')
-      .select('id, groups(name)')
+      .select('id, group_id, groups(name)')
       .eq('user_id', user.id)
-    const match = (accounts || []).find((a: { id: string; groups: { name: string } | null }) => a.groups?.name === groupName)
+    const all = accounts || []
+    const match = all.find((a: { id: string; groups: { name: string } | null }) => a.groups?.name === groupName)
     if (match) {
       setActiveAccountId(match.id)
       router.push('/upload')

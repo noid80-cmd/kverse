@@ -179,27 +179,14 @@ export default function SelectAccountPage() {
         </div>
 
         {/* 팬닉 추가 버튼 */}
-        {accounts.length < 3 ? (
-          <Link
-            href="/select-group"
-            className="mt-4 flex items-center justify-center gap-2 w-full py-4 rounded-2xl border-2 border-dashed font-medium text-sm transition hover:opacity-80"
-            style={{ borderColor: 'rgba(236,72,153,0.35)', color: '#EC4899' }}
-          >
-            <span className="text-lg">+</span>
-            {t('sa.addFanNick')}
-            <span className="text-white/25 font-normal">({accounts.length}/3 무료)</span>
-          </Link>
-        ) : (
-          <button
-            onClick={() => setShowUpgradeModal(true)}
-            className="mt-4 flex items-center justify-center gap-2 w-full py-4 rounded-2xl border-2 border-dashed font-medium text-sm transition hover:opacity-80"
-            style={{ borderColor: 'rgba(250,204,21,0.35)', color: '#FBBF24' }}
-          >
-            <span className="text-lg">👑</span>
-            {t('sa.addMore')}
-            <span className="text-white/25 font-normal">(3/3 {t('sa.inUse')})</span>
-          </button>
-        )}
+        <Link
+          href="/select-group"
+          className="mt-4 flex items-center justify-center gap-2 w-full py-4 rounded-2xl border-2 border-dashed font-medium text-sm transition hover:opacity-80"
+          style={{ borderColor: 'rgba(236,72,153,0.35)', color: '#EC4899' }}
+        >
+          <span className="text-lg">+</span>
+          {t('sa.addFanNick')}
+        </Link>
 
         {/* 로그아웃 */}
         <button
