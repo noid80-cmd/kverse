@@ -1,8 +1,7 @@
-const CACHE = 'kverse-v1'
-const STATIC = ['/']
+const CACHE = 'kverse-v2'
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)))
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])))
   self.skipWaiting()
 })
 
@@ -16,15 +15,11 @@ self.addEventListener('activate', (e) => {
 })
 
 self.addEventListener('fetch', (e) => {
-  // navigation requests: network-first (always fresh content)
-  if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match('/'))
-    )
-    return
-  }
-  // static assets: cache-first
+  // network-first: always get fresh JS/CSS/HTML after deployments
+  // fall back to cache only when offline
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request).catch(() =>
+      caches.match(e.request).then(cached => cached || caches.match('/'))
+    )
   )
 })
