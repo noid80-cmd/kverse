@@ -83,20 +83,21 @@ export default function UserProfilePage() {
       setFollowingCount(fg || 0)
 
       if (user) {
-        const { data: myAcc } = await supabase
+        const { data: myAccounts } = await supabase
           .from('accounts')
-          .select('id')
+          .select('id, username')
           .eq('user_id', user.id)
-          .single()
-        if (myAcc) {
-          setMyAccountId(myAcc.id)
-          if (myAcc.username === username) {
+        if (myAccounts && myAccounts.length > 0) {
+          const ownAcc = myAccounts.find((a: { id: string; username: string }) => a.username === username)
+          if (ownAcc) {
             setIsOwn(true)
+            setMyAccountId(ownAcc.id)
           } else {
+            setMyAccountId(myAccounts[0].id)
             const { data: followRow } = await supabase
               .from('follows')
               .select('id')
-              .eq('follower_id', myAcc.id)
+              .eq('follower_id', myAccounts[0].id)
               .eq('following_id', acc.id)
               .maybeSingle()
             setIsFollowing(!!followRow)
