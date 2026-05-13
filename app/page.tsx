@@ -35,8 +35,7 @@ export default function Home() {
 
   useEffect(() => {
     getAuthUser().then(u => {
-      if (!u) { window.location.href = '/login'; return }
-      setLoggedIn(true)
+      if (u) setLoggedIn(true)
       setAuthReady(true)
     })
   }, [])
