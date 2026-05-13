@@ -384,7 +384,7 @@ export default function FeedPage() {
     const next = allAccounts[nextIdx]
     setActiveAccountId(next.id)
     setAccount(next)
-    fetchVideos(next.group_id, feedTab === 'following' ? 'all' : feedTab, next.id)
+    fetchVideos(feedTab === 'following' ? 'all' : feedTab, next.id)
     fetchLikedIds(next.id)
   }
 
