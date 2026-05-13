@@ -48,6 +48,8 @@ export default function ProfilePage() {
   const [nationality, setNationality] = useState('KR')
   const [editingNationality, setEditingNationality] = useState(false)
   const [nationalitySearch, setNationalitySearch] = useState('')
+  const [followerCount, setFollowerCount] = useState(0)
+  const [followingCount, setFollowingCount] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -67,10 +69,14 @@ export default function ProfilePage() {
       setTheme(getTheme(accounts[0].groups.name))
       setNationality(accounts[0].nationality || 'KR')
 
-      const [{ data: vids }, equippedResult] = await Promise.all([
+      const [{ data: vids }, equippedResult, { count: fc }, { count: fg }] = await Promise.all([
         supabase.from('videos').select('*').eq('account_id', accounts[0].id).order('created_at', { ascending: false }),
         loadEquippedVisuals(accounts[0].equipped || {}),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', accounts[0].id),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', accounts[0].id),
       ])
+      setFollowerCount(fc || 0)
+      setFollowingCount(fg || 0)
 
       setVideos(vids || [])
       setEquippedVisuals(equippedResult)
@@ -83,12 +89,16 @@ export default function ProfilePage() {
     setAccount(acc)
     setTheme(getTheme(acc.groups.name))
     setNationality(acc.nationality || 'KR')
-    const [{ data: vids }, equippedResult] = await Promise.all([
+    const [{ data: vids }, equippedResult, { count: fc }, { count: fg }] = await Promise.all([
       supabase.from('videos').select('*').eq('account_id', acc.id).order('created_at', { ascending: false }),
       loadEquippedVisuals(acc.equipped || {}),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', acc.id),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', acc.id),
     ])
     setVideos(vids || [])
     setEquippedVisuals(equippedResult)
+    setFollowerCount(fc || 0)
+    setFollowingCount(fg || 0)
   }
 
   async function togglePrivacy(video: Video) {
@@ -298,20 +308,28 @@ export default function ProfilePage() {
         {/* ── STATS CARD ── */}
         {account && theme && (
           <div
-            className="rounded-2xl p-5 mb-5 border grid grid-cols-3 gap-0"
+            className="rounded-2xl p-5 mb-5 border grid grid-cols-5 gap-0"
             style={{ background: `${accent}0A`, borderColor: `${accent}25` }}
           >
             <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
-              <p className="text-3xl font-bold text-white">{videos.length}</p>
+              <p className="text-2xl font-bold text-white">{videos.length}</p>
               <p className="text-white/40 text-xs mt-1">{t('prof.coverVideos')}</p>
             </div>
             <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
-              <p className="text-3xl font-bold" style={{ color: accent }}>{totalLikes}</p>
+              <p className="text-2xl font-bold" style={{ color: accent }}>{totalLikes}</p>
               <p className="text-white/40 text-xs mt-1">{t('prof.totalLikes')}</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-white">{totalViews}</p>
+            <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
+              <p className="text-2xl font-bold text-white">{totalViews}</p>
               <p className="text-white/40 text-xs mt-1">{t('prof.totalViews')}</p>
+            </div>
+            <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
+              <p className="text-2xl font-bold text-white">{followerCount}</p>
+              <p className="text-white/40 text-xs mt-1">{t('prof.followers')}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-white">{followingCount}</p>
+              <p className="text-white/40 text-xs mt-1">{t('prof.following')}</p>
             </div>
           </div>
         )}

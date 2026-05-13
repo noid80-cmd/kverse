@@ -253,6 +253,11 @@ const translations: Record<Locale, Dict> = {
     'dm.firstMessage': '첫 메시지를 보내보세요 👋',
     'dm.placeholder': '메시지 입력... (Enter로 전송)',
     'dm.send': '전송',
+    'prof.followers': '팔로워', 'prof.following': '팔로잉',
+    'prof.follow': '팔로우', 'prof.unfollow': '팔로우 취소',
+    'feed.followingTab': '팔로잉', 'feed.allTab': '전체',
+    'feed.noFollowingVideos': '팔로우한 사람의 영상이 없어요',
+    'feed.followSomeone': '다른 팬들을 팔로우해보세요!',
   },
 
   en: {
@@ -467,6 +472,11 @@ const translations: Record<Locale, Dict> = {
     'dm.firstMessage': 'Send the first message 👋',
     'dm.placeholder': 'Type a message... (Enter to send)',
     'dm.send': 'Send',
+    'prof.followers': 'Followers', 'prof.following': 'Following',
+    'prof.follow': 'Follow', 'prof.unfollow': 'Unfollow',
+    'feed.followingTab': 'Following', 'feed.allTab': 'All',
+    'feed.noFollowingVideos': 'No videos from people you follow',
+    'feed.followSomeone': 'Follow other fans to see their videos!',
   },
 
   es: {
@@ -648,6 +658,11 @@ const translations: Record<Locale, Dict> = {
     'dm.hint': 'Busca usuarios arriba y envía mensajes',
     'dm.firstMessage': 'Envía el primer mensaje 👋',
     'dm.placeholder': 'Escribe un mensaje... (Enter para enviar)', 'dm.send': 'Enviar',
+    'prof.followers': 'Seguidores', 'prof.following': 'Siguiendo',
+    'prof.follow': 'Seguir', 'prof.unfollow': 'Dejar de seguir',
+    'feed.followingTab': 'Siguiendo', 'feed.allTab': 'Todo',
+    'feed.noFollowingVideos': 'No hay videos de personas que sigues',
+    'feed.followSomeone': '¡Sigue a otros fans para ver sus videos!',
   },
 
   zh: {
@@ -793,6 +808,11 @@ const translations: Record<Locale, Dict> = {
     'dm.noConversations': '还没有对话', 'dm.hint': '在上方搜索用户并发送消息',
     'dm.firstMessage': '发送第一条消息 👋',
     'dm.placeholder': '输入消息... (Enter发送)', 'dm.send': '发送',
+    'prof.followers': '粉丝', 'prof.following': '关注中',
+    'prof.follow': '关注', 'prof.unfollow': '取消关注',
+    'feed.followingTab': '关注', 'feed.allTab': '全部',
+    'feed.noFollowingVideos': '没有你关注的人的视频',
+    'feed.followSomeone': '关注其他粉丝来查看他们的视频！',
   },
 
   ja: {
@@ -938,6 +958,11 @@ const translations: Record<Locale, Dict> = {
     'dm.noConversations': 'まだ会話がありません', 'dm.hint': '上でユーザーを検索してメッセージを送ろう',
     'dm.firstMessage': '最初のメッセージを送ろう 👋',
     'dm.placeholder': 'メッセージを入力... (Enterで送信)', 'dm.send': '送信',
+    'prof.followers': 'フォロワー', 'prof.following': 'フォロー中',
+    'prof.follow': 'フォロー', 'prof.unfollow': 'フォロー解除',
+    'feed.followingTab': 'フォロー中', 'feed.allTab': '全て',
+    'feed.noFollowingVideos': 'フォローした人の動画がありません',
+    'feed.followSomeone': '他のファンをフォローして動画を見よう！',
   },
 
   fr: {
@@ -1083,6 +1108,11 @@ const translations: Record<Locale, Dict> = {
     'dm.noConversations': 'Pas encore de conversations', 'dm.hint': 'Recherchez des utilisateurs ci-dessus et envoyez des messages',
     'dm.firstMessage': 'Envoyez le premier message 👋',
     'dm.placeholder': 'Tapez un message... (Entrée pour envoyer)', 'dm.send': 'Envoyer',
+    'prof.followers': 'Abonnés', 'prof.following': 'Abonnements',
+    'prof.follow': "S'abonner", 'prof.unfollow': 'Se désabonner',
+    'feed.followingTab': 'Abonnements', 'feed.allTab': 'Tout',
+    'feed.noFollowingVideos': 'Aucune vidéo des personnes que vous suivez',
+    'feed.followSomeone': 'Suivez des fans pour voir leurs vidéos !',
   },
 
   ar: {
@@ -1228,6 +1258,11 @@ const translations: Record<Locale, Dict> = {
     'dm.noConversations': 'لا توجد محادثات بعد', 'dm.hint': 'ابحث عن المستخدمين أعلاه وأرسل رسائل',
     'dm.firstMessage': 'أرسل أول رسالة 👋',
     'dm.placeholder': 'اكتب رسالة... (Enter للإرسال)', 'dm.send': 'إرسال',
+    'prof.followers': 'متابعون', 'prof.following': 'يتابع',
+    'prof.follow': 'متابعة', 'prof.unfollow': 'إلغاء المتابعة',
+    'feed.followingTab': 'المتابَعون', 'feed.allTab': 'الكل',
+    'feed.noFollowingVideos': 'لا توجد مقاطع من الأشخاص الذين تتابعهم',
+    'feed.followSomeone': 'تابع مشجعين آخرين لترى مقاطعهم!',
   },
 }
 

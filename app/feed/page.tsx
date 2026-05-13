@@ -77,6 +77,9 @@ export default function FeedPage() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [newVideoNotif, setNewVideoNotif] = useState(false)
   const [shareToast, setShareToast] = useState(false)
+  const [feedTab, setFeedTab] = useState<'all' | 'following'>('all')
+  const [followingVideos, setFollowingVideos] = useState<Video[]>([])
+  const [followingLoading, setFollowingLoading] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   useEffect(() => {
@@ -127,6 +130,11 @@ export default function FeedPage() {
     if (!account) return
     fetchVideos(account.group_id, period, sort)
   }, [period, sort])
+
+  useEffect(() => {
+    if (!account || feedTab !== 'following') return
+    fetchFollowingVideos(account.id)
+  }, [feedTab, account])
 
   // 다른 페이지에서 돌아올 때 자동 새로고침
   useEffect(() => {
@@ -189,6 +197,23 @@ export default function FeedPage() {
     Object.values(videoRefs.current).forEach(v => { if (v) observer.observe(v) })
     return () => observer.disconnect()
   }, [videos])
+
+  async function fetchFollowingVideos(accountId: string) {
+    setFollowingLoading(true)
+    const { data: followRows } = await supabase
+      .from('follows').select('following_id').eq('follower_id', accountId)
+    const ids = (followRows || []).map((r: { following_id: string }) => r.following_id)
+    if (ids.length === 0) { setFollowingVideos([]); setFollowingLoading(false); return }
+    const { data: vids } = await supabase
+      .from('videos')
+      .select('*, accounts(username), groups(name)')
+      .in('account_id', ids)
+      .eq('is_private', false)
+      .order('created_at', { ascending: false })
+      .limit(30)
+    setFollowingVideos(vids || [])
+    setFollowingLoading(false)
+  }
 
   async function fetchVideos(groupId: string, p: Period, s: SortOrder, accId?: string) {
     setVideosLoading(true)
@@ -608,8 +633,25 @@ export default function FeedPage() {
           </div>
         )}
 
+        {/* 피드 탭 */}
+        <div className="flex gap-2 mb-5 justify-center">
+          {(['all', 'following'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setFeedTab(tab)}
+              className="px-5 py-2 rounded-full text-sm font-bold transition border"
+              style={feedTab === tab
+                ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' }
+                : { borderColor: `${accentColor}30`, color: `${accentColor}80` }
+              }
+            >
+              {tab === 'all' ? t('feed.allTab') : t('feed.followingTab')}
+            </button>
+          ))}
+        </div>
+
         {/* 필터 */}
-        <div className="flex flex-col items-center gap-3 mb-6">
+        <div className="flex flex-col items-center gap-3 mb-6" style={{ display: feedTab === 'following' ? 'none' : undefined }}>
           <div className="flex gap-2">
             {([
               { key: 'all', label: t('common.all') },
@@ -646,8 +688,66 @@ export default function FeedPage() {
           </div>
         </div>
 
+        {/* 팔로잉 피드 */}
+        {feedTab === 'following' && (
+          followingLoading ? (
+            <div className="text-white/30 text-sm text-center py-20 animate-pulse">...</div>
+          ) : followingVideos.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-4">👥</div>
+              <p className="text-white/50 mb-2">{t('feed.noFollowingVideos')}</p>
+              <p className="text-white/20 text-sm">{t('feed.followSomeone')}</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-5">
+              {followingVideos.map((video) => (
+                <div key={video.id} className="rounded-2xl overflow-hidden border relative"
+                  style={{ borderColor: `${accentColor}25`, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                  <div className="flex items-center gap-3 px-4 py-3"
+                    style={{ background: `linear-gradient(to right, ${accentColor}22, ${accentColor}08)` }}>
+                    <Link href={`/profile/${video.accounts.username}`} className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                        style={{ background: theme?.gradient }}>
+                        {video.accounts.username.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-white text-sm font-bold truncate">@{video.accounts.username}</span>
+                    </Link>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0"
+                      style={{ background: `${accentColor}25`, color: accentColor }}>
+                      {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
+                    </span>
+                  </div>
+                  <video src={video.video_url} className="w-full block bg-black" style={{ maxHeight: '65vh' }}
+                    playsInline muted loop controls preload="none" />
+                  <div className="px-4 py-3 flex items-center gap-2"
+                    style={{ background: `linear-gradient(to right, ${accentColor}14, ${accentColor}06)` }}>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-bold truncate">{video.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-white/30 text-xs">👁 {video.view_count}</span>
+                        <span className="text-white/15 text-xs">·</span>
+                        <span className="text-white/30 text-xs">♥ {video.like_count}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleLike(video)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition"
+                      style={likedIds.has(video.id)
+                        ? { background: theme?.gradient, color: 'white', boxShadow: `0 0 12px ${accentColor}60` }
+                        : { background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}35` }
+                      }
+                    >
+                      ♥ {video.like_count}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+
         {/* 영상 목록 — 인라인 스크롤 피드 */}
-        {videos.length === 0 ? (
+        {feedTab === 'all' && (videos.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">{theme?.emoji}</div>
             <p className="text-white/50 mb-6">{t('feed.beFirst')}</p>
@@ -807,7 +907,7 @@ export default function FeedPage() {
               </div>
             ))}
           </div>
-        )}
+        ))}
       </div>
 
       {/* 링크 복사 토스트 */}

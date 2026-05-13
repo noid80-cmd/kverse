@@ -46,6 +46,10 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true)
   const [isOwn, setIsOwn] = useState(false)
   const [myAccountId, setMyAccountId] = useState<string | null>(null)
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followerCount, setFollowerCount] = useState(0)
+  const [followingCount, setFollowingCount] = useState(0)
+  const [followLoading, setFollowLoading] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -71,20 +75,55 @@ export default function UserProfilePage() {
 
       setVideos(vids || [])
 
+      const [{ count: fc }, { count: fg }] = await Promise.all([
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', acc.id),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', acc.id),
+      ])
+      setFollowerCount(fc || 0)
+      setFollowingCount(fg || 0)
+
       if (user) {
         const { data: myAcc } = await supabase
           .from('accounts')
           .select('id')
           .eq('user_id', user.id)
-          .eq('username', username)
           .single()
-        if (myAcc) { setIsOwn(true); setMyAccountId(myAcc.id) }
+        if (myAcc) {
+          setMyAccountId(myAcc.id)
+          if (myAcc.username === username) {
+            setIsOwn(true)
+          } else {
+            const { data: followRow } = await supabase
+              .from('follows')
+              .select('id')
+              .eq('follower_id', myAcc.id)
+              .eq('following_id', acc.id)
+              .maybeSingle()
+            setIsFollowing(!!followRow)
+          }
+        }
       }
 
       setLoading(false)
     }
     load()
   }, [username])
+
+  async function toggleFollow() {
+    if (!myAccountId || !profile) return
+    setFollowLoading(true)
+    if (isFollowing) {
+      await supabase.from('follows').delete()
+        .eq('follower_id', myAccountId).eq('following_id', profile.id)
+      setIsFollowing(false)
+      setFollowerCount(c => c - 1)
+    } else {
+      await supabase.from('follows').insert({ follower_id: myAccountId, following_id: profile.id })
+      setIsFollowing(true)
+      setFollowerCount(c => c + 1)
+    }
+    setFollowLoading(false)
+  }
 
   if (loading) {
     return (
@@ -154,16 +193,36 @@ export default function UserProfilePage() {
               <p className="text-xl font-bold" style={{ color: accent }}>{totalLikes}</p>
               <p className="text-white/40 text-xs">{t('prof.totalLikes')}</p>
             </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-white">{followerCount}</p>
+              <p className="text-white/40 text-xs">{t('prof.followers')}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-white">{followingCount}</p>
+              <p className="text-white/40 text-xs">{t('prof.following')}</p>
+            </div>
           </div>
 
           {!isOwn && (
-            <Link
-              href={`/dm?to=${profile.username}`}
-              className="mt-4 px-6 py-2 text-white text-sm font-medium rounded-full transition"
-              style={{ background: theme.gradient }}
-            >
-              💬 {t('feed.sendDM')}
-            </Link>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={toggleFollow}
+                disabled={followLoading || !myAccountId}
+                className="px-6 py-2 text-white text-sm font-bold rounded-full transition disabled:opacity-50"
+                style={isFollowing
+                  ? { background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }
+                  : { background: theme.gradient }
+                }
+              >
+                {isFollowing ? t('prof.unfollow') : t('prof.follow')}
+              </button>
+              <Link
+                href={`/dm?to=${profile.username}`}
+                className="px-5 py-2 text-white text-sm font-medium rounded-full transition border border-white/20 hover:bg-white/10"
+              >
+                💬
+              </Link>
+            </div>
           )}
           {isOwn && (
             <Link href="/profile" className="mt-4 px-6 py-2 text-white/50 text-sm rounded-full border border-white/10 hover:text-white transition">
