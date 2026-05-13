@@ -51,8 +51,8 @@ export default function UniversePage() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
-  const [uploadHref, setUploadHref] = useState('/login')
   const [groupAccountId, setGroupAccountId] = useState<string | null>(null)
+  const [showNoAccountModal, setShowNoAccountModal] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const viewedIds = useRef<Set<string>>(new Set())
@@ -68,21 +68,16 @@ export default function UniversePage() {
         .eq('name', groupName)
         .single()
 
-      if (!group) {
-        if (user) setUploadHref('/select-group')
-        setLoading(false)
-        return
-      }
+      if (!group) { setLoading(false); return }
 
       if (user) {
-        // 이 유니버스 계정 있으면 /upload, 없으면 /select-group
+        // 이 그룹 계정 있으면 ID 저장, 없으면 null 유지 → 모달 표시
         const { data: groupAcc } = await supabase
           .from('accounts').select('id')
           .eq('user_id', user.id)
           .eq('group_id', group.id)
           .limit(1).maybeSingle()
-        if (groupAcc) { setUploadHref('/upload'); setGroupAccountId(groupAcc.id) }
-        else setUploadHref('/select-group')
+        if (groupAcc) setGroupAccountId(groupAcc.id)
         // 활성 계정 좋아요 로드
         const activeId = getActiveAccountId()
         let q = supabase.from('accounts').select('id').eq('user_id', user.id)
@@ -323,14 +318,17 @@ export default function UniversePage() {
                 ? t('uni.noVideos')
                 : `${filter === 'vocal' ? t('common.vocal') : t('common.dance')} 커버가 아직 없어요`}
             </p>
-            <a
-              href={isLoggedIn ? uploadHref : '/signup'}
-              onClick={() => { if (groupAccountId) setActiveAccountId(groupAccountId) }}
-              className="inline-block mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
+            <button
+              onClick={() => {
+                if (!isLoggedIn) { window.location.href = '/signup'; return }
+                if (groupAccountId) { setActiveAccountId(groupAccountId); window.location.href = '/upload' }
+                else setShowNoAccountModal(true)
+              }}
+              className="mt-4 px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
               style={{ background: theme.gradient }}
             >
               {t('uni.uploadCover')}
-            </a>
+            </button>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -502,18 +500,47 @@ export default function UniversePage() {
         {!loading && (
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
-            <a
-              href={isLoggedIn ? uploadHref : '/signup'}
-              onClick={() => { if (groupAccountId) setActiveAccountId(groupAccountId) }}
-              className="inline-block px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
+            <button
+              onClick={() => {
+                if (!isLoggedIn) { window.location.href = '/signup'; return }
+                if (groupAccountId) { setActiveAccountId(groupAccountId); window.location.href = '/upload' }
+                else setShowNoAccountModal(true)
+              }}
+              className="px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >
               {worldName(theme, locale)}
-            </a>
+            </button>
           </div>
         )}
       </div>
 
+      {showNoAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
+          <div className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="text-4xl mb-3">{theme.emoji}</div>
+              <h2 className="text-white font-bold text-lg mb-2">{groupDisplayName(groupName, locale)} 계정이 없어요</h2>
+              <p className="text-white/40 text-sm leading-relaxed">커버를 올리려면 먼저 계정을 만들어야 해요</p>
+            </div>
+            <div className="border-t border-white/5 flex">
+              <button
+                onClick={() => setShowNoAccountModal(false)}
+                className="flex-1 py-4 text-white/40 text-sm border-r border-white/5 transition hover:text-white"
+              >
+                취소
+              </button>
+              <a
+                href="/select-group"
+                className="flex-1 py-4 text-sm font-bold text-center"
+                style={{ color: accentColor }}
+              >
+                계정 만들기
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )
