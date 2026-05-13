@@ -292,6 +292,15 @@ export default function UniversePage() {
             <h1 className="text-3xl font-black text-white">{groupDisplayName(groupName, locale)}</h1>
             <p className="text-sm mt-1" style={{ color: `${accentColor}90` }}>{worldName(theme, locale)}</p>
           </div>
+          {isLoggedIn && !groupAccountId && (
+            <button
+              onClick={() => { window.location.href = `/select-group?group=${encodeURIComponent(groupName)}&back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` }}
+              className="px-6 py-2.5 rounded-full text-white text-sm font-bold transition hover:opacity-90"
+              style={{ background: theme.gradient }}
+            >
+              {groupDisplayName(groupName, locale)} 합류하기
+            </button>
+          )}
         </div>
 
         {/* 필터 탭 */}
@@ -558,7 +567,7 @@ export default function UniversePage() {
                 className="flex-1 py-4 text-sm font-bold"
                 style={{ color: accentColor }}
               >
-                계정 만들기
+                합류하기
               </button>
             </div>
           </div>
