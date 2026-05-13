@@ -108,7 +108,11 @@ export default function UniversePage() {
       setTotalCount(validVideos.length)
       setLoading(false)
     }
-    load()
+    load().catch(err => {
+      console.error('Universe page load error:', err)
+      setLoading(false)
+      setAuthReady(true)
+    })
   }, [groupName])
 
   // 공유 링크로 들어왔을 때 해당 영상으로 스크롤
