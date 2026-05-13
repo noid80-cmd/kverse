@@ -50,6 +50,8 @@ export default function ProfilePage() {
   const [nationalitySearch, setNationalitySearch] = useState('')
   const [followerCount, setFollowerCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
+  const [tab, setTab] = useState<'videos' | 'liked'>('videos')
+  const [likedVideos, setLikedVideos] = useState<any[]>([])
 
   useEffect(() => {
     async function load() {
@@ -74,16 +76,18 @@ export default function ProfilePage() {
         setTheme(getTheme(validAccounts[0].groups.name))
         setNationality(validAccounts[0].nationality || 'KR')
 
-        const [videosRes, equippedResult, followersRes, followingRes] = await Promise.all([
+        const [videosRes, equippedResult, followersRes, followingRes, likedRes] = await Promise.all([
           supabase.from('videos').select('*').eq('account_id', validAccounts[0].id).order('created_at', { ascending: false }),
           loadEquippedVisuals(validAccounts[0].equipped || {}),
           supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', validAccounts[0].id),
           supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', validAccounts[0].id),
+          supabase.from('likes').select('videos(*)').eq('account_id', validAccounts[0].id),
         ])
         setFollowerCount(followersRes.count || 0)
         setFollowingCount(followingRes.count || 0)
         setVideos(videosRes.data || [])
         setEquippedVisuals(equippedResult)
+        setLikedVideos((likedRes.data || []).map((r: any) => r.videos).filter(Boolean))
         setLoading(false)
       } catch (e) {
         console.error('Profile load error:', e)
@@ -366,10 +370,42 @@ export default function ProfilePage() {
           </Link>
         )}
 
-        {/* ── VIDEOS ── */}
-        <h2 className="text-base font-bold text-white mb-3 text-center">{t('prof.myVideos')}</h2>
+        {/* ── TABS ── */}
+        <div className="flex gap-2 mb-4 justify-center">
+          {(['videos', 'liked'] as const).map(t2 => (
+            <button
+              key={t2}
+              onClick={() => setTab(t2)}
+              className="px-5 py-2 rounded-full text-sm font-medium transition border"
+              style={tab === t2
+                ? { background: theme?.gradient, borderColor: 'transparent', color: 'white' }
+                : { borderColor: `${accent}30`, color: `${accent}70` }
+              }
+            >
+              {t2 === 'videos' ? '내 영상' : '❤️ 좋아요'}
+            </button>
+          ))}
+        </div>
 
-        {videos.length === 0 ? (
+        {tab === 'liked' ? (
+          likedVideos.length === 0 ? (
+            <div className="text-center py-14 text-white/20 text-sm">좋아요한 영상이 없어요</div>
+          ) : (
+            <div className="flex flex-col gap-2.5 pb-10">
+              {likedVideos.map((video: any) => (
+                <div key={video.id} className="rounded-xl p-4 flex items-center gap-3 border" style={{ background: `${accent}08`, borderColor: `${accent}18` }}>
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: `${accent}20`, color: accent }}>
+                    {video.category === 'vocal' ? 'VOCAL' : 'DANCE'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-sm truncate">{video.title}</p>
+                    <span className="text-xs" style={{ color: accent }}>♥ {video.like_count}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : videos.length === 0 ? (
           <div className="text-center py-14 rounded-2xl border" style={{ borderColor: `${accent}15` }}>
             <div className="text-5xl mb-3">{theme?.emoji}</div>
             <p className="text-white/30 text-sm mb-4">{t('prof.noVideos')}</p>
