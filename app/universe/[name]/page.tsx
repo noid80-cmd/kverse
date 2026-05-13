@@ -52,6 +52,7 @@ export default function UniversePage() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
+  const [showUploadModal, setShowUploadModal] = useState(false)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const viewedIds = useRef<Set<string>>(new Set())
@@ -161,7 +162,7 @@ export default function UniversePage() {
     const { data: group } = await supabase
       .from('groups').select('id').eq('name', groupName).single()
 
-    if (!group) { window.location.href = '/select-group'; return }
+    if (!group) { setShowUploadModal(true); return }
 
     const { data: match } = await supabase
       .from('accounts').select('id')
@@ -173,7 +174,7 @@ export default function UniversePage() {
       setActiveAccountId(match.id)
       window.location.href = '/upload'
     } else {
-      window.location.href = '/select-group'
+      setShowUploadModal(true)
     }
   }
 
@@ -530,6 +531,40 @@ export default function UniversePage() {
           </div>
         )}
       </div>
+
+      {showUploadModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4"
+          style={{ background: 'rgba(0,0,0,0.85)' }}
+        >
+          <div className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="text-4xl mb-3">{theme.emoji}</div>
+              <h2 className="text-white font-bold text-lg mb-2">
+                {groupDisplayName(groupName, locale)} 계정이 없어요
+              </h2>
+              <p className="text-white/40 text-sm leading-relaxed">
+                커버를 올리려면 먼저 계정을 만들어야 해요
+              </p>
+            </div>
+            <div className="border-t border-white/5 flex">
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="flex-1 py-4 text-white/40 hover:text-white text-sm transition border-r border-white/5"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => { window.location.href = '/select-group' }}
+                className="flex-1 py-4 text-sm font-bold transition"
+                style={{ color: accentColor }}
+              >
+                계정 만들기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )
