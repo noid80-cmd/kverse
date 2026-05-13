@@ -63,7 +63,7 @@ export default function Home() {
               <Link href="/signup"
                 className="px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
                 style={{ background: BRAND_GRADIENT }}>
-                {t('home.enterUniverse')}
+                {t('auth.signup')}
               </Link>
             </>
           )}
