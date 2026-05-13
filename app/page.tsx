@@ -122,9 +122,9 @@ export default function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {ALL_WORLDS.map((w) => (
-            <Link
+            <div
               key={w.name}
-              href={`/universe/${encodeURIComponent(w.name)}`}
+              onClick={() => { window.location.href = `/universe/${encodeURIComponent(w.name)}` }}
               className="relative overflow-hidden rounded-2xl group cursor-pointer hover:scale-[1.03] transition-all duration-300"
               style={{ aspectRatio: '4/3' }}
             >
@@ -143,7 +143,7 @@ export default function Home() {
               </div>
               <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.25)' }} />
-            </Link>
+            </div>
           ))}
         </div>
       </section>
