@@ -150,6 +150,9 @@ export default function ProfilePage() {
         </div>
         <KverseLogo />
         <div className="flex items-center gap-2">
+          <Link href="/community" className="px-3 py-1.5 text-white/40 hover:text-white text-xs rounded-full border border-white/10 transition">
+            📋
+          </Link>
           <button
             onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
             className="px-3 py-1.5 text-white/40 hover:text-white text-xs rounded-full border border-white/10 transition"

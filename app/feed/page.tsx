@@ -424,12 +424,8 @@ export default function FeedPage() {
           {account && (
             <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />
           )}
-          <Link href="/dm" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
+          <Link href="/dm" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
             💬
-          </Link>
-          <Link href="/community" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
-            <span className="hidden sm:inline">{t('nav.community')}</span>
-            <span className="sm:hidden">📋</span>
           </Link>
           <Link
             href="/upload"
@@ -438,15 +434,9 @@ export default function FeedPage() {
           >
             + {t('nav.upload')}
           </Link>
-          <Link href="/profile" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
-            {t('nav.profile')}
+          <Link href="/profile" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
+            👤
           </Link>
-          <button
-            onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
-            className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white/50 hover:text-white text-sm rounded-full transition whitespace-nowrap shrink-0"
-          >
-            {t('nav.logout')}
-          </button>
         </div>
       </nav>
 
