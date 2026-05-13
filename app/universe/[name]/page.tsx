@@ -558,13 +558,13 @@ export default function UniversePage() {
               >
                 취소
               </button>
-              <Link
-                href="/select-group"
+              <button
+                onClick={(e) => { e.stopPropagation(); window.location.href = '/select-group' }}
                 className="flex-1 py-4 text-sm font-bold transition text-center"
                 style={{ color: accentColor }}
               >
                 계정 만들기
-              </Link>
+              </button>
             </div>
           </div>
         </div>
