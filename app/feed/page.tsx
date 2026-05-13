@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useT, useLanguage } from '@/lib/i18n'
 import { getFlagImageUrl } from '@/lib/countries'
 import KverseLogo from '@/app/components/KverseLogo'
+import NotificationBell from '@/app/components/NotificationBell'
 
 type Account = {
   id: string
@@ -31,6 +32,7 @@ type Video = {
   created_at: string
   is_live: boolean
   is_private: boolean
+  account_id: string
   accounts: { username: string }
   groups: { name: string }
 }
@@ -266,6 +268,16 @@ export default function FeedPage() {
     if (!error && data) {
       setComments(prev => [...prev, data])
       setCommentText('')
+      const video = videos.find(v => v.id === commentVideoId)
+      if (video && video.account_id !== account.id) {
+        await supabase.from('notifications').insert({
+          account_id: video.account_id,
+          type: 'comment',
+          from_username: account.username,
+          video_id: video.id,
+          video_title: video.title,
+        })
+      }
     }
   }
 
@@ -311,6 +323,15 @@ export default function FeedPage() {
     } else {
       await supabase.from('likes').insert({ account_id: account.id, video_id: video.id })
       await supabase.from('videos').update({ like_count: video.like_count + 1 }).eq('id', video.id)
+      if (video.account_id !== account.id) {
+        await supabase.from('notifications').insert({
+          account_id: video.account_id,
+          type: 'like',
+          from_username: account.username,
+          video_id: video.id,
+          video_title: video.title,
+        })
+      }
     }
   }
 
@@ -400,6 +421,9 @@ export default function FeedPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {account && (
+            <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />
+          )}
           <Link href="/dm" className="px-3 py-2 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition whitespace-nowrap shrink-0">
             💬
           </Link>
