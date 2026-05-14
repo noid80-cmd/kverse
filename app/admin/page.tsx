@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { groupDisplayName } from '@/lib/groupThemes'
+import Link from 'next/link'
 
 const ADMIN_EMAIL = 'noid80@hanmail.net'
 
@@ -108,7 +109,7 @@ export default function AdminPage() {
       )}
 
       <nav className="sticky top-0 z-10 bg-black/90 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <span className="text-white/40 text-sm">Kverse</span>
+        <Link href="/" className="text-white/40 hover:text-white transition text-sm">← Kverse</Link>
         <span className="font-black text-white">관리자</span>
         <span className="text-xs px-2 py-1 rounded-full font-bold"
           style={{ background: 'linear-gradient(135deg,#E91E8C,#7B2FBE)', color: '#fff' }}>
