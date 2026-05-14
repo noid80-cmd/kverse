@@ -11,11 +11,14 @@ import KverseLogo from '@/app/components/KverseLogo'
 const MAX_DURATION_SEC = 300
 
 const ALL_GROUPS = Object.entries(GROUP_THEMES).map(([name, theme]) => ({
-  name,
-  emoji: theme.emoji,
-  gradient: theme.gradient,
-  primary: theme.primary,
+  name, emoji: theme.emoji, gradient: theme.gradient, primary: theme.primary,
 }))
+
+function fmtTime(sec: number) {
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
 
 function getVideoDuration(file: File): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -34,19 +37,22 @@ export default function UploadPage() {
   const { locale } = useLanguage()
   const fileRef = useRef<HTMLInputElement>(null)
   const liveRef = useRef<HTMLInputElement>(null)
+  const previewRef = useRef<HTMLVideoElement>(null)
+
   const [accountId, setAccountId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<'vocal' | 'dance'>('vocal')
-
-  function handleCategoryChange(c: 'vocal' | 'dance') {
-    setCategory(c)
-    if (c === 'dance') handleModeChange('normal')
-  }
   const [uploadMode, setUploadMode] = useState<'normal' | 'live'>('normal')
   const [selectedGroup, setSelectedGroup] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [duration, setDuration] = useState(0)
+  const [trimStart, setTrimStart] = useState(0)
+  const [trimEnd, setTrimEnd] = useState(0)
+  const [brightness, setBrightness] = useState(1)
+  const [contrast, setContrast] = useState(1)
+  const [saturation, setSaturation] = useState(1)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
@@ -61,24 +67,16 @@ export default function UploadPage() {
     async function load() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
-
-      const { data } = await supabase
-        .from('accounts')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle()
-
+      const { data } = await supabase.from('accounts').select('id').eq('user_id', user.id).limit(1).maybeSingle()
       if (!data) { router.push('/signup'); return }
       setAccountId(data.id)
     }
     load()
   }, [])
 
-  async function handleGroupSelect(groupName: string) {
-    setSelectedGroup(groupName)
-    const { data } = await supabase.from('groups').select('id').eq('name', groupName).maybeSingle()
-    setSelectedGroupId(data?.id || null)
+  function handleCategoryChange(c: 'vocal' | 'dance') {
+    setCategory(c)
+    if (c === 'dance') handleModeChange('normal')
   }
 
   function handleModeChange(mode: 'normal' | 'live') {
@@ -91,33 +89,31 @@ export default function UploadPage() {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
-
-    if (!f.type.startsWith('video/')) {
-      setError(t('upload.errVideoOnly'))
-      return
-    }
-    if (f.size > 200 * 1024 * 1024) {
-      setError(t('upload.errSize'))
-      return
-    }
-
+    if (!f.type.startsWith('video/')) { setError(t('upload.errVideoOnly')); return }
+    if (f.size > 200 * 1024 * 1024) { setError(t('upload.errSize')); return }
     try {
-      const duration = await getVideoDuration(f)
-      if (duration > MAX_DURATION_SEC) {
-        const m = Math.floor(duration / 60)
-        const s = Math.floor(duration % 60)
-        setError(t('upload.errDuration', { m, s }))
+      const dur = await getVideoDuration(f)
+      if (dur > MAX_DURATION_SEC) {
+        setError(t('upload.errDuration', { m: Math.floor(dur / 60), s: Math.floor(dur % 60) }))
         e.target.value = ''
         return
       }
+      setDuration(dur)
+      setTrimStart(0)
+      setTrimEnd(dur)
     } catch {
-      setError(t('upload.errRead'))
-      return
+      setError(t('upload.errRead')); return
     }
-
     setFile(f)
     setError('')
     setPreview(URL.createObjectURL(f))
+    setBrightness(1); setContrast(1); setSaturation(1)
+  }
+
+  async function handleGroupSelect(groupName: string) {
+    setSelectedGroup(groupName)
+    const { data } = await supabase.from('groups').select('id').eq('name', groupName).maybeSingle()
+    setSelectedGroupId(data?.id || null)
   }
 
   async function handleUpload() {
@@ -129,21 +125,11 @@ export default function UploadPage() {
     const ext = file.name.split('.').pop()
     const fileName = `${accountId}/${Date.now()}.${ext}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('videos')
-      .upload(fileName, file, { upsert: false })
-
-    if (uploadError) {
-      setError(t('upload.errUpload') + uploadError.message)
-      setUploading(false)
-      return
-    }
+    const { error: uploadError } = await supabase.storage.from('videos').upload(fileName, file, { upsert: false })
+    if (uploadError) { setError(t('upload.errUpload') + uploadError.message); setUploading(false); return }
 
     setProgress(70)
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('videos')
-      .getPublicUrl(fileName)
+    const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(fileName)
 
     const { error: dbError } = await supabase.from('videos').insert({
       account_id: accountId,
@@ -153,10 +139,14 @@ export default function UploadPage() {
       video_url: publicUrl,
       is_live: uploadMode === 'live',
       is_private: isPrivate,
+      trim_start: trimStart > 0 ? trimStart : null,
+      trim_end: trimEnd < duration ? trimEnd : null,
+      filter_brightness: brightness !== 1 ? brightness : null,
+      filter_contrast: contrast !== 1 ? contrast : null,
+      filter_saturation: saturation !== 1 ? saturation : null,
     })
 
     setProgress(100)
-
     if (dbError) {
       setError(t('upload.errSave') + dbError.message)
     } else {
@@ -166,6 +156,7 @@ export default function UploadPage() {
     setUploading(false)
   }
 
+  const filterStyle = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`
   const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading
 
   return (
@@ -183,25 +174,13 @@ export default function UploadPage() {
 
         {/* 업로드 모드 선택 — 보컬만 */}
         <div className={`flex gap-3 mb-8 ${category === 'dance' ? 'hidden' : ''}`}>
-          <button
-            onClick={() => handleModeChange('normal')}
-            className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${
-              uploadMode === 'normal'
-                ? 'border-white/30 bg-white/10 text-white'
-                : 'border-white/10 text-white/40 hover:border-white/20'
-            }`}
-          >
+          <button onClick={() => handleModeChange('normal')}
+            className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${uploadMode === 'normal' ? 'border-white/30 bg-white/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}>
             📁 일반 커버
             <p className="text-xs font-normal mt-0.5 opacity-60">갤러리에서 선택</p>
           </button>
-          <button
-            onClick={() => handleModeChange('live')}
-            className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${
-              uploadMode === 'live'
-                ? 'border-red-500 bg-red-500/15 text-white'
-                : 'border-white/10 text-white/40 hover:border-white/20'
-            }`}
-          >
+          <button onClick={() => handleModeChange('live')}
+            className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${uploadMode === 'live' ? 'border-red-500 bg-red-500/15 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}>
             🔴 LIVE 인증
             <p className="text-xs font-normal mt-0.5 opacity-60">실시간 촬영만 허용</p>
           </button>
@@ -212,7 +191,7 @@ export default function UploadPage() {
             <span className="text-red-400 text-lg">🔴</span>
             <div>
               <p className="text-red-300 text-sm font-medium">LIVE 인증 커버</p>
-              <p className="text-white/40 text-xs mt-0.5">지금 촬영한 영상만 업로드됩니다. 편집 없이 실력 그대로를 보여주는 인증 커버로 랭킹에 별도 표시됩니다.</p>
+              <p className="text-white/40 text-xs mt-0.5">지금 촬영한 영상만 업로드됩니다. 구간 설정만 가능하며 색 보정은 적용되지 않습니다.</p>
             </div>
           </div>
         )}
@@ -234,22 +213,12 @@ export default function UploadPage() {
                 const isSelected = selectedGroup === g.name
                 const accent = g.primary === '#FFFFFF' ? '#C9A96E' : g.primary
                 return (
-                  <button
-                    key={g.name}
-                    onClick={() => handleGroupSelect(g.name)}
+                  <button key={g.name} onClick={() => handleGroupSelect(g.name)}
                     className="relative rounded-xl py-3 px-2 text-center transition border-2 flex flex-col items-center gap-1"
-                    style={isSelected
-                      ? { background: g.gradient, borderColor: 'transparent' }
-                      : { background: `${accent}10`, borderColor: `${accent}25` }
-                    }
-                  >
+                    style={isSelected ? { background: g.gradient, borderColor: 'transparent' } : { background: `${accent}10`, borderColor: `${accent}25` }}>
                     <span className="text-xl">{g.emoji}</span>
-                    <span className="text-xs font-medium text-white leading-tight">
-                      {groupDisplayName(g.name, locale)}
-                    </span>
-                    {isSelected && (
-                      <span className="absolute top-1 right-1.5 text-white text-[10px]">✓</span>
-                    )}
+                    <span className="text-xs font-medium text-white leading-tight">{groupDisplayName(g.name, locale)}</span>
+                    {isSelected && <span className="absolute top-1 right-1.5 text-white text-[10px]">✓</span>}
                   </button>
                 )
               })}
@@ -260,24 +229,12 @@ export default function UploadPage() {
           <div>
             <label className="text-white/60 text-sm mb-3 block">{t('upload.category')}</label>
             <div className="flex gap-3">
-              <button
-                onClick={() => handleCategoryChange('vocal')}
-                className={`flex-1 py-3 rounded-xl border-2 font-medium transition ${
-                  category === 'vocal'
-                    ? 'border-pink-500 bg-pink-500/20 text-pink-300'
-                    : 'border-white/10 text-white/50 hover:border-white/30'
-                }`}
-              >
+              <button onClick={() => handleCategoryChange('vocal')}
+                className={`flex-1 py-3 rounded-xl border-2 font-medium transition ${category === 'vocal' ? 'border-pink-500 bg-pink-500/20 text-pink-300' : 'border-white/10 text-white/50 hover:border-white/30'}`}>
                 🎤 {t('common.vocal')}
               </button>
-              <button
-                onClick={() => handleCategoryChange('dance')}
-                className={`flex-1 py-3 rounded-xl border-2 font-medium transition ${
-                  category === 'dance'
-                    ? 'border-pink-500 bg-pink-500/20 text-pink-300'
-                    : 'border-white/10 text-white/50 hover:border-white/30'
-                }`}
-              >
+              <button onClick={() => handleCategoryChange('dance')}
+                className={`flex-1 py-3 rounded-xl border-2 font-medium transition ${category === 'dance' ? 'border-pink-500 bg-pink-500/20 text-pink-300' : 'border-white/10 text-white/50 hover:border-white/30'}`}>
                 💃 {t('common.dance')}
               </button>
             </div>
@@ -286,42 +243,97 @@ export default function UploadPage() {
           {/* 제목 */}
           <div>
             <label className="text-white/60 text-sm mb-1.5 block">{t('upload.titleLabel')}</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={t('upload.titlePlaceholder')}
-              maxLength={50}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-pink-500 transition"
-            />
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+              placeholder={t('upload.titlePlaceholder')} maxLength={50}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-pink-500 transition" />
           </div>
 
           {/* 영상 선택 */}
           <div>
             <label className="text-white/60 text-sm mb-3 block">{t('upload.videoLabel')}</label>
             {preview ? (
-              <div className="relative rounded-xl overflow-hidden">
-                <video src={preview} controls className="w-full rounded-xl" />
-                <button
-                  onClick={() => { setFile(null); setPreview(null) }}
-                  className="absolute top-2 right-2 bg-black/70 text-white text-xs px-3 py-1 rounded-full"
-                >
-                  {t('upload.change')}
-                </button>
+              <div className="flex flex-col gap-4">
+                {/* 미리보기 */}
+                <div className="relative rounded-xl overflow-hidden">
+                  <video
+                    ref={previewRef}
+                    src={preview}
+                    controls
+                    className="w-full rounded-xl"
+                    style={{ filter: filterStyle }}
+                  />
+                  <button onClick={() => { setFile(null); setPreview(null) }}
+                    className="absolute top-2 right-2 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+                    {t('upload.change')}
+                  </button>
+                </div>
+
+                {/* 구간 설정 */}
+                <div className="rounded-xl p-4 border border-white/10 bg-white/5">
+                  <p className="text-white/60 text-xs font-medium mb-3">✂️ 구간 설정 <span className="text-white/30 ml-1">{fmtTime(trimStart)} ~ {fmtTime(trimEnd)}</span></p>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-white/40 text-xs w-10">시작</span>
+                      <input type="range" min={0} max={duration} step={0.1} value={trimStart}
+                        onChange={e => {
+                          const v = parseFloat(e.target.value)
+                          setTrimStart(v)
+                          if (previewRef.current) previewRef.current.currentTime = v
+                        }}
+                        className="flex-1 accent-pink-500" />
+                      <span className="text-white/50 text-xs w-10 text-right">{fmtTime(trimStart)}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-white/40 text-xs w-10">끝</span>
+                      <input type="range" min={0} max={duration} step={0.1} value={trimEnd}
+                        onChange={e => {
+                          const v = parseFloat(e.target.value)
+                          setTrimEnd(v)
+                          if (previewRef.current) previewRef.current.currentTime = v
+                        }}
+                        className="flex-1 accent-pink-500" />
+                      <span className="text-white/50 text-xs w-10 text-right">{fmtTime(trimEnd)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 색 보정 — 일반만 */}
+                {uploadMode === 'normal' && (
+                  <div className="rounded-xl p-4 border border-white/10 bg-white/5">
+                    <p className="text-white/60 text-xs font-medium mb-3">🎨 색 보정</p>
+                    <div className="flex flex-col gap-3">
+                      {[
+                        { label: '밝기', value: brightness, set: setBrightness, min: 0.5, max: 1.5 },
+                        { label: '대비', value: contrast, set: setContrast, min: 0.5, max: 1.5 },
+                        { label: '채도', value: saturation, set: setSaturation, min: 0, max: 2 },
+                      ].map(({ label, value, set, min, max }) => (
+                        <div key={label} className="flex items-center gap-3">
+                          <span className="text-white/40 text-xs w-10">{label}</span>
+                          <input type="range" min={min} max={max} step={0.05} value={value}
+                            onChange={e => set(parseFloat(e.target.value))}
+                            className="flex-1 accent-pink-500" />
+                          <button onClick={() => set(label === '채도' ? 1 : 1)}
+                            className="text-white/25 text-xs w-10 text-right hover:text-white/50 transition">
+                            {value.toFixed(1)}
+                          </button>
+                        </div>
+                      ))}
+                      <button onClick={() => { setBrightness(1); setContrast(1); setSaturation(1) }}
+                        className="text-white/25 text-xs text-center mt-1 hover:text-white/50 transition">
+                        초기화
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <button
                 onClick={() => uploadMode === 'live' ? liveRef.current?.click() : fileRef.current?.click()}
                 disabled={uploadMode === 'live' && !isMobile}
                 className="w-full border-2 border-dashed rounded-xl py-12 flex flex-col items-center gap-3 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{
-                  borderColor: uploadMode === 'live' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.2)',
-                }}
-              >
+                style={{ borderColor: uploadMode === 'live' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.2)' }}>
                 <span className="text-4xl">{uploadMode === 'live' ? '🎬' : '📁'}</span>
-                <span className="text-white/50 text-sm">
-                  {uploadMode === 'live' ? '탭하여 촬영 시작' : '갤러리에서 영상 선택'}
-                </span>
+                <span className="text-white/50 text-sm">{uploadMode === 'live' ? '탭하여 촬영 시작' : '갤러리에서 영상 선택'}</span>
                 <span className="text-white/25 text-xs">{t('upload.maxInfo')}</span>
               </button>
             )}
@@ -329,45 +341,26 @@ export default function UploadPage() {
             <input ref={liveRef} type="file" accept="video/*" capture="environment" onChange={handleFileChange} className="hidden" />
           </div>
 
-          {/* 공개/비공개 토글 */}
-          <button
-            onClick={() => setIsPrivate(p => !p)}
-            className={`w-full py-3 px-4 rounded-xl border-2 font-medium transition text-sm flex items-center justify-between ${
-              isPrivate
-                ? 'border-white/20 bg-white/5 text-white/60'
-                : 'border-pink-500/40 bg-pink-500/10 text-pink-300'
-            }`}
-          >
+          {/* 공개/비공개 */}
+          <button onClick={() => setIsPrivate(p => !p)}
+            className={`w-full py-3 px-4 rounded-xl border-2 font-medium transition text-sm flex items-center justify-between ${isPrivate ? 'border-white/20 bg-white/5 text-white/60' : 'border-pink-500/40 bg-pink-500/10 text-pink-300'}`}>
             <span>{isPrivate ? '🔒 비공개' : '🌐 공개'}</span>
-            <span className="text-xs opacity-60">
-              {isPrivate ? '나만 볼 수 있어요' : '유니버스에 공개돼요'}
-            </span>
+            <span className="text-xs opacity-60">{isPrivate ? '나만 볼 수 있어요' : '유니버스에 공개돼요'}</span>
           </button>
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
           {uploading && (
             <div className="w-full bg-white/10 rounded-full h-2">
-              <div
-                className="h-2 rounded-full transition-all duration-500"
-                style={{ background: 'linear-gradient(90deg, #E91E8C, #7B2FBE)', width: `${progress}%` }}
-              />
+              <div className="h-2 rounded-full transition-all duration-500"
+                style={{ background: 'linear-gradient(90deg, #E91E8C, #7B2FBE)', width: `${progress}%` }} />
             </div>
           )}
 
-          <button
-            onClick={handleUpload}
-            disabled={!canUpload}
+          <button onClick={handleUpload} disabled={!canUpload}
             className="w-full disabled:opacity-40 text-white font-medium py-4 rounded-xl transition text-lg"
-            style={{
-              background: uploadMode === 'live'
-                ? 'linear-gradient(135deg, #ef4444, #E91E8C)'
-                : 'linear-gradient(135deg, #E91E8C, #7B2FBE)',
-            }}
-          >
-            {uploading
-              ? t('upload.uploading', { pct: progress })
-              : uploadMode === 'live' ? '🔴 LIVE 커버 업로드' : t('upload.btn')}
+            style={{ background: uploadMode === 'live' ? 'linear-gradient(135deg, #ef4444, #E91E8C)' : 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}>
+            {uploading ? t('upload.uploading', { pct: progress }) : uploadMode === 'live' ? '🔴 LIVE 커버 업로드' : t('upload.btn')}
           </button>
         </div>
       </div>
