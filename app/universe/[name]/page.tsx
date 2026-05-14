@@ -18,6 +18,11 @@ type Video = {
   video_url: string
   created_at: string
   is_live: boolean
+  trim_start: number | null
+  trim_end: number | null
+  filter_brightness: number | null
+  filter_contrast: number | null
+  filter_saturation: number | null
   accounts: { username: string; is_founder?: boolean }
 }
 
@@ -99,7 +104,7 @@ export default function UniversePage() {
 
       const { data } = await supabase
         .from('videos')
-        .select('*, accounts(username, is_founder), is_live')
+        .select('*, accounts(username, is_founder)')
         .eq('group_id', group.id)
         .eq('is_private', false)
         .order('like_count', { ascending: false })
@@ -483,13 +488,29 @@ export default function UniversePage() {
                   ref={el => { videoRefs.current[video.id] = el }}
                   src={video.video_url}
                   className="w-full block bg-black"
-                  style={{ maxHeight: '65vh' }}
+                  style={{
+                    maxHeight: '65vh',
+                    filter: [
+                      video.filter_brightness != null ? `brightness(${video.filter_brightness})` : '',
+                      video.filter_contrast != null ? `contrast(${video.filter_contrast})` : '',
+                      video.filter_saturation != null ? `saturate(${video.filter_saturation})` : '',
+                    ].filter(Boolean).join(' ') || undefined,
+                  }}
                   playsInline
                   muted
                   loop
                   controls
                   preload="none"
                   onPlay={() => handleVideoPlay(video)}
+                  onLoadedMetadata={e => {
+                    if (video.trim_start) (e.target as HTMLVideoElement).currentTime = video.trim_start
+                  }}
+                  onTimeUpdate={e => {
+                    const el = e.target as HTMLVideoElement
+                    if (video.trim_end && el.currentTime >= video.trim_end) {
+                      el.currentTime = video.trim_start ?? 0
+                    }
+                  }}
                 />
 
                 {/* 하단 정보 바 */}
