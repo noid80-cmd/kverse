@@ -27,7 +27,6 @@ export default function ProfilePage() {
   const t = useT()
   const { locale } = useLanguage()
   const [account, setAccount] = useState<Account | null>(null)
-  const [allAccounts, setAllAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState<GroupTheme | null>(null)
   const [equippedVisuals, setEquippedVisuals] = useState<EquippedItems>({})
@@ -57,7 +56,6 @@ export default function ProfilePage() {
         const activeAccount = groupAccounts.length > 0 ? groupAccounts[0] : citizenAccount
         if (!activeAccount) { router.push('/login'); return }
 
-        setAllAccounts(groupAccounts)
         setAccount(activeAccount)
         if (activeAccount.groups) setTheme(getTheme(activeAccount.groups.name))
         setNationality(activeAccount.nationality || 'KR')
@@ -84,24 +82,7 @@ export default function ProfilePage() {
     load()
   }, [])
 
-  async function switchAccount(acc: Account) {
-    setAccount(acc)
-    if (acc.groups) setTheme(getTheme(acc.groups.name))
-    setNationality(acc.nationality || 'KR')
-    const [equippedResult, videosRes, followersRes, followingRes] = await Promise.all([
-      loadEquippedVisuals(acc.equipped || {}),
-      supabase.from('videos').select('like_count, view_count').eq('account_id', acc.id),
-      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', acc.id),
-      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', acc.id),
-    ])
-    setEquippedVisuals(equippedResult)
-    setFollowerCount(followersRes.count || 0)
-    setFollowingCount(followingRes.count || 0)
-    const vids = videosRes.data || []
-    setVideoCount(vids.length)
-    setTotalLikes(vids.reduce((s: number, v: any) => s + v.like_count, 0))
-    setTotalViews(vids.reduce((s: number, v: any) => s + v.view_count, 0))
-  }
+
 
   async function updateNationality(code: string) {
     if (!account) return
@@ -214,26 +195,6 @@ export default function ProfilePage() {
               </span>
               <span className="text-[10px] opacity-50">✏️</span>
             </button>
-          </div>
-        )}
-
-        {/* 계정 전환 */}
-        {allAccounts.length > 1 && (
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-1 justify-center">
-            {allAccounts.map(acc => {
-              const accT = getTheme(acc.groups?.name || '')
-              const isActive = account?.id === acc.id
-              const accAccent = accT.primary === '#FFFFFF' ? '#C9A96E' : accT.primary
-              return (
-                <button key={acc.id} onClick={() => switchAccount(acc)}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border flex-shrink-0"
-                  style={isActive
-                    ? { background: accT.gradient, borderColor: 'transparent', color: 'white' }
-                    : { borderColor: `${accAccent}40`, color: accAccent }}>
-                  {acc.username}
-                </button>
-              )
-            })}
           </div>
         )}
 
