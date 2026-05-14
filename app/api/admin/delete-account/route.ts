@@ -29,6 +29,10 @@ export async function POST(req: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
+    // user_id 먼저 조회 (Auth 삭제용)
+    const { data: accountData } = await db.from('accounts').select('user_id').eq('id', accountId).maybeSingle()
+    const userId = accountData?.user_id
+
     const { data: videos } = await db.from('videos').select('id').eq('account_id', accountId)
     const videoIds = (videos || []).map((v: { id: string }) => v.id)
     const { data: posts } = await db.from('posts').select('id').eq('account_id', accountId)
@@ -61,6 +65,9 @@ export async function POST(req: NextRequest) {
 
     const { error: accErr } = await db.from('accounts').delete().eq('id', accountId)
     if (accErr) return NextResponse.json({ error: 'accounts: ' + accErr.message }, { status: 500 })
+
+    // Supabase Auth 유저도 삭제
+    if (userId) await db.auth.admin.deleteUser(userId)
 
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
