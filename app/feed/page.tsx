@@ -9,6 +9,8 @@ import KverseLogo from '@/app/components/KverseLogo'
 import NotificationBell from '@/app/components/NotificationBell'
 import Avatar from '@/app/components/Avatar'
 
+type Highlight = { key: string; name: string; emoji: string }
+
 type Account = {
   id: string
   username: string
@@ -21,6 +23,7 @@ type Account = {
   account_type?: string
   groups: { name: string; name_en: string } | null
   rpm_avatar_url?: string | null
+  custom_highlights?: Highlight[]
 }
 
 type Video = {
@@ -34,6 +37,7 @@ type Video = {
   is_private: boolean
   account_id: string
   groups: { name: string } | null
+  tags?: string[]
 }
 
 type Comment = {
@@ -43,7 +47,7 @@ type Comment = {
   accounts: { username: string }
 }
 
-const CATEGORIES = [
+const FIXED_CATEGORIES = [
   { key: 'all', emoji: '🎬', labelKey: 'feed.catAll' },
   { key: 'vocal', emoji: '🎤', labelKey: 'feed.catVocal' },
   { key: 'dance', emoji: '💃', labelKey: 'feed.catDance' },
@@ -67,6 +71,10 @@ export default function FeedPage() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [followerCount, setFollowerCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
+  const [customHighlights, setCustomHighlights] = useState<Highlight[]>([])
+  const [showAddHighlight, setShowAddHighlight] = useState(false)
+  const [newHighlightName, setNewHighlightName] = useState('')
+  const [newHighlightEmoji, setNewHighlightEmoji] = useState('')
   const viewedIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -78,6 +86,7 @@ export default function FeedPage() {
         .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
       if (!data) { setLoading(false); return }
       setAccount(data)
+      if (data.custom_highlights) setCustomHighlights(data.custom_highlights as Highlight[])
       const [, , fcRes, fgRes] = await Promise.all([
         fetchVideos(data.id),
         fetchLikedIds(data.id),
@@ -102,16 +111,46 @@ export default function FeedPage() {
 
   async function fetchVideos(accId: string) {
     const { data: vids } = await supabase
-      .from('videos')
-      .select('*, groups(name)')
-      .eq('account_id', accId)
-      .order('created_at', { ascending: false })
+      .from('videos').select('*, groups(name)')
+      .eq('account_id', accId).order('created_at', { ascending: false })
     setVideos(vids || [])
   }
 
   async function fetchLikedIds(accountId: string) {
     const { data } = await supabase.from('likes').select('video_id').eq('account_id', accountId)
     if (data) setLikedIds(new Set(data.map((r: { video_id: string }) => r.video_id)))
+  }
+
+  async function addHighlight() {
+    if (!account || !newHighlightName.trim()) return
+    const newH: Highlight = {
+      key: `h_${Date.now()}`,
+      name: newHighlightName.trim(),
+      emoji: newHighlightEmoji.trim() || '📌',
+    }
+    const updated = [...customHighlights, newH]
+    setCustomHighlights(updated)
+    setShowAddHighlight(false)
+    setNewHighlightName('')
+    setNewHighlightEmoji('')
+    await supabase.from('accounts').update({ custom_highlights: updated }).eq('id', account.id)
+  }
+
+  async function deleteHighlight(key: string) {
+    if (!account) return
+    const updated = customHighlights.filter(h => h.key !== key)
+    setCustomHighlights(updated)
+    if (activeCategory === key) setActiveCategory('all')
+    await supabase.from('accounts').update({ custom_highlights: updated }).eq('id', account.id)
+  }
+
+  async function toggleVideoTag(video: Video, highlightKey: string) {
+    const currentTags = video.tags || []
+    const hasTag = currentTags.includes(highlightKey)
+    const newTags = hasTag ? currentTags.filter(t => t !== highlightKey) : [...currentTags, highlightKey]
+    setVideos(prev => prev.map(v => v.id === video.id ? { ...v, tags: newTags } : v))
+    setSelectedVideo(prev => prev?.id === video.id ? { ...prev, tags: newTags } : prev)
+    await supabase.from('videos').update({ tags: newTags }).eq('id', video.id)
   }
 
   async function deleteVideo(video: Video) {
@@ -136,10 +175,7 @@ export default function FeedPage() {
     const { data, error } = await supabase.from('video_comments')
       .insert({ video_id: commentVideoId, account_id: account.id, content: commentText.trim() })
       .select('*, accounts(username)').single()
-    if (!error && data) {
-      setComments(prev => [...prev, data])
-      setCommentText('')
-    }
+    if (!error && data) { setComments(prev => [...prev, data]); setCommentText('') }
   }
 
   async function deleteComment(commentId: string) {
@@ -184,7 +220,11 @@ export default function FeedPage() {
   const theme = account?.groups ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
   const totalLikes = videos.reduce((sum, v) => sum + v.like_count, 0)
-  const filteredVideos = activeCategory === 'all' ? videos : videos.filter(v => v.category === activeCategory)
+
+  const filteredVideos = activeCategory === 'all' ? videos
+    : activeCategory === 'vocal' || activeCategory === 'dance'
+      ? videos.filter(v => v.category === activeCategory)
+      : videos.filter(v => (v.tags || []).includes(activeCategory))
 
   const confettiItems = showCelebration
     ? Array.from({ length: 18 }, (_, i) => ({
@@ -196,13 +236,11 @@ export default function FeedPage() {
       }))
     : []
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-pink-400 text-xl font-medium animate-pulse">{t('common.loadingUniverse')}</div>
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="text-pink-400 text-xl font-medium animate-pulse">{t('common.loadingUniverse')}</div>
+    </div>
+  )
 
   if (!authReady) return <div className="min-h-screen bg-black" />
 
@@ -248,7 +286,6 @@ export default function FeedPage() {
         {/* 프로필 헤더 */}
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-center gap-5 mb-4">
-            {/* 아바타 */}
             <div className="rounded-2xl flex-shrink-0"
               style={{ padding: 3, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
               <Avatar
@@ -259,8 +296,6 @@ export default function FeedPage() {
                 username={account?.username}
               />
             </div>
-
-            {/* 스탯 */}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <span className="text-white font-black text-lg">@{account?.username}</span>
@@ -277,9 +312,7 @@ export default function FeedPage() {
                   <p className="text-white/40 text-xs mt-0.5">{t('prof.coverVideos')}</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-base leading-tight" style={{ color: accentColor }}>
-                    {totalLikes}
-                  </p>
+                  <p className="font-bold text-base leading-tight" style={{ color: accentColor }}>{totalLikes}</p>
                   <p className="text-white/40 text-xs mt-0.5">{t('prof.totalLikes')}</p>
                 </div>
                 <div className="text-center">
@@ -293,22 +326,17 @@ export default function FeedPage() {
               </div>
             </div>
           </div>
-
-          {/* 바이오 */}
-          {account?.bio && (
-            <p className="text-white/60 text-sm leading-relaxed mb-3">{account.bio}</p>
-          )}
-
-          {/* 프로필 편집 버튼 */}
+          {account?.bio && <p className="text-white/60 text-sm leading-relaxed mb-3">{account.bio}</p>}
           <Link href="/profile"
             className="block w-full text-center py-2 rounded-xl border border-white/15 text-white/60 text-sm font-medium hover:bg-white/5 transition">
             {t('feed.editProfile')}
           </Link>
         </div>
 
-        {/* 카테고리 하이라이트 */}
-        <div className="border-t border-white/5 px-5 py-4 flex gap-5 overflow-x-auto">
-          {CATEGORIES.map(cat => {
+        {/* 하이라이트 */}
+        <div className="border-t border-white/5 px-5 py-4 flex gap-5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {/* 고정 카테고리 */}
+          {FIXED_CATEGORIES.map(cat => {
             const isActive = activeCategory === cat.key
             const count = cat.key === 'all' ? videos.length : videos.filter(v => v.category === cat.key).length
             return (
@@ -326,11 +354,46 @@ export default function FeedPage() {
               </button>
             )
           })}
+
+          {/* 커스텀 하이라이트 */}
+          {customHighlights.map(h => {
+            const isActive = activeCategory === h.key
+            const count = videos.filter(v => (v.tags || []).includes(h.key)).length
+            return (
+              <div key={h.key} className="flex flex-col items-center gap-1.5 flex-shrink-0 relative">
+                <button onClick={() => setActiveCategory(h.key)}
+                  className="w-16 h-16 rounded-full flex items-center justify-center text-2xl transition"
+                  style={isActive
+                    ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', boxShadow: `0 0 0 2px #000, 0 0 0 4px ${accentColor || '#E91E8C'}` }
+                    : { background: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 2px #000, 0 0 0 4px rgba(255,255,255,0.12)' }
+                  }>
+                  {h.emoji}
+                </button>
+                <span className="text-xs text-white/50 max-w-[64px] truncate text-center">{h.name}</span>
+                <span className="text-[10px] text-white/25">{count}</span>
+                <button onClick={() => deleteHighlight(h.key)}
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-white/40 hover:text-red-400 transition"
+                  style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  ×
+                </button>
+              </div>
+            )
+          })}
+
+          {/* + 추가 버튼 */}
+          <button onClick={() => setShowAddHighlight(true)}
+            className="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl text-white/30 transition hover:text-white/60"
+              style={{ border: '2px dashed rgba(255,255,255,0.15)' }}>
+              +
+            </div>
+            <span className="text-xs text-white/25">{t('feed.addHighlight')}</span>
+          </button>
         </div>
 
         {/* 그리드 */}
         {filteredVideos.length === 0 ? (
-          <div className="text-center py-20 px-6">
+          <div className="text-center py-20 px-6 border-t border-white/5">
             <div className="text-5xl mb-4">{theme?.emoji || '📹'}</div>
             <p className="text-white/40 text-sm mb-6">{t('feed.beFirst')}</p>
             <Link href="/upload" className="px-8 py-3 text-white font-medium rounded-full transition"
@@ -341,30 +404,20 @@ export default function FeedPage() {
         ) : (
           <div className="grid grid-cols-3 gap-px bg-white/5 border-t border-white/5">
             {filteredVideos.map(video => (
-              <button
-                key={video.id}
-                onClick={() => setSelectedVideo(video)}
-                className="relative bg-zinc-950 overflow-hidden"
-                style={{ aspectRatio: '1' }}
-              >
+              <button key={video.id} onClick={() => setSelectedVideo(video)}
+                className="relative bg-zinc-950 overflow-hidden" style={{ aspectRatio: '1' }}>
                 <video
                   src={video.video_url}
                   className="w-full h-full object-cover"
-                  preload="metadata"
-                  muted
-                  playsInline
+                  preload="metadata" muted playsInline
                   onLoadedMetadata={e => { (e.target as HTMLVideoElement).currentTime = 0.1 }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                <div className="absolute bottom-1.5 left-2 text-xs">
-                  {video.category === 'vocal' ? '🎤' : '💃'}
-                </div>
+                <div className="absolute bottom-1.5 left-2 text-xs">{video.category === 'vocal' ? '🎤' : '💃'}</div>
                 <div className="absolute bottom-1.5 right-2">
                   <span className="text-white text-[10px] font-bold drop-shadow-sm">♥ {video.like_count}</span>
                 </div>
-                {video.is_private && (
-                  <div className="absolute top-1.5 right-1.5 text-xs">🔒</div>
-                )}
+                {video.is_private && <div className="absolute top-1.5 right-1.5 text-xs">🔒</div>}
               </button>
             ))}
           </div>
@@ -374,11 +427,9 @@ export default function FeedPage() {
       {/* 영상 모달 */}
       {selectedVideo && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.88)' }}
-          onClick={() => setSelectedVideo(null)}>
+          style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => setSelectedVideo(null)}>
           <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
-            style={{ background: '#111', maxHeight: '92vh' }}
-            onClick={e => e.stopPropagation()}>
+            style={{ background: '#111', maxHeight: '92vh' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 flex-shrink-0">
               <div className="flex-1 min-w-0">
                 <p className="text-white font-bold text-sm truncate">{selectedVideo.title}</p>
@@ -391,13 +442,30 @@ export default function FeedPage() {
               </div>
               <button onClick={() => setSelectedVideo(null)} className="text-white/30 text-2xl leading-none flex-shrink-0">×</button>
             </div>
-            <video
-              src={selectedVideo.video_url}
-              className="w-full bg-black flex-shrink-0"
-              style={{ maxHeight: '55vh' }}
-              controls playsInline autoPlay
-              onPlay={() => handleVideoPlay(selectedVideo.id, selectedVideo.view_count)}
-            />
+            <video src={selectedVideo.video_url} className="w-full bg-black flex-shrink-0"
+              style={{ maxHeight: '50vh' }} controls playsInline autoPlay
+              onPlay={() => handleVideoPlay(selectedVideo.id, selectedVideo.view_count)} />
+
+            {/* 하이라이트 태그 */}
+            {customHighlights.length > 0 && (
+              <div className="px-4 pt-3 pb-2 flex flex-wrap gap-2 border-t border-white/5 flex-shrink-0">
+                <p className="text-white/25 text-xs w-full">{t('feed.addToHighlight')}</p>
+                {customHighlights.map(h => {
+                  const hasTag = (selectedVideo.tags || []).includes(h.key)
+                  return (
+                    <button key={h.key} onClick={() => toggleVideoTag(selectedVideo, h.key)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition border"
+                      style={hasTag
+                        ? { background: `${accentColor}20`, borderColor: accentColor, color: accentColor }
+                        : { borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)' }
+                      }>
+                      {h.emoji} {h.name}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
             <div className="px-4 py-3 flex items-center justify-between border-t border-white/5 flex-shrink-0">
               <div className="flex items-center gap-3 text-white/35 text-xs">
                 <span>👁 {selectedVideo.view_count}</span>
@@ -415,13 +483,51 @@ export default function FeedPage() {
                   style={likedIds.has(selectedVideo.id)
                     ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', color: 'white' }
                     : { background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}35` }
-                  }>
-                  ♥ {selectedVideo.like_count}
-                </button>
+                  }>♥ {selectedVideo.like_count}</button>
                 <button onClick={() => setDeleteTarget(selectedVideo)}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>🗑</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 하이라이트 추가 모달 */}
+      {showAddHighlight && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowAddHighlight(false)}>
+          <div className="w-full max-w-lg rounded-t-3xl p-6 flex flex-col gap-4"
+            style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={e => e.stopPropagation()}>
+            <h3 className="text-white font-bold text-base">{t('feed.newHighlight')}</h3>
+            <div className="flex gap-3">
+              <input
+                value={newHighlightEmoji}
+                onChange={e => setNewHighlightEmoji(e.target.value)}
+                placeholder="📌"
+                maxLength={2}
+                className="w-16 bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-white text-center text-xl focus:outline-none focus:border-pink-500 transition"
+              />
+              <input
+                value={newHighlightName}
+                onChange={e => setNewHighlightName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') addHighlight() }}
+                placeholder={t('feed.highlightNamePlaceholder')}
+                maxLength={20}
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-pink-500 transition"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowAddHighlight(false)}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-white/50 text-sm font-medium">
+                {t('feed.cancelBtn')}
+              </button>
+              <button onClick={addHighlight} disabled={!newHighlightName.trim()}
+                className="flex-1 py-3 rounded-xl text-white text-sm font-medium disabled:opacity-40 transition"
+                style={{ background: 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
+                {t('feed.addBtn')}
+              </button>
             </div>
           </div>
         </div>
@@ -437,9 +543,8 @@ export default function FeedPage() {
 
       {/* 댓글 바텀 시트 */}
       {commentVideoId && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center"
-          style={{ background: 'rgba(0,0,0,0.7)' }}
-          onClick={() => setCommentVideoId(null)}>
+        <div className="fixed inset-0 z-[70] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setCommentVideoId(null)}>
           <div className="w-full max-w-2xl rounded-t-3xl flex flex-col"
             style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '70vh' }}
             onClick={e => e.stopPropagation()}>
@@ -486,9 +591,8 @@ export default function FeedPage() {
 
       {/* 삭제 확인 모달 */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center px-6"
-          style={{ background: 'rgba(0,0,0,0.7)' }}
-          onClick={() => setDeleteTarget(null)}>
+        <div className="fixed inset-0 z-[80] flex items-center justify-center px-6"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setDeleteTarget(null)}>
           <div className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4"
             style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
             onClick={e => e.stopPropagation()}>
