@@ -4,35 +4,35 @@ import { NextRequest, NextResponse } from 'next/server'
 const ADMIN_EMAIL = 'noid80@hanmail.net'
 
 export async function POST(req: NextRequest) {
-  const { accountId, accessToken } = await req.json()
-  if (!accountId || !accessToken) {
-    return NextResponse.json({ error: 'Missing params' }, { status: 400 })
-  }
-
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!serviceKey) {
-    return NextResponse.json({ error: 'No service key configured' }, { status: 500 })
-  }
-
-  const db = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceKey,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-
-  // access token으로 요청자 확인
-  const { data: { user }, error: authError } = await db.auth.getUser(accessToken)
-  if (authError) return NextResponse.json({ error: 'Auth error: ' + authError.message }, { status: 403 })
-  if (!user) return NextResponse.json({ error: 'No user found' }, { status: 403 })
-  if (user.email !== ADMIN_EMAIL) return NextResponse.json({ error: 'Not admin: ' + user.email }, { status: 403 })
-
   try {
+    const { accountId, accessToken } = await req.json()
+    if (!accountId || !accessToken) {
+      return NextResponse.json({ error: 'Missing params' }, { status: 400 })
+    }
+
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+    // 토큰으로 요청자 확인 (anon key + Bearer token)
+    const userClient = createClient(url, anonKey, {
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+    const { data: { user }, error: authError } = await userClient.auth.getUser()
+    if (authError || !user || user.email !== ADMIN_EMAIL) {
+      return NextResponse.json({ error: 'Unauthorized: ' + (authError?.message || user?.email || 'no user') }, { status: 403 })
+    }
+
+    // service role로 삭제
+    const db = createClient(url, serviceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+
     const { data: videos } = await db.from('videos').select('id').eq('account_id', accountId)
     const videoIds = (videos || []).map((v: { id: string }) => v.id)
-
     const { data: posts } = await db.from('posts').select('id').eq('account_id', accountId)
     const postIds = (posts || []).map((p: { id: string }) => p.id)
-
     const { data: convs } = await db.from('conversations').select('id')
       .or(`account1_id.eq.${accountId},account2_id.eq.${accountId}`)
     const convIds = (convs || []).map((c: { id: string }) => c.id)
@@ -59,12 +59,11 @@ export async function POST(req: NextRequest) {
     await db.from('subscriptions').delete().eq('account_id', accountId)
     await db.from('videos').delete().eq('account_id', accountId)
 
-    const { error: accError } = await db.from('accounts').delete().eq('id', accountId)
-    if (accError) return NextResponse.json({ error: 'accounts delete failed: ' + accError.message }, { status: 500 })
+    const { error: accErr } = await db.from('accounts').delete().eq('id', accountId)
+    if (accErr) return NextResponse.json({ error: 'accounts: ' + accErr.message }, { status: 500 })
 
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : String(e)
-    return NextResponse.json({ error: 'Exception: ' + msg }, { status: 500 })
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 })
   }
 }

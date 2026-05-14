@@ -76,8 +76,9 @@ export default function AdminPage() {
       body: JSON.stringify({ accountId: account.id, accessToken: session.access_token }),
     })
 
-    const body = await res.json()
-    if (!res.ok) {
+    let body: { ok?: boolean; error?: string } = {}
+    try { body = await res.json() } catch { /* ignore */ }
+    if (!res.ok || !body.ok) {
       showToast('오류: ' + (body.error || res.status), 'error')
       return
     }
