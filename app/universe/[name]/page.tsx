@@ -440,7 +440,7 @@ export default function UniversePage() {
             <button
               onClick={() => {
                 if (!isLoggedIn) { window.location.href = `/login?back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` ; return }
-                window.location.href = '/upload'
+                window.location.href = `/upload?group=${encodeURIComponent(groupName)}`
               }}
               className="px-6 py-2.5 rounded-full text-white text-sm font-medium transition"
               style={{ background: theme.gradient }}
@@ -650,7 +650,7 @@ export default function UniversePage() {
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
             <button
-              onClick={() => { window.location.href = '/upload' }}
+              onClick={() => { window.location.href = `/upload?group=${encodeURIComponent(groupName)}` }}
               className="px-8 py-3 rounded-full text-white font-medium text-sm transition hover:opacity-90"
               style={{ background: theme.gradient }}
             >

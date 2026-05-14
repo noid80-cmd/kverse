@@ -70,6 +70,9 @@ export default function UploadPage() {
       const { data } = await supabase.from('accounts').select('id').eq('user_id', user.id).limit(1).maybeSingle()
       if (!data) { router.push('/signup'); return }
       setAccountId(data.id)
+      const params = new URLSearchParams(window.location.search)
+      const groupParam = params.get('group')
+      if (groupParam) handleGroupSelect(groupParam)
     }
     load()
   }, [])
@@ -259,6 +262,7 @@ export default function UploadPage() {
                     ref={previewRef}
                     src={preview}
                     controls
+                    preload="auto"
                     className="w-full rounded-xl"
                     style={{ filter: filterStyle }}
                   />
@@ -278,7 +282,7 @@ export default function UploadPage() {
                         onChange={e => {
                           const v = parseFloat(e.target.value)
                           setTrimStart(v)
-                          if (previewRef.current) previewRef.current.currentTime = v
+                          if (previewRef.current) { previewRef.current.pause(); previewRef.current.currentTime = v }
                         }}
                         className="flex-1 accent-pink-500" />
                       <span className="text-white/50 text-xs w-10 text-right">{fmtTime(trimStart)}</span>
@@ -289,7 +293,7 @@ export default function UploadPage() {
                         onChange={e => {
                           const v = parseFloat(e.target.value)
                           setTrimEnd(v)
-                          if (previewRef.current) previewRef.current.currentTime = v
+                          if (previewRef.current) { previewRef.current.pause(); previewRef.current.currentTime = v }
                         }}
                         className="flex-1 accent-pink-500" />
                       <span className="text-white/50 text-xs w-10 text-right">{fmtTime(trimEnd)}</span>
