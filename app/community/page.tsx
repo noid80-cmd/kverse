@@ -218,7 +218,7 @@ function CommunityContent() {
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition"
                     style={likedPostIds.has(post.id)
                       ? { background: theme.gradient, color: 'white' }
-                      : { background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}35` }
+                      : { background: 'transparent', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.2)' }
                     }
                   >
                     ♥ {post.like_count}
