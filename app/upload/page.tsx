@@ -243,7 +243,7 @@ export default function UploadPage() {
                 <span className="text-white/25 text-xs">{t('upload.maxInfo')}</span>
               </button>
             )}
-            <input ref={fileRef} type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
+            <input ref={fileRef} type="file" accept="video/*" capture="environment" onChange={handleFileChange} className="hidden" />
           </div>
 
           {/* 공개/비공개 */}
