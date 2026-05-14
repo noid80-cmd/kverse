@@ -34,8 +34,14 @@ export default function LoginPage() {
     if (error) {
       setError(t('auth.loginError'))
     } else if (data.user) {
-      // 첫 번째 계정을 활성 계정으로 자동 설정
-      window.location.href = getBackUrl()
+      const { data: acc } = await supabase
+        .from('accounts')
+        .select('account_type')
+        .eq('user_id', data.user.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      window.location.href = acc?.account_type === 'scout' ? '/scout' : getBackUrl()
     }
     setLoading(false)
   }
