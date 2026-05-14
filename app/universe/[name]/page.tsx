@@ -35,7 +35,7 @@ type Comment = {
   accounts: { username: string }
 }
 
-type Filter = 'all' | 'vocal' | 'vocal-live' | 'dance'
+type Filter = 'all' | 'vocal' | 'dance'
 
 export default function UniversePage() {
   const t = useT()
@@ -293,11 +293,9 @@ export default function UniversePage() {
   }
 
   const filtered = filter === 'all' ? videos
-    : filter === 'vocal' ? videos.filter(v => v.category === 'vocal' && !v.is_live)
-    : filter === 'vocal-live' ? videos.filter(v => v.category === 'vocal' && v.is_live)
+    : filter === 'vocal' ? videos.filter(v => v.category === 'vocal')
     : videos.filter(v => v.category === 'dance')
-  const vocalCount = videos.filter(v => v.category === 'vocal' && !v.is_live).length
-  const vocalLiveCount = videos.filter(v => v.category === 'vocal' && v.is_live).length
+  const vocalCount = videos.filter(v => v.category === 'vocal').length
   const danceCount = videos.filter(v => v.category === 'dance').length
 
   function timeAgo(dateStr: string) {
@@ -407,9 +405,8 @@ export default function UniversePage() {
         <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide -mx-4 px-4">
           {([
             { key: 'all', label: t('common.all'), count: totalCount },
-            { key: 'vocal', label: `🎤 일반`, count: vocalCount },
-            { key: 'vocal-live', label: `🔴 라이브`, count: vocalLiveCount },
-            { key: 'dance', label: `💃 ${t('common.dance')}`, count: danceCount },
+            { key: 'vocal', label: `♪ ${t('common.vocal')}`, count: vocalCount },
+            { key: 'dance', label: `✦ ${t('common.dance')}`, count: danceCount },
           ] as { key: Filter; label: string; count: number }[]).map(({ key, label, count }) => (
             <button
               key={key}
@@ -478,10 +475,6 @@ export default function UniversePage() {
                   </span>
                   <Link href={isLoggedIn ? `/profile/${video.accounts?.username ?? ''}` : '/login'}
                     className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
-                      style={{ background: theme.gradient }}>
-                      {(video.accounts?.username ?? '?').charAt(0).toUpperCase()}
-                    </div>
                     <span className="text-white text-sm font-semibold truncate">@{video.accounts?.username ?? '알 수 없음'}</span>
                     {video.accounts?.is_founder && (
                       <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
@@ -491,14 +484,9 @@ export default function UniversePage() {
                     )}
                   </Link>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    {video.is_live && video.category === 'vocal' && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                        🔴 LIVE
-                      </span>
-                    )}
                     <span className="text-xs px-2 py-0.5 rounded-full"
                       style={{ background: `${accentColor}30`, color: accentColor }}>
-                      {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
+                      {video.category === 'vocal' ? `♪ ${t('common.vocal')}` : `✦ ${t('common.dance')}`}
                     </span>
                     {video.accounts?.username === myUsername && (
                       <button
