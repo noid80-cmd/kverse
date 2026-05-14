@@ -50,9 +50,7 @@ export default function UploadPage() {
   const [duration, setDuration] = useState(0)
   const [trimStart, setTrimStart] = useState(0)
   const [trimEnd, setTrimEnd] = useState(0)
-  const [brightness, setBrightness] = useState(1)
-  const [contrast, setContrast] = useState(1)
-  const [saturation, setSaturation] = useState(1)
+  const [agreedOriginal, setAgreedOriginal] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
@@ -116,7 +114,6 @@ export default function UploadPage() {
     setFile(f)
     setError('')
     setPreview(URL.createObjectURL(f))
-    setBrightness(1); setContrast(1); setSaturation(1)
   }
 
   async function handleGroupSelect(groupName: string) {
@@ -150,9 +147,6 @@ export default function UploadPage() {
       is_private: isPrivate,
       trim_start: trimStart > 0 ? trimStart : null,
       trim_end: trimEnd < duration ? trimEnd : null,
-      filter_brightness: brightness !== 1 ? brightness : null,
-      filter_contrast: contrast !== 1 ? contrast : null,
-      filter_saturation: saturation !== 1 ? saturation : null,
     })
 
     setProgress(100)
@@ -165,10 +159,9 @@ export default function UploadPage() {
     setUploading(false)
   }
 
-  const filterStyle = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`
   const trimDuration = trimEnd - trimStart
   const trimOverLimit = trimDuration > MAX_DURATION_SEC
-  const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading && !trimOverLimit
+  const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading && !trimOverLimit && agreedOriginal
 
   return (
     <div className="min-h-screen bg-black">
@@ -272,7 +265,6 @@ export default function UploadPage() {
                     controls
                     preload="auto"
                     className="w-full rounded-xl"
-                    style={{ filter: filterStyle }}
                   />
                   <button onClick={() => { setFile(null); setPreview(null) }}
                     className="absolute top-2 right-2 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
@@ -317,34 +309,6 @@ export default function UploadPage() {
                   </div>
                 </div>
 
-                {/* 색 보정 — 일반만 */}
-                {uploadMode === 'normal' && (
-                  <div className="rounded-xl p-4 border border-white/10 bg-white/5">
-                    <p className="text-white/60 text-xs font-medium mb-3">{t('upload.colorSection')}</p>
-                    <div className="flex flex-col gap-3">
-                      {[
-                        { label: t('upload.brightness'), value: brightness, set: setBrightness, min: 0.5, max: 1.5 },
-                        { label: t('upload.contrast'), value: contrast, set: setContrast, min: 0.5, max: 1.5 },
-                        { label: t('upload.saturation'), value: saturation, set: setSaturation, min: 0, max: 2 },
-                      ].map(({ label, value, set, min, max }) => (
-                        <div key={label} className="flex items-center gap-3">
-                          <span className="text-white/40 text-xs w-10">{label}</span>
-                          <input type="range" min={min} max={max} step={0.05} value={value}
-                            onChange={e => set(parseFloat(e.target.value))}
-                            className="flex-1 accent-pink-500" />
-                          <button onClick={() => set(1)}
-                            className="text-white/25 text-xs w-10 text-right hover:text-white/50 transition">
-                            {value.toFixed(1)}
-                          </button>
-                        </div>
-                      ))}
-                      <button onClick={() => { setBrightness(1); setContrast(1); setSaturation(1) }}
-                        className="text-white/25 text-xs text-center mt-1 hover:text-white/50 transition">
-                        {t('upload.resetFilters')}
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <button
@@ -366,6 +330,26 @@ export default function UploadPage() {
             className={`w-full py-3 px-4 rounded-xl border-2 font-medium transition text-sm flex items-center justify-between ${isPrivate ? 'border-white/20 bg-white/5 text-white/60' : 'border-pink-500/40 bg-pink-500/10 text-pink-300'}`}>
             <span>{isPrivate ? t('upload.private') : t('upload.public')}</span>
             <span className="text-xs opacity-60">{isPrivate ? t('upload.privateDesc') : t('upload.publicDesc')}</span>
+          </button>
+
+          {/* 원본 동의 체크박스 */}
+          <button
+            onClick={() => setAgreedOriginal(p => !p)}
+            className="w-full flex items-start gap-3 p-4 rounded-xl border-2 transition text-left"
+            style={agreedOriginal
+              ? { borderColor: 'rgba(236,72,153,0.5)', background: 'rgba(236,72,153,0.08)' }
+              : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}
+          >
+            <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 border-2 transition"
+              style={agreedOriginal
+                ? { background: 'linear-gradient(135deg,#E91E8C,#7B2FBE)', borderColor: 'transparent' }
+                : { borderColor: 'rgba(255,255,255,0.2)' }}>
+              {agreedOriginal && <span className="text-white text-xs font-bold">✓</span>}
+            </div>
+            <div>
+              <p className="text-white text-sm font-medium">{t('upload.originalAgree')}</p>
+              <p className="text-white/40 text-xs mt-0.5">No filters. No edits. Just you.</p>
+            </div>
           </button>
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
