@@ -25,6 +25,7 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
   const t = useT()
   const [notifs, setNotifs] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
+  const [followedBack, setFollowedBack] = useState<Set<string>>(new Set())
   const ref = useRef<HTMLDivElement>(null)
 
   const unread = notifs.filter(n => !n.is_read).length
@@ -79,6 +80,19 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
     }
   }
 
+  async function handleFollowBack(fromUsername: string) {
+    const { data: acc } = await supabase
+      .from('accounts').select('id').eq('username', fromUsername).maybeSingle()
+    if (!acc) return
+    await supabase.from('follows').insert({ follower_id: accountId, following_id: acc.id })
+    await supabase.from('notifications').insert({
+      account_id: acc.id,
+      type: 'follow',
+      from_username: (await supabase.from('accounts').select('username').eq('id', accountId).maybeSingle()).data?.username || '',
+    })
+    setFollowedBack(prev => new Set([...prev, fromUsername]))
+  }
+
   function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime()
     const m = Math.floor(diff / 60000)
@@ -130,41 +144,61 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
           <div className="overflow-y-auto" style={{ maxHeight: 360 }}>
             {notifs.length === 0 ? (
               <div className="text-white/20 text-sm text-center py-10">{t('notif.empty')}</div>
-            ) : notifs.map(n => (
-              <Link
-                key={n.id}
-                href={n.type === 'follow'
-                  ? `/profile/${n.from_username}`
-                  : (n.video_group ? `/universe/${encodeURIComponent(n.video_group)}?video=${n.video_id}` : `/feed`)}
-                onClick={() => setOpen(false)}
-                className="flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition border-b border-white/5 last:border-0"
-                style={{ background: n.is_read ? 'transparent' : 'rgba(233,30,140,0.05)' }}
-              >
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 font-bold text-white"
-                  style={n.type === 'scout_view'
-                    ? { background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)' }
-                    : { background: groupGradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
-                  {n.type === 'scout_view' ? '🎯' : n.from_username.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-xs leading-relaxed">
-                    {n.type === 'scout_view' ? (
-                      <><span className="font-bold text-yellow-400">{n.from_username}</span>{t('notif.scoutMsg')}</>
-                    ) : n.type === 'follow' ? (
-                      <><span className="font-bold">@{n.from_username}</span>{t('notif.followed')}</>
-                    ) : (
-                      <><span className="font-bold">@{n.from_username}</span>{n.type === 'like' ? t('notif.liked') : t('notif.commented')}</>
+            ) : notifs.map(n => {
+              const isFollow = n.type === 'follow'
+              const alreadyFollowed = followedBack.has(n.from_username)
+              const href = isFollow
+                ? `/profile/${n.from_username}`
+                : (n.video_group ? `/universe/${encodeURIComponent(n.video_group)}?video=${n.video_id}` : `/feed`)
+
+              return (
+                <div
+                  key={n.id}
+                  className="flex items-start gap-3 px-4 py-3 border-b border-white/5 last:border-0"
+                  style={{ background: n.is_read ? 'transparent' : 'rgba(233,30,140,0.05)' }}
+                >
+                  <Link href={href} onClick={() => setOpen(false)} className="flex items-start gap-3 flex-1 min-w-0 hover:opacity-80 transition">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 font-bold text-white"
+                      style={n.type === 'scout_view'
+                        ? { background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)' }
+                        : { background: groupGradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
+                      {n.type === 'scout_view' ? '🎯' : n.from_username.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs leading-relaxed">
+                        {n.type === 'scout_view' ? (
+                          <><span className="font-bold text-yellow-400">{n.from_username}</span>{t('notif.scoutMsg')}</>
+                        ) : isFollow ? (
+                          <><span className="font-bold">@{n.from_username}</span>{t('notif.followed')}</>
+                        ) : (
+                          <><span className="font-bold">@{n.from_username}</span>{n.type === 'like' ? t('notif.liked') : t('notif.commented')}</>
+                        )}
+                      </p>
+                      {n.video_title && <p className="text-white/30 text-xs truncate mt-0.5">{n.video_title}</p>}
+                      <p className="text-white/20 text-xs mt-0.5">{timeAgo(n.created_at)}</p>
+                    </div>
+                  </Link>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {isFollow && (
+                      <button
+                        onClick={() => !alreadyFollowed && handleFollowBack(n.from_username)}
+                        className="text-xs px-2.5 py-1 rounded-full font-medium transition"
+                        style={alreadyFollowed
+                          ? { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)' }
+                          : { background: groupGradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', color: 'white' }
+                        }
+                      >
+                        {alreadyFollowed ? '팔로잉 ✓' : '맞팔하기'}
+                      </button>
                     )}
-                  </p>
-                  {n.video_title && <p className="text-white/30 text-xs truncate mt-0.5">{n.video_title}</p>}
-                  <p className="text-white/20 text-xs mt-0.5">{timeAgo(n.created_at)}</p>
+                    {!n.is_read && (
+                      <div className="w-2 h-2 rounded-full"
+                        style={{ background: '#E91E8C' }} />
+                    )}
+                  </div>
                 </div>
-                {!n.is_read && (
-                  <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1"
-                    style={{ background: '#E91E8C' }} />
-                )}
-              </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
