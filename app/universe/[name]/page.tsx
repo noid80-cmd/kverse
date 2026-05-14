@@ -17,6 +17,7 @@ type Video = {
   view_count: number
   video_url: string
   created_at: string
+  is_live: boolean
   accounts: { username: string; is_founder?: boolean }
 }
 
@@ -98,7 +99,7 @@ export default function UniversePage() {
 
       const { data } = await supabase
         .from('videos')
-        .select('*, accounts(username, is_founder)')
+        .select('*, accounts(username, is_founder), is_live')
         .eq('group_id', group.id)
         .eq('is_private', false)
         .order('like_count', { ascending: false })
@@ -459,10 +460,17 @@ export default function UniversePage() {
                       </span>
                     )}
                   </Link>
-                  <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ background: `${accentColor}30`, color: accentColor }}>
-                    {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {video.is_live && video.category === 'vocal' && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                        🔴 LIVE
+                      </span>
+                    )}
+                    <span className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ background: `${accentColor}30`, color: accentColor }}>
+                      {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
+                    </span>
+                  </div>
                 </div>
 
                 {/* 영상 */}
