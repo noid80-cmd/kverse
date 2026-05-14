@@ -70,10 +70,9 @@ export default function Home() {
           <span style={BRAND_TEXT}>{t('home.heroTitle').split('\n')[1]}</span>
         </h1>
 
-        <p className="text-[15px] text-white/35 max-w-md leading-[1.8] font-normal break-keep">
-          {t('home.heroDesc').split('\n').map((line, i, arr) => (
-            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-          ))}
+        <p className="text-2xl sm:text-3xl font-black tracking-tight italic"
+          style={{ background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          {t('home.heroDesc')}
         </p>
 
         <div className="flex gap-3">
