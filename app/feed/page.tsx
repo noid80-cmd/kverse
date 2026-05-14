@@ -464,9 +464,10 @@ export default function FeedPage() {
       )}
 
       {/* 네비게이션 */}
-      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <Link href="/"><KverseLogo /></Link>
-        <div className="flex items-center gap-2">
+      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
+        <Link href="/" className="text-white/40 hover:text-white transition text-sm">← 뒤로</Link>
+        <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
+        <div className="flex items-center gap-2 justify-end">
           {account && <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />}
           <Link href="/upload" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
             ✚

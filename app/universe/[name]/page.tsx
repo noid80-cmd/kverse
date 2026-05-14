@@ -324,17 +324,11 @@ export default function UniversePage() {
       )}
 
       {/* 네비게이션 */}
-      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-white/40 hover:text-white transition text-sm">{t('nav.home')}</Link>
-        </div>
-        <KverseLogo />
-        <div className="flex items-center gap-2">
-          {isLoggedIn ? (
-            <Link href="/browse" className="text-white/40 hover:text-white transition text-sm">{t('nav.allFeed')}</Link>
-          ) : (
-            <Link href="/login" className="px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-violet-600 text-sm font-medium">{t('nav.login')}</Link>
-          )}
+      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
+        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">← 뒤로</button>
+        <div className="flex justify-center"><KverseLogo /></div>
+        <div className="flex justify-end">
+          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">내 SNS</Link>
         </div>
       </nav>
 
@@ -394,7 +388,7 @@ export default function UniversePage() {
         </div>
 
         {/* 필터 탭 */}
-        <div className="flex gap-2 mb-6 justify-center">
+        <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide -mx-4 px-4">
           {([
             { key: 'all', label: t('common.all'), count: totalCount },
             { key: 'vocal', label: `🎤 일반`, count: vocalCount },
@@ -404,7 +398,7 @@ export default function UniversePage() {
             <button
               key={key}
               onClick={() => setFilter(key)}
-              className="px-4 py-2 rounded-full text-sm font-medium transition border flex items-center gap-1.5"
+              className="flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition border flex items-center gap-1.5"
               style={filter === key ? {
                 background: theme.gradient,
                 borderColor: 'transparent',

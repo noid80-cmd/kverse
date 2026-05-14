@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 import { getFlagImageUrl } from '@/lib/countries'
+import Link from 'next/link'
 
 type Account = {
   id: string
@@ -129,12 +130,12 @@ function CommunityContent() {
 
   return (
     <div className="min-h-screen bg-black">
-      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">뒤로</button>
+      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
+        <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm text-left">← 뒤로</button>
+        <div className="flex justify-center"><KverseLogo /></div>
+        <div className="flex justify-end">
+          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">내 SNS</Link>
         </div>
-        <KverseLogo />
-        <div />
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 py-8">

@@ -6,6 +6,7 @@ import { getTheme, GROUP_THEMES } from '@/lib/groupThemes'
 import { getActiveAccountId } from '@/lib/activeAccount'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
+import KverseLogo from '@/app/components/KverseLogo'
 
 type Video = {
   id: string
@@ -161,24 +162,11 @@ export default function BrowsePage() {
       )}
 
       {/* 네비게이션 */}
-      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-white/40 hover:text-white transition text-sm">{t('nav.home')}</Link>
-        </div>
-        <span className="font-black text-white">
-          {t('nav.allFeed')}
-        </span>
-        <div className="flex items-center gap-2">
-          {isLoggedIn ? (
-            <>
-              <Link href="/feed" className="text-white/40 hover:text-white text-sm transition">{t('nav.myFeed')}</Link>
-              <Link href="/profile" className="text-white/40 hover:text-white text-sm transition">{t('nav.profile')}</Link>
-            </>
-          ) : (
-            <Link href="/login" className="px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-violet-600 text-sm font-medium">
-              {t('nav.login')}
-            </Link>
-          )}
+      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
+        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">← 뒤로</button>
+        <div className="flex justify-center"><KverseLogo /></div>
+        <div className="flex justify-end">
+          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">내 SNS</Link>
         </div>
       </nav>
 

@@ -93,17 +93,17 @@ export default function UploadPage() {
     const f = e.target.files?.[0]
     if (!f) return
     if (!f.type.startsWith('video/')) { setError(t('upload.errVideoOnly')); return }
-    if (f.size > 200 * 1024 * 1024) { setError(t('upload.errSize')); return }
+    if (f.size > 500 * 1024 * 1024) { setError(t('upload.errSize')); return }
     try {
       const dur = await getVideoDuration(f)
-      if (dur > MAX_DURATION_SEC) {
+      if (uploadMode === 'normal' && dur > MAX_DURATION_SEC) {
         setError(t('upload.errDuration', { m: Math.floor(dur / 60), s: Math.floor(dur % 60) }))
         e.target.value = ''
         return
       }
       setDuration(dur)
       setTrimStart(0)
-      setTrimEnd(dur)
+      setTrimEnd(Math.min(dur, MAX_DURATION_SEC))
     } catch {
       setError(t('upload.errRead')); return
     }
@@ -160,18 +160,20 @@ export default function UploadPage() {
   }
 
   const filterStyle = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`
-  const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading
+  const trimDuration = trimEnd - trimStart
+  const trimOverLimit = trimDuration > MAX_DURATION_SEC
+  const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading && !trimOverLimit
 
   return (
-    <div className="min-h-screen bg-black px-6 py-10">
-      <div className="max-w-lg mx-auto">
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠 {t('nav.home')}</Link>
-            <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.back')}</Link>
-          </div>
-          <KverseLogo />
+    <div className="min-h-screen bg-black">
+      <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
+        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">← 뒤로</button>
+        <div className="flex justify-center"><KverseLogo /></div>
+        <div className="flex justify-end">
+          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">내 SNS</Link>
         </div>
+      </nav>
+      <div className="max-w-lg mx-auto px-6 py-8">
 
         <h1 className="text-2xl font-black text-white mb-6">{t('upload.title')}</h1>
 
@@ -194,7 +196,7 @@ export default function UploadPage() {
             <span className="text-red-400 text-lg">🔴</span>
             <div>
               <p className="text-red-300 text-sm font-medium">LIVE 인증 커버</p>
-              <p className="text-white/40 text-xs mt-0.5">지금 촬영한 영상만 업로드됩니다. 구간 설정만 가능하며 색 보정은 적용되지 않습니다.</p>
+              <p className="text-white/40 text-xs mt-0.5">촬영 길이 제한 없이 찍은 후, 5분 이내 구간을 선택해 업로드하세요. 색 보정은 적용되지 않습니다.</p>
             </div>
           </div>
         )}
@@ -274,7 +276,15 @@ export default function UploadPage() {
 
                 {/* 구간 설정 */}
                 <div className="rounded-xl p-4 border border-white/10 bg-white/5">
-                  <p className="text-white/60 text-xs font-medium mb-3">✂️ 구간 설정 <span className="text-white/30 ml-1">{fmtTime(trimStart)} ~ {fmtTime(trimEnd)}</span></p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-white/60 text-xs font-medium">✂️ 구간 설정 <span className="text-white/30 ml-1">{fmtTime(trimStart)} ~ {fmtTime(trimEnd)}</span></p>
+                    {uploadMode === 'live' && duration > MAX_DURATION_SEC && (
+                      <span className="text-orange-400 text-xs">5분 이내 구간 선택 필요</span>
+                    )}
+                    {trimOverLimit && (
+                      <span className="text-red-400 text-xs font-medium">선택 구간 {fmtTime(trimDuration)} — 5분 초과</span>
+                    )}
+                  </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                       <span className="text-white/40 text-xs w-10">시작</span>
