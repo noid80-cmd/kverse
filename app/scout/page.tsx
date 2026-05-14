@@ -84,6 +84,20 @@ export default function ScoutPage() {
     load()
   }, [])
 
+  async function handleVideoClick(video: Video) {
+    if (!scout || !video.account) return
+
+    await supabase.from('video_views').insert({
+      viewer_id: scout.id,
+      video_id: video.id,
+    })
+
+    const dest = video.account.groups?.name
+      ? `/universe/${encodeURIComponent(video.account.groups.name)}?video=${video.id}`
+      : `/profile/${video.account.username}`
+    window.location.href = dest
+  }
+
   async function toggleSave(accountId: string) {
     if (!scout || saving) return
     setSaving(accountId)
@@ -93,6 +107,18 @@ export default function ScoutPage() {
     } else {
       await supabase.from('scout_lists').insert({ scout_id: scout.id, target_id: accountId })
       setSavedIds(prev => new Set([...prev, accountId]))
+
+      const video = videos.find(v => v.account?.id === accountId)
+      if (video?.account) {
+        await supabase.from('notifications').insert({
+          account_id: accountId,
+          type: 'scout_view',
+          from_username: scout.agency_name || 'Scout',
+          video_id: video.id,
+          video_title: video.title,
+          video_group: video.account.groups?.name || null,
+        })
+      }
     }
     setSaving(null)
   }
@@ -179,8 +205,9 @@ export default function ScoutPage() {
 
               return (
                 <div key={video.id}
-                  className="rounded-2xl border p-4 flex gap-4"
-                  style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  className="rounded-2xl border p-4 flex gap-4 cursor-pointer hover:border-white/20 transition"
+                  style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  onClick={() => handleVideoClick(video)}>
 
                   {/* 아티스트 정보 */}
                   <div className="flex-1 min-w-0">
@@ -216,7 +243,7 @@ export default function ScoutPage() {
 
                   {/* 저장 버튼 */}
                   <button
-                    onClick={() => toggleSave(acc.id)}
+                    onClick={e => { e.stopPropagation(); toggleSave(acc.id) }}
                     disabled={saving === acc.id}
                     className="flex-shrink-0 self-center w-9 h-9 rounded-full flex items-center justify-center transition"
                     style={isSaved
