@@ -18,6 +18,7 @@ type Post = {
   id: string
   content: string
   created_at: string
+  like_count: number
   accounts: { username: string }
 }
 
@@ -33,6 +34,7 @@ function CommunityContent() {
   const [account, setAccount] = useState<Account | null>(null)
   const [groupId, setGroupId] = useState<string | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
+  const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [content, setContent] = useState('')
   const [posting, setPosting] = useState(false)
@@ -58,13 +60,12 @@ function CommunityContent() {
       setAccount(accRes.data)
       setGroupId(groupRes.data.id)
 
-      const { data } = await supabase
-        .from('posts')
-        .select('*, accounts(username)')
-        .eq('group_id', groupRes.data.id)
-        .order('created_at', { ascending: false })
-        .limit(50)
-      setPosts(data || [])
+      const [postsRes, likesRes] = await Promise.all([
+        supabase.from('posts').select('*, accounts(username)').eq('group_id', groupRes.data.id).order('created_at', { ascending: false }).limit(50),
+        supabase.from('post_likes').select('post_id').eq('account_id', accRes.data.id),
+      ])
+      setPosts(postsRes.data || [])
+      setLikedPostIds(new Set((likesRes.data || []).map((r: { post_id: string }) => r.post_id)))
       setLoading(false)
     }
     load()
@@ -79,7 +80,7 @@ function CommunityContent() {
       .select('*, accounts(username)')
       .single()
     if (!error && data) {
-      setPosts(prev => [data, ...prev])
+      setPosts(prev => [{ ...data, like_count: 0 }, ...prev])
       setContent('')
     }
     setPosting(false)
@@ -88,6 +89,24 @@ function CommunityContent() {
   async function handleDelete(postId: string) {
     await supabase.from('posts').delete().eq('id', postId)
     setPosts(prev => prev.filter(p => p.id !== postId))
+  }
+
+  async function toggleLike(post: Post) {
+    if (!account) return
+    const liked = likedPostIds.has(post.id)
+    setLikedPostIds(prev => {
+      const next = new Set(prev)
+      liked ? next.delete(post.id) : next.add(post.id)
+      return next
+    })
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, like_count: p.like_count + (liked ? -1 : 1) } : p))
+    if (liked) {
+      await supabase.from('post_likes').delete().eq('post_id', post.id).eq('account_id', account.id)
+      await supabase.from('posts').update({ like_count: post.like_count - 1 }).eq('id', post.id)
+    } else {
+      await supabase.from('post_likes').insert({ post_id: post.id, account_id: account.id })
+      await supabase.from('posts').update({ like_count: post.like_count + 1 }).eq('id', post.id)
+    }
   }
 
   function timeAgo(dateStr: string) {
@@ -192,7 +211,19 @@ function CommunityContent() {
                     </button>
                   )}
                 </div>
-                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap mb-3">{post.content}</p>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => toggleLike(post)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition"
+                    style={likedPostIds.has(post.id)
+                      ? { background: theme.gradient, color: 'white' }
+                      : { background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}35` }
+                    }
+                  >
+                    ♥ {post.like_count}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
