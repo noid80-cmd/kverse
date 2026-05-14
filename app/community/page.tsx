@@ -112,7 +112,7 @@ function CommunityContent() {
     <div className="min-h-screen bg-black">
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">← {t('nav.back')}</button>
+          <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">{t('nav.back')}</button>
         </div>
         <KverseLogo />
         <div />
@@ -130,7 +130,7 @@ function CommunityContent() {
         </div>
 
         {/* 글 작성 */}
-        <div className="rounded-2xl p-4 mb-8 border" style={{ borderColor: `${accentColor}30`, background: `${accentColor}08` }}>
+        <div className="rounded-2xl p-4 mb-8 border" style={{ borderColor: `${accentColor}50`, background: `${accentColor}18` }}>
           <div className="flex gap-3">
             <div className="relative flex-shrink-0">
               <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: theme.gradient }}>
@@ -150,10 +150,10 @@ function CommunityContent() {
                 placeholder={`${worldName(theme, locale)}${t('comm.placeholder')}`}
                 maxLength={500}
                 rows={3}
-                className="w-full bg-transparent text-white placeholder-white/20 resize-none focus:outline-none text-sm leading-relaxed"
+                className="w-full bg-transparent text-white placeholder-white/40 resize-none focus:outline-none text-sm leading-relaxed"
               />
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                <span className="text-white/20 text-xs">{content.length}/500</span>
+                <span className="text-white/50 text-xs">{content.length}/500</span>
                 <button
                   onClick={handlePost}
                   disabled={posting || content.trim().length === 0}
@@ -171,18 +171,18 @@ function CommunityContent() {
         {posts.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-3">{theme.emoji}</div>
-            <p className="text-white/30 text-sm">{t('comm.noPosts')}</p>
+            <p className="text-white/60 text-sm">{t('comm.noPosts')}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             {posts.map(post => (
-              <div key={post.id} className="rounded-xl p-4 border" style={{ borderColor: `${accentColor}15`, background: `${accentColor}06` }}>
+              <div key={post.id} className="rounded-xl p-4 border" style={{ borderColor: `${accentColor}28`, background: `${accentColor}14` }}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: theme.gradient }}>
                     {post.accounts.username.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-white text-sm font-semibold">@{post.accounts.username}</span>
-                  <span className="text-white/20 text-xs ml-auto">{timeAgo(post.created_at)}</span>
+                  <span className="text-white/50 text-xs ml-auto">{timeAgo(post.created_at)}</span>
                   {post.accounts.username === account?.username && (
                     <button
                       onClick={() => handleDelete(post.id)}

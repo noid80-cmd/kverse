@@ -435,14 +435,14 @@ export default function UniversePage() {
                 ref={el => { cardRefs.current[video.id] = el }}
                 className="rounded-2xl overflow-hidden border transition-all duration-500"
                 style={{
-                  borderColor: highlightId === video.id ? accentColor : index === 0 ? `${accentColor}50` : `${accentColor}18`,
+                  borderColor: highlightId === video.id ? accentColor : index === 0 ? `${accentColor}50` : `${accentColor}30`,
                   boxShadow: highlightId === video.id ? `0 0 0 2px ${accentColor}, 0 0 32px ${accentColor}40` : 'none',
                 }}
               >
                 {/* 헤더 */}
-                <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${accentColor}08` }}>
+                <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${accentColor}18` }}>
                   <span className="font-bold text-sm w-6 text-center flex-shrink-0"
-                    style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'rgba(255,255,255,0.2)' }}>
+                    style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'rgba(255,255,255,0.45)' }}>
                     {index + 1}
                   </span>
                   <Link href={isLoggedIn ? `/profile/${video.accounts?.username ?? ''}` : '/login'}
@@ -460,7 +460,7 @@ export default function UniversePage() {
                     )}
                   </Link>
                   <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ background: `${accentColor}18`, color: accentColor }}>
+                    style={{ background: `${accentColor}30`, color: accentColor }}>
                     {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
                   </span>
                 </div>
@@ -480,12 +480,12 @@ export default function UniversePage() {
                 />
 
                 {/* 하단 정보 바 */}
-                <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${accentColor}06` }}>
+                <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${accentColor}12` }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{video.title}</p>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-white/25 text-xs">{video.view_count} views</span>
-                      <span className="text-white/20 text-xs">{timeAgo(video.created_at)}</span>
+                      <span className="text-white/60 text-xs">{video.view_count} views</span>
+                      <span className="text-white/50 text-xs">{timeAgo(video.created_at)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
