@@ -92,10 +92,7 @@ export default function ScoutPage() {
       video_id: video.id,
     })
 
-    const dest = video.account.groups?.name
-      ? `/universe/${encodeURIComponent(video.account.groups.name)}?video=${video.id}`
-      : `/profile/${video.account.username}`
-    window.location.href = dest
+    window.location.href = `/profile/${video.account.username}`
   }
 
   async function toggleSave(accountId: string) {

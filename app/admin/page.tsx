@@ -58,10 +58,7 @@ export default function AdminPage() {
 
   async function rejectScout(account: Account) {
     if (!confirm(`@${account.username} Scout 계정을 삭제할까요?`)) return
-    const { error } = await supabase.from('accounts').delete().eq('id', account.id)
-    if (error) { showToast('오류: ' + error.message, 'error'); return }
-    setAccounts(prev => prev.filter(a => a.id !== account.id))
-    showToast(`🗑 @${account.username} 삭제`, 'success')
+    await deleteAccount(account)
   }
 
   async function deleteAccount(account: Account) {
@@ -213,6 +210,12 @@ export default function AdminPage() {
                         style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>
                         ✓ 승인
                       </span>
+                      <button
+                        onClick={() => deleteAccount(account)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition hover:bg-red-500/20 text-white/20 hover:text-red-400 text-xs"
+                      >
+                        🗑
+                      </button>
                     </div>
                   ))}
                 </div>

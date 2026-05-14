@@ -83,6 +83,10 @@ export default function FeedPage() {
   const [showFollowList, setShowFollowList] = useState<null | 'followers' | 'following'>(null)
   const [followList, setFollowList] = useState<FollowAccount[]>([])
   const [followListLoading, setFollowListLoading] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<{ id: string; username: string; groups: { name: string } | null }[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
   const viewedIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -242,6 +246,30 @@ export default function FeedPage() {
     }
   }
 
+  useEffect(() => {
+    if (!showSearch) { setSearchQuery(''); setSearchResults([]); return }
+  }, [showSearch])
+
+  useEffect(() => {
+    if (!searchQuery.trim()) { setSearchResults([]); return }
+    const timer = setTimeout(async () => {
+      setSearchLoading(true)
+      const { data } = await supabase
+        .from('accounts')
+        .select('id, username, groups(name)')
+        .ilike('username', `%${searchQuery.trim()}%`)
+        .neq('account_type', 'scout')
+        .neq('id', account?.id || '')
+        .limit(20)
+      setSearchResults((data || []).map((a: any) => ({
+        ...a,
+        groups: Array.isArray(a.groups) ? a.groups[0] : a.groups,
+      })))
+      setSearchLoading(false)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
   async function handleVideoPlay(videoId: string, currentCount: number) {
     if (viewedIds.current.has(videoId)) return
     viewedIds.current.add(videoId)
@@ -306,6 +334,15 @@ export default function FeedPage() {
         <Link href="/" className="text-white/40 hover:text-white transition text-sm">{t('nav.backBtn')}</Link>
         <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
         <div className="flex items-center gap-2 justify-end">
+          {account && (
+            <button
+              onClick={() => setShowSearch(true)}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition border border-white/20 hover:bg-white/10 text-base"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            >
+              🔍
+            </button>
+          )}
           {account && (
             <Link
               href="/dm"
@@ -655,6 +692,50 @@ export default function FeedPage() {
                   <span className="text-white/20 text-xs">›</span>
                 </Link>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 유저 검색 바텀시트 */}
+      {showSearch && (
+        <div className="fixed inset-0 z-[90] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowSearch(false)}>
+          <div className="w-full max-w-2xl rounded-t-3xl flex flex-col"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '80vh' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="px-4 py-4 border-b border-white/5 flex-shrink-0">
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="닉네임으로 검색..."
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/25"
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-1 min-h-0">
+              {searchLoading ? (
+                <div className="text-white/30 text-sm text-center py-10">검색 중...</div>
+              ) : searchQuery && searchResults.length === 0 ? (
+                <div className="text-white/20 text-sm text-center py-10">검색 결과가 없어요</div>
+              ) : searchResults.map(acc => {
+                const theme = acc.groups ? getTheme(acc.groups.name) : null
+                const accent = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
+                return (
+                  <Link key={acc.id} href={`/profile/${acc.username}`} onClick={() => setShowSearch(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                      style={{ background: accent ? `${accent}33` : 'rgba(233,30,140,0.2)', border: `1px solid ${accent || '#E91E8C'}40` }}>
+                      {acc.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-semibold">@{acc.username}</p>
+                      {acc.groups && <p className="text-white/30 text-xs">{acc.groups.name}</p>}
+                    </div>
+                    <span className="text-white/20 text-xs">›</span>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         </div>

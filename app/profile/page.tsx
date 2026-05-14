@@ -161,16 +161,18 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">
               <Link href="/avatar" className="hover:opacity-90 transition block">
-                <div className="rounded-2xl p-1.5"
+                <div className="rounded-full p-1.5"
                   style={{ background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
-                  <Avatar
-                    gender={(account.gender as 'male' | 'female') || 'female'}
-                    equipped={equippedVisuals}
-                    groupColor={accent}
-                    size={96}
-                    rpmAvatarUrl={account.rpm_avatar_url}
-                    username={account.username}
-                  />
+                  <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden' }}>
+                    <Avatar
+                      gender={(account.gender as 'male' | 'female') || 'female'}
+                      equipped={equippedVisuals}
+                      groupColor={accent}
+                      size={96}
+                      rpmAvatarUrl={account.rpm_avatar_url}
+                      username={account.username}
+                    />
+                  </div>
                 </div>
               </Link>
               <img
