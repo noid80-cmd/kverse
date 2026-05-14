@@ -56,6 +56,7 @@ export default function UniversePage() {
   const [fanCount, setFanCount] = useState(0)
   const [fanLoading, setFanLoading] = useState(false)
   const [fanLimitToast, setFanLimitToast] = useState(false)
+  const [boardToast, setBoardToast] = useState(false)
 
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -286,6 +287,14 @@ export default function UniversePage() {
         </div>
       )}
 
+      {/* 게시판 팬 전용 토스트 */}
+      {boardToast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium text-center"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          팬으로 참여해야 게시판을 이용할 수 있어요
+        </div>
+      )}
+
       {/* 팬덤 3개 초과 토스트 */}
       {fanLimitToast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium text-center"
@@ -341,6 +350,23 @@ export default function UniversePage() {
                 }
               >
                 {isFan ? `✓ ${groupDisplayName(groupName, locale)} 팬` : '팬으로 참여하기'}
+              </button>
+              <button
+                onClick={() => {
+                  if (!isFan) {
+                    setBoardToast(true)
+                    setTimeout(() => setBoardToast(false), 3000)
+                  } else {
+                    window.location.href = `/community?group=${encodeURIComponent(groupName)}`
+                  }
+                }}
+                className="px-4 py-2 rounded-full text-sm font-bold transition border"
+                style={isFan
+                  ? { border: `1.5px solid ${accentColor}60`, color: accentColor, background: 'transparent' }
+                  : { border: '1.5px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.2)', background: 'transparent' }
+                }
+              >
+                📋 게시판
               </button>
               <span className="text-white/25 text-xs">{fanCount.toLocaleString()}명</span>
             </div>
