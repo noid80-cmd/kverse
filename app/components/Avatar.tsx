@@ -24,7 +24,7 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
     const displayUrl = rpmAvatarUrl.endsWith('.glb')
       ? `${rpmAvatarUrl.replace(/\.glb$/, '')}.png?scene=fullbody-portrait-v1-transparent&arm=5`
       : rpmAvatarUrl
-    return <img src={displayUrl} alt="avatar" width={size} height={size} style={{ objectFit: 'cover', borderRadius: 16 }} />
+    return <img src={displayUrl} alt="avatar" width={size} height={size} style={{ objectFit: 'cover', borderRadius: '50%' }} />
   }
 
   const color     = groupColor || BRAND_PRIMARY
@@ -77,14 +77,14 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
             <feGaussianBlur stdDeviation="1.4" />
           </filter>
           <clipPath id={`cp${uid}`}>
-            <rect x="0" y="0" width="100" height="100" rx="18" />
+            <circle cx="50" cy="50" r="50" />
           </clipPath>
         </defs>
 
         {/* ── card background ── */}
-        <rect x="0" y="0" width="100" height="100" rx="18" fill={`url(#bg${uid})`} />
+        <circle cx="50" cy="50" r="50" fill={`url(#bg${uid})`} />
         {/* shimmer overlay */}
-        <rect x="0" y="0" width="100" height="100" rx="18" fill={`url(#sh${uid})`} />
+        <circle cx="50" cy="50" r="50" fill={`url(#sh${uid})`} />
 
         {/* ── outer glow ring (animated) ── */}
         <circle cx="50" cy="44" r="32" fill="none" stroke={color} strokeWidth="6" opacity="0.18" filter={`url(#gf${uid})`}>
@@ -145,12 +145,7 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
         </text>
 
         {/* ── card border ── */}
-        <rect x="1" y="1" width="98" height="98" rx="17"
-          fill="none" stroke={lite} strokeWidth="1" opacity="0.2" />
-        {/* top-left corner accent */}
-        <path d="M1,18 L1,1 L18,1" fill="none" stroke={lite} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-        {/* bottom-right corner accent */}
-        <path d="M99,82 L99,99 L82,99" fill="none" stroke={lite} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+        <circle cx="50" cy="50" r="49" fill="none" stroke={lite} strokeWidth="1" opacity="0.2" />
       </svg>
 
       {/* ── equipped item badges ── */}
