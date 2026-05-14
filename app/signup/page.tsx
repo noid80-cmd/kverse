@@ -120,7 +120,7 @@ export default function SignupPage() {
           </Link>
         </div>
         <div className="text-center mb-10">
-          <Link href="/login"><KverseLogo size="xl" /></Link>
+          <Link href="/"><KverseLogo size="xl" /></Link>
           <p className="text-white/50 mt-3 text-sm">{t('auth.newAccount')}</p>
         </div>
 

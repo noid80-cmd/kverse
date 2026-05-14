@@ -146,7 +146,7 @@ export default function UserProfilePage() {
           <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠</Link>
           <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">← {t('nav.back')}</button>
         </div>
-        <KverseLogo />
+        <Link href="/"><KverseLogo /></Link>
         <div />
       </nav>
 

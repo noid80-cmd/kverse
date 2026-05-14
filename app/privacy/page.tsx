@@ -13,7 +13,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-black text-white">
       <nav className="sticky top-0 z-20 bg-black/80 backdrop-blur border-b border-white/10 px-5 py-3 flex items-center justify-between">
         <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠</Link>
-        <KverseLogo />
+        <Link href="/"><KverseLogo /></Link>
         <div />
       </nav>
 
