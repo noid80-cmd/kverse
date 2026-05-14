@@ -33,7 +33,7 @@ const translations: Record<Locale, Dict> = {
     // home
     'home.welcome': 'K-pop Universe에 오신 것을 환영합니다',
     'home.heroTitle': '당신의 케이팝\n유니버스를 펼쳐요',
-    'home.heroDesc': 'BTS의 Purple Planet부터\nBLACKPINK의 Pink Kingdom까지.\n좋아하는 아이돌의 세계로 여행을 떠나 나만의 커버로 빛나세요.',
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': '나의 유니버스 시작',
     'home.enterUniverse': '유니버스 입장',
     'home.whichUniverse': '어떤 유니버스로 떠날까요?',
@@ -303,7 +303,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': 'Saving...', 'common.back': '← Back',
     'home.welcome': 'Welcome to K-pop Universe',
     'home.heroTitle': 'Expand Your\nK-pop Universe',
-    'home.heroDesc': "From BTS's Purple Planet\nto BLACKPINK's Pink Kingdom.\nJourney into your favorite idol's world and shine with your own covers.",
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': 'Start My Universe',
     'home.enterUniverse': 'Enter Universe',
     'home.whichUniverse': 'Which universe will you explore?',
@@ -552,7 +552,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': 'Guardando...', 'common.back': '← Volver',
     'home.welcome': 'Bienvenido al K-pop Universe',
     'home.heroTitle': 'Expande tu\nUniverso K-pop',
-    'home.heroDesc': 'Desde el Purple Planet de BTS hasta el Pink Kingdom de BLACKPINK.\nViaja al mundo de tu idol favorito y brilla con tus propias covers.',
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': 'Iniciar mi Universo',
     'home.enterUniverse': 'Entrar al Universo',
     'home.whichUniverse': '¿A qué universo te aventuras?',
@@ -768,7 +768,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': '保存中...', 'common.back': '← 返回',
     'home.welcome': '欢迎来到K-pop宇宙',
     'home.heroTitle': '展开你的\nK-pop宇宙',
-    'home.heroDesc': '从BTS的Purple Planet到BLACKPINK的Pink Kingdom。\n踏入你最爱偶像的世界，用你的翻唱闪耀。',
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': '开始我的宇宙', 'home.enterUniverse': '进入宇宙',
     'home.whichUniverse': '你要前往哪个宇宙？',
     'home.universeDesc': '探索每位艺人的独特世界',
@@ -948,7 +948,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': '保存中...', 'common.back': '← 戻る',
     'home.welcome': 'K-pop Universeへようこそ',
     'home.heroTitle': 'あなたの\nK-popユニバースを広げよう',
-    'home.heroDesc': 'BTSのPurple PlanetからBLACKPINKのPink Kingdomまで。\nお気に入りのアイドルの世界に旅して、自分だけのカバーで輝こう。',
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': '私のユニバースを始める', 'home.enterUniverse': 'ユニバースへ入場',
     'home.whichUniverse': 'どのユニバースへ行く？',
     'home.universeDesc': '各アーティストの独自の世界へ旅しよう',
@@ -1128,7 +1128,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': 'Enregistrement...', 'common.back': '← Retour',
     'home.welcome': 'Bienvenue dans K-pop Universe',
     'home.heroTitle': 'Développez votre\nUnivers K-pop',
-    'home.heroDesc': "Du Purple Planet de BTS au Pink Kingdom de BLACKPINK.\nVoyagez dans le monde de votre idol préféré et brillez avec vos propres covers.",
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': 'Commencer mon Univers', 'home.enterUniverse': "Entrer dans l'Univers",
     'home.whichUniverse': 'Quel univers allez-vous explorer ?',
     'home.universeDesc': "Voyagez dans le monde unique de chaque artiste",
@@ -1308,7 +1308,7 @@ const translations: Record<Locale, Dict> = {
     'common.saving': 'جارٍ الحفظ...', 'common.back': '→ رجوع',
     'home.welcome': 'مرحباً بكم في عالم K-pop',
     'home.heroTitle': 'وسّع\nعالمك للـ K-pop',
-    'home.heroDesc': 'من Purple Planet لـBTS إلى Pink Kingdom لـBLACKPINK.\nسافر إلى عالم أيدولك المفضل وتألق بتغطياتك الخاصة.',
+    'home.heroDesc': 'No filters. No edits. Just you.',
     'home.startUniverse': 'ابدأ كوني', 'home.enterUniverse': 'ادخل الكون',
     'home.whichUniverse': 'أي عالم ستستكشف؟',
     'home.universeDesc': 'سافر إلى عالم كل فنان الفريد',
@@ -1484,7 +1484,7 @@ const LanguageContext = createContext<{
 }>({ locale: 'en', setLocale: () => {} })
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en')
+  const [locale, setLocaleState] = useState<Locale>('ko')
 
   useEffect(() => {
     const saved = localStorage.getItem('kvers-locale') as Locale
@@ -1492,6 +1492,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       setLocaleState(saved)
       document.documentElement.dir = RTL_LOCALES.includes(saved) ? 'rtl' : 'ltr'
       document.documentElement.lang = saved
+    } else {
+      const browser = navigator.language.slice(0, 2) as Locale
+      const detected = translations[browser] ? browser : 'ko'
+      setLocaleState(detected)
+      document.documentElement.lang = detected
     }
   }, [])
 
