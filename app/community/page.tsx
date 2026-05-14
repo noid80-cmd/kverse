@@ -131,9 +131,7 @@ function CommunityContent() {
     <div className="min-h-screen bg-black">
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push(`/universe/${encodeURIComponent(groupName)}`)} className="text-white/40 hover:text-white transition text-sm">
-          {groupDisplayName(groupName, locale)}
-        </button>
+          <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">뒤로</button>
         </div>
         <KverseLogo />
         <div />
