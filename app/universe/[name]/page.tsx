@@ -643,8 +643,8 @@ export default function UniversePage() {
         </div>
       )}
 
-        {/* 하단 CTA */}
-        {!loading && isLoggedIn && (
+        {/* 하단 CTA - 영상 있을 때만 */}
+        {!loading && isLoggedIn && videos.length > 0 && (
           <div className="mt-10 text-center">
             <p className="text-white/20 text-sm mb-3">{t('uni.wantUpload', { group: groupDisplayName(groupName, locale) })}</p>
             <button

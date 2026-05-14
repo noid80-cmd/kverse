@@ -433,10 +433,7 @@ export default function FeedPage() {
         {/* 그리드 */}
         {filteredVideos.length === 0 ? (
           <div className="text-center py-20 px-6 border-t border-white/5">
-            <Link href="/upload" className="px-8 py-3 text-white font-medium rounded-full transition"
-              style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
-              {t('feed.uploadFirst')}
-            </Link>
+            <p className="text-white/30 text-sm">{t('feed.uploadFirst')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-px bg-white/5 border-t border-white/5">
