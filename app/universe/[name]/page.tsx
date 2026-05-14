@@ -55,6 +55,7 @@ export default function UniversePage() {
   const [isFan, setIsFan] = useState(false)
   const [fanCount, setFanCount] = useState(0)
   const [fanLoading, setFanLoading] = useState(false)
+  const [fanLimitToast, setFanLimitToast] = useState(false)
 
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -170,6 +171,16 @@ export default function UniversePage() {
       setIsFan(false)
       setFanCount(c => Math.max(0, c - 1))
     } else {
+      const { count } = await supabase
+        .from('fandom_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('account_id', accountId)
+      if ((count ?? 0) >= 3) {
+        setFanLimitToast(true)
+        setTimeout(() => setFanLimitToast(false), 3000)
+        setFanLoading(false)
+        return
+      }
       await supabase.from('fandom_members').insert({ account_id: accountId, group_name: groupName })
       setIsFan(true)
       setFanCount(c => c + 1)
@@ -272,6 +283,14 @@ export default function UniversePage() {
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
           style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
           🔗 링크가 복사됐어요
+        </div>
+      )}
+
+      {/* 팬덤 3개 초과 토스트 */}
+      {fanLimitToast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium text-center"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,100,100,0.3)' }}>
+          💜 팬덤은 최대 3개까지 참여할 수 있어요
         </div>
       )}
 
