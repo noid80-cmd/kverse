@@ -137,7 +137,7 @@ export default function ProfilePage() {
     )
   }
 
-  const accent = theme?.primary === '#FFFFFF' ? '#C9A96E' : (theme?.primary || '#7C3AED')
+  const accent = theme?.primary === '#FFFFFF' ? '#C9A96E' : (theme?.primary || '#E91E8C')
 
   return (
     <div className="min-h-screen bg-black text-white">

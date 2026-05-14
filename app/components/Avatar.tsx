@@ -1,5 +1,7 @@
 'use client'
 
+import { BRAND_PRIMARY } from '@/lib/brand'
+
 export type EquippedItems = {
   outfit?: { outfitColor?: string; type?: string }
   hat?: { hatColor?: string; style?: string; hatEmoji?: string }
@@ -25,7 +27,7 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
     return <img src={displayUrl} alt="avatar" width={size} height={size} style={{ objectFit: 'cover', borderRadius: 16 }} />
   }
 
-  const color     = groupColor || '#7C3AED'
+  const color     = groupColor || BRAND_PRIMARY
   const aura      = equipped?.skin?.auraColor || color
   const hasAura   = !!equipped?.skin?.auraColor
   const glowColor = equipped?.glowstick?.glowColor || color

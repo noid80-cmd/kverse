@@ -138,7 +138,7 @@ export default function BrowsePage() {
                     onClick={() => toggleLike(selectedVideo)}
                     className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition"
                     style={likedIds.has(selectedVideo.id)
-                      ? { background: 'linear-gradient(135deg, #EC4899, #7C3AED)', color: 'white' }
+                      ? { background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)', color: 'white' }
                       : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.15)' }
                     }
                   >
@@ -187,7 +187,7 @@ export default function BrowsePage() {
               onClick={() => setCategoryFilter(key)}
               className="px-4 py-1.5 rounded-full text-sm font-medium transition border"
               style={categoryFilter === key
-                ? { background: 'linear-gradient(135deg, #EC4899, #7C3AED)', borderColor: 'transparent', color: 'white' }
+                ? { background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)', borderColor: 'transparent', color: 'white' }
                 : { borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)' }
               }
             >
@@ -287,7 +287,7 @@ export default function BrowsePage() {
                       <span className="text-white/30 text-xs">@{video.accounts.username}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs" style={{ color: liked ? '#EC4899' : 'rgba(255,255,255,0.25)' }}>♥ {video.like_count}</span>
+                      <span className="text-xs" style={{ color: liked ? '#E91E8C' : 'rgba(255,255,255,0.25)' }}>♥ {video.like_count}</span>
                       <span className="text-white/20 text-xs">{video.view_count} views</span>
                       <span className="text-white/15 text-xs">{timeAgo(video.created_at)}</span>
                     </div>
@@ -299,7 +299,7 @@ export default function BrowsePage() {
                       onClick={() => toggleLike(video)}
                       className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition text-base"
                       style={liked
-                        ? { background: 'linear-gradient(135deg, #EC4899, #7C3AED)' }
+                        ? { background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }
                         : { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }
                       }
                     >
