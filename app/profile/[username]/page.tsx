@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
-import { getTheme, GroupTheme, groupDisplayName } from '@/lib/groupThemes'
+import { getTheme, groupDisplayName } from '@/lib/groupThemes'
 import Avatar from '@/app/components/Avatar'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -10,20 +10,21 @@ import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 import { getFlagImageUrl } from '@/lib/countries'
 
+type Highlight = { key: string; name: string; emoji: string }
+
 type Account = {
   id: string
   username: string
   display_name: string
   bio: string
-  created_at: string
   gender: string
   nationality?: string
   is_founder?: boolean
   account_type?: string
   agency_name?: string | null
   is_scout_verified?: boolean
-  equipped: Record<string, string>
   rpm_avatar_url?: string | null
+  custom_highlights?: Highlight[]
   groups: { name: string; name_en: string } | null
 }
 
@@ -33,19 +34,33 @@ type Video = {
   category: string
   like_count: number
   view_count: number
+  video_url: string
   created_at: string
-  is_live: boolean
+  tags?: string[]
 }
 
-export default function UserProfilePage() {
+type Comment = {
+  id: string
+  content: string
+  created_at: string
+  accounts: { username: string }
+}
+
+const FIXED_CATEGORIES = [
+  { key: 'all', symbol: '◉', labelKey: 'feed.catAll' },
+  { key: 'vocal', symbol: '♪', labelKey: 'feed.catVocal' },
+  { key: 'dance', symbol: '✦', labelKey: 'feed.catDance' },
+]
+
+export default function UserKversePage() {
   const params = useParams()
   const router = useRouter()
   const t = useT()
   const { locale } = useLanguage()
   const username = params.username as string
+
   const [profile, setProfile] = useState<Account | null>(null)
   const [videos, setVideos] = useState<Video[]>([])
-  const [theme, setTheme] = useState<GroupTheme | null>(null)
   const [loading, setLoading] = useState(true)
   const [isOwn, setIsOwn] = useState(false)
   const [myAccountId, setMyAccountId] = useState<string | null>(null)
@@ -53,6 +68,14 @@ export default function UserProfilePage() {
   const [followerCount, setFollowerCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
   const [followLoading, setFollowLoading] = useState(false)
+  const [activeCategory, setActiveCategory] = useState('all')
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
+  const [commentVideoId, setCommentVideoId] = useState<string | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [commentText, setCommentText] = useState('')
+  const [commentLoading, setCommentLoading] = useState(false)
+  const [shareToast, setShareToast] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -64,18 +87,15 @@ export default function UserProfilePage() {
         .eq('username', username)
         .single()
 
-      if (!acc) { router.push('/feed'); return }
-
+      if (!acc) { router.push('/'); return }
       setProfile(acc)
-      if (acc.groups) setTheme(getTheme(acc.groups.name))
 
       const { data: vids } = await supabase
         .from('videos')
-        .select('id, title, category, like_count, view_count, created_at, is_live')
+        .select('id, title, category, like_count, view_count, video_url, created_at, tags')
         .eq('account_id', acc.id)
         .eq('is_private', false)
         .order('created_at', { ascending: false })
-
       setVideos(vids || [])
 
       const [{ count: fc }, { count: fg }] = await Promise.all([
@@ -87,9 +107,7 @@ export default function UserProfilePage() {
 
       if (user) {
         const { data: myAccounts } = await supabase
-          .from('accounts')
-          .select('id, username')
-          .eq('user_id', user.id)
+          .from('accounts').select('id, username').eq('user_id', user.id)
         if (myAccounts && myAccounts.length > 0) {
           const ownAcc = myAccounts.find((a: { id: string; username: string }) => a.username === username)
           if (ownAcc) {
@@ -98,16 +116,15 @@ export default function UserProfilePage() {
           } else {
             setMyAccountId(myAccounts[0].id)
             const { data: followRow } = await supabase
-              .from('follows')
-              .select('id')
-              .eq('follower_id', myAccounts[0].id)
-              .eq('following_id', acc.id)
-              .maybeSingle()
+              .from('follows').select('id')
+              .eq('follower_id', myAccounts[0].id).eq('following_id', acc.id).maybeSingle()
             setIsFollowing(!!followRow)
+            const { data: liked } = await supabase
+              .from('likes').select('video_id').eq('account_id', myAccounts[0].id)
+            if (liked) setLikedIds(new Set(liked.map((r: { video_id: string }) => r.video_id)))
           }
         }
       }
-
       setLoading(false)
     }
     load()
@@ -117,8 +134,7 @@ export default function UserProfilePage() {
     if (!myAccountId || !profile) return
     setFollowLoading(true)
     if (isFollowing) {
-      await supabase.from('follows').delete()
-        .eq('follower_id', myAccountId).eq('following_id', profile.id)
+      await supabase.from('follows').delete().eq('follower_id', myAccountId).eq('following_id', profile.id)
       setIsFollowing(false)
       setFollowerCount(c => c - 1)
     } else {
@@ -129,162 +145,327 @@ export default function UserProfilePage() {
     setFollowLoading(false)
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-pink-400 text-xl font-medium animate-pulse">{t('common.loadingUniverse')}</div>
-      </div>
-    )
+  async function fetchComments(videoId: string) {
+    setCommentLoading(true)
+    const { data } = await supabase.from('video_comments').select('*, accounts(username)')
+      .eq('video_id', videoId).order('created_at', { ascending: true })
+    setComments(data || [])
+    setCommentLoading(false)
   }
 
-  if (!profile || !theme) return null
+  async function submitComment() {
+    if (!myAccountId || !commentVideoId || !commentText.trim()) return
+    const { data, error } = await supabase.from('video_comments')
+      .insert({ video_id: commentVideoId, account_id: myAccountId, content: commentText.trim() })
+      .select('*, accounts(username)').single()
+    if (!error && data) { setComments(prev => [...prev, data]); setCommentText('') }
+  }
 
-  const accent = theme.primary === '#FFFFFF' ? '#C9A96E' : theme.primary
+  async function toggleLike(video: Video) {
+    if (!myAccountId) return
+    const liked = likedIds.has(video.id)
+    setLikedIds(prev => { const next = new Set(prev); liked ? next.delete(video.id) : next.add(video.id); return next })
+    setVideos(prev => prev.map(v => v.id === video.id ? { ...v, like_count: v.like_count + (liked ? -1 : 1) } : v))
+    setSelectedVideo(prev => prev?.id === video.id ? { ...prev, like_count: prev.like_count + (liked ? -1 : 1) } : prev)
+    if (liked) {
+      await supabase.from('likes').delete().eq('account_id', myAccountId).eq('video_id', video.id)
+      await supabase.from('videos').update({ like_count: video.like_count - 1 }).eq('id', video.id)
+    } else {
+      await supabase.from('likes').insert({ account_id: myAccountId, video_id: video.id })
+      await supabase.from('videos').update({ like_count: video.like_count + 1 }).eq('id', video.id)
+      if (profile && !isOwn) {
+        await supabase.from('notifications').insert({
+          account_id: profile.id, type: 'like',
+          from_username: username, video_id: video.id,
+          video_title: video.title,
+        })
+      }
+    }
+  }
+
+  async function shareVideo(video: Video) {
+    const url = `${window.location.origin}/profile/${username}`
+    if (navigator.share) {
+      await navigator.share({ title: video.title, url }).catch(() => {})
+    } else {
+      await navigator.clipboard.writeText(url).catch(() => {})
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    }
+  }
+
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="text-pink-400 text-xl font-medium animate-pulse">{t('common.loadingUniverse')}</div>
+    </div>
+  )
+
+  if (!profile) return null
+
+  const theme = profile.groups ? getTheme(profile.groups.name) : null
+  const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
   const totalLikes = videos.reduce((sum, v) => sum + v.like_count, 0)
+  const customHighlights = (profile.custom_highlights || []) as Highlight[]
+
+  const filteredVideos = activeCategory === 'all' ? videos
+    : activeCategory === 'vocal' || activeCategory === 'dance'
+      ? videos.filter(v => v.category === activeCategory)
+      : videos.filter(v => (v.tags || []).includes(activeCategory))
 
   return (
     <div className="min-h-screen bg-black text-white">
       <nav className="sticky top-0 z-20 bg-black/80 backdrop-blur border-b border-white/10 px-5 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-white/40 hover:text-white transition text-sm">🏠</Link>
-          <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">← {t('nav.back')}</button>
-        </div>
+        <button onClick={() => router.back()} className="text-white/40 hover:text-white transition text-sm">← {t('nav.back')}</button>
         <Link href="/"><KverseLogo /></Link>
         <div />
       </nav>
 
-      {/* 히어로 배너 */}
-      <div className="relative overflow-hidden" style={{ height: 160 }}>
-        <div className="absolute inset-0" style={{ background: theme.gradient }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9) 100%)' }} />
-      </div>
+      <div className="max-w-2xl mx-auto">
 
-      <div className="max-w-2xl mx-auto px-5">
-        {/* 프로필 섹션 */}
-        <div className="flex flex-col items-center -mt-10 mb-6">
-          <div className="rounded-2xl p-1.5 mb-3" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
-            <Avatar
-              gender={(profile.gender as 'male' | 'female') || 'female'}
-              groupColor={accent}
-              size={90}
-              rpmAvatarUrl={profile.rpm_avatar_url}
-              username={profile.username}
-            />
-          </div>
-          <div className="flex items-center gap-2 mb-1 flex-wrap justify-center">
-            <h1 className="text-2xl font-black text-white">@{profile.username}</h1>
-            {profile.nationality && (
-              <img src={getFlagImageUrl(profile.nationality, 20)} alt={profile.nationality} className="w-5 h-3.5 rounded-sm object-cover" />
-            )}
-            {profile.is_founder && (
-              <span className="text-xs font-black px-2.5 py-1 rounded-full"
-                style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
-                ✦ FOUNDER
-              </span>
-            )}
-          </div>
-          {profile.account_type === 'scout' && profile.is_scout_verified && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-2 border"
-              style={{ background: 'rgba(251,191,36,0.1)', borderColor: 'rgba(251,191,36,0.3)' }}>
-              <span className="text-sm">🎯</span>
-              <span className="text-yellow-400 text-xs font-bold">{profile.agency_name || 'Scout'}</span>
-              <span className="text-yellow-400/60 text-xs">✓ 인증</span>
+        {/* 헤더 */}
+        <div className="px-5 pt-6 pb-4">
+          <div className="flex items-center gap-5 mb-4">
+            <div className="flex-shrink-0 rounded-2xl overflow-hidden"
+              style={{ padding: 3, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
+              <div style={{ width: 96, height: 96, borderRadius: 12, overflow: 'hidden' }}>
+                <Avatar
+                  gender={(profile.gender as 'male' | 'female') || 'female'}
+                  groupColor={accentColor || '#E91E8C'}
+                  size={96}
+                  rpmAvatarUrl={profile.rpm_avatar_url}
+                  username={profile.username}
+                />
+              </div>
             </div>
-          )}
-          {profile.groups && profile.account_type !== 'scout' && (
-            <span className="text-sm font-medium px-3 py-1 rounded-full mb-2" style={{ background: `${accent}22`, color: accent }}>
-              {groupDisplayName(profile.groups.name, locale)}
-            </span>
-          )}
-          {profile.bio && <p className="text-white/50 text-sm text-center max-w-xs">{profile.bio}</p>}
 
-          <div className="flex gap-6 mt-4">
-            <div className="text-center">
-              <p className="text-xl font-bold text-white">{videos.length}</p>
-              <p className="text-white/40 text-xs">{t('prof.coverVideos')}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold" style={{ color: accent }}>{totalLikes}</p>
-              <p className="text-white/40 text-xs">{t('prof.totalLikes')}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-white">{followerCount}</p>
-              <p className="text-white/40 text-xs">{t('prof.followers')}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-white">{followingCount}</p>
-              <p className="text-white/40 text-xs">{t('prof.following')}</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="text-white font-black text-lg">@{profile.username}</span>
+                {profile.nationality && (
+                  <img src={getFlagImageUrl(profile.nationality, 20)} alt={profile.nationality} className="w-5 h-3.5 rounded-sm object-cover" />
+                )}
+                {profile.is_founder && (
+                  <span className="text-xs font-black px-2 py-0.5 rounded-full"
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                    ✦ FOUNDER
+                  </span>
+                )}
+                {profile.account_type === 'scout' && profile.is_scout_verified && (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full border"
+                    style={{ background: 'rgba(251,191,36,0.1)', borderColor: 'rgba(251,191,36,0.3)', color: '#FBBF24' }}>
+                    🎯 {profile.agency_name}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-5">
+                <div className="text-center">
+                  <p className="text-white font-bold text-base leading-tight">{videos.length}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.coverVideos')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-base leading-tight" style={{ color: accentColor }}>{totalLikes}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.totalLikes')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-base leading-tight">{followerCount}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.followers')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-base leading-tight">{followingCount}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.following')}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {!isOwn && (
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={toggleFollow}
-                disabled={followLoading || !myAccountId}
-                className="px-6 py-2 text-white text-sm font-bold rounded-full transition disabled:opacity-50"
+          {profile.bio && <p className="text-white/60 text-sm leading-relaxed mb-3">{profile.bio}</p>}
+
+          {/* 액션 버튼 */}
+          {isOwn ? (
+            <Link href="/profile"
+              className="block w-full text-center py-2 rounded-xl border border-white/15 text-white/60 text-sm font-medium hover:bg-white/5 transition">
+              {t('feed.editProfile')}
+            </Link>
+          ) : (
+            <div className="flex gap-2">
+              <button onClick={toggleFollow} disabled={followLoading || !myAccountId}
+                className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition disabled:opacity-50"
                 style={isFollowing
-                  ? { background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }
-                  : { background: theme.gradient }
-                }
-              >
+                  ? { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }
+                  : { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }
+                }>
                 {isFollowing ? t('prof.unfollow') : t('prof.follow')}
               </button>
-              <Link
-                href={`/dm?to=${profile.username}`}
-                className="px-5 py-2 text-white text-sm font-medium rounded-full transition border border-white/20 hover:bg-white/10"
-              >
+              <Link href={`/dm?to=${profile.username}`}
+                className="px-5 py-2.5 rounded-xl text-white text-sm font-medium border border-white/15 hover:bg-white/5 transition">
                 💬
               </Link>
             </div>
           )}
-          {isOwn && (
-            <Link href="/profile" className="mt-4 px-6 py-2 text-white/50 text-sm rounded-full border border-white/10 hover:text-white transition">
-              {t('prof.editProfile')}
-            </Link>
-          )}
         </div>
 
-        {/* 영상 목록 */}
-        <h2 className="text-base font-bold text-white mb-3 text-center">{t('prof.myVideos')}</h2>
-        {videos.length === 0 ? (
-          <div className="text-center py-14 rounded-2xl border" style={{ borderColor: `${accent}15` }}>
-            <div className="text-5xl mb-3">{theme.emoji}</div>
+        {/* 하이라이트 */}
+        <div className="border-t border-white/5 px-5 py-4 flex gap-5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {FIXED_CATEGORIES.map(cat => {
+            const isActive = activeCategory === cat.key
+            const count = cat.key === 'all' ? videos.length : videos.filter(v => v.category === cat.key).length
+            return (
+              <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center transition"
+                  style={isActive
+                    ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', boxShadow: `0 0 0 2px #000, 0 0 0 4px ${accentColor || '#E91E8C'}` }
+                    : { background: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 2px #000, 0 0 0 4px rgba(255,255,255,0.12)' }
+                  }>
+                  <span className="text-xl font-black">{cat.symbol}</span>
+                </div>
+                <span className="text-xs text-white/50">{t(cat.labelKey)}</span>
+                <span className="text-[10px] text-white/25">{count}</span>
+              </button>
+            )
+          })}
+          {customHighlights.map(h => {
+            const isActive = activeCategory === h.key
+            const count = videos.filter(v => (v.tags || []).includes(h.key)).length
+            return (
+              <button key={h.key} onClick={() => setActiveCategory(h.key)}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl transition"
+                  style={isActive
+                    ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', boxShadow: `0 0 0 2px #000, 0 0 0 4px ${accentColor || '#E91E8C'}` }
+                    : { background: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 2px #000, 0 0 0 4px rgba(255,255,255,0.12)' }
+                  }>
+                  {h.emoji}
+                </div>
+                <span className="text-xs text-white/50 max-w-[64px] truncate text-center">{h.name}</span>
+                <span className="text-[10px] text-white/25">{count}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* 그리드 */}
+        {filteredVideos.length === 0 ? (
+          <div className="text-center py-20 px-6 border-t border-white/5">
             <p className="text-white/30 text-sm">{t('prof.noVideos')}</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2.5 pb-10">
-            {videos.map((video) => (
-              <Link
-                key={video.id}
-                href={profile.groups ? `/universe/${encodeURIComponent(profile.groups.name)}?video=${video.id}` : '/feed'}
-                className="rounded-xl p-4 flex items-center gap-3 border block hover:opacity-80 transition"
-                style={{ background: `${accent}08`, borderColor: `${accent}18` }}
-              >
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: `${accent}20` }}>
-                  {video.category === 'vocal' ? '🎤' : '💃'}
+          <div className="grid grid-cols-3 gap-px bg-white/5 border-t border-white/5">
+            {filteredVideos.map(video => (
+              <button key={video.id} onClick={() => setSelectedVideo(video)}
+                className="relative bg-zinc-950 overflow-hidden" style={{ aspectRatio: '1' }}>
+                <video src={video.video_url} className="w-full h-full object-cover"
+                  preload="metadata" muted playsInline
+                  onLoadedMetadata={e => { (e.target as HTMLVideoElement).currentTime = 0.1 }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute bottom-1.5 left-2 text-xs">{video.category === 'vocal' ? '🎤' : '💃'}</div>
+                <div className="absolute bottom-1.5 right-2">
+                  <span className="text-white text-[10px] font-bold drop-shadow-sm">♥ {video.like_count}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-white font-semibold text-sm truncate">{video.title}</p>
-                    {video.is_live && (
-                      <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                        {t('feed.liveBadge')}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-xs" style={{ color: accent }}>♥ {video.like_count}</span>
-                    <span className="text-white/30 text-xs">{video.view_count} {t('feed.views')}</span>
-                    <span className="text-white/20 text-xs">{new Date(video.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <span className="text-white/20 text-xs flex-shrink-0">▶</span>
-              </Link>
+              </button>
             ))}
           </div>
         )}
       </div>
+
+      {/* 영상 모달 */}
+      {selectedVideo && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => setSelectedVideo(null)}>
+          <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+            style={{ background: '#111', maxHeight: '92vh' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 flex-shrink-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-bold text-sm truncate">{selectedVideo.title}</p>
+                <span className="text-xs" style={{ color: accentColor }}>
+                  {selectedVideo.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
+                </span>
+              </div>
+              <button onClick={() => setSelectedVideo(null)} className="text-white/30 text-2xl leading-none flex-shrink-0">×</button>
+            </div>
+            <video src={selectedVideo.video_url} className="w-full bg-black flex-shrink-0"
+              style={{ maxHeight: '55vh' }} controls playsInline autoPlay />
+            <div className="px-4 py-3 flex items-center justify-between border-t border-white/5 flex-shrink-0">
+              <div className="flex items-center gap-3 text-white/35 text-xs">
+                <span>👁 {selectedVideo.view_count}</span>
+                <span>♥ {selectedVideo.like_count}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => shareVideo(selectedVideo)}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>📤</button>
+                {myAccountId && (
+                  <button onClick={() => { setCommentVideoId(selectedVideo.id); fetchComments(selectedVideo.id) }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>🗨️</button>
+                )}
+                {myAccountId && (
+                  <button onClick={() => toggleLike(selectedVideo)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition"
+                    style={likedIds.has(selectedVideo.id)
+                      ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', color: 'white' }
+                      : { background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}35` }
+                    }>♥ {selectedVideo.like_count}</button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 링크 복사 토스트 */}
+      {shareToast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          {t('feed.linkCopied')}
+        </div>
+      )}
+
+      {/* 댓글 바텀 시트 */}
+      {commentVideoId && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setCommentVideoId(null)}>
+          <div className="w-full max-w-2xl rounded-t-3xl flex flex-col"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '70vh' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+              <span className="text-white font-semibold">{t('feed.comments')}</span>
+              <button onClick={() => setCommentVideoId(null)} className="text-white/30 text-2xl leading-none">×</button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4 min-h-0">
+              {commentLoading ? (
+                <div className="text-white/30 text-sm text-center py-8">{t('common.loading')}</div>
+              ) : comments.length === 0 ? (
+                <div className="text-white/20 text-sm text-center py-8">{t('feed.noComments')}</div>
+              ) : comments.map(comment => (
+                <div key={comment.id} className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                    style={{ background: theme?.gradient }}>
+                    {comment.accounts.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-white text-xs font-semibold">@{comment.accounts.username}</span>
+                    <p className="text-white/70 text-sm mt-0.5 leading-relaxed">{comment.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {myAccountId && (
+              <div className="px-4 py-4 border-t border-white/5 flex gap-3 flex-shrink-0">
+                <input value={commentText} onChange={e => setCommentText(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() } }}
+                  placeholder={t('feed.commentPlaceholder')} maxLength={200}
+                  className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none border border-white/10" />
+                <button onClick={submitComment} disabled={!commentText.trim()}
+                  className="px-4 py-2 rounded-full text-white text-sm font-medium disabled:opacity-30 transition"
+                  style={{ background: theme?.gradient }}>
+                  {t('feed.postBtn')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
