@@ -238,7 +238,7 @@ export default function UniversePage() {
 
   async function shareVideo(video: Video) {
     const url = `https://kverse-nine.vercel.app/universe/${encodeURIComponent(groupName)}?video=${video.id}`
-    const text = `@${video.accounts?.username ?? ''}의 ${groupDisplayName(groupName, locale)} 커버 영상을 Kverse에서 보세요!`
+    const text = t('uni.shareText', { username: video.accounts?.username ?? '', group: groupDisplayName(groupName, locale) })
     if (navigator.share) {
       await navigator.share({ title: video.title, text, url }).catch(() => {})
     } else {
@@ -396,7 +396,7 @@ export default function UniversePage() {
               >
                 {t('uni.boardBtn')}
               </button>
-              <span className="text-white/25 text-xs">{fanCount.toLocaleString()}명</span>
+              <span className="text-white/25 text-xs">{fanCount.toLocaleString()}{t('uni.fanCountUnit')}</span>
             </div>
           )}
         </div>
@@ -475,7 +475,7 @@ export default function UniversePage() {
                   </span>
                   <Link href={isLoggedIn ? `/profile/${video.accounts?.username ?? ''}` : '/login'}
                     className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-white text-sm font-semibold truncate">@{video.accounts?.username ?? '알 수 없음'}</span>
+                    <span className="text-white text-sm font-semibold truncate">@{video.accounts?.username ?? t('uni.unknownUser')}</span>
                     {video.accounts?.is_founder && (
                       <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
                         style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>

@@ -292,6 +292,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 비공개', 'upload.public': '🌐 공개',
     'upload.privateDesc': '나만 볼 수 있어요', 'upload.publicDesc': '유니버스에 공개돼요',
     'upload.liveBtn': '🔴 LIVE 커버 업로드',
+    'notif.title': '알림', 'notif.clearAll': '전체 삭제', 'notif.empty': '알림이 없어요',
+    'notif.scoutMsg': ' 기획사가 스카우트 리스트에 저장했어요 🎯',
+    'notif.followed': '님이 팔로우했어요 🩷', 'notif.liked': '님이 영상을 좋아해요 ♥', 'notif.commented': '님이 댓글을 달았어요 💬',
+    'uni.fanCountUnit': '명', 'uni.unknownUser': '알 수 없음',
+    'home.fansUnit': '명 팬', 'prof.joinedUniverses': '내가 가입한 유니버스',
+    'prof.nationalityOnce': '✏️ 1회 수정 가능', 'prof.nationalityWarning': '변경 후 다시 수정할 수 없어요',
+    'uni.shareText': '{username}의 {group} 커버 영상을 Kverse에서 보세요!',
   },
 
   en: {
@@ -545,6 +552,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 Private', 'upload.public': '🌐 Public',
     'upload.privateDesc': 'Only you can see this', 'upload.publicDesc': 'Visible in the universe',
     'upload.liveBtn': '🔴 Upload LIVE Cover',
+    'notif.title': 'Notifications', 'notif.clearAll': 'Clear all', 'notif.empty': 'No notifications',
+    'notif.scoutMsg': ' added you to their scout list 🎯',
+    'notif.followed': ' followed you 🩷', 'notif.liked': ' liked your video ♥', 'notif.commented': ' commented on your video 💬',
+    'uni.fanCountUnit': ' fans', 'uni.unknownUser': 'Unknown',
+    'home.fansUnit': ' fans', 'prof.joinedUniverses': 'My Universes',
+    'prof.nationalityOnce': '✏️ Edit once', 'prof.nationalityWarning': 'Cannot be changed after this',
+    'uni.shareText': 'Watch {username}\'s {group} cover on Kverse!',
   },
 
   es: {
@@ -765,6 +779,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 Privado', 'upload.public': '🌐 Público',
     'upload.privateDesc': 'Solo tú puedes verlo', 'upload.publicDesc': 'Visible en el universo',
     'upload.liveBtn': '🔴 Subir Cover LIVE',
+    'notif.title': 'Notificaciones', 'notif.clearAll': 'Borrar todo', 'notif.empty': 'Sin notificaciones',
+    'notif.scoutMsg': ' te añadió a su lista scout 🎯',
+    'notif.followed': ' te siguió 🩷', 'notif.liked': ' le gustó tu video ♥', 'notif.commented': ' comentó tu video 💬',
+    'uni.fanCountUnit': ' fans', 'uni.unknownUser': 'Desconocido',
+    'home.fansUnit': ' fans', 'prof.joinedUniverses': 'Mis Universos',
+    'prof.nationalityOnce': '✏️ Editar una vez', 'prof.nationalityWarning': 'No se puede cambiar después',
+    'uni.shareText': '¡Mira el cover de {group} de {username} en Kverse!',
   },
 
   zh: {
@@ -949,6 +970,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 私密', 'upload.public': '🌐 公开',
     'upload.privateDesc': '仅自己可见', 'upload.publicDesc': '在宇宙中公开',
     'upload.liveBtn': '🔴 上传LIVE封面',
+    'notif.title': '通知', 'notif.clearAll': '清除全部', 'notif.empty': '暂无通知',
+    'notif.scoutMsg': ' 将您加入了星探名单 🎯',
+    'notif.followed': ' 关注了你 🩷', 'notif.liked': ' 喜欢了你的视频 ♥', 'notif.commented': ' 评论了你的视频 💬',
+    'uni.fanCountUnit': '名粉丝', 'uni.unknownUser': '未知用户',
+    'home.fansUnit': '名粉丝', 'prof.joinedUniverses': '我加入的宇宙',
+    'prof.nationalityOnce': '✏️ 仅可修改一次', 'prof.nationalityWarning': '修改后无法再更改',
+    'uni.shareText': '在Kverse观看{username}的{group}翻唱！',
   },
 
   ja: {
@@ -1133,6 +1161,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 非公開', 'upload.public': '🌐 公開',
     'upload.privateDesc': '自分だけ見られます', 'upload.publicDesc': 'ユニバースで公開',
     'upload.liveBtn': '🔴 LIVEカバーをアップ',
+    'notif.title': '通知', 'notif.clearAll': '全て削除', 'notif.empty': '通知はありません',
+    'notif.scoutMsg': ' がスカウトリストに追加しました 🎯',
+    'notif.followed': ' さんがフォローしました 🩷', 'notif.liked': ' さんが動画をいいねしました ♥', 'notif.commented': ' さんが動画にコメントしました 💬',
+    'uni.fanCountUnit': '名のファン', 'uni.unknownUser': '不明',
+    'home.fansUnit': '名のファン', 'prof.joinedUniverses': '参加中のユニバース',
+    'prof.nationalityOnce': '✏️ 1回のみ変更可', 'prof.nationalityWarning': '変更後は再修正できません',
+    'uni.shareText': 'Kverseで{username}の{group}カバーを見よう！',
   },
 
   fr: {
@@ -1317,6 +1352,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 Privé', 'upload.public': '🌐 Public',
     'upload.privateDesc': 'Seulement vous pouvez le voir', 'upload.publicDesc': "Visible dans l'univers",
     'upload.liveBtn': '🔴 Publier Cover LIVE',
+    'notif.title': 'Notifications', 'notif.clearAll': 'Tout effacer', 'notif.empty': 'Aucune notification',
+    'notif.scoutMsg': " vous a ajouté à sa liste de scouts 🎯",
+    'notif.followed': ' vous a suivi 🩷', 'notif.liked': ' a aimé votre vidéo ♥', 'notif.commented': ' a commenté votre vidéo 💬',
+    'uni.fanCountUnit': ' fans', 'uni.unknownUser': 'Inconnu',
+    'home.fansUnit': ' fans', 'prof.joinedUniverses': 'Mes Univers',
+    'prof.nationalityOnce': '✏️ Modifiable une fois', 'prof.nationalityWarning': 'Impossible de modifier après changement',
+    'uni.shareText': 'Regardez le cover {group} de {username} sur Kverse !',
   },
 
   ar: {
@@ -1501,6 +1543,13 @@ const translations: Record<Locale, Dict> = {
     'upload.private': '🔒 خاص', 'upload.public': '🌐 عام',
     'upload.privateDesc': 'يمكنك أنت فقط رؤيته', 'upload.publicDesc': 'مرئي في الكون',
     'upload.liveBtn': '🔴 رفع غلاف مباشر',
+    'notif.title': 'الإشعارات', 'notif.clearAll': 'مسح الكل', 'notif.empty': 'لا توجد إشعارات',
+    'notif.scoutMsg': ' أضافك إلى قائمة المواهب 🎯',
+    'notif.followed': ' تابعك 🩷', 'notif.liked': ' أعجب بفيديوك ♥', 'notif.commented': ' علّق على فيديوك 💬',
+    'uni.fanCountUnit': ' مشجع', 'uni.unknownUser': 'مجهول',
+    'home.fansUnit': ' مشجع', 'prof.joinedUniverses': 'أكواني',
+    'prof.nationalityOnce': '✏️ يمكن التعديل مرة واحدة', 'prof.nationalityWarning': 'لا يمكن التعديل بعد التغيير',
+    'uni.shareText': 'شاهد كوفر {group} لـ{username} على Kverse!',
   },
 }
 

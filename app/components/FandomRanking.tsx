@@ -134,7 +134,7 @@ export default function FandomRanking() {
                   {/* 활동 지표 */}
                   <div className="relative z-10 text-right flex-shrink-0">
                     <p className="text-white font-semibold text-sm tabular-nums">{group.videoCount} <span className="text-white/30 text-xs font-normal">{t('home.covers')}</span></p>
-                    <p className="text-xs tabular-nums mt-0.5" style={{ color: `${accentColor}70` }}>{group.fanCount.toLocaleString()}명 팬</p>
+                    <p className="text-xs tabular-nums mt-0.5" style={{ color: `${accentColor}70` }}>{group.fanCount.toLocaleString()}{t('home.fansUnit')}</p>
                   </div>
                 </div>
               )

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { useT } from '@/lib/i18n'
 
 type Notification = {
   id: string
@@ -21,6 +22,7 @@ type Props = {
 }
 
 export default function NotificationBell({ accountId, groupGradient }: Props) {
+  const t = useT()
   const [notifs, setNotifs] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -80,11 +82,11 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
   function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime()
     const m = Math.floor(diff / 60000)
-    if (m < 1) return '방금'
-    if (m < 60) return `${m}분 전`
+    if (m < 1) return t('common.justNow')
+    if (m < 60) return t('common.minsAgo', { n: m })
     const h = Math.floor(m / 60)
-    if (h < 24) return `${h}시간 전`
-    return `${Math.floor(h / 24)}일 전`
+    if (h < 24) return t('common.hoursAgo', { n: h })
+    return t('common.daysAgo', { n: Math.floor(h / 24) })
   }
 
   return (
@@ -111,7 +113,7 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
           style={{ background: '#111', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
         >
           <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-            <span className="text-white font-semibold text-sm">알림</span>
+            <span className="text-white font-semibold text-sm">{t('notif.title')}</span>
             {notifs.length > 0 && (
               <button
                 onClick={async () => {
@@ -120,14 +122,14 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
                 }}
                 className="text-white/30 text-xs hover:text-white/50 transition"
               >
-                전체 삭제
+                {t('notif.clearAll')}
               </button>
             )}
           </div>
 
           <div className="overflow-y-auto" style={{ maxHeight: 360 }}>
             {notifs.length === 0 ? (
-              <div className="text-white/20 text-sm text-center py-10">알림이 없어요</div>
+              <div className="text-white/20 text-sm text-center py-10">{t('notif.empty')}</div>
             ) : notifs.map(n => (
               <Link
                 key={n.id}
@@ -147,11 +149,11 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-xs leading-relaxed">
                     {n.type === 'scout_view' ? (
-                      <><span className="font-bold text-yellow-400">{n.from_username}</span> 기획사가 나를 스카우트 리스트에 저장했어요 🎯</>
+                      <><span className="font-bold text-yellow-400">{n.from_username}</span>{t('notif.scoutMsg')}</>
                     ) : n.type === 'follow' ? (
-                      <><span className="font-bold">@{n.from_username}</span>님이 팔로우했어요 🩷</>
+                      <><span className="font-bold">@{n.from_username}</span>{t('notif.followed')}</>
                     ) : (
-                      <><span className="font-bold">@{n.from_username}</span>{n.type === 'like' ? '님이 영상을 좋아해요 ♥' : '님이 댓글을 달았어요 💬'}</>
+                      <><span className="font-bold">@{n.from_username}</span>{n.type === 'like' ? t('notif.liked') : t('notif.commented')}</>
                     )}
                   </p>
                   {n.video_title && <p className="text-white/30 text-xs truncate mt-0.5">{n.video_title}</p>}

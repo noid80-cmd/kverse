@@ -247,7 +247,7 @@ export default function ProfilePage() {
                 <span className="text-xs">
                   {locale === 'ko' ? COUNTRIES.find(c => c.code === nationality)?.nameKo : COUNTRIES.find(c => c.code === nationality)?.name}
                 </span>
-                <span className="text-[10px] opacity-50">✏️ 1회 수정 가능</span>
+                <span className="text-[10px] opacity-50">{t('prof.nationalityOnce')}</span>
               </button>
             )}
           </div>
@@ -284,7 +284,7 @@ export default function ProfilePage() {
         {/* 가입한 유니버스 */}
         {fandoms.length > 0 && (
           <div className="rounded-2xl p-5 border border-white/8" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <p className="text-white/40 text-xs font-medium mb-3">내가 가입한 유니버스</p>
+            <p className="text-white/40 text-xs font-medium mb-3">{t('prof.joinedUniverses')}</p>
             <div className="flex flex-wrap gap-2">
               {fandoms.map(name => {
                 const grpTheme = getTheme(name)
@@ -313,7 +313,7 @@ export default function ProfilePage() {
           <div className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-6"
             onClick={e => e.stopPropagation()}>
             <h2 className="text-white font-bold mb-1 text-center">🌍 {t('prof.changeNationality')}</h2>
-            <p className="text-white/30 text-xs text-center mb-4">변경 후 다시 수정할 수 없어요</p>
+            <p className="text-white/30 text-xs text-center mb-4">{t('prof.nationalityWarning')}</p>
             <input
               type="text"
               value={nationalitySearch}
