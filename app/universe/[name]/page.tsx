@@ -51,6 +51,7 @@ export default function UniversePage() {
   const [totalCount, setTotalCount] = useState(0)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [accountId, setAccountId] = useState<string | null>(null)
+  const [myUsername, setMyUsername] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [commentVideoId, setCommentVideoId] = useState<string | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -88,9 +89,10 @@ export default function UniversePage() {
 
       if (user) {
         const { data: acc } = await supabase
-          .from('accounts').select('id').eq('user_id', user.id).limit(1).maybeSingle()
+          .from('accounts').select('id, username').eq('user_id', user.id).limit(1).maybeSingle()
         if (acc) {
           setAccountId(acc.id)
+          setMyUsername(acc.username)
           const [likedRes, fanRes, fanCountRes] = await Promise.all([
             supabase.from('likes').select('video_id').eq('account_id', acc.id),
             supabase.from('fandom_members').select('id').eq('account_id', acc.id).eq('group_name', groupName).maybeSingle(),
@@ -235,6 +237,14 @@ export default function UniversePage() {
       setShareToast(true)
       setTimeout(() => setShareToast(false), 2500)
     }
+  }
+
+  async function deleteVideo(video: Video) {
+    const match = video.video_url.match(/\/videos\/(.+)$/)
+    if (match) await supabase.storage.from('videos').remove([decodeURIComponent(match[1])])
+    await supabase.from('videos').delete().eq('id', video.id)
+    setVideos(prev => prev.filter(v => v.id !== video.id))
+    setTotalCount(c => c - 1)
   }
 
   async function toggleLike(video: Video) {
@@ -480,6 +490,14 @@ export default function UniversePage() {
                       style={{ background: `${accentColor}30`, color: accentColor }}>
                       {video.category === 'vocal' ? `🎤 ${t('common.vocal')}` : `💃 ${t('common.dance')}`}
                     </span>
+                    {video.accounts?.username === myUsername && (
+                      <button
+                        onClick={() => deleteVideo(video)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs text-white/25 hover:text-red-400 hover:bg-red-400/10 transition"
+                      >
+                        🗑
+                      </button>
+                    )}
                   </div>
                 </div>
 
