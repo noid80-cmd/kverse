@@ -305,6 +305,15 @@ export default function FeedPage() {
         <Link href="/" className="text-white/40 hover:text-white transition text-sm">{t('nav.backBtn')}</Link>
         <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
         <div className="flex items-center gap-2 justify-end">
+          {account && (
+            <Link
+              href="/dm"
+              className="w-9 h-9 rounded-full flex items-center justify-center transition border border-white/20 hover:bg-white/10 text-base"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            >
+              ✉️
+            </Link>
+          )}
           {account && <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />}
         </div>
       </nav>
