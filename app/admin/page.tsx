@@ -67,13 +67,13 @@ export default function AdminPage() {
   async function deleteAccount(account: Account) {
     if (!confirm(`@${account.username} 계정과 영상을 모두 삭제할까요?`)) return
 
-    const user = await getAuthUser()
-    if (!user) return
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
 
     const res = await fetch('/api/admin/delete-account', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accountId: account.id, requesterId: user.id }),
+      body: JSON.stringify({ accountId: account.id, accessToken: session.access_token }),
     })
 
     if (!res.ok) {
