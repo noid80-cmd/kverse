@@ -7,13 +7,20 @@ import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 import NotificationBell from '@/app/components/NotificationBell'
+import Avatar from '@/app/components/Avatar'
 
 type Account = {
   id: string
   username: string
+  display_name: string
+  bio: string
   group_id: string
   gender: string
+  nationality?: string
+  is_founder?: boolean
+  account_type?: string
   groups: { name: string; name_en: string } | null
+  rpm_avatar_url?: string | null
 }
 
 type Video = {
@@ -36,6 +43,12 @@ type Comment = {
   accounts: { username: string }
 }
 
+const CATEGORIES = [
+  { key: 'all', emoji: '🎬', labelKey: 'feed.catAll' },
+  { key: 'vocal', emoji: '🎤', labelKey: 'feed.catVocal' },
+  { key: 'dance', emoji: '💃', labelKey: 'feed.catDance' },
+]
+
 export default function FeedPage() {
   const t = useT()
   const [account, setAccount] = useState<Account | null>(null)
@@ -51,6 +64,9 @@ export default function FeedPage() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [shareToast, setShareToast] = useState(false)
+  const [activeCategory, setActiveCategory] = useState('all')
+  const [followerCount, setFollowerCount] = useState(0)
+  const [followingCount, setFollowingCount] = useState(0)
   const viewedIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -62,7 +78,14 @@ export default function FeedPage() {
         .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
       if (!data) { setLoading(false); return }
       setAccount(data)
-      await Promise.all([fetchVideos(data.id), fetchLikedIds(data.id)])
+      const [, , fcRes, fgRes] = await Promise.all([
+        fetchVideos(data.id),
+        fetchLikedIds(data.id),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', data.id),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', data.id),
+      ])
+      setFollowerCount((fcRes as any).count || 0)
+      setFollowingCount((fgRes as any).count || 0)
       setLoading(false)
     }
     load()
@@ -139,7 +162,6 @@ export default function FeedPage() {
   async function toggleLike(video: Video) {
     if (!account) return
     const liked = likedIds.has(video.id)
-
     setLikedIds(prev => { const next = new Set(prev); liked ? next.delete(video.id) : next.add(video.id); return next })
     setVideos(prev => prev.map(v => v.id === video.id ? { ...v, like_count: v.like_count + (liked ? -1 : 1) } : v))
     setSelectedVideo(prev => prev?.id === video.id ? { ...prev, like_count: prev.like_count + (liked ? -1 : 1) } : prev)
@@ -161,6 +183,8 @@ export default function FeedPage() {
 
   const theme = account?.groups ? getTheme(account.groups.name) : null
   const accentColor = theme?.primary === '#FFFFFF' ? '#C9A96E' : theme?.primary
+  const totalLikes = videos.reduce((sum, v) => sum + v.like_count, 0)
+  const filteredVideos = activeCategory === 'all' ? videos : videos.filter(v => v.category === activeCategory)
 
   const confettiItems = showCelebration
     ? Array.from({ length: 18 }, (_, i) => ({
@@ -185,7 +209,7 @@ export default function FeedPage() {
   return (
     <div className="min-h-screen bg-black">
 
-      {/* 업로드 축하 컨페티 */}
+      {/* 컨페티 */}
       {showCelebration && (
         <div className="fixed inset-0 pointer-events-none z-[200] overflow-hidden">
           {confettiItems.map((c, i) => (
@@ -216,31 +240,98 @@ export default function FeedPage() {
           <Link href="/upload" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
             ✚
           </Link>
-          <Link href="/profile" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
-            👤
-          </Link>
         </div>
       </nav>
 
       <div className="max-w-2xl mx-auto">
 
-        {/* 헤더 */}
-        <div className="px-5 py-5 flex items-center justify-between">
-          <div>
-            <h1 className="text-white font-black text-lg">{t('feed.myCovers')}</h1>
-            <p className="text-white/30 text-xs mt-0.5">{videos.length}{t('feed.videoCount')}</p>
+        {/* 프로필 헤더 */}
+        <div className="px-5 pt-6 pb-4">
+          <div className="flex items-center gap-5 mb-4">
+            {/* 아바타 */}
+            <div className="rounded-2xl flex-shrink-0"
+              style={{ padding: 3, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
+              <Avatar
+                gender={(account?.gender as 'male' | 'female') || 'female'}
+                groupColor={accentColor || '#E91E8C'}
+                size={80}
+                rpmAvatarUrl={account?.rpm_avatar_url}
+                username={account?.username}
+              />
+            </div>
+
+            {/* 스탯 */}
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="text-white font-black text-lg">@{account?.username}</span>
+                {account?.is_founder && (
+                  <span className="text-xs font-black px-2 py-0.5 rounded-full"
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                    ✦ FOUNDER
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-5">
+                <div className="text-center">
+                  <p className="text-white font-bold text-base leading-tight">{videos.length}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.coverVideos')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-base leading-tight" style={{ color: accentColor }}>
+                    {totalLikes}
+                  </p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.totalLikes')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-base leading-tight">{followerCount}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.followers')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-base leading-tight">{followingCount}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{t('prof.following')}</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <Link href="/upload"
-            className="px-4 py-2 rounded-full text-white text-sm font-bold transition"
-            style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
-            + {t('feed.uploadFirst')}
+
+          {/* 바이오 */}
+          {account?.bio && (
+            <p className="text-white/60 text-sm leading-relaxed mb-3">{account.bio}</p>
+          )}
+
+          {/* 프로필 편집 버튼 */}
+          <Link href="/profile"
+            className="block w-full text-center py-2 rounded-xl border border-white/15 text-white/60 text-sm font-medium hover:bg-white/5 transition">
+            {t('feed.editProfile')}
           </Link>
         </div>
 
+        {/* 카테고리 하이라이트 */}
+        <div className="border-t border-white/5 px-5 py-4 flex gap-5 overflow-x-auto">
+          {CATEGORIES.map(cat => {
+            const isActive = activeCategory === cat.key
+            const count = cat.key === 'all' ? videos.length : videos.filter(v => v.category === cat.key).length
+            return (
+              <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl transition"
+                  style={isActive
+                    ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', boxShadow: `0 0 0 2px #000, 0 0 0 4px ${accentColor || '#E91E8C'}` }
+                    : { background: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 2px #000, 0 0 0 4px rgba(255,255,255,0.12)' }
+                  }>
+                  {cat.emoji}
+                </div>
+                <span className="text-xs text-white/50">{t(cat.labelKey)}</span>
+                <span className="text-[10px] text-white/25">{count}</span>
+              </button>
+            )
+          })}
+        </div>
+
         {/* 그리드 */}
-        {videos.length === 0 ? (
-          <div className="text-center py-24 px-6">
-            <div className="text-6xl mb-4">{theme?.emoji || '📹'}</div>
+        {filteredVideos.length === 0 ? (
+          <div className="text-center py-20 px-6">
+            <div className="text-5xl mb-4">{theme?.emoji || '📹'}</div>
             <p className="text-white/40 text-sm mb-6">{t('feed.beFirst')}</p>
             <Link href="/upload" className="px-8 py-3 text-white font-medium rounded-full transition"
               style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
@@ -248,8 +339,8 @@ export default function FeedPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-px bg-white/5">
-            {videos.map(video => (
+          <div className="grid grid-cols-3 gap-px bg-white/5 border-t border-white/5">
+            {filteredVideos.map(video => (
               <button
                 key={video.id}
                 onClick={() => setSelectedVideo(video)}
@@ -268,7 +359,7 @@ export default function FeedPage() {
                 <div className="absolute bottom-1.5 left-2 text-xs">
                   {video.category === 'vocal' ? '🎤' : '💃'}
                 </div>
-                <div className="absolute bottom-1.5 right-2 flex items-center gap-0.5">
+                <div className="absolute bottom-1.5 right-2">
                   <span className="text-white text-[10px] font-bold drop-shadow-sm">♥ {video.like_count}</span>
                 </div>
                 {video.is_private && (
@@ -288,8 +379,6 @@ export default function FeedPage() {
           <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
             style={{ background: '#111', maxHeight: '92vh' }}
             onClick={e => e.stopPropagation()}>
-
-            {/* 모달 헤더 */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 flex-shrink-0">
               <div className="flex-1 min-w-0">
                 <p className="text-white font-bold text-sm truncate">{selectedVideo.title}</p>
@@ -302,19 +391,13 @@ export default function FeedPage() {
               </div>
               <button onClick={() => setSelectedVideo(null)} className="text-white/30 text-2xl leading-none flex-shrink-0">×</button>
             </div>
-
-            {/* 영상 */}
             <video
               src={selectedVideo.video_url}
               className="w-full bg-black flex-shrink-0"
               style={{ maxHeight: '55vh' }}
-              controls
-              playsInline
-              autoPlay
+              controls playsInline autoPlay
               onPlay={() => handleVideoPlay(selectedVideo.id, selectedVideo.view_count)}
             />
-
-            {/* 액션 바 */}
             <div className="px-4 py-3 flex items-center justify-between border-t border-white/5 flex-shrink-0">
               <div className="flex items-center gap-3 text-white/35 text-xs">
                 <span>👁 {selectedVideo.view_count}</span>
@@ -323,16 +406,11 @@ export default function FeedPage() {
               <div className="flex items-center gap-2">
                 <button onClick={() => shareVideo(selectedVideo)}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
-                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
-                  📤
-                </button>
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>📤</button>
                 <button onClick={() => { setCommentVideoId(selectedVideo.id); fetchComments(selectedVideo.id) }}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
-                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
-                  🗨️
-                </button>
-                <button
-                  onClick={() => toggleLike(selectedVideo)}
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>🗨️</button>
+                <button onClick={() => toggleLike(selectedVideo)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition"
                   style={likedIds.has(selectedVideo.id)
                     ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', color: 'white' }
@@ -342,9 +420,7 @@ export default function FeedPage() {
                 </button>
                 <button onClick={() => setDeleteTarget(selectedVideo)}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
-                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>
-                  🗑
-                </button>
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>🗑</button>
               </div>
             </div>
           </div>
@@ -394,14 +470,10 @@ export default function FeedPage() {
               ))}
             </div>
             <div className="px-4 py-4 border-t border-white/5 flex gap-3 flex-shrink-0">
-              <input
-                value={commentText}
-                onChange={e => setCommentText(e.target.value)}
+              <input value={commentText} onChange={e => setCommentText(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() } }}
-                placeholder={t('feed.commentPlaceholder')}
-                maxLength={200}
-                className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none border border-white/10"
-              />
+                placeholder={t('feed.commentPlaceholder')} maxLength={200}
+                className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none border border-white/10" />
               <button onClick={submitComment} disabled={!commentText.trim()}
                 className="px-4 py-2 rounded-full text-white text-sm font-medium disabled:opacity-30 transition"
                 style={{ background: theme?.gradient }}>
