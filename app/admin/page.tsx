@@ -63,6 +63,14 @@ export default function AdminPage() {
     showToast(`🗑 @${account.username} 삭제`, 'success')
   }
 
+  async function deleteAccount(account: Account) {
+    if (!confirm(`@${account.username} 계정을 삭제할까요?`)) return
+    const { error } = await supabase.from('accounts').delete().eq('id', account.id)
+    if (error) { showToast('오류: ' + error.message, 'error'); return }
+    setAccounts(prev => prev.filter(a => a.id !== account.id))
+    showToast(`🗑 @${account.username} 삭제됨`, 'success')
+  }
+
   function showToast(msg: string, type: 'success' | 'error') {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 2500)
@@ -232,6 +240,12 @@ export default function AdminPage() {
                       ✦
                     </span>
                   )}
+                  <button
+                    onClick={() => deleteAccount(account)}
+                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition hover:bg-red-500/20 text-white/20 hover:text-red-400 text-xs"
+                  >
+                    🗑
+                  </button>
                 </div>
               ))}
             </div>
