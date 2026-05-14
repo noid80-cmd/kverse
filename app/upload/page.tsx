@@ -64,6 +64,12 @@ export default function UploadPage() {
   }, [])
 
   useEffect(() => {
+    if (preview && previewRef.current) {
+      previewRef.current.load()
+    }
+  }, [preview])
+
+  useEffect(() => {
     async function load() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
@@ -167,10 +173,10 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen bg-black">
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
-        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">← 뒤로</button>
+        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">{t('nav.backBtn')}</button>
         <div className="flex justify-center"><KverseLogo /></div>
         <div className="flex justify-end">
-          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">내 SNS</Link>
+          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.mySns')}</Link>
         </div>
       </nav>
       <div className="max-w-lg mx-auto px-6 py-8">
@@ -181,13 +187,13 @@ export default function UploadPage() {
         <div className={`flex gap-3 mb-8 ${category === 'dance' ? 'hidden' : ''}`}>
           <button onClick={() => handleModeChange('normal')}
             className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${uploadMode === 'normal' ? 'border-white/30 bg-white/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}>
-            📁 일반 커버
-            <p className="text-xs font-normal mt-0.5 opacity-60">갤러리에서 선택</p>
+            {t('upload.normalMode')}
+            <p className="text-xs font-normal mt-0.5 opacity-60">{t('upload.normalModeDesc')}</p>
           </button>
           <button onClick={() => handleModeChange('live')}
             className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${uploadMode === 'live' ? 'border-red-500 bg-red-500/15 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}>
-            🔴 LIVE 인증
-            <p className="text-xs font-normal mt-0.5 opacity-60">실시간 촬영만 허용</p>
+            {t('upload.liveMode')}
+            <p className="text-xs font-normal mt-0.5 opacity-60">{t('upload.liveModeDesc')}</p>
           </button>
         </div>
 
@@ -196,7 +202,7 @@ export default function UploadPage() {
             <span className="text-red-400 text-lg">🔴</span>
             <div>
               <p className="text-red-300 text-sm font-medium">LIVE 인증 커버</p>
-              <p className="text-white/40 text-xs mt-0.5">촬영 길이 제한 없이 찍은 후, 5분 이내 구간을 선택해 업로드하세요. 색 보정은 적용되지 않습니다.</p>
+              <p className="text-white/40 text-xs mt-0.5">{t('upload.liveInst')}</p>
             </div>
           </div>
         )}
@@ -212,7 +218,7 @@ export default function UploadPage() {
 
           {/* 아티스트 선택 */}
           <div>
-            <label className="text-white/60 text-sm mb-3 block">어느 아티스트 커버인가요?</label>
+            <label className="text-white/60 text-sm mb-3 block">{t('upload.whichArtist')}</label>
             <div className="grid grid-cols-3 gap-2">
               {ALL_GROUPS.map((g) => {
                 const isSelected = selectedGroup === g.name
@@ -277,17 +283,17 @@ export default function UploadPage() {
                 {/* 구간 설정 */}
                 <div className="rounded-xl p-4 border border-white/10 bg-white/5">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-white/60 text-xs font-medium">✂️ 구간 설정 <span className="text-white/30 ml-1">{fmtTime(trimStart)} ~ {fmtTime(trimEnd)}</span></p>
+                    <p className="text-white/60 text-xs font-medium">{t('upload.trimSection')} <span className="text-white/30 ml-1">{fmtTime(trimStart)} ~ {fmtTime(trimEnd)}</span></p>
                     {uploadMode === 'live' && duration > MAX_DURATION_SEC && (
-                      <span className="text-orange-400 text-xs">5분 이내 구간 선택 필요</span>
+                      <span className="text-orange-400 text-xs">{t('upload.trimNeeded')}</span>
                     )}
                     {trimOverLimit && (
-                      <span className="text-red-400 text-xs font-medium">선택 구간 {fmtTime(trimDuration)} — 5분 초과</span>
+                      <span className="text-red-400 text-xs font-medium">{t('upload.trimOver', { dur: fmtTime(trimDuration) })}</span>
                     )}
                   </div>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-white/40 text-xs w-10">시작</span>
+                      <span className="text-white/40 text-xs w-10">{t('upload.trimStart')}</span>
                       <input type="range" min={0} max={duration} step={0.1} value={trimStart}
                         onChange={e => {
                           const v = parseFloat(e.target.value)
@@ -298,7 +304,7 @@ export default function UploadPage() {
                       <span className="text-white/50 text-xs w-10 text-right">{fmtTime(trimStart)}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-white/40 text-xs w-10">끝</span>
+                      <span className="text-white/40 text-xs w-10">{t('upload.trimEnd')}</span>
                       <input type="range" min={0} max={duration} step={0.1} value={trimEnd}
                         onChange={e => {
                           const v = parseFloat(e.target.value)
@@ -314,19 +320,19 @@ export default function UploadPage() {
                 {/* 색 보정 — 일반만 */}
                 {uploadMode === 'normal' && (
                   <div className="rounded-xl p-4 border border-white/10 bg-white/5">
-                    <p className="text-white/60 text-xs font-medium mb-3">🎨 색 보정</p>
+                    <p className="text-white/60 text-xs font-medium mb-3">{t('upload.colorSection')}</p>
                     <div className="flex flex-col gap-3">
                       {[
-                        { label: '밝기', value: brightness, set: setBrightness, min: 0.5, max: 1.5 },
-                        { label: '대비', value: contrast, set: setContrast, min: 0.5, max: 1.5 },
-                        { label: '채도', value: saturation, set: setSaturation, min: 0, max: 2 },
+                        { label: t('upload.brightness'), value: brightness, set: setBrightness, min: 0.5, max: 1.5 },
+                        { label: t('upload.contrast'), value: contrast, set: setContrast, min: 0.5, max: 1.5 },
+                        { label: t('upload.saturation'), value: saturation, set: setSaturation, min: 0, max: 2 },
                       ].map(({ label, value, set, min, max }) => (
                         <div key={label} className="flex items-center gap-3">
                           <span className="text-white/40 text-xs w-10">{label}</span>
                           <input type="range" min={min} max={max} step={0.05} value={value}
                             onChange={e => set(parseFloat(e.target.value))}
                             className="flex-1 accent-pink-500" />
-                          <button onClick={() => set(label === '채도' ? 1 : 1)}
+                          <button onClick={() => set(1)}
                             className="text-white/25 text-xs w-10 text-right hover:text-white/50 transition">
                             {value.toFixed(1)}
                           </button>
@@ -334,7 +340,7 @@ export default function UploadPage() {
                       ))}
                       <button onClick={() => { setBrightness(1); setContrast(1); setSaturation(1) }}
                         className="text-white/25 text-xs text-center mt-1 hover:text-white/50 transition">
-                        초기화
+                        {t('upload.resetFilters')}
                       </button>
                     </div>
                   </div>
@@ -347,7 +353,7 @@ export default function UploadPage() {
                 className="w-full border-2 border-dashed rounded-xl py-12 flex flex-col items-center gap-3 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ borderColor: uploadMode === 'live' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.2)' }}>
                 <span className="text-4xl">{uploadMode === 'live' ? '🎬' : '📁'}</span>
-                <span className="text-white/50 text-sm">{uploadMode === 'live' ? '탭하여 촬영 시작' : '갤러리에서 영상 선택'}</span>
+                <span className="text-white/50 text-sm">{uploadMode === 'live' ? t('upload.tapToRecord') : t('upload.normalModeDesc')}</span>
                 <span className="text-white/25 text-xs">{t('upload.maxInfo')}</span>
               </button>
             )}
@@ -358,8 +364,8 @@ export default function UploadPage() {
           {/* 공개/비공개 */}
           <button onClick={() => setIsPrivate(p => !p)}
             className={`w-full py-3 px-4 rounded-xl border-2 font-medium transition text-sm flex items-center justify-between ${isPrivate ? 'border-white/20 bg-white/5 text-white/60' : 'border-pink-500/40 bg-pink-500/10 text-pink-300'}`}>
-            <span>{isPrivate ? '🔒 비공개' : '🌐 공개'}</span>
-            <span className="text-xs opacity-60">{isPrivate ? '나만 볼 수 있어요' : '유니버스에 공개돼요'}</span>
+            <span>{isPrivate ? t('upload.private') : t('upload.public')}</span>
+            <span className="text-xs opacity-60">{isPrivate ? t('upload.privateDesc') : t('upload.publicDesc')}</span>
           </button>
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -374,7 +380,7 @@ export default function UploadPage() {
           <button onClick={handleUpload} disabled={!canUpload}
             className="w-full disabled:opacity-40 text-white font-medium py-4 rounded-xl transition text-lg"
             style={{ background: uploadMode === 'live' ? 'linear-gradient(135deg, #ef4444, #E91E8C)' : 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}>
-            {uploading ? t('upload.uploading', { pct: progress }) : uploadMode === 'live' ? '🔴 LIVE 커버 업로드' : t('upload.btn')}
+            {uploading ? t('upload.uploading', { pct: progress }) : uploadMode === 'live' ? t('upload.liveBtn') : t('upload.btn')}
           </button>
         </div>
       </div>

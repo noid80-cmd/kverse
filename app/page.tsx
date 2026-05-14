@@ -81,14 +81,14 @@ export default function Home() {
             <Link href="/feed"
               className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
               style={{ background: BRAND_GRADIENT }}>
-              나의 SNS
+              {t('home.mySns')}
             </Link>
           ) : (
             <>
               <Link href="/signup"
                 className="px-8 py-3.5 rounded-full font-medium text-[15px] hover:opacity-90 transition"
                 style={{ background: BRAND_GRADIENT }}>
-                가입하기
+                {t('auth.signup')}
               </Link>
               <Link href="/login"
                 className="px-8 py-3.5 rounded-full border border-white/10 font-medium text-[15px] text-white/50 hover:text-white hover:border-white/25 transition">

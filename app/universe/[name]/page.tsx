@@ -303,7 +303,7 @@ export default function UniversePage() {
       {shareToast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
           style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
-          🔗 링크가 복사됐어요
+          {t('uni.linkCopied')}
         </div>
       )}
 
@@ -311,7 +311,7 @@ export default function UniversePage() {
       {boardToast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium text-center"
           style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
-          팬으로 참여해야 게시판을 이용할 수 있어요
+          {t('uni.boardFanOnly')}
         </div>
       )}
 
@@ -319,16 +319,16 @@ export default function UniversePage() {
       {fanLimitToast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium text-center"
           style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,100,100,0.3)' }}>
-          💜 팬덤은 최대 3개까지 참여할 수 있어요
+          {t('uni.fanLimit')}
         </div>
       )}
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
-        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">← 뒤로</button>
+        <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">{t('nav.backBtn')}</button>
         <div className="flex justify-center"><KverseLogo /></div>
         <div className="flex justify-end">
-          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">내 SNS</Link>
+          <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.mySns')}</Link>
         </div>
       </nav>
 
@@ -363,7 +363,7 @@ export default function UniversePage() {
                   : { border: `1.5px solid ${accentColor}60`, color: accentColor, background: 'transparent' }
                 }
               >
-                {isFan ? `✓ ${groupDisplayName(groupName, locale)} 팬` : '팬으로 참여하기'}
+                {isFan ? `✓ ${groupDisplayName(groupName, locale)} Fan` : t('uni.joinFan')}
               </button>
               <button
                 onClick={() => {
@@ -380,7 +380,7 @@ export default function UniversePage() {
                   : { border: '1.5px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.2)', background: 'transparent' }
                 }
               >
-                📋 게시판
+                {t('uni.boardBtn')}
               </button>
               <span className="text-white/25 text-xs">{fanCount.toLocaleString()}명</span>
             </div>
@@ -429,8 +429,8 @@ export default function UniversePage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-white/30 text-sm mb-1">아직 커버 영상이 없어요.</p>
-            <p className="text-white/50 text-sm font-medium mb-5">첫 번째 커버의 주인공이 되어보세요!</p>
+            <p className="text-white/30 text-sm mb-1">{t('uni.noVideosMsg')}</p>
+            <p className="text-white/50 text-sm font-medium mb-5">{t('uni.beFirstMsg')}</p>
             <button
               onClick={() => {
                 if (!isLoggedIn) { window.location.href = `/login?back=${encodeURIComponent(`/universe/${encodeURIComponent(groupName)}`)}` ; return }
@@ -586,14 +586,14 @@ export default function UniversePage() {
             onClick={e => e.stopPropagation()}
           >
             <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
-              <span className="text-white font-semibold">댓글</span>
+              <span className="text-white font-semibold">{t('uni.comments')}</span>
               <button onClick={() => setCommentVideoId(null)} className="text-white/30 text-2xl leading-none">×</button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4 min-h-0">
               {commentLoading ? (
-                <div className="text-white/30 text-sm text-center py-8">불러오는 중...</div>
+                <div className="text-white/30 text-sm text-center py-8">{t('common.loading')}</div>
               ) : comments.length === 0 ? (
-                <div className="text-white/20 text-sm text-center py-8">아직 댓글이 없어요. 첫 댓글을 달아보세요!</div>
+                <div className="text-white/20 text-sm text-center py-8">{t('uni.noComments')}</div>
               ) : comments.map(comment => (
                 <div key={comment.id} className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
@@ -617,7 +617,7 @@ export default function UniversePage() {
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() } }}
-                  placeholder="댓글 달기..."
+                  placeholder={t('uni.commentPlaceholder')}
                   maxLength={200}
                   className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none border border-white/10"
                 />
@@ -627,12 +627,12 @@ export default function UniversePage() {
                   className="px-4 py-2 rounded-full text-white text-sm font-medium disabled:opacity-30 transition"
                   style={{ background: theme.gradient }}
                 >
-                  게시
+                  {t('uni.postComment')}
                 </button>
               </div>
             ) : (
               <div className="px-4 py-4 border-t border-white/5 text-center flex-shrink-0">
-                <Link href="/login" className="text-white/40 text-sm hover:text-white/60 transition">로그인하면 댓글을 달 수 있어요</Link>
+                <Link href="/login" className="text-white/40 text-sm hover:text-white/60 transition">{t('uni.loginToComment')}</Link>
               </div>
             )}
           </div>

@@ -439,8 +439,8 @@ export default function FeedPage() {
             <div style={{ animation: 'celebrationPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards' }}
               className="bg-zinc-900/95 border border-white/20 rounded-3xl px-8 py-6 text-center backdrop-blur">
               <div className="text-4xl mb-2">🎉</div>
-              <p className="text-white font-black text-lg">업로드 완료!</p>
-              <p className="text-white/40 text-sm mt-1">커버 영상이 올라갔어요</p>
+              <p className="text-white font-black text-lg">{t('feed.uploadSuccess')}</p>
+              <p className="text-white/40 text-sm mt-1">{t('feed.uploadSuccessDesc')}</p>
             </div>
           </div>
         </div>
@@ -458,14 +458,14 @@ export default function FeedPage() {
             onClick={() => { setNewVideoNotif(false); fetchVideos(feedTab === 'following' ? 'all' : feedTab) }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'realtimeDot 1s ease-in-out infinite' }} />
-            새 커버 영상이 올라왔어요 · 탭해서 보기
+            {t('feed.newCoverAlert')}
           </button>
         </div>
       )}
 
       {/* 네비게이션 */}
       <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
-        <Link href="/" className="text-white/40 hover:text-white transition text-sm">← 뒤로</Link>
+        <Link href="/" className="text-white/40 hover:text-white transition text-sm">{t('nav.backBtn')}</Link>
         <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
         <div className="flex items-center gap-2 justify-end">
           {account && <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />}
@@ -588,7 +588,7 @@ export default function FeedPage() {
                 style={{ background: 'linear-gradient(135deg,#ff3278,#7c3aed)', animation: 'hotPulse 2s ease-in-out infinite' }}>
                 🔥 TRENDING NOW
               </span>
-              <span className="text-white/35 text-xs">이번 주 전체 1위</span>
+              <span className="text-white/35 text-xs">{t('feed.thisWeekNo1')}</span>
               {trendingVideo.groups && (
                 <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full"
                   style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
@@ -618,7 +618,7 @@ export default function FeedPage() {
         <div className="flex gap-2 mb-6 justify-center">
           {([
             { key: 'all', label: t('feed.allTab') },
-            { key: 'popular', label: '인기' },
+            { key: 'popular', label: t('feed.popularTab') },
             { key: 'following', label: t('feed.followingTab') },
           ] as { key: 'all' | 'popular' | 'following'; label: string }[]).map(({ key, label }) => (
             <button
@@ -670,7 +670,7 @@ export default function FeedPage() {
                               {acc.groups?.name ? groupDisplayName(acc.groups.name, locale) : ''}
                             </p>
                           </div>
-                          <span className="text-white/20 text-xs">프로필 →</span>
+                          <span className="text-white/20 text-xs">{t('feed.profileArrow')}</span>
                         </Link>
                       )
                     })}
@@ -743,7 +743,7 @@ export default function FeedPage() {
             </div>
             {allGroups.length > 0 && (
               <div>
-                <p className="text-white/20 text-xs text-center mb-4">다른 유니버스 둘러보기</p>
+                <p className="text-white/20 text-xs text-center mb-4">{t('feed.browseOther')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {allGroups.filter(g => g.name !== account?.groups?.name).slice(0, 4).map(group => {
                     const grpTheme = GROUP_THEMES[group.name]
@@ -906,7 +906,7 @@ export default function FeedPage() {
       {shareToast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
           style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
-          🔗 링크가 복사됐어요
+          {t('feed.linkCopied')}
         </div>
       )}
 
@@ -986,14 +986,14 @@ export default function FeedPage() {
             onClick={e => e.stopPropagation()}
           >
             <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
-              <span className="text-white font-semibold">댓글</span>
+              <span className="text-white font-semibold">{t('feed.comments')}</span>
               <button onClick={() => setCommentVideoId(null)} className="text-white/30 text-2xl leading-none">×</button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4 min-h-0">
               {commentLoading ? (
-                <div className="text-white/30 text-sm text-center py-8">불러오는 중...</div>
+                <div className="text-white/30 text-sm text-center py-8">{t('common.loading')}</div>
               ) : comments.length === 0 ? (
-                <div className="text-white/20 text-sm text-center py-8">아직 댓글이 없어요. 첫 댓글을 달아보세요!</div>
+                <div className="text-white/20 text-sm text-center py-8">{t('feed.noComments')}</div>
               ) : comments.map(comment => (
                 <div key={comment.id} className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
@@ -1016,7 +1016,7 @@ export default function FeedPage() {
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() } }}
-                placeholder="댓글 달기..."
+                placeholder={t('feed.commentPlaceholder')}
                 maxLength={200}
                 className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none border border-white/10"
               />
@@ -1026,7 +1026,7 @@ export default function FeedPage() {
                 className="px-4 py-2 rounded-full text-white text-sm font-medium disabled:opacity-30 transition"
                 style={{ background: theme?.gradient }}
               >
-                게시
+                {t('feed.postBtn')}
               </button>
             </div>
           </div>
