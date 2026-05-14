@@ -151,7 +151,7 @@ export default function AvatarPage() {
             className="w-full py-4 rounded-2xl font-medium text-white transition disabled:opacity-50"
             style={{ background: theme.gradient }}
           >
-            {uploading ? '업로드 중...' : '📷 카메라로 촬영'}
+            {uploading ? t('avatar.uploading') : t('avatar.camera')}
           </button>
 
           <button
@@ -159,7 +159,7 @@ export default function AvatarPage() {
             disabled={uploading}
             className="w-full py-4 rounded-2xl font-medium text-white border border-white/20 transition disabled:opacity-50"
           >
-            🖼 갤러리에서 선택
+            {t('avatar.gallery')}
           </button>
 
           {account?.rpm_avatar_url && (
@@ -167,12 +167,14 @@ export default function AvatarPage() {
               onClick={handleRemovePhoto}
               className="w-full py-3 rounded-2xl font-medium text-sm border border-white/10 text-white/40 hover:text-white/70 transition"
             >
-              사진 제거 (기본 아바타로)
+              {t('avatar.removePhoto')}
             </button>
           )}
 
           <p className="text-white/25 text-xs text-center leading-relaxed">
-            사진을 업로드하면 프로필과 커버 영상 목록에<br />내 사진이 표시됩니다
+            {t('avatar.photoDesc').split('\n').map((line, i) => (
+              <span key={i}>{line}{i === 0 && <br />}</span>
+            ))}
           </p>
         </div>
 
