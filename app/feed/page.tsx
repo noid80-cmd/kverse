@@ -50,7 +50,6 @@ type Comment = {
 type FollowAccount = {
   id: string
   username: string
-  groups: { name: string } | null
 }
 
 const FIXED_CATEGORIES = [
@@ -154,14 +153,14 @@ export default function FeedPage() {
       const { data: rows } = await supabase.from('follows').select('follower_id').eq('following_id', account.id)
       const ids = (rows || []).map((r: { follower_id: string }) => r.follower_id)
       if (ids.length > 0) {
-        const { data: accs } = await supabase.from('accounts').select('id, username, groups(name)').in('id', ids)
+        const { data: accs } = await supabase.from('accounts').select('id, username').in('id', ids)
         setFollowList(accs || [])
       }
     } else {
       const { data: rows } = await supabase.from('follows').select('following_id').eq('follower_id', account.id)
       const ids = (rows || []).map((r: { following_id: string }) => r.following_id)
       if (ids.length > 0) {
-        const { data: accs } = await supabase.from('accounts').select('id, username, groups(name)').in('id', ids)
+        const { data: accs } = await supabase.from('accounts').select('id, username').in('id', ids)
         setFollowList(accs || [])
       }
     }
@@ -646,7 +645,6 @@ export default function FeedPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-semibold">@{acc.username}</p>
-                    {acc.groups?.name && <p className="text-white/35 text-xs truncate">{acc.groups.name}</p>}
                   </div>
                   <span className="text-white/20 text-xs">›</span>
                 </Link>
