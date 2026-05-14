@@ -48,6 +48,14 @@ export default function FandomRanking() {
       setLoading(false)
     }
     load()
+
+    const channel = supabase
+      .channel('fandom_ranking')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fandom_members' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'videos' }, () => load())
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   const maxScore = ranking[0]?.score || 1
