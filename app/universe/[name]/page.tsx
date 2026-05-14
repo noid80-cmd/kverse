@@ -89,7 +89,7 @@ export default function UniversePage() {
 
       if (user) {
         const { data: acc } = await supabase
-          .from('accounts').select('id, username').eq('user_id', user.id).limit(1).maybeSingle()
+          .from('accounts').select('id, username').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
         if (acc) {
           setAccountId(acc.id)
           setMyUsername(acc.username)

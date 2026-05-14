@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { setActiveAccountId } from '@/lib/activeAccount'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -36,9 +35,6 @@ export default function LoginPage() {
       setError(t('auth.loginError'))
     } else if (data.user) {
       // 첫 번째 계정을 활성 계정으로 자동 설정
-      const { data: acc } = await supabase
-        .from('accounts').select('id').eq('user_id', data.user.id).limit(1).maybeSingle()
-      if (acc) setActiveAccountId(acc.id)
       window.location.href = getBackUrl()
     }
     setLoading(false)

@@ -101,7 +101,7 @@ export default function UpgradePage() {
     <div className="min-h-screen bg-black text-white">
       {/* 네비 */}
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <Link href="/select-account" className="text-white/40 hover:text-white transition text-sm">{t('common.back')}</Link>
+        <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('common.back')}</Link>
         <span className="font-black bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">Kverse Plus</span>
         <div />
       </nav>

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
-import { setActiveAccountId } from '@/lib/activeAccount'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -38,6 +37,8 @@ const COUNTRIES = [
   { code: 'OTHER', name: '🌍 Other' },
 ]
 
+type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
+
 export default function SignupPage() {
   const t = useT()
   const [email, setEmail] = useState('')
@@ -47,6 +48,24 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle')
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    if (username.length === 0) { setUsernameStatus('idle'); return }
+    if (username.length < 3) { setUsernameStatus('invalid'); return }
+
+    setUsernameStatus('checking')
+    debounceRef.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('accounts').select('id').eq('username', username).maybeSingle()
+      setUsernameStatus(data ? 'taken' : 'available')
+    }, 500)
+
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [username])
 
   function getBackUrl() {
     const params = new URLSearchParams(window.location.search)
@@ -55,6 +74,7 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.SyntheticEvent) {
     e.preventDefault()
+    if (usernameStatus !== 'available') return
     setError('')
     setLoading(true)
 
@@ -71,16 +91,15 @@ export default function SignupPage() {
     }
 
     if (data.session) {
-      const { data: newAcc, error: accError } = await supabase
+      const { error: accError } = await supabase
         .from('accounts')
         .insert({
           user_id: data.session.user.id,
           group_id: null,
           username: username.trim(),
           display_name: username.trim(),
+          nationality: country || 'KR',
         })
-        .select('id')
-        .single()
 
       if (accError) {
         setError(accError.code === '23505' ? '이미 사용 중인 닉네임이에요.' : '오류가 발생했어요.')
@@ -88,7 +107,6 @@ export default function SignupPage() {
         return
       }
 
-      if (newAcc) setActiveAccountId(newAcc.id)
       window.location.href = getBackUrl()
     } else {
       setDone(true)
@@ -110,6 +128,21 @@ export default function SignupPage() {
       </div>
     )
   }
+
+  const usernameBorderColor =
+    usernameStatus === 'available' ? 'border-green-500' :
+    usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500/70' :
+    usernameStatus === 'checking' ? 'border-white/20' :
+    'border-white/10'
+
+  const usernameHint =
+    usernameStatus === 'available' ? { text: '✓ 사용 가능한 닉네임이에요', color: 'text-green-400' } :
+    usernameStatus === 'taken' ? { text: '✗ 이미 사용 중인 닉네임이에요', color: 'text-red-400' } :
+    usernameStatus === 'checking' ? { text: '확인 중...', color: 'text-white/30' } :
+    usernameStatus === 'invalid' ? { text: '3자 이상 입력해주세요', color: 'text-white/30' } :
+    { text: '영문·숫자·_ 3~20자 · Kverse에서 쓰는 내 이름이에요', color: 'text-white/25' }
+
+  const canSubmit = !loading && usernameStatus === 'available' && username.length >= 3
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-6">
@@ -163,9 +196,9 @@ export default function SignupPage() {
               minLength={3}
               maxLength={20}
               dir="ltr"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-pink-500 transition"
+              className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none transition ${usernameBorderColor}`}
             />
-            <p className="text-white/25 text-xs mt-1.5">Kverse에서 쓰는 내 이름이에요</p>
+            <p className={`text-xs mt-1.5 transition ${usernameHint.color}`}>{usernameHint.text}</p>
           </div>
 
           <div>
@@ -190,7 +223,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading || username.length < 3}
+            disabled={!canSubmit}
             className="w-full disabled:opacity-50 text-white font-medium py-3 rounded-xl transition mt-2"
             style={{ background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}
           >

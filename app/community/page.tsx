@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
@@ -51,7 +51,7 @@ function CommunityContent() {
       }
 
       const [accRes, groupRes] = await Promise.all([
-        supabase.from('accounts').select('id, username, nationality').eq('user_id', user.id).limit(1).maybeSingle(),
+        supabase.from('accounts').select('id, username, nationality').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle(),
         supabase.from('groups').select('id').eq('name', groupName).single(),
       ])
 
@@ -241,3 +241,4 @@ export default function CommunityPage() {
     </Suspense>
   )
 }
+

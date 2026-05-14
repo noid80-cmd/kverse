@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
-import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
@@ -30,11 +29,8 @@ export default function CoinsPage() {
       if (!user) { router.push('/login'); return }
       setUser(user)
 
-      const activeId = getActiveAccountId()
-      let q = supabase.from('accounts').select('id, username, coins').eq('user_id', user.id)
-      if (activeId) q = q.eq('id', activeId)
-      const { data } = await q.limit(1).single()
-      if (!data) { router.push('/select-account'); return }
+      const { data } = await supabase.from('accounts').select('id, username, coins').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
+      if (!data) { router.push('/login'); return }
       setAccount(data)
     }
     load()
@@ -208,3 +204,4 @@ export default function CoinsPage() {
     </div>
   )
 }
+

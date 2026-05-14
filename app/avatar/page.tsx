@@ -1,9 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, groupDisplayName, worldName } from '@/lib/groupThemes'
-import { getActiveAccountId } from '@/lib/activeAccount'
 import Avatar, { EquippedItems } from '@/app/components/Avatar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -35,11 +34,8 @@ export default function AvatarPage() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
 
-      const activeId = getActiveAccountId()
-      let q = supabase.from('accounts').select('*, groups(name)').eq('user_id', user.id)
-      if (activeId) q = q.eq('id', activeId)
-      const { data: acc } = await q.limit(1).single()
-      if (!acc) { router.push('/select-account'); return }
+      const { data: acc } = await supabase.from('accounts').select('*, groups(name)').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
+      if (!acc) { router.push('/login'); return }
 
       setAccount(acc)
 
@@ -199,3 +195,4 @@ export default function AvatarPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
@@ -16,6 +16,7 @@ type Account = {
   username: string
   gender: string
   nationality?: string
+  nationality_locked?: boolean
   is_founder?: boolean
   equipped: Record<string, string>
   rpm_avatar_url?: string | null
@@ -31,13 +32,18 @@ export default function ProfilePage() {
   const [theme, setTheme] = useState<GroupTheme | null>(null)
   const [equippedVisuals, setEquippedVisuals] = useState<EquippedItems>({})
   const [nationality, setNationality] = useState('KR')
-  const [editingNationality, setEditingNationality] = useState(false)
-  const [nationalitySearch, setNationalitySearch] = useState('')
   const [followerCount, setFollowerCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
   const [videoCount, setVideoCount] = useState(0)
   const [totalLikes, setTotalLikes] = useState(0)
   const [totalViews, setTotalViews] = useState(0)
+  const [editingUsername, setEditingUsername] = useState(false)
+  const [newUsername, setNewUsername] = useState('')
+  const [usernameError, setUsernameError] = useState('')
+  const [savingUsername, setSavingUsername] = useState(false)
+  const [fandoms, setFandoms] = useState<string[]>([])
+  const [editingNationality, setEditingNationality] = useState(false)
+  const [nationalitySearch, setNationalitySearch] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -45,26 +51,22 @@ export default function ProfilePage() {
         const user = await getAuthUser()
         if (!user) { router.push('/login'); return }
 
-        const { data: accounts } = await supabase
+        const { data: acc } = await supabase
           .from('accounts').select('*, groups(name, name_en)')
-          .eq('user_id', user.id).order('created_at', { ascending: true })
+          .eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
 
-        if (!accounts || accounts.length === 0) { router.push('/login'); return }
+        if (!acc) { router.push('/login'); return }
 
-        const groupAccounts = accounts.filter((a: any) => a.groups != null)
-        const citizenAccount = accounts.find((a: any) => a.groups == null)
-        const activeAccount = groupAccounts.length > 0 ? groupAccounts[0] : citizenAccount
-        if (!activeAccount) { router.push('/login'); return }
+        setAccount(acc)
+        if (acc.groups) setTheme(getTheme(acc.groups.name))
+        setNationality(acc.nationality || 'KR')
 
-        setAccount(activeAccount)
-        if (activeAccount.groups) setTheme(getTheme(activeAccount.groups.name))
-        setNationality(activeAccount.nationality || 'KR')
-
-        const [equippedResult, videosRes, followersRes, followingRes] = await Promise.all([
-          loadEquippedVisuals(activeAccount.equipped || {}),
-          supabase.from('videos').select('like_count, view_count').eq('account_id', activeAccount.id),
-          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', activeAccount.id),
-          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', activeAccount.id),
+        const [equippedResult, videosRes, followersRes, followingRes, fandomRes] = await Promise.all([
+          loadEquippedVisuals(acc.equipped || {}),
+          supabase.from('videos').select('like_count, view_count').eq('account_id', acc.id),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', acc.id),
+          supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', acc.id),
+          supabase.from('fandom_members').select('group_name').eq('account_id', acc.id),
         ])
         setEquippedVisuals(equippedResult)
         setFollowerCount(followersRes.count || 0)
@@ -73,6 +75,7 @@ export default function ProfilePage() {
         setVideoCount(vids.length)
         setTotalLikes(vids.reduce((s: number, v: any) => s + v.like_count, 0))
         setTotalViews(vids.reduce((s: number, v: any) => s + v.view_count, 0))
+        setFandoms((fandomRes.data || []).map((r: any) => r.group_name))
         setLoading(false)
       } catch (e) {
         console.error(e)
@@ -82,15 +85,31 @@ export default function ProfilePage() {
     load()
   }, [])
 
-
-
   async function updateNationality(code: string) {
     if (!account) return
-    await supabase.from('accounts').update({ nationality: code }).eq('id', account.id)
+    await supabase.from('accounts').update({ nationality: code, nationality_locked: true }).eq('id', account.id)
     setNationality(code)
-    setAccount(prev => prev ? { ...prev, nationality: code } : prev)
+    setAccount(prev => prev ? { ...prev, nationality: code, nationality_locked: true } : prev)
     setEditingNationality(false)
     setNationalitySearch('')
+  }
+
+  async function saveUsername() {
+    if (!account || savingUsername) return
+    const val = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
+    if (val.length < 3 || val.length > 20) { setUsernameError(t('prof.usernameHint')); return }
+
+    setSavingUsername(true)
+    setUsernameError('')
+
+    const { data: existing } = await supabase
+      .from('accounts').select('id').eq('username', val).neq('id', account.id).maybeSingle()
+    if (existing) { setUsernameError(t('prof.usernameTaken')); setSavingUsername(false); return }
+
+    await supabase.from('accounts').update({ username: val, display_name: val }).eq('id', account.id)
+    setAccount(prev => prev ? { ...prev, username: val } : prev)
+    setEditingUsername(false)
+    setSavingUsername(false)
   }
 
   async function loadEquippedVisuals(equipped: Record<string, string>): Promise<EquippedItems> {
@@ -123,7 +142,6 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-black text-white">
 
-      {/* 네비게이션 */}
       <nav className="sticky top-0 z-20 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
         <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.backBtn')}</Link>
         <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
@@ -139,7 +157,6 @@ export default function ProfilePage() {
 
       <div className="max-w-2xl mx-auto px-5 py-10">
 
-        {/* 아바타 + 유저네임 */}
         {account && (
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">
@@ -163,43 +180,81 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap justify-center mb-1.5">
-              <h1 className="text-2xl font-black text-white">@{account.username}</h1>
-              {account.is_founder && (
-                <span className="text-xs font-black px-2.5 py-1 rounded-full"
-                  style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
-                  ✦ FOUNDER
-                </span>
-              )}
-            </div>
-
-            {account.groups ? (
-              <span className="text-sm font-medium px-3 py-1 rounded-full mb-3"
-                style={{ background: `${accent}22`, color: accent }}>
-                {groupDisplayName(account.groups.name, locale)}
-              </span>
+            {/* 유저네임 */}
+            {editingUsername ? (
+              <div className="flex flex-col items-center gap-2 mb-3 w-full max-w-xs">
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={e => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                  placeholder={t('prof.usernameHint')}
+                  maxLength={20}
+                  autoFocus
+                  className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-white text-center text-lg font-bold placeholder-white/20 focus:outline-none focus:border-pink-500/60 transition"
+                />
+                {usernameError && <p className="text-red-400 text-xs">{usernameError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveUsername}
+                    disabled={savingUsername || newUsername.length < 3}
+                    className="px-5 py-1.5 rounded-full text-sm font-bold text-white disabled:opacity-50 transition"
+                    style={{ background: `linear-gradient(135deg, #E91E8C, #7B2FBE)` }}
+                  >
+                    {savingUsername ? t('common.saving') : t('common.save')}
+                  </button>
+                  <button
+                    onClick={() => { setEditingUsername(false); setUsernameError('') }}
+                    className="px-5 py-1.5 rounded-full text-sm text-white/40 border border-white/10 hover:text-white transition"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
+              </div>
             ) : (
-              <span className="text-sm font-medium px-3 py-1 rounded-full mb-3"
-                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
-                {t('prof.citizen')}
-              </span>
+              <div className="flex flex-col items-center gap-1 mb-3">
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                  <h1 className="text-2xl font-black text-white">@{account.username}</h1>
+                  {account.is_founder && (
+                    <span className="text-xs font-black px-2.5 py-1 rounded-full"
+                      style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#000' }}>
+                      ✦ FOUNDER
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => { setNewUsername(account.username); setEditingUsername(true) }}
+                  className="text-white/40 hover:text-white/70 transition text-xs flex items-center gap-1"
+                >
+                  <span>✏️</span>
+                  <span>{t('prof.changeUsername')}</span>
+                </button>
+              </div>
             )}
 
-            <button
-              onClick={() => setEditingNationality(true)}
-              className="flex items-center gap-1.5 text-white/30 hover:text-white/50 transition"
-            >
-              <img src={getFlagImageUrl(nationality, 20)} alt={nationality} className="w-5 h-3.5 rounded-sm object-cover" />
-              <span className="text-xs">
-                {locale === 'ko' ? COUNTRIES.find(c => c.code === nationality)?.nameKo : COUNTRIES.find(c => c.code === nationality)?.name}
-              </span>
-              <span className="text-[10px] opacity-50">✏️</span>
-            </button>
+            {account.nationality_locked ? (
+              <div className="flex items-center gap-1.5 text-white/30 mb-1">
+                <img src={getFlagImageUrl(nationality, 20)} alt={nationality} className="w-5 h-3.5 rounded-sm object-cover" />
+                <span className="text-xs">
+                  {locale === 'ko' ? COUNTRIES.find(c => c.code === nationality)?.nameKo : COUNTRIES.find(c => c.code === nationality)?.name}
+                </span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setEditingNationality(true)}
+                className="flex items-center gap-1.5 text-white/30 hover:text-white/50 transition mb-1"
+              >
+                <img src={getFlagImageUrl(nationality, 20)} alt={nationality} className="w-5 h-3.5 rounded-sm object-cover" />
+                <span className="text-xs">
+                  {locale === 'ko' ? COUNTRIES.find(c => c.code === nationality)?.nameKo : COUNTRIES.find(c => c.code === nationality)?.name}
+                </span>
+                <span className="text-[10px] opacity-50">✏️ 1회 수정 가능</span>
+              </button>
+            )}
           </div>
         )}
 
         {/* 스탯 */}
-        <div className="rounded-2xl p-5 border" style={{ background: `${accent}0A`, borderColor: `${accent}25` }}>
+        <div className="rounded-2xl p-5 border mb-4" style={{ background: `${accent}0A`, borderColor: `${accent}25` }}>
           <div className="grid grid-cols-3 gap-0 mb-4 pb-4 border-b" style={{ borderColor: `${accent}20` }}>
             <div className="text-center border-r" style={{ borderColor: `${accent}20` }}>
               <p className="text-3xl font-bold text-white">{videoCount}</p>
@@ -226,15 +281,39 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* 가입한 유니버스 */}
+        {fandoms.length > 0 && (
+          <div className="rounded-2xl p-5 border border-white/8" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <p className="text-white/40 text-xs font-medium mb-3">내가 가입한 유니버스</p>
+            <div className="flex flex-wrap gap-2">
+              {fandoms.map(name => {
+                const grpTheme = getTheme(name)
+                const grpAccent = grpTheme.primary === '#FFFFFF' ? '#C9A96E' : grpTheme.primary
+                return (
+                  <Link
+                    key={name}
+                    href={`/universe/${encodeURIComponent(name)}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition hover:opacity-80"
+                    style={{ background: `${grpAccent}20`, color: grpAccent, border: `1px solid ${grpAccent}30` }}
+                  >
+                    <span>{grpTheme.emoji}</span>
+                    <span>{groupDisplayName(name, locale)}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
       </div>
 
-      {/* 국적 변경 모달 */}
       {editingNationality && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end justify-center px-4 pb-8"
           onClick={() => { setEditingNationality(false); setNationalitySearch('') }}>
           <div className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-6"
             onClick={e => e.stopPropagation()}>
-            <h2 className="text-white font-bold mb-4 text-center">🌍 {t('prof.changeNationality')}</h2>
+            <h2 className="text-white font-bold mb-1 text-center">🌍 {t('prof.changeNationality')}</h2>
+            <p className="text-white/30 text-xs text-center mb-4">변경 후 다시 수정할 수 없어요</p>
             <input
               type="text"
               value={nationalitySearch}
@@ -261,3 +340,4 @@ export default function ProfilePage() {
     </div>
   )
 }
+

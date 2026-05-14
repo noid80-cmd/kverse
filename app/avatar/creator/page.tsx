@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
-import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter } from 'next/navigation'
 
 const RPM_SUBDOMAIN = process.env.NEXT_PUBLIC_RPM_SUBDOMAIN || 'demo'
@@ -18,10 +17,7 @@ export default function AvatarCreatorPage() {
     async function getAccount() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
-      const activeId = getActiveAccountId()
-      let q = supabase.from('accounts').select('id').eq('user_id', user.id)
-      if (activeId) q = q.eq('id', activeId)
-      const { data } = await q.limit(1).single()
+      const { data } = await supabase.from('accounts').select('id').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
       if (data) setAccountId(data.id)
     }
     getAccount()
@@ -102,3 +98,4 @@ export default function AvatarCreatorPage() {
     </div>
   )
 }
+

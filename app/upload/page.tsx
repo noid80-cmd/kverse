@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
@@ -73,7 +73,7 @@ export default function UploadPage() {
     async function load() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
-      const { data } = await supabase.from('accounts').select('id').eq('user_id', user.id).limit(1).maybeSingle()
+      const { data } = await supabase.from('accounts').select('id').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
       if (!data) { router.push('/signup'); return }
       setAccountId(data.id)
       const params = new URLSearchParams(window.location.search)
@@ -387,3 +387,4 @@ export default function UploadPage() {
     </div>
   )
 }
+

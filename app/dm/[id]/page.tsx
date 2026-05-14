@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GroupTheme, worldName, groupDisplayName } from '@/lib/groupThemes'
-import { getActiveAccountId } from '@/lib/activeAccount'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
@@ -53,14 +52,10 @@ export default function DMChatPage() {
       const user = await getAuthUser()
       if (!user) { router.push('/login'); return }
 
-      const activeId = getActiveAccountId()
-      let q = supabase.from('accounts').select('*, groups(name)').eq('user_id', user.id)
-      if (activeId) q = q.eq('id', activeId)
-      const { data: acc } = await q.limit(1).single()
-
-      if (!acc) { router.push('/select-account'); return }
+      const { data: acc } = await supabase.from('accounts').select('*, groups(name)').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
+      if (!acc) { router.push('/login'); return }
       setAccount(acc)
-      setTheme(getTheme(acc.groups.name))
+      setTheme(getTheme(acc.groups?.name || ''))
 
       const { data: conv } = await supabase
         .from('conversations')

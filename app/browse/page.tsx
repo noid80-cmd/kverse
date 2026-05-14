@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
 import { getTheme, GROUP_THEMES } from '@/lib/groupThemes'
-import { getActiveAccountId } from '@/lib/activeAccount'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
@@ -44,10 +43,7 @@ export default function BrowsePage() {
       setAuthReady(true)
       if (user) {
         setIsLoggedIn(true)
-        const activeId = getActiveAccountId()
-        let q = supabase.from('accounts').select('id').eq('user_id', user.id)
-        if (activeId) q = q.eq('id', activeId)
-        const { data: acc } = await q.limit(1).single()
+        const { data: acc } = await supabase.from('accounts').select('id').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
         if (acc) {
           setAccountId(acc.id)
           const { data: liked } = await supabase
@@ -327,3 +323,4 @@ export default function BrowsePage() {
     </div>
   )
 }
+

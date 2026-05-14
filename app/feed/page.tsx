@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getAuthUser } from '@/lib/supabase'
@@ -74,7 +74,7 @@ export default function FeedPage() {
       if (!user) { window.location.href = '/login'; return }
       setAuthReady(true)
       const { data } = await supabase
-        .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id).limit(1).maybeSingle()
+        .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
       if (!data) { setLoading(false); return }
       setAccount(data)
       await fetchLikedIds(data.id)
@@ -713,3 +713,4 @@ export default function FeedPage() {
     </div>
   )
 }
+
