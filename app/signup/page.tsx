@@ -48,6 +48,7 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(false)
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -175,13 +176,15 @@ export default function SignupPage() {
           {t('auth.googleBtn')}
         </button>
 
-        <div className="flex items-center gap-3 mb-2">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/20 text-xs">{t('auth.orEmail')}</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowEmailForm(v => !v)}
+          className="w-full text-center text-white/30 text-sm py-2 hover:text-white/50 transition"
+        >
+          {t('auth.emailSignupLink')}
+        </button>
 
-        <form onSubmit={handleSignup} className="flex flex-col gap-4">
+        {showEmailForm && <form onSubmit={handleSignup} className="flex flex-col gap-4">
           <div>
             <label className="text-white/60 text-sm mb-1.5 block text-start">{t('auth.email')}</label>
             <input
@@ -253,7 +256,7 @@ export default function SignupPage() {
           >
             {loading ? t('common.processing') : t('auth.signup')}
           </button>
-        </form>
+        </form>}
 
         <p className="text-center text-white/40 text-sm mt-6">
           {t('auth.hasAccount')}{' '}
