@@ -31,15 +31,11 @@ export default function Home() {
   const t = useT()
   const { locale } = useLanguage()
   const [loggedIn, setLoggedIn] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [authReady, setAuthReady] = useState(false)
 
   useEffect(() => {
     getAuthUser().then(u => {
-      if (u) {
-        setLoggedIn(true)
-        if (u.email === 'noid80@hanmail.net') setIsAdmin(true)
-      }
+      if (u) setLoggedIn(true)
       setAuthReady(true)
     })
   }, [])
@@ -58,7 +54,7 @@ export default function Home() {
           <KverseLogo size="lg" />
         </div>
         <div className="flex items-center justify-end gap-2">
-          {isAdmin && (
+          {loggedIn && (
             <Link href="/admin" className="text-white/30 hover:text-white/60 text-xs border border-white/10 px-3 py-1.5 rounded-full transition">
               Admin
             </Link>
