@@ -93,6 +93,7 @@ export default function FeedPage() {
       const { data } = await supabase
         .from('accounts').select('*, groups(name, name_en)').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1).maybeSingle()
       if (!data) { setLoading(false); return }
+      if (data.account_type === 'scout') { window.location.href = '/scout'; return }
       setAccount(data)
       if (data.custom_highlights) setCustomHighlights(data.custom_highlights as Highlight[])
       const [, , fcRes, fgRes] = await Promise.all([
