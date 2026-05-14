@@ -37,6 +37,11 @@ export default function UploadPage() {
   const [accountId, setAccountId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<'vocal' | 'dance'>('vocal')
+
+  function handleCategoryChange(c: 'vocal' | 'dance') {
+    setCategory(c)
+    if (c === 'dance') handleModeChange('normal')
+  }
   const [uploadMode, setUploadMode] = useState<'normal' | 'live'>('normal')
   const [selectedGroup, setSelectedGroup] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
@@ -176,8 +181,8 @@ export default function UploadPage() {
 
         <h1 className="text-2xl font-black text-white mb-6">{t('upload.title')}</h1>
 
-        {/* 업로드 모드 선택 */}
-        <div className="flex gap-3 mb-8">
+        {/* 업로드 모드 선택 — 보컬만 */}
+        <div className={`flex gap-3 mb-8 ${category === 'dance' ? 'hidden' : ''}`}>
           <button
             onClick={() => handleModeChange('normal')}
             className={`flex-1 py-3 px-4 rounded-xl border-2 font-medium transition text-sm ${
@@ -256,7 +261,7 @@ export default function UploadPage() {
             <label className="text-white/60 text-sm mb-3 block">{t('upload.category')}</label>
             <div className="flex gap-3">
               <button
-                onClick={() => setCategory('vocal')}
+                onClick={() => handleCategoryChange('vocal')}
                 className={`flex-1 py-3 rounded-xl border-2 font-medium transition ${
                   category === 'vocal'
                     ? 'border-pink-500 bg-pink-500/20 text-pink-300'
@@ -266,7 +271,7 @@ export default function UploadPage() {
                 🎤 {t('common.vocal')}
               </button>
               <button
-                onClick={() => setCategory('dance')}
+                onClick={() => handleCategoryChange('dance')}
                 className={`flex-1 py-3 rounded-xl border-2 font-medium transition ${
                   category === 'dance'
                     ? 'border-pink-500 bg-pink-500/20 text-pink-300'
