@@ -48,9 +48,9 @@ type Comment = {
 }
 
 const FIXED_CATEGORIES = [
-  { key: 'all', emoji: '🎬', labelKey: 'feed.catAll' },
-  { key: 'vocal', emoji: '🎤', labelKey: 'feed.catVocal' },
-  { key: 'dance', emoji: '💃', labelKey: 'feed.catDance' },
+  { key: 'all', symbol: '◉', labelKey: 'feed.catAll' },
+  { key: 'vocal', symbol: '♪', labelKey: 'feed.catVocal' },
+  { key: 'dance', symbol: '✦', labelKey: 'feed.catDance' },
 ]
 
 export default function FeedPage() {
@@ -275,9 +275,6 @@ export default function FeedPage() {
         <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
         <div className="flex items-center gap-2 justify-end">
           {account && <NotificationBell accountId={account.id} groupGradient={theme?.gradient} />}
-          <Link href="/upload" className="w-9 h-9 border border-white/20 hover:bg-white/10 text-white text-sm rounded-full transition flex items-center justify-center flex-shrink-0">
-            ✚
-          </Link>
         </div>
       </nav>
 
@@ -286,15 +283,17 @@ export default function FeedPage() {
         {/* 프로필 헤더 */}
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-center gap-5 mb-4">
-            <div className="rounded-2xl flex-shrink-0"
+            <div className="flex-shrink-0 rounded-2xl overflow-hidden"
               style={{ padding: 3, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
-              <Avatar
-                gender={(account?.gender as 'male' | 'female') || 'female'}
-                groupColor={accentColor || '#E91E8C'}
-                size={80}
-                rpmAvatarUrl={account?.rpm_avatar_url}
-                username={account?.username}
-              />
+              <div style={{ width: 96, height: 96, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}>
+                <Avatar
+                  gender={(account?.gender as 'male' | 'female') || 'female'}
+                  groupColor={accentColor || '#E91E8C'}
+                  size={96}
+                  rpmAvatarUrl={account?.rpm_avatar_url}
+                  username={account?.username}
+                />
+              </div>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -347,7 +346,7 @@ export default function FeedPage() {
                     ? { background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', boxShadow: `0 0 0 2px #000, 0 0 0 4px ${accentColor || '#E91E8C'}` }
                     : { background: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 2px #000, 0 0 0 4px rgba(255,255,255,0.12)' }
                   }>
-                  {cat.emoji}
+                  <span className="text-xl font-black">{cat.symbol}</span>
                 </div>
                 <span className="text-xs text-white/50">{t(cat.labelKey)}</span>
                 <span className="text-[10px] text-white/25">{count}</span>
@@ -394,7 +393,6 @@ export default function FeedPage() {
         {/* 그리드 */}
         {filteredVideos.length === 0 ? (
           <div className="text-center py-20 px-6 border-t border-white/5">
-            <div className="text-5xl mb-4">{theme?.emoji || '📹'}</div>
             <p className="text-white/40 text-sm mb-6">{t('feed.beFirst')}</p>
             <Link href="/upload" className="px-8 py-3 text-white font-medium rounded-full transition"
               style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}>
@@ -588,6 +586,13 @@ export default function FeedPage() {
           </div>
         </div>
       )}
+
+      {/* 업로드 FAB */}
+      <Link href="/upload"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-lg transition hover:scale-110"
+        style={{ background: theme?.gradient || 'linear-gradient(135deg,#E91E8C,#7B2FBE)', boxShadow: '0 4px 20px rgba(233,30,140,0.4)' }}>
+        ✚
+      </Link>
 
       {/* 삭제 확인 모달 */}
       {deleteTarget && (
