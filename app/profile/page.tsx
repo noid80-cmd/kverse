@@ -160,9 +160,9 @@ export default function ProfilePage() {
         {account && (
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">
-              <Link href="/avatar" className="hover:opacity-90 transition block">
-                <div className="rounded-full p-1.5"
-                  style={{ background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
+              <Link href="/avatar" className="hover:opacity-90 transition inline-flex">
+                <div className="rounded-full p-1.5 flex items-center justify-center"
+                  style={{ width: 108, height: 108, background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
                   <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden' }}>
                     <Avatar
                       gender={(account.gender as 'male' | 'female') || 'female'}
