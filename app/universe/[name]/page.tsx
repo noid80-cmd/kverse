@@ -29,7 +29,7 @@ type Comment = {
   accounts: { username: string }
 }
 
-type Filter = 'all' | 'vocal' | 'dance'
+type Filter = 'all' | 'vocal' | 'vocal-live' | 'dance'
 
 export default function UniversePage() {
   const t = useT()
@@ -261,8 +261,12 @@ export default function UniversePage() {
     setVideos(prev => prev.map(v => v.id === video.id ? { ...v, view_count: v.view_count + 1 } : v))
   }
 
-  const filtered = filter === 'all' ? videos : videos.filter(v => v.category === filter)
-  const vocalCount = videos.filter(v => v.category === 'vocal').length
+  const filtered = filter === 'all' ? videos
+    : filter === 'vocal' ? videos.filter(v => v.category === 'vocal' && !v.is_live)
+    : filter === 'vocal-live' ? videos.filter(v => v.category === 'vocal' && v.is_live)
+    : videos.filter(v => v.category === 'dance')
+  const vocalCount = videos.filter(v => v.category === 'vocal' && !v.is_live).length
+  const vocalLiveCount = videos.filter(v => v.category === 'vocal' && v.is_live).length
   const danceCount = videos.filter(v => v.category === 'dance').length
 
   function timeAgo(dateStr: string) {
@@ -378,8 +382,9 @@ export default function UniversePage() {
         <div className="flex gap-2 mb-6 justify-center">
           {([
             { key: 'all', label: t('common.all'), count: totalCount },
-            { key: 'vocal', label: `VOCAL ${t('common.vocal')}`, count: vocalCount },
-            { key: 'dance', label: `DANCE ${t('common.dance')}`, count: danceCount },
+            { key: 'vocal', label: `🎤 일반`, count: vocalCount },
+            { key: 'vocal-live', label: `🔴 라이브`, count: vocalLiveCount },
+            { key: 'dance', label: `💃 ${t('common.dance')}`, count: danceCount },
           ] as { key: Filter; label: string; count: number }[]).map(({ key, label, count }) => (
             <button
               key={key}
