@@ -56,6 +56,17 @@ function DMListInner() {
 
       setConversations((convs as Conversation[]) || [])
       setLoading(false)
+
+      const toParam = searchParams.get('to')
+      if (toParam && toParam.trim().length >= 1) {
+        const { data } = await supabase
+          .from('accounts')
+          .select('id, username, groups(name)')
+          .ilike('username', `%${toParam}%`)
+          .neq('id', acc.id)
+          .limit(5)
+        setSearchResults((data as unknown as Account[]) || [])
+      }
     }
     load()
   }, [])
