@@ -11,6 +11,7 @@ import KverseLogo from '@/app/components/KverseLogo'
 
 type Video = {
   id: string
+  account_id: string
   title: string
   category: string
   like_count: number
@@ -218,6 +219,14 @@ export default function UniversePage() {
     if (!error && data) {
       setComments(prev => [...prev, data])
       setCommentText('')
+      const targetVideo = videos.find(v => v.id === commentVideoId)
+      if (targetVideo && targetVideo.account_id !== accountId) {
+        await supabase.from('notifications').insert({
+          account_id: targetVideo.account_id, type: 'comment',
+          from_username: myUsername, video_id: commentVideoId,
+          video_title: targetVideo.title, video_group: groupName,
+        })
+      }
     }
   }
 
@@ -266,6 +275,13 @@ export default function UniversePage() {
     } else {
       await supabase.from('likes').insert({ account_id: accountId, video_id: video.id })
       await supabase.from('videos').update({ like_count: video.like_count + 1 }).eq('id', video.id)
+      if (video.account_id !== accountId) {
+        await supabase.from('notifications').insert({
+          account_id: video.account_id, type: 'like',
+          from_username: myUsername, video_id: video.id,
+          video_title: video.title, video_group: groupName,
+        })
+      }
     }
   }
 

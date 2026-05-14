@@ -47,6 +47,12 @@ type Comment = {
   accounts: { username: string }
 }
 
+type FollowAccount = {
+  id: string
+  username: string
+  groups: { name: string } | null
+}
+
 const FIXED_CATEGORIES = [
   { key: 'all', symbol: '◉', labelKey: 'feed.catAll' },
   { key: 'vocal', symbol: '♪', labelKey: 'feed.catVocal' },
@@ -75,6 +81,9 @@ export default function FeedPage() {
   const [showAddHighlight, setShowAddHighlight] = useState(false)
   const [newHighlightName, setNewHighlightName] = useState('')
   const [newHighlightEmoji, setNewHighlightEmoji] = useState('')
+  const [showFollowList, setShowFollowList] = useState<null | 'followers' | 'following'>(null)
+  const [followList, setFollowList] = useState<FollowAccount[]>([])
+  const [followListLoading, setFollowListLoading] = useState(false)
   const viewedIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -134,6 +143,29 @@ export default function FeedPage() {
     setNewHighlightName('')
     setNewHighlightEmoji('')
     await supabase.from('accounts').update({ custom_highlights: updated }).eq('id', account.id)
+  }
+
+  async function fetchFollowList(type: 'followers' | 'following') {
+    if (!account) return
+    setShowFollowList(type)
+    setFollowListLoading(true)
+    setFollowList([])
+    if (type === 'followers') {
+      const { data: rows } = await supabase.from('follows').select('follower_id').eq('following_id', account.id)
+      const ids = (rows || []).map((r: { follower_id: string }) => r.follower_id)
+      if (ids.length > 0) {
+        const { data: accs } = await supabase.from('accounts').select('id, username, groups(name)').in('id', ids)
+        setFollowList(accs || [])
+      }
+    } else {
+      const { data: rows } = await supabase.from('follows').select('following_id').eq('follower_id', account.id)
+      const ids = (rows || []).map((r: { following_id: string }) => r.following_id)
+      if (ids.length > 0) {
+        const { data: accs } = await supabase.from('accounts').select('id, username, groups(name)').in('id', ids)
+        setFollowList(accs || [])
+      }
+    }
+    setFollowListLoading(false)
   }
 
   async function deleteHighlight(key: string) {
@@ -314,14 +346,14 @@ export default function FeedPage() {
                   <p className="font-bold text-base leading-tight" style={{ color: accentColor }}>{totalLikes}</p>
                   <p className="text-white/40 text-xs mt-0.5">{t('prof.totalLikes')}</p>
                 </div>
-                <div className="text-center">
+                <button className="text-center" onClick={() => fetchFollowList('followers')}>
                   <p className="text-white font-bold text-base leading-tight">{followerCount}</p>
                   <p className="text-white/40 text-xs mt-0.5">{t('prof.followers')}</p>
-                </div>
-                <div className="text-center">
+                </button>
+                <button className="text-center" onClick={() => fetchFollowList('following')}>
                   <p className="text-white font-bold text-base leading-tight">{followingCount}</p>
                   <p className="text-white/40 text-xs mt-0.5">{t('prof.following')}</p>
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -582,6 +614,43 @@ export default function FeedPage() {
                 style={{ background: theme?.gradient }}>
                 {t('feed.postBtn')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 팔로워/팔로잉 바텀 시트 */}
+      {showFollowList && (
+        <div className="fixed inset-0 z-[90] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowFollowList(null)}>
+          <div className="w-full max-w-2xl rounded-t-3xl flex flex-col"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '70vh' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+              <span className="text-white font-semibold">
+                {showFollowList === 'followers' ? t('prof.followers') : t('prof.following')}
+              </span>
+              <button onClick={() => setShowFollowList(null)} className="text-white/30 text-2xl leading-none">×</button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-1 min-h-0">
+              {followListLoading ? (
+                <div className="text-white/30 text-sm text-center py-10">{t('common.loading')}</div>
+              ) : followList.length === 0 ? (
+                <div className="text-white/20 text-sm text-center py-10">—</div>
+              ) : followList.map(acc => (
+                <Link key={acc.id} href={`/profile/${acc.username}`} onClick={() => setShowFollowList(null)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                    style={{ background: accentColor ? `${accentColor}33` : 'rgba(233,30,140,0.2)', border: `1px solid ${accentColor || '#E91E8C'}40` }}>
+                    {acc.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold">@{acc.username}</p>
+                    {acc.groups?.name && <p className="text-white/35 text-xs truncate">{acc.groups.name}</p>}
+                  </div>
+                  <span className="text-white/20 text-xs">›</span>
+                </Link>
+              ))}
             </div>
           </div>
         </div>

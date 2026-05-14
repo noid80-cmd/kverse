@@ -286,6 +286,19 @@ export const GROUP_THEMES: Record<string, GroupTheme> = {
     bgColor: 'bg-rose-400/10',
     glowColor: 'shadow-rose-400/30',
   },
+  보이넥스트도어: {
+    primary: '#FFE000',
+    secondary: '#4FC3F7',
+    gradient: 'linear-gradient(135deg, #FFE000, #4FC3F7)',
+    cardGradient: 'from-[#FFE000] to-[#4FC3F7]',
+    world: 'Next Door',
+    worldKo: '넥스트도어',
+    emoji: '🏠',
+    textColor: 'text-yellow-300',
+    borderColor: 'border-yellow-400',
+    bgColor: 'bg-yellow-400/10',
+    glowColor: 'shadow-yellow-400/30',
+  },
 }
 
 const GROUP_NAME_EN: Record<string, string> = {
@@ -310,6 +323,7 @@ const GROUP_NAME_EN: Record<string, string> = {
   여자아이들: '(G)I-DLE',
   있지: 'ITZY',
   레드벨벳: 'Red Velvet',
+  보이넥스트도어: 'BOYNEXTDOOR',
 }
 
 export function groupDisplayName(name: string, locale: string): string {

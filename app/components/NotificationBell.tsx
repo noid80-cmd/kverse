@@ -6,10 +6,10 @@ import Link from 'next/link'
 
 type Notification = {
   id: string
-  type: 'like' | 'comment' | 'scout_view'
+  type: 'like' | 'comment' | 'scout_view' | 'follow'
   from_username: string
-  video_id: string
-  video_title: string
+  video_id?: string | null
+  video_title?: string | null
   video_group?: string
   is_read: boolean
   created_at: string
@@ -131,7 +131,9 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
             ) : notifs.map(n => (
               <Link
                 key={n.id}
-                href={n.video_group ? `/universe/${encodeURIComponent(n.video_group)}?video=${n.video_id}` : `/feed`}
+                href={n.type === 'follow'
+                  ? `/profile/${n.from_username}`
+                  : (n.video_group ? `/universe/${encodeURIComponent(n.video_group)}?video=${n.video_id}` : `/feed`)}
                 onClick={() => setOpen(false)}
                 className="flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition border-b border-white/5 last:border-0"
                 style={{ background: n.is_read ? 'transparent' : 'rgba(233,30,140,0.05)' }}
@@ -146,11 +148,13 @@ export default function NotificationBell({ accountId, groupGradient }: Props) {
                   <p className="text-white text-xs leading-relaxed">
                     {n.type === 'scout_view' ? (
                       <><span className="font-bold text-yellow-400">{n.from_username}</span> 기획사가 나를 스카우트 리스트에 저장했어요 🎯</>
+                    ) : n.type === 'follow' ? (
+                      <><span className="font-bold">@{n.from_username}</span>님이 팔로우했어요 🩷</>
                     ) : (
-                      <><span className="font-bold">@{n.from_username}</span>{n.type === 'like' ? '님이 회원님의 영상을 좋아해요 ♥' : '님이 댓글을 달았어요 💬'}</>
+                      <><span className="font-bold">@{n.from_username}</span>{n.type === 'like' ? '님이 영상을 좋아해요 ♥' : '님이 댓글을 달았어요 💬'}</>
                     )}
                   </p>
-                  <p className="text-white/30 text-xs truncate mt-0.5">{n.video_title}</p>
+                  {n.video_title && <p className="text-white/30 text-xs truncate mt-0.5">{n.video_title}</p>}
                   <p className="text-white/20 text-xs mt-0.5">{timeAgo(n.created_at)}</p>
                 </div>
                 {!n.is_read && (
