@@ -19,6 +19,9 @@ type Account = {
   gender: string
   nationality?: string
   is_founder?: boolean
+  account_type?: string
+  agency_name?: string | null
+  is_scout_verified?: boolean
   equipped: Record<string, string>
   rpm_avatar_url?: string | null
   groups: { name: string; name_en: string } | null
@@ -180,7 +183,15 @@ export default function UserProfilePage() {
               </span>
             )}
           </div>
-          {profile.groups && (
+          {profile.account_type === 'scout' && profile.is_scout_verified && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-2 border"
+              style={{ background: 'rgba(251,191,36,0.1)', borderColor: 'rgba(251,191,36,0.3)' }}>
+              <span className="text-sm">🎯</span>
+              <span className="text-yellow-400 text-xs font-bold">{profile.agency_name || 'Scout'}</span>
+              <span className="text-yellow-400/60 text-xs">✓ 인증</span>
+            </div>
+          )}
+          {profile.groups && profile.account_type !== 'scout' && (
             <span className="text-sm font-medium px-3 py-1 rounded-full mb-2" style={{ background: `${accent}22`, color: accent }}>
               {groupDisplayName(profile.groups.name, locale)}
             </span>
