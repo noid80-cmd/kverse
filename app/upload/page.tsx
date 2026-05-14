@@ -174,7 +174,7 @@ export default function UploadPage() {
     <div className="min-h-screen bg-black">
       <nav className="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-white/10 px-6 py-4 grid grid-cols-3 items-center">
         <button onClick={() => window.history.back()} className="text-white/40 hover:text-white transition text-sm text-left">{t('nav.backBtn')}</button>
-        <div className="flex justify-center"><KverseLogo /></div>
+        <div className="flex justify-center"><Link href="/"><KverseLogo /></Link></div>
         <div className="flex justify-end">
           <Link href="/feed" className="text-white/40 hover:text-white transition text-sm">{t('nav.mySns')}</Link>
         </div>
