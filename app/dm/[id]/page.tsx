@@ -6,6 +6,7 @@ import { getTheme, GroupTheme, worldName, groupDisplayName } from '@/lib/groupTh
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
+import { sendPushNotification } from '@/lib/pushNotification'
 
 type Account = {
   id: string
@@ -116,6 +117,11 @@ export default function DMChatPage() {
       .from('conversations')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', id)
+
+    const other = getOther()
+    if (other) {
+      sendPushNotification(other.id, `@${account.username}`, text, `/dm/${id}`)
+    }
 
     setSending(false)
     inputRef.current?.focus()

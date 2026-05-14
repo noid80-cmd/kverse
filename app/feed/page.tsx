@@ -8,6 +8,7 @@ import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 import NotificationBell from '@/app/components/NotificationBell'
 import Avatar from '@/app/components/Avatar'
+import { subscribePush } from '@/lib/pushNotification'
 
 type Highlight = { key: string; name: string; emoji: string }
 
@@ -99,6 +100,7 @@ export default function FeedPage() {
       if (!data) { setLoading(false); return }
       if (data.account_type === 'scout') { window.location.href = '/scout'; return }
       setAccount(data)
+      subscribePush(data.id)
       if (data.custom_highlights) setCustomHighlights(data.custom_highlights as Highlight[])
       const [, , fcRes, fgRes] = await Promise.all([
         fetchVideos(data.id),

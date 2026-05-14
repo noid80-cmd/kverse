@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useT, useLanguage } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 import { getFlagImageUrl } from '@/lib/countries'
+import { sendPushNotification } from '@/lib/pushNotification'
 
 type Highlight = { key: string; name: string; emoji: string }
 
@@ -179,6 +180,7 @@ export default function UserKversePage() {
           account_id: profile.id, type: 'follow',
           from_username: myUsername,
         })
+        sendPushNotification(profile.id, '새 팔로워', `@${myUsername}님이 팔로우했어요`, `/profile/${myUsername}`)
       }
     }
     setFollowLoading(false)
@@ -207,6 +209,7 @@ export default function UserKversePage() {
           from_username: myUsername, video_id: commentVideoId,
           video_title: targetVideo?.title || '',
         })
+        sendPushNotification(profile.id, '새 댓글', `@${myUsername}: ${commentText.trim()}`, `/profile/${username}`)
       }
     }
   }
@@ -229,6 +232,7 @@ export default function UserKversePage() {
           from_username: username, video_id: video.id,
           video_title: video.title,
         })
+        sendPushNotification(profile.id, '좋아요', `@${username}님이 "${video.title}"을 좋아해요`, `/profile/${username}`)
       }
     }
   }
