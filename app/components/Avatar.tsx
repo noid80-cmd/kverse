@@ -81,37 +81,32 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
           </clipPath>
         </defs>
 
+        <g clipPath={`url(#cp${uid})`}>
         {/* ── card background ── */}
         <circle cx="50" cy="50" r="50" fill={`url(#bg${uid})`} />
         {/* shimmer overlay */}
         <circle cx="50" cy="50" r="50" fill={`url(#sh${uid})`} />
 
         {/* ── outer glow ring (animated) ── */}
-        <circle cx="50" cy="44" r="32" fill="none" stroke={color} strokeWidth="6" opacity="0.18" filter={`url(#gf${uid})`}>
+        <circle cx="50" cy="40" r="30" fill="none" stroke={color} strokeWidth="6" opacity="0.18" filter={`url(#gf${uid})`}>
           <animate attributeName="opacity" values="0.12;0.28;0.12" dur="3s" repeatCount="indefinite" />
-          <animate attributeName="r" values="30;34;30" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="r" values="28;32;28" dur="3s" repeatCount="indefinite" />
         </circle>
 
         {/* ── center badge circle ── */}
-        {/* glow shadow */}
-        <circle cx="50" cy="44" r="24" fill={color} opacity="0.35" filter={`url(#gf${uid})`} />
-        {/* main circle */}
-        <circle cx="50" cy="44" r="22" fill={`url(#cc${uid})`} />
-        {/* inner highlight arc */}
-        <path d="M34,34 Q50,26 66,34" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.35" />
-        {/* thin ring border */}
-        <circle cx="50" cy="44" r="22" fill="none" stroke="white" strokeWidth="0.7" opacity="0.25" />
+        <circle cx="50" cy="40" r="24" fill={color} opacity="0.35" filter={`url(#gf${uid})`} />
+        <circle cx="50" cy="40" r="22" fill={`url(#cc${uid})`} />
+        <path d="M34,30 Q50,22 66,30" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.35" />
+        <circle cx="50" cy="40" r="22" fill="none" stroke="white" strokeWidth="0.7" opacity="0.25" />
 
         {/* ── initial letter ── */}
-        {/* glow layer */}
-        <text x="50" y="56" textAnchor="middle"
+        <text x="50" y="51" textAnchor="middle"
           fontSize="30" fontWeight="900"
           fontFamily="system-ui,-apple-system,'Helvetica Neue',sans-serif"
           fill={lite} opacity="0.5" filter={`url(#lf${uid})`}>
           {initial}
         </text>
-        {/* main letter */}
-        <text x="50" y="56" textAnchor="middle"
+        <text x="50" y="51" textAnchor="middle"
           fontSize="30" fontWeight="900"
           fontFamily="system-ui,-apple-system,'Helvetica Neue',sans-serif"
           fill="white" opacity="0.97">
@@ -119,26 +114,23 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
         </text>
 
         {/* ── decorative stars ── */}
-        <text x="14" y="20" fontSize="6.5" fill="white" opacity="0.5" fontFamily="serif">✦
+        <text x="14" y="18" fontSize="6.5" fill="white" opacity="0.5" fontFamily="serif">✦
           <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.4s" repeatCount="indefinite" />
         </text>
-        <text x="79" y="16" fontSize="4.5" fill="white" fontFamily="serif">✦
+        <text x="79" y="14" fontSize="4.5" fill="white" fontFamily="serif">✦
           <animate attributeName="opacity" values="0.2;0.6;0.2" dur="3.1s" repeatCount="indefinite" />
         </text>
-        <text x="83" y="72" fontSize="5.5" fill="white" fontFamily="serif">✦
+        <text x="80" y="68" fontSize="5.5" fill="white" fontFamily="serif">✦
           <animate attributeName="opacity" values="0.25;0.55;0.25" dur="2.7s" repeatCount="indefinite" />
         </text>
-        <text x="9" y="76" fontSize="4" fill="white" fontFamily="serif">✦
+        <text x="14" y="70" fontSize="4" fill="white" fontFamily="serif">✦
           <animate attributeName="opacity" values="0.15;0.45;0.15" dur="3.5s" repeatCount="indefinite" />
-        </text>
-        <text x="87" y="44" fontSize="3" fill={lite} fontFamily="serif">✦
-          <animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite" />
         </text>
 
         {/* ── username strip ── */}
-        <rect x="10" y="73" width="80" height="15" rx="7.5" fill="black" opacity="0.3" />
-        <text x="50" y="83.5" textAnchor="middle"
-          fontSize="8" fontWeight="700"
+        <rect x="18" y="67" width="64" height="13" rx="6.5" fill="black" opacity="0.3" />
+        <text x="50" y="77" textAnchor="middle"
+          fontSize="7.5" fontWeight="700"
           fontFamily="system-ui,-apple-system,sans-serif"
           fill="white" opacity="0.85" letterSpacing="0.3">
           {username ? `@${username.slice(0, 10)}` : ''}
@@ -146,6 +138,7 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
 
         {/* ── card border ── */}
         <circle cx="50" cy="50" r="49" fill="none" stroke={lite} strokeWidth="1" opacity="0.2" />
+        </g>
       </svg>
 
       {/* ── equipped item badges ── */}
