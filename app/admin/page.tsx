@@ -65,9 +65,24 @@ export default function AdminPage() {
   }
 
   async function deleteAccount(account: Account) {
-    if (!confirm(`@${account.username} 계정을 삭제할까요?`)) return
+    if (!confirm(`@${account.username} 계정과 영상을 모두 삭제할까요?`)) return
+
+    // 이 계정의 영상 목록 조회
+    const { data: videos } = await supabase.from('videos').select('id').eq('account_id', account.id)
+    const videoIds = (videos || []).map((v: { id: string }) => v.id)
+
+    // 영상에 달린 좋아요 삭제
+    if (videoIds.length > 0) {
+      await supabase.from('likes').delete().in('video_id', videoIds)
+    }
+    // 이 계정이 누른 좋아요 삭제
+    await supabase.from('likes').delete().eq('account_id', account.id)
+    // 영상 삭제
+    await supabase.from('videos').delete().eq('account_id', account.id)
+    // 계정 삭제
     const { error } = await supabase.from('accounts').delete().eq('id', account.id)
     if (error) { showToast('오류: ' + error.message, 'error'); return }
+
     setAccounts(prev => prev.filter(a => a.id !== account.id))
     showToast(`🗑 @${account.username} 삭제됨`, 'success')
   }
