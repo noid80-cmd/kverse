@@ -48,6 +48,16 @@ export default function ScoutSignupPage() {
 
     if (accError) { setError(accError.message); setLoading(false); return }
 
+    fetch('/api/push/send-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: '🎯 스카우트 가입 신청',
+        body: `${agencyName} · ${contactName}${position ? ` (${position})` : ''} — ${email}`,
+        url: '/admin',
+      }),
+    })
+
     setDone(true)
     setLoading(false)
   }

@@ -83,6 +83,8 @@ export default function UserKversePage() {
   const [commentText, setCommentText] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
   const [shareToast, setShareToast] = useState(false)
+  const [reportingVideo, setReportingVideo] = useState<Video | null>(null)
+  const [reportDone, setReportDone] = useState(false)
   const [showFollowList, setShowFollowList] = useState<null | 'followers' | 'following'>(null)
   const [followList, setFollowList] = useState<FollowAccount[]>([])
   const [followListLoading, setFollowListLoading] = useState(false)
@@ -246,6 +248,18 @@ export default function UserKversePage() {
       setShareToast(true)
       setTimeout(() => setShareToast(false), 2500)
     }
+  }
+
+  async function submitReport(reason: string) {
+    if (!reportingVideo || !myAccountId) return
+    setReportingVideo(null)
+    await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ videoId: reportingVideo.id, reporterAccountId: myAccountId, reason }),
+    })
+    setReportDone(true)
+    setTimeout(() => setReportDone(false), 2500)
   }
 
   if (loading) return (
@@ -448,6 +462,11 @@ export default function UserKversePage() {
                 <button onClick={() => shareVideo(selectedVideo)}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
                   style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>📤</button>
+                {myAccountId && !isOwn && (
+                  <button onClick={() => setReportingVideo(selectedVideo)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>🚨</button>
+                )}
                 {myAccountId && (
                   <button onClick={() => { setCommentVideoId(selectedVideo.id); fetchComments(selectedVideo.id) }}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-sm"
@@ -463,6 +482,37 @@ export default function UserKversePage() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 신고 완료 토스트 */}
+      {reportDone && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          신고가 접수됐어요
+        </div>
+      )}
+
+      {/* 신고 이유 선택 시트 */}
+      {reportingVideo && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setReportingVideo(null)}>
+          <div className="w-full max-w-lg rounded-t-3xl p-6"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={e => e.stopPropagation()}>
+            <p className="text-white font-semibold mb-1">영상 신고</p>
+            <p className="text-white/30 text-sm mb-5 truncate">"{reportingVideo.title}"</p>
+            <div className="flex flex-col gap-2">
+              {['저작권 침해', '부적절한 콘텐츠', '욕설 / 혐오 표현', '스팸', '기타'].map(reason => (
+                <button key={reason} onClick={() => submitReport(reason)}
+                  className="w-full py-3 rounded-xl text-left px-4 text-white/80 text-sm transition"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  {reason}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setReportingVideo(null)} className="w-full mt-3 py-3 text-white/30 text-sm">취소</button>
           </div>
         </div>
       )}

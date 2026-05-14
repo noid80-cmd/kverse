@@ -65,6 +65,8 @@ export default function UniversePage() {
   const [fanLoading, setFanLoading] = useState(false)
   const [fanLimitToast, setFanLimitToast] = useState(false)
   const [boardToast, setBoardToast] = useState(false)
+  const [reportingVideo, setReportingVideo] = useState<Video | null>(null)
+  const [reportDone, setReportDone] = useState(false)
 
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -285,6 +287,18 @@ export default function UniversePage() {
     }
   }
 
+  async function submitReport(reason: string) {
+    if (!reportingVideo || !accountId) return
+    setReportingVideo(null)
+    await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ videoId: reportingVideo.id, reporterAccountId: accountId, reason }),
+    })
+    setReportDone(true)
+    setTimeout(() => setReportDone(false), 2500)
+  }
+
   async function handleVideoPlay(video: Video) {
     if (viewedIds.current.has(video.id)) return
     viewedIds.current.add(video.id)
@@ -312,6 +326,14 @@ export default function UniversePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+
+      {/* 신고 완료 토스트 */}
+      {reportDone && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full text-white text-sm font-medium"
+          style={{ background: 'rgba(30,30,30,0.95)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          신고가 접수됐어요
+        </div>
+      )}
 
       {/* 링크 복사 토스트 */}
       {shareToast && (
@@ -546,6 +568,15 @@ export default function UniversePage() {
                     >
                       📤
                     </button>
+                    {isLoggedIn && accountId && video.accounts?.username !== myUsername && (
+                      <button
+                        onClick={() => setReportingVideo(video)}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs transition"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}
+                      >
+                        🚨
+                      </button>
+                    )}
                     <button
                       onClick={() => { setCommentVideoId(video.id); fetchComments(video.id) }}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition"
@@ -639,6 +670,37 @@ export default function UniversePage() {
                 <Link href="/login" className="text-white/40 text-sm hover:text-white/60 transition">{t('uni.loginToComment')}</Link>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 신고 이유 선택 시트 */}
+      {reportingVideo && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setReportingVideo(null)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-t-3xl p-6"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="text-white font-semibold mb-1">영상 신고</p>
+            <p className="text-white/30 text-sm mb-5 truncate">"{reportingVideo.title}"</p>
+            <div className="flex flex-col gap-2">
+              {['저작권 침해', '부적절한 콘텐츠', '욕설 / 혐오 표현', '스팸', '기타'].map(reason => (
+                <button
+                  key={reason}
+                  onClick={() => submitReport(reason)}
+                  className="w-full py-3 rounded-xl text-left px-4 text-white/80 text-sm transition"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  {reason}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setReportingVideo(null)} className="w-full mt-3 py-3 text-white/30 text-sm">취소</button>
           </div>
         </div>
       )}

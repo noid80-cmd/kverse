@@ -20,11 +20,23 @@ type Account = {
   users?: { email: string } | null
 }
 
-type Tab = 'scout' | 'users'
+type Report = {
+  id: string
+  video_id: string
+  reporter_account_id: string
+  reason: string
+  created_at: string
+  resolved: boolean
+  videos: { title: string; accounts: { username: string } | null } | null
+  reporter: { username: string } | null
+}
+
+type Tab = 'scout' | 'users' | 'reports'
 
 export default function AdminPage() {
   const router = useRouter()
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState<Tab>('scout')
@@ -43,6 +55,16 @@ export default function AdminPage() {
       setAccounts((data || []).map(a => ({
         ...a,
         groups: Array.isArray(a.groups) ? a.groups[0] : a.groups,
+      })))
+
+      const { data: reportData } = await supabase
+        .from('video_reports')
+        .select('*, videos(title, accounts(username)), reporter:reporter_account_id(username)')
+        .order('created_at', { ascending: false })
+
+      setReports((reportData || []).map((r: any) => ({
+        ...r,
+        reporter: Array.isArray(r.reporter) ? r.reporter[0] : r.reporter,
       })))
       setLoading(false)
     }
@@ -84,6 +106,22 @@ export default function AdminPage() {
     showToast(`🗑 @${account.username} 삭제됨`, 'success')
   }
 
+  async function resolveReport(reportId: string) {
+    await supabase.from('video_reports').update({ resolved: true }).eq('id', reportId)
+    setReports(prev => prev.map(r => r.id === reportId ? { ...r, resolved: true } : r))
+    showToast('✅ 신고 처리 완료', 'success')
+  }
+
+  async function deleteReportedVideo(report: Report) {
+    if (!confirm(`"${report.videos?.title || '영상'}"을(를) 삭제할까요?`)) return
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    await supabase.from('videos').delete().eq('id', report.video_id)
+    await supabase.from('video_reports').update({ resolved: true }).eq('id', report.id)
+    setReports(prev => prev.map(r => r.id === report.id ? { ...r, resolved: true } : r))
+    showToast('🗑 영상 삭제 및 신고 처리 완료', 'success')
+  }
+
   function showToast(msg: string, type: 'success' | 'error') {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 2500)
@@ -98,9 +136,12 @@ export default function AdminPage() {
     (a.groups?.name || '').toLowerCase().includes(search.toLowerCase())
   )
 
+  const unresolvedReports = reports.filter(r => !r.resolved)
+
   const TABS: { key: Tab; label: string; badge?: number }[] = [
     { key: 'scout', label: '🎯 Scout 승인', badge: pendingScouts.length },
     { key: 'users', label: '👥 전체 유저', badge: regularUsers.length },
+    { key: 'reports', label: '🚨 신고', badge: unresolvedReports.length },
   ]
 
   if (loading) {
@@ -226,6 +267,65 @@ export default function AdminPage() {
               <div className="text-center py-20">
                 <p className="text-4xl mb-3">🎯</p>
                 <p className="text-white/20 text-sm">아직 Scout 가입 신청이 없어요</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 신고 탭 */}
+        {tab === 'reports' && (
+          <div>
+            {reports.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-4xl mb-3">🚨</p>
+                <p className="text-white/20 text-sm">아직 신고가 없어요</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {unresolvedReports.length > 0 && (
+                  <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">미처리 신고 {unresolvedReports.length}건</p>
+                )}
+                {reports.map(report => (
+                  <div key={report.id}
+                    className="rounded-2xl border p-4"
+                    style={{
+                      background: report.resolved ? 'rgba(255,255,255,0.02)' : 'rgba(239,68,68,0.05)',
+                      borderColor: report.resolved ? 'rgba(255,255,255,0.06)' : 'rgba(239,68,68,0.2)',
+                    }}>
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold truncate">"{report.videos?.title || '삭제된 영상'}"</p>
+                        <p className="text-white/40 text-xs mt-0.5">
+                          @{report.videos?.accounts?.username || '?'} 업로드 · @{report.reporter?.username || '?'} 신고
+                        </p>
+                        <p className="text-xs mt-1 px-2 py-0.5 rounded-full inline-block"
+                          style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+                          {report.reason}
+                        </p>
+                      </div>
+                      {report.resolved ? (
+                        <span className="text-xs font-bold px-2 py-1 rounded-full flex-shrink-0"
+                          style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>
+                          ✓ 처리됨
+                        </span>
+                      ) : (
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button onClick={() => resolveReport(report.id)}
+                            className="px-3 py-1.5 rounded-xl text-xs font-medium transition"
+                            style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.2)' }}>
+                            처리 완료
+                          </button>
+                          <button onClick={() => deleteReportedVideo(report)}
+                            className="px-3 py-1.5 rounded-xl text-xs font-medium transition"
+                            style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
+                            영상 삭제
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-white/20 text-xs">{new Date(report.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
