@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n";
 import ServiceWorker from "@/app/components/ServiceWorker";
+import DesktopGate from "@/app/components/DesktopGate";
 
 export const metadata: Metadata = {
   title: "Kverse - K-pop Universe",
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" translate="no" className="h-full">
       <body className="min-h-full flex flex-col">
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider><DesktopGate>{children}</DesktopGate></LanguageProvider>
         <ServiceWorker />
       </body>
     </html>
