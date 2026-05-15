@@ -98,6 +98,7 @@ export default function ProfilePage() {
     if (!account || savingUsername) return
     const val = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
     if (val.length < 3 || val.length > 20) { setUsernameError(t('prof.usernameHint')); return }
+    if (/^scout_/i.test(val)) { setUsernameError('scout_ 로 시작하는 닉네임은 사용할 수 없어요'); return }
 
     setSavingUsername(true)
     setUsernameError('')
