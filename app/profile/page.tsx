@@ -188,11 +188,6 @@ export default function ProfilePage() {
                   )}
                 </div>
               </Link>
-              <img
-                src={getFlagImageUrl(nationality, 20)}
-                alt={nationality}
-                className="absolute -top-1 -right-1 w-5 h-3.5 rounded-sm object-cover shadow-lg border border-black/80 z-10"
-              />
             </div>
 
             {/* 유저네임 */}
