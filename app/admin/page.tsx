@@ -76,6 +76,15 @@ export default function AdminPage() {
     if (error) { showToast('오류: ' + error.message, 'error'); return }
     setAccounts(prev => prev.map(a => a.id === account.id ? { ...a, is_scout_verified: true } : a))
     showToast(`✅ ${account.agency_name || account.username} 승인 완료`, 'success')
+
+    const { data: { session } } = await supabase.auth.refreshSession()
+    if (session) {
+      fetch('/api/admin/send-approval-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId: account.id, accessToken: session.access_token }),
+      })
+    }
   }
 
   async function rejectScout(account: Account) {
