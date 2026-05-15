@@ -132,6 +132,11 @@ export default function UploadPage() {
     if (dbError) {
       setError(t('upload.errSave') + dbError.message)
     } else {
+      // 첫 영상 업로드 시 파운더 뱃지 자동 부여
+      const { count } = await supabase.from('videos').select('id', { count: 'exact', head: true }).eq('account_id', accountId)
+      if (count === 1) {
+        await supabase.from('accounts').update({ is_founder: true }).eq('id', accountId)
+      }
       localStorage.setItem('justUploaded', '1')
       router.push(`/universe/${encodeURIComponent(selectedGroup)}`)
     }
