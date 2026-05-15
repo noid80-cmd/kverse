@@ -131,6 +131,7 @@ export default function AdminPage() {
   const pendingScouts = scouts.filter(a => !a.is_scout_verified)
   const approvedScouts = scouts.filter(a => a.is_scout_verified)
   const regularUsers = accounts.filter(a => a.account_type !== 'scout')
+  const suspiciousUsers = regularUsers.filter(a => /^scout_/i.test(a.username))
   const filteredUsers = regularUsers.filter(a =>
     a.username.toLowerCase().includes(search.toLowerCase()) ||
     (a.groups?.name || '').toLowerCase().includes(search.toLowerCase())
@@ -334,6 +335,25 @@ export default function AdminPage() {
         {/* 전체 유저 탭 */}
         {tab === 'users' && (
           <div>
+            {suspiciousUsers.length > 0 && (
+              <div className="mb-4 rounded-2xl border border-orange-500/30 p-4" style={{ background: 'rgba(249,115,22,0.07)' }}>
+                <p className="text-orange-400 text-xs font-bold mb-2">⚠️ scout_ 사칭 의심 계정 {suspiciousUsers.length}개</p>
+                <div className="flex flex-col gap-1.5">
+                  {suspiciousUsers.map(a => (
+                    <div key={a.id} className="flex items-center justify-between gap-3">
+                      <span className="text-orange-300 text-sm font-mono">@{a.username}</span>
+                      <button
+                        onClick={() => deleteAccount(a)}
+                        className="px-3 py-1 rounded-xl text-xs font-medium transition"
+                        style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="text-white/30 text-sm mb-4">일반 유저 {regularUsers.length}명</p>
             <input
               value={search}
