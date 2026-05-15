@@ -58,6 +58,8 @@ export default function UploadPage() {
     if (preview && previewRef.current) previewRef.current.load()
   }, [preview])
 
+  const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
   useEffect(() => {
     async function load() {
       const user = await getAuthUser()
@@ -139,6 +141,19 @@ export default function UploadPage() {
   const trimDuration = trimEnd - trimStart
   const trimOverLimit = trimDuration > MAX_DURATION_SEC
   const canUpload = !!file && !!title.trim() && !!selectedGroup && !!selectedGroupId && !uploading && !trimOverLimit && agreedOriginal
+
+  if (!isMobile) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6 text-center">
+        <div className="text-6xl mb-6">📱</div>
+        <h1 className="text-2xl font-black text-white mb-3">모바일에서 업로드해주세요</h1>
+        <p className="text-white/40 text-sm leading-relaxed">
+          영상 업로드는 스마트폰에서만 가능해요.<br />
+          핸드폰으로 Kverse에 접속 후 업로드해주세요.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-black">
