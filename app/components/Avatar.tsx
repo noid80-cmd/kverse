@@ -24,7 +24,11 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
     const displayUrl = rpmAvatarUrl.endsWith('.glb')
       ? `${rpmAvatarUrl.replace(/\.glb$/, '')}.png?scene=fullbody-portrait-v1-transparent&arm=5`
       : rpmAvatarUrl
-    return <img src={displayUrl} alt="avatar" style={{ display: 'block', width: size, height: size, objectFit: 'cover', borderRadius: '50%' }} />
+    return (
+      <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+        <img src={displayUrl} alt="avatar" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+    )
   }
 
   const color     = groupColor || BRAND_PRIMARY
