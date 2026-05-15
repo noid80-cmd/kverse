@@ -25,9 +25,15 @@ export default function Avatar({ equipped, groupColor, size = 160, rpmAvatarUrl,
       ? `${rpmAvatarUrl.replace(/\.glb$/, '')}.png?scene=fullbody-portrait-v1-transparent&arm=5`
       : rpmAvatarUrl
     return (
-      <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-        <img src={displayUrl} alt="avatar" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
-      </div>
+      <div style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        backgroundImage: `url(${displayUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        flexShrink: 0,
+      }} />
     )
   }
 
