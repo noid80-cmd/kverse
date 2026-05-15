@@ -5,6 +5,7 @@ import { supabase, getAuthUser } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { groupDisplayName } from '@/lib/groupThemes'
 import Link from 'next/link'
+import { subscribePush } from '@/lib/pushNotification'
 
 const ADMIN_EMAIL = 'noid80@hanmail.net'
 
@@ -67,6 +68,10 @@ export default function AdminPage() {
         reporter: Array.isArray(r.reporter) ? r.reporter[0] : r.reporter,
       })))
       setLoading(false)
+
+      const { data: myAccount } = await supabase
+        .from('accounts').select('id').eq('user_id', user.id).maybeSingle()
+      if (myAccount) subscribePush(myAccount.id)
     }
     load()
   }, [])
