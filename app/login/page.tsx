@@ -6,6 +6,12 @@ import Link from 'next/link'
 import { useT } from '@/lib/i18n'
 import KverseLogo from '@/app/components/KverseLogo'
 
+function isInAppBrowser() {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /KAKAOTALK|NAVER|Line\/|FBAN|FBAV|Instagram|MicroMessenger|Snapchat/i.test(ua)
+}
+
 export default function LoginPage() {
   const t = useT()
   const [email, setEmail] = useState('')
@@ -13,10 +19,12 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [signupUrl, setSignupUrl] = useState('/signup')
+  const [inApp, setInApp] = useState(false)
 
   useEffect(() => {
     const back = new URLSearchParams(window.location.search).get('back') || ''
     setSignupUrl(back ? `/signup?back=${back}` : '/signup')
+    setInApp(isInAppBrowser())
   }, [])
 
   function getBackUrl() {
@@ -25,6 +33,10 @@ export default function LoginPage() {
   }
 
   async function handleGoogle() {
+    if (isInAppBrowser()) {
+      setInApp(true)
+      return
+    }
     const back = getBackUrl()
     sessionStorage.setItem('auth_back', back)
     await supabase.auth.signInWithOAuth({
@@ -53,6 +65,27 @@ export default function LoginPage() {
       window.location.href = acc?.account_type === 'scout' ? '/scout' : getBackUrl()
     }
     setLoading(false)
+  }
+
+  if (inApp) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-8 text-center">
+        <div className="text-5xl mb-6">🌐</div>
+        <h1 className="text-xl font-black text-white mb-3">외부 브라우저에서 열어주세요</h1>
+        <p className="text-white/50 text-sm leading-relaxed mb-6">
+          카카오톡, 네이버 등 앱 내 브라우저에서는<br />
+          Google 로그인이 차단됩니다.<br />
+          <span className="text-white/70 font-medium">Safari 또는 Chrome</span>으로 접속해주세요.
+        </p>
+        <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-5 w-full max-w-xs">
+          <p className="text-white/40 text-xs mb-3">접속 주소</p>
+          <p className="text-pink-400 font-mono text-sm font-medium break-all">{typeof window !== 'undefined' ? window.location.origin : 'kverse-nine.vercel.app'}</p>
+        </div>
+        <p className="text-white/25 text-xs mt-6">
+          주소를 복사해서 Safari / Chrome에 붙여넣기 하세요
+        </p>
+      </div>
+    )
   }
 
   return (
