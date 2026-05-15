@@ -9,7 +9,8 @@ export async function subscribePush(accountId: string): Promise<boolean> {
     if (permission !== 'granted') return false
 
     const existing = await reg.pushManager.getSubscription()
-    const subscription = existing || await reg.pushManager.subscribe({
+    if (existing) await existing.unsubscribe()
+    const subscription = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
     })
