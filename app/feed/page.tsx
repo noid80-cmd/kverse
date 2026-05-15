@@ -363,8 +363,8 @@ export default function FeedPage() {
         {/* 프로필 헤더 */}
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-center gap-5 mb-4">
-            <div className="flex-shrink-0 rounded-full overflow-hidden"
-              style={{ padding: 3, width: 108, height: 108, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
+            <div className="flex-shrink-0 rounded-full flex items-center justify-center"
+              style={{ width: 108, height: 108, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
               <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
                 <Avatar
                   gender={(account?.gender as 'male' | 'female') || 'female'}
