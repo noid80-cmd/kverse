@@ -61,6 +61,9 @@ export async function POST(req: NextRequest) {
     await db.from('scout_lists').delete().eq('target_id', accountId)
     await db.from('user_items').delete().eq('account_id', accountId)
     await db.from('subscriptions').delete().eq('account_id', accountId)
+    await db.from('push_subscriptions').delete().eq('account_id', accountId)
+    if (videoIds.length > 0) await db.from('video_reports').delete().in('video_id', videoIds)
+    await db.from('video_reports').delete().eq('reporter_account_id', accountId)
     await db.from('videos').delete().eq('account_id', accountId)
 
     const { error: accErr } = await db.from('accounts').delete().eq('id', accountId)
