@@ -68,21 +68,39 @@ export default function LoginPage() {
   }
 
   if (inApp) {
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://kverse-nine.vercel.app/login'
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
+    const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    const chromeIntentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`
+
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center px-8 text-center">
-        <div className="text-5xl mb-6">🌐</div>
-        <h1 className="text-xl font-black text-white mb-3">외부 브라우저에서 열어주세요</h1>
-        <p className="text-white/50 text-sm leading-relaxed mb-6">
-          카카오톡, 네이버 등 앱 내 브라우저에서는<br />
-          Google 로그인이 차단됩니다.<br />
-          <span className="text-white/70 font-medium">Safari 또는 Chrome</span>으로 접속해주세요.
+        <div className="text-5xl mb-5">🌐</div>
+        <h1 className="text-xl font-black text-white mb-2">브라우저에서 열어주세요</h1>
+        <p className="text-white/45 text-sm leading-relaxed mb-7">
+          카카오톡 앱에서는 Google 로그인이<br />차단됩니다. 아래 버튼을 눌러주세요.
         </p>
-        <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-5 w-full max-w-xs">
-          <p className="text-white/40 text-xs mb-3">접속 주소</p>
-          <p className="text-pink-400 font-mono text-sm font-medium break-all">{typeof window !== 'undefined' ? window.location.origin : 'kverse-nine.vercel.app'}</p>
-        </div>
-        <p className="text-white/25 text-xs mt-6">
-          주소를 복사해서 Safari / Chrome에 붙여넣기 하세요
+
+        {isAndroid && (
+          <a href={chromeIntentUrl}
+            className="w-full max-w-xs flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-white text-base mb-3"
+            style={{ background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}>
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C41 35.8 44 30.3 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
+            Chrome으로 열기
+          </a>
+        )}
+
+        {isIOS && (
+          <a href={`googlechrome://${currentUrl.replace(/^https?:\/\//, '')}`}
+            className="w-full max-w-xs flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-white text-base mb-3"
+            style={{ background: 'linear-gradient(135deg, #E91E8C, #7B2FBE)' }}>
+            Safari / Chrome으로 열기
+          </a>
+        )}
+
+        <p className="text-white/25 text-xs mt-2">
+          버튼이 안 되면 주소창에 직접 입력하세요<br />
+          <span className="text-white/40 font-mono">kverse-nine.vercel.app</span>
         </p>
       </div>
     )
