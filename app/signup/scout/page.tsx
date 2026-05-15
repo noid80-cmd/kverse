@@ -1,9 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import KverseLogo from '@/app/components/KverseLogo'
+
+function toAgencySlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 20)
+}
 
 export default function ScoutSignupPage() {
   const [email, setEmail] = useState('')
@@ -11,13 +19,18 @@ export default function ScoutSignupPage() {
   const [agencyName, setAgencyName] = useState('')
   const [contactName, setContactName] = useState('')
   const [position, setPosition] = useState('')
+  const [suffix, setSuffix] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
 
+  const agencySlug = useMemo(() => toAgencySlug(agencyName), [agencyName])
+  const prefix = agencySlug ? `scout_${agencySlug}_` : 'scout_[기획사명]_'
+  const fullUsername = agencySlug && suffix ? `scout_${agencySlug}_${suffix}` : ''
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email || !password || !agencyName || !contactName) {
+    if (!email || !password || !agencyName || !contactName || !suffix) {
       setError('모든 필수 항목을 입력해주세요.')
       return
     }
@@ -25,9 +38,21 @@ export default function ScoutSignupPage() {
       setError('비밀번호는 6자 이상이어야 해요.')
       return
     }
+    if (!/^[a-z0-9_]+$/.test(suffix)) {
+      setError('닉네임 뒷부분은 영문 소문자, 숫자, 언더바(_)만 사용할 수 있어요.')
+      return
+    }
 
     setLoading(true)
     setError('')
+
+    const username = fullUsername
+    const { data: existing } = await supabase.from('accounts').select('id').eq('username', username).maybeSingle()
+    if (existing) {
+      setError('이미 사용 중인 닉네임이에요. 뒷부분을 바꿔주세요.')
+      setLoading(false)
+      return
+    }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({ email, password })
     if (authError) { setError(authError.message); setLoading(false); return }
@@ -35,7 +60,6 @@ export default function ScoutSignupPage() {
     const userId = authData.user?.id
     if (!userId) { setError('가입 중 오류가 발생했어요.'); setLoading(false); return }
 
-    const username = `scout_${Date.now()}`
     const { error: accError } = await supabase.from('accounts').insert({
       user_id: userId,
       username,
@@ -133,6 +157,28 @@ export default function ScoutSignupPage() {
               />
             </div>
 
+            <div>
+              <label className="text-white/50 text-xs font-medium mb-1.5 block">닉네임 <span className="text-pink-500">*</span></label>
+              <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-pink-500/50 transition">
+                <span className="pl-4 pr-2 py-3 text-white/30 text-sm font-mono whitespace-nowrap select-none">
+                  {prefix}
+                </span>
+                <input
+                  type="text"
+                  value={suffix}
+                  onChange={e => setSuffix(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20))}
+                  placeholder="kim"
+                  className="flex-1 bg-transparent pr-4 py-3 text-white placeholder-white/20 focus:outline-none text-sm font-mono"
+                />
+              </div>
+              {fullUsername && (
+                <p className="text-white/30 text-xs mt-1.5 pl-1">
+                  최종 닉네임: <span className="text-yellow-400 font-mono">@{fullUsername}</span>
+                </p>
+              )}
+              <p className="text-white/20 text-xs mt-1 pl-1">영문 소문자, 숫자, _ 사용 가능</p>
+            </div>
+
             <div className="border-t border-white/8 pt-4">
               <label className="text-white/50 text-xs font-medium mb-1.5 block">이메일 <span className="text-pink-500">*</span></label>
               <input
@@ -159,7 +205,7 @@ export default function ScoutSignupPage() {
 
             <button
               type="submit"
-              disabled={loading || !agencyName || !contactName || !email || !password}
+              disabled={loading || !agencyName || !contactName || !email || !password || !suffix}
               className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition disabled:opacity-40 mt-2"
               style={{ background: 'linear-gradient(135deg,#E91E8C,#7B2FBE)' }}
             >
