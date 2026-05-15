@@ -57,6 +57,7 @@ export default function SignupPage() {
 
     if (username.length === 0) { setUsernameStatus('idle'); return }
     if (username.length < 3) { setUsernameStatus('invalid'); return }
+    if (/^scout_/i.test(username)) { setUsernameStatus('invalid'); return }
 
     setUsernameStatus('checking')
     debounceRef.current = setTimeout(async () => {
@@ -148,7 +149,7 @@ export default function SignupPage() {
     usernameStatus === 'available' ? { text: '✓ 사용 가능한 닉네임이에요', color: 'text-green-400' } :
     usernameStatus === 'taken' ? { text: '✗ 이미 사용 중인 닉네임이에요', color: 'text-red-400' } :
     usernameStatus === 'checking' ? { text: '확인 중...', color: 'text-white/30' } :
-    usernameStatus === 'invalid' ? { text: '3자 이상 입력해주세요', color: 'text-white/30' } :
+    usernameStatus === 'invalid' ? { text: /^scout_/i.test(username) ? '✗ scout_ 로 시작하는 닉네임은 사용할 수 없어요' : '3자 이상 입력해주세요', color: 'text-red-400' } :
     { text: '영문·숫자·_ 3~20자 · Kverse에서 쓰는 내 이름이에요', color: 'text-white/25' }
 
   const canSubmit = !loading && usernameStatus === 'available' && username.length >= 3

@@ -58,6 +58,7 @@ function CompleteInner() {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (username.length === 0) { setUsernameStatus('idle'); return }
     if (username.length < 3) { setUsernameStatus('invalid'); return }
+    if (/^scout_/i.test(username)) { setUsernameStatus('invalid'); return }
     setUsernameStatus('checking')
     debounceRef.current = setTimeout(async () => {
       const { data } = await supabase
@@ -102,7 +103,7 @@ function CompleteInner() {
     usernameStatus === 'available' ? { text: t('prof.usernameHint') + ' ✓', color: 'text-green-400' } :
     usernameStatus === 'taken' ? { text: t('prof.usernameTaken'), color: 'text-red-400' } :
     usernameStatus === 'checking' ? { text: '...', color: 'text-white/30' } :
-    usernameStatus === 'invalid' ? { text: t('prof.usernameHint'), color: 'text-white/30' } :
+    usernameStatus === 'invalid' ? { text: /^scout_/i.test(username) ? '✗ scout_ 로 시작하는 닉네임은 사용할 수 없어요' : t('prof.usernameHint'), color: 'text-red-400' } :
     { text: t('prof.usernameHint'), color: 'text-white/25' }
 
   return (
