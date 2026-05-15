@@ -161,30 +161,32 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">
               <Link href="/avatar" className="hover:opacity-90 transition inline-flex">
-                {account.rpm_avatar_url ? (
-                  <div style={{
-                    width: 96,
-                    height: 96,
-                    borderRadius: '50%',
-                    backgroundImage: `url(${account.rpm_avatar_url})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    boxShadow: `0 0 0 3px #000, 0 0 0 6px ${accent}`,
-                  }} />
-                ) : (
-                  <div className="rounded-full flex items-center justify-center"
-                    style={{ width: 108, height: 108, background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
-                    <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden' }}>
-                      <Avatar
-                        gender={(account.gender as 'male' | 'female') || 'female'}
-                        equipped={equippedVisuals}
-                        groupColor={accent}
-                        size={96}
-                        username={account.username}
-                      />
-                    </div>
-                  </div>
-                )}
+                <div style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: 48,
+                  overflow: 'hidden',
+                  background: `linear-gradient(135deg, ${accent}, #7B2FBE)`,
+                  boxShadow: `0 0 0 3px #000, 0 0 0 6px ${accent}`,
+                }}>
+                  {account.rpm_avatar_url ? (
+                    <img
+                      src={account.rpm_avatar_url}
+                      width={96}
+                      height={96}
+                      alt=""
+                      style={{ display: 'block', width: 96, height: 96, objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <Avatar
+                      gender={(account.gender as 'male' | 'female') || 'female'}
+                      equipped={equippedVisuals}
+                      groupColor={accent}
+                      size={96}
+                      username={account.username}
+                    />
+                  )}
+                </div>
               </Link>
               <img
                 src={getFlagImageUrl(nationality, 20)}

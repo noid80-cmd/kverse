@@ -363,30 +363,32 @@ export default function FeedPage() {
         {/* 프로필 헤더 */}
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-center gap-5 mb-4">
-            {account?.rpm_avatar_url ? (
-              <div style={{
-                width: 96,
-                height: 96,
-                borderRadius: '50%',
-                backgroundImage: `url(${account.rpm_avatar_url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                flexShrink: 0,
-                boxShadow: `0 0 0 3px #000, 0 0 0 6px ${accentColor || '#E91E8C'}`,
-              }} />
-            ) : (
-              <div className="flex-shrink-0 rounded-full flex items-center justify-center"
-                style={{ width: 108, height: 108, background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, ${accentColor || '#7B2FBE'}55)` }}>
-                <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-                  <Avatar
-                    gender={(account?.gender as 'male' | 'female') || 'female'}
-                    groupColor={accentColor || '#E91E8C'}
-                    size={96}
-                    username={account?.username}
-                  />
-                </div>
-              </div>
-            )}
+            <div style={{
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              overflow: 'hidden',
+              flexShrink: 0,
+              background: `linear-gradient(135deg, ${accentColor || '#E91E8C'}, #7B2FBE)`,
+              boxShadow: `0 0 0 3px #000, 0 0 0 6px ${accentColor || '#E91E8C'}`,
+            }}>
+              {account?.rpm_avatar_url ? (
+                <img
+                  src={account.rpm_avatar_url}
+                  width={96}
+                  height={96}
+                  alt=""
+                  style={{ display: 'block', width: 96, height: 96, objectFit: 'cover' }}
+                />
+              ) : (
+                <Avatar
+                  gender={(account?.gender as 'male' | 'female') || 'female'}
+                  groupColor={accentColor || '#E91E8C'}
+                  size={96}
+                  username={account?.username}
+                />
+              )}
+            </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <span className="text-white font-black text-lg">@{account?.username}</span>
