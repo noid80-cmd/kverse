@@ -161,19 +161,30 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">
               <Link href="/avatar" className="hover:opacity-90 transition inline-flex">
-                <div className="rounded-full p-1.5 flex items-center justify-center"
-                  style={{ width: 108, height: 108, background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
-                  <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden' }}>
-                    <Avatar
-                      gender={(account.gender as 'male' | 'female') || 'female'}
-                      equipped={equippedVisuals}
-                      groupColor={accent}
-                      size={96}
-                      rpmAvatarUrl={account.rpm_avatar_url}
-                      username={account.username}
-                    />
+                {account.rpm_avatar_url ? (
+                  <div style={{
+                    width: 96,
+                    height: 96,
+                    borderRadius: '50%',
+                    backgroundImage: `url(${account.rpm_avatar_url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    boxShadow: `0 0 0 3px #000, 0 0 0 6px ${accent}`,
+                  }} />
+                ) : (
+                  <div className="rounded-full flex items-center justify-center"
+                    style={{ width: 108, height: 108, background: `linear-gradient(135deg, ${accent}, ${accent}55)`, boxShadow: '0 0 0 3px #000' }}>
+                    <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden' }}>
+                      <Avatar
+                        gender={(account.gender as 'male' | 'female') || 'female'}
+                        equipped={equippedVisuals}
+                        groupColor={accent}
+                        size={96}
+                        username={account.username}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </Link>
               <img
                 src={getFlagImageUrl(nationality, 20)}
