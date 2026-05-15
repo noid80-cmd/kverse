@@ -86,8 +86,8 @@ export default function AdminPage() {
   async function deleteAccount(account: Account) {
     if (!confirm(`@${account.username} 계정과 영상을 모두 삭제할까요?`)) return
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    const { data: { session } } = await supabase.auth.refreshSession()
+    if (!session) { showToast('로그인 세션이 만료됐어요. 다시 로그인해주세요.', 'error'); return }
 
     const res = await fetch('/api/admin/delete-account', {
       method: 'POST',
@@ -114,8 +114,8 @@ export default function AdminPage() {
 
   async function deleteReportedVideo(report: Report) {
     if (!confirm(`"${report.videos?.title || '영상'}"을(를) 삭제할까요?`)) return
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    const { data: { session } } = await supabase.auth.refreshSession()
+    if (!session) { showToast('로그인 세션이 만료됐어요. 다시 로그인해주세요.', 'error'); return }
     await supabase.from('videos').delete().eq('id', report.video_id)
     await supabase.from('video_reports').update({ resolved: true }).eq('id', report.id)
     setReports(prev => prev.map(r => r.id === report.id ? { ...r, resolved: true } : r))
