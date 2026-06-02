@@ -20,7 +20,7 @@ type Stats = { videos: number; bookmarks: number; contacts: number }
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [stats, setStats] = useState<Stats>({ videos: 0, bookmarks: 0, contacts: 0 })
-  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }[]>([])
+  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }[] | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function DashboardPage() {
           <Link href="/videos" style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
         </div>
 
-        {recentVideos.length === 0 ? (
+        {recentVideos === null ? null : recentVideos.length === 0 ? (
           <Link href="/videos/upload" style={{ textDecoration: 'none' }}>
             <div style={{
               background: '#fff', borderRadius: 20, padding: 32, textAlign: 'center',
