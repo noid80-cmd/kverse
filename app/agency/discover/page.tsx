@@ -27,7 +27,7 @@ export default function DiscoverPage() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState<string>('')
-  const [agencyName, setAgencyName] = useState<string>('')
+  const [agencyName, setAgencyName] = useState<string | null>(null)
   const [agencyVerified, setAgencyVerified] = useState(false)
   const supabase = createClient()
 
@@ -110,7 +110,7 @@ export default function DiscoverPage() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b' }}>{agencyName || 'KVERSE'}</h1>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', minHeight: 32 }}>{agencyName ?? ''}</h1>
               {agencyVerified && (
                 <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 8 }}>인증</span>
               )}
