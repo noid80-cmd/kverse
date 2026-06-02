@@ -165,8 +165,70 @@ export default function ProfileEditPage() {
               </select>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 placeholder="연락처" style={inputStyle} />
-              <input type="text" value={nationality} onChange={e => setNationality(e.target.value)}
-                placeholder="국적 (예: 대한민국)" style={inputStyle} />
+              <select value={nationality} onChange={e => setNationality(e.target.value)} style={inputStyle}>
+                <option value="">국적 선택</option>
+                <optgroup label="아시아">
+                  <option value="대한민국">대한민국</option>
+                  <option value="조선민주주의인민공화국">북한</option>
+                  <option value="중국">중국</option>
+                  <option value="일본">일본</option>
+                  <option value="대만">대만</option>
+                  <option value="홍콩">홍콩</option>
+                  <option value="태국">태국</option>
+                  <option value="베트남">베트남</option>
+                  <option value="필리핀">필리핀</option>
+                  <option value="인도네시아">인도네시아</option>
+                  <option value="말레이시아">말레이시아</option>
+                  <option value="싱가포르">싱가포르</option>
+                  <option value="미얀마">미얀마</option>
+                  <option value="캄보디아">캄보디아</option>
+                  <option value="몽골">몽골</option>
+                  <option value="인도">인도</option>
+                  <option value="파키스탄">파키스탄</option>
+                  <option value="방글라데시">방글라데시</option>
+                  <option value="카자흐스탄">카자흐스탄</option>
+                  <option value="우즈베키스탄">우즈베키스탄</option>
+                </optgroup>
+                <optgroup label="북미/남미">
+                  <option value="미국">미국</option>
+                  <option value="캐나다">캐나다</option>
+                  <option value="멕시코">멕시코</option>
+                  <option value="브라질">브라질</option>
+                  <option value="아르헨티나">아르헨티나</option>
+                  <option value="콜롬비아">콜롬비아</option>
+                  <option value="칠레">칠레</option>
+                  <option value="페루">페루</option>
+                </optgroup>
+                <optgroup label="유럽">
+                  <option value="영국">영국</option>
+                  <option value="프랑스">프랑스</option>
+                  <option value="독일">독일</option>
+                  <option value="스페인">스페인</option>
+                  <option value="이탈리아">이탈리아</option>
+                  <option value="포르투갈">포르투갈</option>
+                  <option value="네덜란드">네덜란드</option>
+                  <option value="벨기에">벨기에</option>
+                  <option value="스웨덴">스웨덴</option>
+                  <option value="노르웨이">노르웨이</option>
+                  <option value="덴마크">덴마크</option>
+                  <option value="핀란드">핀란드</option>
+                  <option value="폴란드">폴란드</option>
+                  <option value="러시아">러시아</option>
+                  <option value="우크라이나">우크라이나</option>
+                </optgroup>
+                <optgroup label="오세아니아/중동/아프리카">
+                  <option value="호주">호주</option>
+                  <option value="뉴질랜드">뉴질랜드</option>
+                  <option value="사우디아라비아">사우디아라비아</option>
+                  <option value="아랍에미리트">아랍에미리트</option>
+                  <option value="이스라엘">이스라엘</option>
+                  <option value="터키">터키</option>
+                  <option value="이란">이란</option>
+                  <option value="이집트">이집트</option>
+                  <option value="남아프리카공화국">남아프리카공화국</option>
+                  <option value="나이지리아">나이지리아</option>
+                </optgroup>
+              </select>
             </div>
           </div>
 
