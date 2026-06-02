@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+body {
+  background: #f0f0f8;
+  color: #1e1b4b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+}
+
+* { box-sizing: border-box; }
+input, select, textarea, button { font-family: inherit; outline: none; }
+button { cursor: pointer; }
