@@ -19,6 +19,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [myId, setMyId] = useState('')
   const [sending, setSending] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -35,6 +36,15 @@ export default function ChatPage() {
         .single()
       if (!convData) { router.back(); return }
       setConv(convData as unknown as Conversation)
+
+      const { data: am } = await supabase
+        .from('agency_members').select('agency_id')
+        .eq('profile_id', (convData as unknown as Conversation).agency_member_id).single()
+      if (am?.agency_id) {
+        const { data: ag } = await supabase
+          .from('agencies').select('is_verified').eq('id', am.agency_id).single()
+        setIsVerified(ag?.is_verified ?? false)
+      }
 
       const { data: msgs } = await supabase
         .from('messages')
@@ -114,7 +124,12 @@ export default function ChatPage() {
             : <span style={{ color: 'white', fontWeight: 900, fontSize: 15 }}>{other?.name?.[0] ?? '?'}</span>
           }
         </div>
-        <span style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 17 }}>{other?.name ?? '...'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 17 }}>{other?.name ?? '...'}</span>
+          {isVerified && conv && myId === conv.talent_id && (
+            <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6, letterSpacing: 0.2 }}>인증</span>
+          )}
+        </div>
       </div>
 
       <div style={{ flex: 1, padding: '76px 16px 90px', maxWidth: 600, margin: '0 auto', width: '100%' }}>

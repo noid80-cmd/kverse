@@ -15,7 +15,7 @@ const talentNav = [
 ]
 
 type Conversation = {
-  id: string; created_at: string
+  id: string; created_at: string; agency_member_id: string
   agency_member: { name: string; avatar_url: string | null } | null
   lastMessage?: string
 }
@@ -29,6 +29,7 @@ type Bookmark = {
 export default function ReactionsPage() {
   const [convs, setConvs] = useState<Conversation[]>([])
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
+  const [verifiedIds, setVerifiedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'contacts' | 'bookmarks'>('contacts')
   const router = useRouter()
   const supabase = createClient()
@@ -40,7 +41,7 @@ export default function ReactionsPage() {
 
       const [{ data: convData }, { data: b }] = await Promise.all([
         supabase.from('conversations')
-          .select('id, created_at, agency_member:profiles!agency_member_id(name, avatar_url)')
+          .select('id, created_at, agency_member_id, agency_member:profiles!agency_member_id(name, avatar_url)')
           .eq('talent_id', user.id).order('created_at', { ascending: false }),
         supabase.from('bookmarks').select('id, created_at, note, video:videos(id, title), agency_member:profiles!agency_member_id(name)')
           .eq('talent_id', user.id).order('created_at', { ascending: false }),
@@ -58,6 +59,22 @@ export default function ReactionsPage() {
 
       setConvs(list)
       setBookmarks((b as unknown as Bookmark[]) ?? [])
+
+      if (list.length > 0) {
+        const profileIds = list.map(c => c.agency_member_id)
+        const { data: ams } = await supabase
+          .from('agency_members').select('profile_id, agency_id').in('profile_id', profileIds)
+        if (ams && ams.length > 0) {
+          const agencyIds = ams.map(a => a.agency_id)
+          const { data: agencies } = await supabase
+            .from('agencies').select('id, is_verified').in('id', agencyIds)
+          const verifiedAgencyIds = new Set((agencies ?? []).filter(a => a.is_verified).map(a => a.id))
+          const agencyIdByProfile: Record<string, string> = {}
+          ams.forEach(a => { agencyIdByProfile[a.profile_id] = a.agency_id })
+          const verified = new Set(profileIds.filter(pid => verifiedAgencyIds.has(agencyIdByProfile[pid])))
+          setVerifiedIds(verified)
+        }
+      }
     }
     load()
   }, [])
@@ -106,7 +123,12 @@ export default function ReactionsPage() {
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15, marginBottom: 3 }}>{c.agency_member?.name ?? '기획사'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      <span style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15 }}>{c.agency_member?.name ?? '기획사'}</span>
+                      {verifiedIds.has(c.agency_member_id) && (
+                        <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                      )}
+                    </div>
                     <div style={{ fontSize: 13, color: '#8b8baa', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {c.lastMessage ?? '대화를 시작해보세요'}
                     </div>
