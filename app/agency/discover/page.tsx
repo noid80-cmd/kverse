@@ -14,7 +14,7 @@ const categoryEmoji: Record<string, string> = {
 
 type Video = {
   id: string; title: string; description: string | null; thumbnail_url: string | null
-  view_count: number; category: string; tags: string[]; created_at: string
+  view_count: number; like_count: number; category: string; tags: string[]; created_at: string
   talent: { id: string; name: string; avatar_url: string | null; birth_date: string | null; skills: string[] } | null
 }
 
@@ -22,7 +22,10 @@ export default function DiscoverPage() {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
+  const [sort, setSort] = useState<'latest' | 'likes'>('latest')
   const [bookmarked, setBookmarked] = useState<Set<string>>(new Set())
+  const [liked, setLiked] = useState<Set<string>>(new Set())
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState<string>('')
   const supabase = createClient()
 
@@ -33,20 +36,44 @@ export default function DiscoverPage() {
     setMyId(user.id)
 
     let q = supabase.from('videos').select(`
-      id, title, description, thumbnail_url, view_count, category, tags, created_at,
+      id, title, description, thumbnail_url, view_count, like_count, category, tags, created_at,
       talent:profiles!talent_id(id, name, avatar_url, birth_date, skills)
-    `).eq('status', 'active').order('created_at', { ascending: false }).limit(50)
+    `).eq('status', 'active').limit(50)
 
     if (category !== 'all') q = q.eq('category', category)
+    q = sort === 'likes'
+      ? q.order('like_count', { ascending: false })
+      : q.order('created_at', { ascending: false })
     const { data } = await q
+
+    const vids = (data as unknown as Video[]) ?? []
+    const counts: Record<string, number> = {}
+    vids.forEach(v => { counts[v.id] = v.like_count })
+    setLikeCounts(counts)
 
     const { data: bm } = await supabase.from('bookmarks').select('video_id').eq('agency_member_id', user.id)
     setBookmarked(new Set(bm?.map(b => b.video_id).filter(Boolean) as string[]))
-    setVideos((data as unknown as Video[]) ?? [])
+
+    const { data: lk } = await supabase.from('likes').select('video_id').eq('user_id', user.id)
+    setLiked(new Set(lk?.map(l => l.video_id).filter(Boolean) as string[]))
+
+    setVideos(vids)
     setLoading(false)
-  }, [category])
+  }, [category, sort])
 
   useEffect(() => { load() }, [load])
+
+  async function toggleLike(videoId: string) {
+    if (liked.has(videoId)) {
+      await supabase.from('likes').delete().eq('video_id', videoId).eq('user_id', myId)
+      setLiked(prev => { const s = new Set(prev); s.delete(videoId); return s })
+      setLikeCounts(prev => ({ ...prev, [videoId]: Math.max((prev[videoId] ?? 1) - 1, 0) }))
+    } else {
+      await supabase.from('likes').insert({ video_id: videoId, user_id: myId })
+      setLiked(prev => new Set([...prev, videoId]))
+      setLikeCounts(prev => ({ ...prev, [videoId]: (prev[videoId] ?? 0) + 1 }))
+    }
+  }
 
   async function toggleBookmark(videoId: string, talentId: string) {
     if (bookmarked.has(videoId)) {
@@ -68,9 +95,24 @@ export default function DiscoverPage() {
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <div style={{ marginBottom: 20 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 4 }}>KVERSE</h1>
-          <p style={{ fontSize: 13, color: '#8b8baa' }}>오디션 지망생 영상 탐색</p>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 4 }}>KVERSE</h1>
+            <p style={{ fontSize: 13, color: '#8b8baa' }}>오디션 지망생 영상 탐색</p>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['latest', 'likes'] as const).map(s => (
+              <button key={s} onClick={() => setSort(s)}
+                style={{
+                  padding: '6px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
+                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#fff',
+                  color: sort === s ? 'white' : '#8b8baa',
+                  boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
+                }}>
+                {s === 'latest' ? '최신순' : '❤️ 인기순'}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 카테고리 필터 */}
@@ -147,14 +189,24 @@ export default function DiscoverPage() {
                         <div style={{ fontSize: 12, color: '#8b8baa' }}>{getAge(v.talent?.birth_date ?? null)}세</div>
                       )}
                     </div>
-                    <button onClick={() => v.talent && toggleBookmark(v.id, v.talent.id)}
-                      style={{
-                        width: 36, height: 36, borderRadius: 12, border: 'none', fontSize: 18,
-                        background: bookmarked.has(v.id) ? '#fef9c3' : '#f0f0f8',
-                        transition: 'all 0.15s',
-                      }}>
-                      {bookmarked.has(v.id) ? '⭐' : '☆'}
-                    </button>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => toggleLike(v.id)}
+                        style={{
+                          height: 36, borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700,
+                          padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
+                          background: liked.has(v.id) ? '#fce7f3' : '#f0f0f8',
+                          color: liked.has(v.id) ? '#e11d48' : '#8b8baa',
+                        }}>
+                        {liked.has(v.id) ? '❤️' : '🤍'} {likeCounts[v.id] ?? 0}
+                      </button>
+                      <button onClick={() => v.talent && toggleBookmark(v.id, v.talent.id)}
+                        style={{
+                          width: 36, height: 36, borderRadius: 12, border: 'none', fontSize: 18, cursor: 'pointer',
+                          background: bookmarked.has(v.id) ? '#fef9c3' : '#f0f0f8',
+                        }}>
+                        {bookmarked.has(v.id) ? '⭐' : '☆'}
+                      </button>
+                    </div>
                   </div>
 
                   <Link href={`/agency/discover/${v.id}`} style={{ textDecoration: 'none' }}>

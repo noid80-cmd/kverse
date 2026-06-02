@@ -19,7 +19,7 @@ const categoryLabel: Record<string, string> = {
 
 type Video = {
   id: string; title: string; description: string | null; video_url: string | null
-  thumbnail_url: string | null; view_count: number; status: string
+  thumbnail_url: string | null; view_count: number; like_count: number; status: string
   category: string; tags: string[]; created_at: string; talent_id: string
 }
 
@@ -29,6 +29,9 @@ export default function VideoDetailPage() {
   const [video, setVideo] = useState<Video | null>(null)
   const [bookmarkCount, setBookmarkCount] = useState(0)
   const [isOwner, setIsOwner] = useState(false)
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+  const [myId, setMyId] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -37,18 +40,36 @@ export default function VideoDetailPage() {
       const { data: v } = await supabase.from('videos').select('*').eq('id', id).single()
       if (!v) { router.push('/videos'); return }
       setVideo(v)
-      setIsOwner(user?.id === v.talent_id)
+      setLikeCount(v.like_count ?? 0)
+      if (user) {
+        setMyId(user.id)
+        setIsOwner(user.id === v.talent_id)
+        const { data: lk } = await supabase.from('likes').select('id').eq('video_id', id).eq('user_id', user.id).single()
+        setLiked(!!lk)
+      }
 
       const { count } = await supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('video_id', id)
       setBookmarkCount(count ?? 0)
 
-      // 조회수 증가
       if (user?.id !== v.talent_id) {
         await supabase.from('videos').update({ view_count: v.view_count + 1 }).eq('id', id)
       }
     }
     load()
   }, [id])
+
+  async function toggleLike() {
+    if (!myId) return
+    if (liked) {
+      await supabase.from('likes').delete().eq('video_id', id).eq('user_id', myId)
+      setLiked(false)
+      setLikeCount(c => Math.max(c - 1, 0))
+    } else {
+      await supabase.from('likes').insert({ video_id: id, user_id: myId })
+      setLiked(true)
+      setLikeCount(c => c + 1)
+    }
+  }
 
   async function handleDelete() {
     if (!confirm('영상을 삭제할까요?')) return
@@ -107,11 +128,25 @@ export default function VideoDetailPage() {
         </div>
 
         {/* 반응 통계 */}
-        <div style={{ background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', borderRadius: 20, padding: 20, border: '1px solid #c4b5fd', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ fontSize: 32 }}>⭐</span>
-          <div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#4f46e5' }}>{bookmarkCount}</div>
-            <div style={{ fontSize: 13, color: '#7c3aed', fontWeight: 600 }}>기획사 관심 표시</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+          <button onClick={toggleLike}
+            style={{
+              background: liked ? 'linear-gradient(135deg, #fce7f3, #fecdd3)' : '#fff',
+              border: liked ? '1px solid #f9a8d4' : '1px solid #e8e8f2',
+              borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+            }}>
+            <span style={{ fontSize: 28 }}>{liked ? '❤️' : '🤍'}</span>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: liked ? '#e11d48' : '#1e1b4b' }}>{likeCount}</div>
+              <div style={{ fontSize: 12, color: liked ? '#e11d48' : '#8b8baa', fontWeight: 600 }}>좋아요</div>
+            </div>
+          </button>
+          <div style={{ background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', borderRadius: 20, padding: 20, border: '1px solid #c4b5fd', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 28 }}>⭐</span>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#4f46e5' }}>{bookmarkCount}</div>
+              <div style={{ fontSize: 12, color: '#7c3aed', fontWeight: 600 }}>기획사 관심</div>
+            </div>
           </div>
         </div>
 
