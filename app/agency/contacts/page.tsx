@@ -17,6 +17,13 @@ export default function AgencyContactsPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  async function deleteConv(convId: string) {
+    if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
+    await supabase.from('messages').delete().eq('conversation_id', convId)
+    await supabase.from('conversations').delete().eq('id', convId)
+    setConvs(prev => prev.filter(c => c.id !== convId))
+  }
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -66,26 +73,32 @@ export default function AgencyContactsPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {convs.map(c => (
-              <button key={c.id} onClick={() => router.push(`/chat/${c.id}`)}
-                style={{ background: '#fff', borderRadius: 18, padding: '16px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', width: '100%', cursor: 'pointer' }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  {c.talent?.avatar_url
-                    ? <img src={c.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{c.talent?.name?.[0] ?? '?'}</span>
-                  }
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15, marginBottom: 3 }}>{c.talent?.name ?? '지망생'}</div>
-                  <div style={{ fontSize: 13, color: '#8b8baa', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                    {c.lastMessage ?? '대화를 시작해보세요'}
+              <div key={c.id} style={{ background: '#fff', borderRadius: 18, border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center' }}>
+                <button onClick={() => router.push(`/chat/${c.id}`)}
+                  style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', minWidth: 0 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
+                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {c.talent?.avatar_url
+                      ? <img src={c.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <span style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{c.talent?.name?.[0] ?? '?'}</span>
+                    }
                   </div>
-                </div>
-                <span style={{ color: '#c0c0d8', fontSize: 18, flexShrink: 0 }}>›</span>
-              </button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15, marginBottom: 3 }}>{c.talent?.name ?? '지망생'}</div>
+                    <div style={{ fontSize: 13, color: '#8b8baa', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      {c.lastMessage ?? '대화를 시작해보세요'}
+                    </div>
+                  </div>
+                  <span style={{ color: '#c0c0d8', fontSize: 18, flexShrink: 0 }}>›</span>
+                </button>
+                <button onClick={() => deleteConv(c.id)}
+                  style={{ padding: '16px 16px', background: 'none', border: 'none', cursor: 'pointer', color: '#d0b0cc', fontSize: 18, flexShrink: 0 }}>
+                  🗑️
+                </button>
+              </div>
             ))}
           </div>
         )}
