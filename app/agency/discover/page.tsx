@@ -190,22 +190,24 @@ export default function DiscoverPage() {
                 <div style={{ padding: '14px 16px' }}>
                   {/* 지망생 정보 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                    <div style={{
-                      width: 36, height: 36, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {v.talent?.avatar_url
-                        ? <img src={v.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <span style={{ color: 'white', fontWeight: 900, fontSize: 13 }}>{v.talent?.name?.[0] ?? '?'}</span>
-                      }
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{v.talent?.name ?? '이름 없음'}</div>
-                      {getAge(v.talent?.birth_date ?? null) && (
-                        <div style={{ fontSize: 12, color: '#8b8baa' }}>{getAge(v.talent?.birth_date ?? null)}세</div>
-                      )}
-                    </div>
+                    <Link href={`/agency/talents/${v.talent?.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, textDecoration: 'none', minWidth: 0 }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
+                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {v.talent?.avatar_url
+                          ? <img src={v.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <span style={{ color: 'white', fontWeight: 900, fontSize: 13 }}>{v.talent?.name?.[0] ?? '?'}</span>
+                        }
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{v.talent?.name ?? '이름 없음'}</div>
+                        {getAge(v.talent?.birth_date ?? null) && (
+                          <div style={{ fontSize: 12, color: '#8b8baa' }}>{getAge(v.talent?.birth_date ?? null)}세</div>
+                        )}
+                      </div>
+                    </Link>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button onClick={() => toggleLike(v.id)}
                         style={{
