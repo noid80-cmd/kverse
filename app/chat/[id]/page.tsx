@@ -20,6 +20,7 @@ export default function ChatPage() {
   const [myId, setMyId] = useState('')
   const [sending, setSending] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
+  const [agencyName, setAgencyName] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -42,8 +43,8 @@ export default function ChatPage() {
         .eq('profile_id', (convData as unknown as Conversation).agency_member_id).single()
       if (am?.agency_id) {
         const { data: ag } = await supabase
-          .from('agencies').select('is_verified').eq('id', am.agency_id).single()
-        setIsVerified(ag?.is_verified ?? false)
+          .from('agencies').select('name, is_verified').eq('id', am.agency_id).single()
+        if (ag) { setIsVerified(ag.is_verified); setAgencyName(ag.name) }
       }
 
       const { data: msgs } = await supabase
@@ -124,10 +125,17 @@ export default function ChatPage() {
             : <span style={{ color: 'white', fontWeight: 900, fontSize: 15 }}>{other?.name?.[0] ?? '?'}</span>
           }
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 17 }}>{other?.name ?? '...'}</span>
-          {isVerified && conv && myId === conv.talent_id && (
-            <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6, letterSpacing: 0.2 }}>인증</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 17 }}>
+              {conv && myId === conv.talent_id && agencyName ? agencyName : other?.name ?? '...'}
+            </span>
+            {isVerified && conv && myId === conv.talent_id && (
+              <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+            )}
+          </div>
+          {conv && myId === conv.talent_id && agencyName && other?.name && (
+            <span style={{ fontSize: 12, color: '#8b8baa' }}>{other.name}</span>
           )}
         </div>
       </div>
