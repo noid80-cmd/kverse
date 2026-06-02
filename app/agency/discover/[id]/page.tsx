@@ -67,11 +67,13 @@ export default function AgencyVideoPage() {
   }
 
   async function handleContact() {
-    if (!contactMsg.trim() || !video?.talent || !myAgencyId) return
+    if (!contactMsg.trim() || !video?.talent) return
+    if (!myAgencyId) { alert('기획사 정보를 불러오는 중이에요. 페이지를 새로고침 해주세요.'); return }
     setSending(true)
-    await supabase.from('contacts').insert({
+    const { error } = await supabase.from('contacts').insert({
       agency_id: myAgencyId, sender_id: myId, talent_id: video.talent.id, message: contactMsg.trim(),
     })
+    if (error) { alert('전송에 실패했어요. 다시 시도해주세요.'); setSending(false); return }
     await supabase.from('notifications').insert({
       user_id: video.talent.id, type: 'contact',
       title: '기획사에서 연락이 왔어요', body: contactMsg.trim().substring(0, 80), link: '/reactions',

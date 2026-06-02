@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 
 type Contact = {
-  id: string; message: string; status: string; created_at: string
-  talent: { name: string; avatar_url: string | null } | null
+  id: string; message: string; status: string; created_at: string; talent_id: string
+  talent?: { name: string; avatar_url: string | null }
 }
 
 export default function AgencyContactsPage() {
@@ -19,12 +19,24 @@ export default function AgencyContactsPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login'; return }
 
-      const { data } = await supabase.from('contacts').select(`
-        id, message, status, created_at,
-        talent:profiles!talent_id(name, avatar_url)
-      `).eq('sender_id', user.id).order('created_at', { ascending: false })
+      const { data: contactData } = await supabase
+        .from('contacts')
+        .select('id, message, status, created_at, talent_id')
+        .eq('sender_id', user.id)
+        .order('created_at', { ascending: false })
 
-      setContacts((data as unknown as Contact[]) ?? [])
+      if (!contactData?.length) { setLoading(false); return }
+
+      const talentIds = [...new Set(contactData.map(c => c.talent_id))]
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', talentIds)
+
+      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+      const merged = contactData.map(c => ({ ...c, talent: profileMap[c.talent_id] }))
+
+      setContacts(merged)
       setLoading(false)
     }
     load()
