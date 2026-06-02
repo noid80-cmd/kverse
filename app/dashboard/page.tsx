@@ -67,19 +67,21 @@ export default function DashboardPage() {
         {/* 통계 카드 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 28 }}>
           {[
-            { label: '영상', value: stats.videos, icon: '🎬' },
-            { label: '관심', value: stats.bookmarks, icon: '⭐' },
-            { label: '연락', value: stats.contacts, icon: '💌' },
+            { label: '영상', value: stats.videos, icon: '🎬', href: '/videos' },
+            { label: '관심', value: stats.bookmarks, icon: '⭐', href: '/reactions?tab=bookmarks' },
+            { label: '채팅', value: stats.contacts, icon: '💬', href: '/reactions' },
           ].map(s => (
-            <div key={s.label} style={{
-              background: '#fff', borderRadius: 20, padding: '18px 12px',
-              textAlign: 'center', border: '1px solid #e8e8f2',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-            }}>
-              <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#1e1b4b', lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: '#8b8baa', marginTop: 4, fontWeight: 600 }}>{s.label}</div>
-            </div>
+            <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
+              <div style={{
+                background: '#fff', borderRadius: 20, padding: '18px 12px',
+                textAlign: 'center', border: '1px solid #e8e8f2',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              }}>
+                <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: '#1e1b4b', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: 11, color: '#8b8baa', marginTop: 4, fontWeight: 600 }}>{s.label}</div>
+              </div>
+            </Link>
           ))}
         </div>
 
