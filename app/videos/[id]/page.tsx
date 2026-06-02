@@ -7,7 +7,7 @@ import BottomNav from '@/components/layout/BottomNav'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: '🏠' },
-  { href: '/videos', label: '내 영상', icon: '🎬' },
+  { href: '/explore', label: '탐색', icon: '🔍' },
   { href: '/videos/upload', label: '올리기', icon: '➕' },
   { href: '/reactions', label: '반응', icon: '⭐' },
   { href: '/profile/edit', label: '프로필', icon: '👤' },
