@@ -27,6 +27,8 @@ export default function DiscoverPage() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState<string>('')
+  const [agencyName, setAgencyName] = useState<string>('')
+  const [agencyVerified, setAgencyVerified] = useState(false)
   const supabase = createClient()
 
   const load = useCallback(async () => {
@@ -34,6 +36,12 @@ export default function DiscoverPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
     setMyId(user.id)
+
+    const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
+    if (am?.agency_id) {
+      const { data: ag } = await supabase.from('agencies').select('name, is_verified').eq('id', am.agency_id).single()
+      if (ag) { setAgencyName(ag.name); setAgencyVerified(ag.is_verified) }
+    }
 
     let q = supabase.from('videos').select(`
       id, title, description, thumbnail_url, view_count, like_count, category, tags, created_at,
@@ -97,7 +105,12 @@ export default function DiscoverPage() {
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 4 }}>KVERSE</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b' }}>{agencyName || 'KVERSE'}</h1>
+              {agencyVerified && (
+                <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 8 }}>인증</span>
+              )}
+            </div>
             <p style={{ fontSize: 13, color: '#8b8baa' }}>오디션 지망생 영상 탐색</p>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
