@@ -21,6 +21,7 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const [agencyName, setAgencyName] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -98,6 +99,14 @@ export default function ChatPage() {
     setSending(false)
   }
 
+  async function deleteConversation() {
+    if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
+    setDeleting(true)
+    await supabase.from('messages').delete().eq('conversation_id', id)
+    await supabase.from('conversations').delete().eq('id', id)
+    router.back()
+  }
+
   const other = conv ? (myId === conv.talent_id ? conv.agency_member : conv.talent) : null
 
   if (!conv) return (
@@ -138,6 +147,11 @@ export default function ChatPage() {
             <span style={{ fontSize: 12, color: '#8b8baa' }}>{other.name}</span>
           )}
         </div>
+        <button onClick={deleteConversation} disabled={deleting}
+          style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', borderRadius: 10, color: '#c0b0cc', fontSize: 20 }}
+          title="대화 삭제">
+          🗑️
+        </button>
       </div>
 
       <div style={{ flex: 1, padding: '76px 16px 90px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
