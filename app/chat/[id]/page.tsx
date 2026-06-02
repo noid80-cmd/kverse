@@ -63,11 +63,18 @@ export default function ChatPage() {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   async function sendMessage() {
-    if (!input.trim() || sending) return
+    if (!input.trim() || sending || !myId) return
     setSending(true)
     const content = input.trim()
     setInput('')
-    await supabase.from('messages').insert({ conversation_id: id, sender_id: myId, content })
+    const tempId = `temp-${Date.now()}`
+    setMessages(prev => [...prev, { id: tempId, content, sender_id: myId, created_at: new Date().toISOString(), is_read: false }])
+    const { error } = await supabase.from('messages').insert({ conversation_id: id, sender_id: myId, content })
+    if (error) {
+      setMessages(prev => prev.filter(m => m.id !== tempId))
+      setInput(content)
+      alert('전송 실패: ' + error.message)
+    }
     setSending(false)
   }
 
