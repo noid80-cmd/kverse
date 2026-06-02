@@ -12,7 +12,7 @@ const categoryLabel: Record<string, string> = {
 
 type Talent = {
   id: string; name: string; avatar_url: string | null; bio: string | null
-  birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]
+  birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]; nationality: string | null
 }
 type Video = { id: string; title: string; thumbnail_url: string | null; view_count: number; like_count: number; category: string }
 
@@ -37,7 +37,7 @@ export default function TalentProfilePage() {
       setMyId(user.id)
 
       const [{ data: t }, { data: v }, { data: conv }] = await Promise.all([
-        supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills').eq('id', id).single(),
+        supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).single(),
       ])
@@ -96,6 +96,7 @@ export default function TalentProfilePage() {
                 {[
                   getAge(talent.birth_date) && `${getAge(talent.birth_date)}세`,
                   talent.gender === 'male' ? '남성' : talent.gender === 'female' ? '여성' : null,
+                  talent.nationality,
                 ].filter(Boolean).join(' · ')}
               </div>
             </div>

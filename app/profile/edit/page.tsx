@@ -29,6 +29,7 @@ export default function ProfileEditPage() {
   const [height, setHeight] = useState('')
   const [weight, setWeight] = useState('')
   const [phone, setPhone] = useState('')
+  const [nationality, setNationality] = useState('')
   const [skills, setSkills] = useState<string[]>([])
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -52,6 +53,7 @@ export default function ProfileEditPage() {
         setHeight(data.height?.toString() ?? '')
         setWeight(data.weight?.toString() ?? '')
         setPhone(data.phone ?? '')
+        setNationality(data.nationality ?? '')
         setSkills(data.skills ?? [])
         setAvatarUrl(data.avatar_url ?? null)
       }
@@ -94,6 +96,7 @@ export default function ProfileEditPage() {
       height: height ? parseInt(height) : null,
       weight: weight ? parseInt(weight) : null,
       phone: phone.trim() || null,
+      nationality: nationality.trim() || null,
       skills,
     }).eq('id', user.id)
 
@@ -162,6 +165,8 @@ export default function ProfileEditPage() {
               </select>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 placeholder="연락처" style={inputStyle} />
+              <input type="text" value={nationality} onChange={e => setNationality(e.target.value)}
+                placeholder="국적 (예: 대한민국)" style={inputStyle} />
             </div>
           </div>
 

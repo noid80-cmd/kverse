@@ -14,7 +14,7 @@ type Video = {
   thumbnail_url: string | null; view_count: number; category: string; tags: string[]; created_at: string
   talent: {
     id: string; name: string; avatar_url: string | null; bio: string | null
-    birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]
+    birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]; nationality: string | null
   } | null
 }
 
@@ -43,7 +43,7 @@ export default function AgencyVideoPage() {
 
       const { data: v } = await supabase.from('videos').select(`
         id, title, description, video_url, thumbnail_url, view_count, category, tags, created_at,
-        talent:profiles!talent_id(id, name, avatar_url, bio, birth_date, gender, height, weight, skills)
+        talent:profiles!talent_id(id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality)
       `).eq('id', id).single()
       if (!v) { router.back(); return }
       setVideo(v as unknown as Video)
@@ -145,7 +145,7 @@ export default function AgencyVideoPage() {
                 <div>
                   <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 18 }}>{t.name}</div>
                   <div style={{ fontSize: 13, color: '#8b8baa' }}>
-                    {[getAge(t.birth_date) && `${getAge(t.birth_date)}세`, t.gender === 'male' ? '남' : t.gender === 'female' ? '여' : null].filter(Boolean).join(' · ')}
+                    {[getAge(t.birth_date) && `${getAge(t.birth_date)}세`, t.gender === 'male' ? '남' : t.gender === 'female' ? '여' : null, t.nationality].filter(Boolean).join(' · ')}
                   </div>
                 </div>
               </div>
