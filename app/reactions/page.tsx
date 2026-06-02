@@ -38,7 +38,7 @@ export default function ReactionsPage() {
       const [{ data: c }, { data: b }] = await Promise.all([
         supabase.from('contacts').select('id, message, status, created_at, agency:agencies(name, logo_url)')
           .eq('talent_id', user.id).order('created_at', { ascending: false }),
-        supabase.from('bookmarks').select('id, created_at, note, video:videos(id, title), agency_member:profiles(name)')
+        supabase.from('bookmarks').select('id, created_at, note, video:videos(id, title), agency_member:profiles!agency_member_id(name)')
           .eq('talent_id', user.id).order('created_at', { ascending: false }),
       ])
       setContacts((c as unknown as Contact[]) ?? [])
