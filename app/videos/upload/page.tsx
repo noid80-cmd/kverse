@@ -24,9 +24,12 @@ export default function UploadPage() {
     return new Promise((resolve) => {
       const video = document.createElement('video')
       video.preload = 'metadata'
+      video.muted = true
       video.src = URL.createObjectURL(videoFile)
-      video.currentTime = 1
-      video.oncanplay = () => {
+      video.onloadedmetadata = () => {
+        video.currentTime = Math.min(1, video.duration * 0.1)
+      }
+      video.onseeked = () => {
         const canvas = document.createElement('canvas')
         canvas.width = video.videoWidth || 640
         canvas.height = video.videoHeight || 360
