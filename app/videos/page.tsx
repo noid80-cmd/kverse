@@ -25,6 +25,7 @@ const categoryLabel: Record<string, string> = {
 export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const supabase = createClient()
 
   useEffect(() => {
@@ -52,10 +53,22 @@ export default function VideosPage() {
 
         <div className="flex items-center justify-between mb-6">
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b' }}>내 영상</h1>
-          <Link href="/videos/upload"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 4px 12px rgba(99,102,241,0.3)' }}>
-            + 업로드
-          </Link>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', background: '#fff', borderRadius: 10, border: '1px solid #e0e0f0', overflow: 'hidden' }}>
+              <button onClick={() => setViewMode('list')}
+                style={{ padding: '8px 12px', border: 'none', fontSize: 16, cursor: 'pointer', background: viewMode === 'list' ? '#6366f1' : 'transparent', color: viewMode === 'list' ? 'white' : '#8b8baa', transition: 'all 0.15s' }}>
+                ☰
+              </button>
+              <button onClick={() => setViewMode('grid')}
+                style={{ padding: '8px 12px', border: 'none', fontSize: 16, cursor: 'pointer', background: viewMode === 'grid' ? '#6366f1' : 'transparent', color: viewMode === 'grid' ? 'white' : '#8b8baa', transition: 'all 0.15s' }}>
+                ⊞
+              </button>
+            </div>
+            <Link href="/videos/upload"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 4px 12px rgba(99,102,241,0.3)' }}>
+              + 업로드
+            </Link>
+          </div>
         </div>
 
         {loading ? (
@@ -70,7 +83,7 @@ export default function VideosPage() {
               영상 업로드
             </Link>
           </div>
-        ) : (
+        ) : viewMode === 'list' ? (
           <div className="flex flex-col gap-3">
             {videos.map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
@@ -103,6 +116,20 @@ export default function VideosPage() {
                   <div style={{ display: 'flex', alignItems: 'center', paddingRight: 14 }}>
                     <span style={{ color: '#c0c0d8', fontSize: 18 }}>›</span>
                   </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
+            {videos.map(v => (
+              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)' }}>
+                {v.thumbnail_url
+                  ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎬</div>
+                }
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', padding: '16px 6px 6px' }}>
+                  <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
                 </div>
               </Link>
             ))}
