@@ -105,20 +105,21 @@ export default function DiscoverPage() {
                   <div style={{
                     height: 180, background: v.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative',
+                    cursor: 'pointer',
                   }}>
                     {v.thumbnail_url
-                      ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
                       : <span style={{ fontSize: 48 }}>🎬</span>
                     }
                     <div style={{
                       position: 'absolute', top: 10, left: 10,
-                      background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '4px 10px',
+                      background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '4px 10px', pointerEvents: 'none',
                     }}>
                       <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>
                         {categoryEmoji[v.category]} {categoryLabel[v.category]}
                       </span>
                     </div>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                       <div style={{
                         width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.9)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
