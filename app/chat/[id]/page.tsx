@@ -123,9 +123,9 @@ export default function ChatPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f0f0f8' }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#f0f0f8' }}>
       <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 40,
+        flexShrink: 0, zIndex: 40,
         background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
         borderBottom: '1px solid #e8e8f2', padding: '12px 16px',
         display: 'flex', alignItems: 'center', gap: 12,
@@ -161,7 +161,7 @@ export default function ChatPage() {
         </button>
       </div>
 
-      <div style={{ flex: 1, padding: '76px 16px 90px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', color: '#b0b0cc', fontSize: 13, marginTop: 60 }}>첫 메시지를 보내보세요</div>
         )}
@@ -199,7 +199,7 @@ export default function ChatPage() {
       </div>
 
       <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
+        flexShrink: 0,
         background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
         borderTop: '1px solid #e8e8f2',
         padding: '10px 16px', paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
