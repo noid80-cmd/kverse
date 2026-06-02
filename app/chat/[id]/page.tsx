@@ -22,6 +22,7 @@ export default function ChatPage() {
   const [isVerified, setIsVerified] = useState(false)
   const [agencyName, setAgencyName] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -99,6 +100,12 @@ export default function ChatPage() {
     setSending(false)
   }
 
+  async function deleteMessage(msgId: string) {
+    await supabase.from('messages').delete().eq('id', msgId)
+    setMessages(prev => prev.filter(m => m.id !== msgId))
+    setSelectedMsgId(null)
+  }
+
   async function deleteConversation() {
     if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
     setDeleting(true)
@@ -160,8 +167,10 @@ export default function ChatPage() {
         )}
         {messages.map(msg => {
           const isMine = msg.sender_id === myId
+          const isSelected = selectedMsgId === msg.id
           return (
-            <div key={msg.id} style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
+            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMine ? 'flex-end' : 'flex-start', marginBottom: 8 }}
+              onClick={() => isMine ? setSelectedMsgId(isSelected ? null : msg.id) : setSelectedMsgId(null)}>
               <div style={{
                 maxWidth: '72%', padding: '10px 14px',
                 borderRadius: isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
@@ -169,12 +178,20 @@ export default function ChatPage() {
                 color: isMine ? 'white' : '#1e1b4b',
                 fontSize: 15, lineHeight: 1.5,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                opacity: isSelected ? 0.85 : 1,
+                cursor: isMine ? 'pointer' : 'default',
               }}>
                 {msg.content}
                 <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: isMine ? 'right' : 'left' }}>
                   {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
+              {isSelected && (
+                <button onClick={e => { e.stopPropagation(); deleteMessage(msg.id) }}
+                  style={{ marginTop: 4, fontSize: 12, color: '#ef4444', background: '#fff', border: '1px solid #fca5a5', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 700 }}>
+                  삭제
+                </button>
+              )}
             </div>
           )
         })}
