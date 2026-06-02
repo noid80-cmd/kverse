@@ -30,15 +30,19 @@ export default function ProfileEditPage() {
   const [weight, setWeight] = useState('')
   const [phone, setPhone] = useState('')
   const [skills, setSkills] = useState<string[]>([])
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [userId, setUserId] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      setUserId(user.id)
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       if (data) {
         setName(data.name ?? '')
@@ -49,10 +53,27 @@ export default function ProfileEditPage() {
         setWeight(data.weight?.toString() ?? '')
         setPhone(data.phone ?? '')
         setSkills(data.skills ?? [])
+        setAvatarUrl(data.avatar_url ?? null)
       }
     }
     load()
   }, [])
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+    setAvatarUploading(true)
+
+    const ext = file.name.split('.').pop()
+    const path = `${userId}/avatar.${ext}`
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (uploadError) { setAvatarUploading(false); return }
+
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId)
+    setAvatarUrl(publicUrl + '?t=' + Date.now())
+    setAvatarUploading(false)
+  }
 
   function toggleSkill(s: string) {
     setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
@@ -95,6 +116,34 @@ export default function ProfileEditPage() {
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 24 }}>내 프로필</h1>
+
+        {/* 프로필 사진 */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+          <label style={{ cursor: 'pointer', position: 'relative' }}>
+            <div style={{
+              width: 96, height: 96, borderRadius: 28, overflow: 'hidden',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '3px solid #fff', boxShadow: '0 4px 16px rgba(99,102,241,0.2)',
+            }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ color: 'white', fontWeight: 900, fontSize: 32 }}>{name?.[0] ?? '?'}</span>
+              }
+            </div>
+            <div style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 28, height: 28, borderRadius: '50%',
+              background: '#6366f1', border: '2px solid #fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13,
+            }}>📷</div>
+            <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+          </label>
+          <p style={{ fontSize: 12, color: '#8b8baa', marginTop: 8 }}>
+            {avatarUploading ? '업로드 중...' : '사진 변경'}
+          </p>
+        </div>
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
 
