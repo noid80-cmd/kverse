@@ -32,6 +32,10 @@ export default function AgencyVideoPage() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (profile?.role !== 'agency') { router.replace('/dashboard'); return }
+
       setMyId(user.id)
 
       const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()

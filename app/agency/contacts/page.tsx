@@ -29,6 +29,9 @@ export default function AgencyContactsPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login'; return }
 
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (profile?.role !== 'agency') { window.location.href = '/dashboard'; return }
+
       const { data } = await supabase
         .from('conversations')
         .select('id, created_at, talent:profiles!talent_id(name, avatar_url)')
