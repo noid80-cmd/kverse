@@ -20,6 +20,23 @@ export default function UploadPage() {
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
 
+  async function generateThumbnail(videoFile: File): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      video.src = URL.createObjectURL(videoFile)
+      video.currentTime = 1
+      video.oncanplay = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth || 640
+        canvas.height = video.videoHeight || 360
+        canvas.getContext('2d')?.drawImage(video, 0, 0)
+        canvas.toBlob(blob => { URL.revokeObjectURL(video.src); resolve(blob) }, 'image/jpeg', 0.8)
+      }
+      video.onerror = () => { URL.revokeObjectURL(video.src); resolve(null) }
+    })
+  }
+
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
     if (!file) { setError('영상 파일을 선택해주세요.'); return }
@@ -30,21 +47,36 @@ export default function UploadPage() {
     if (!user) { router.push('/login'); return }
 
     const ext = file.name.split('.').pop()
-    const path = `videos/${user.id}/${Date.now()}.${ext}`
+    const ts = Date.now()
+    const path = `videos/${user.id}/${ts}.${ext}`
 
     setProgress(30)
     const { error: uploadError } = await supabase.storage.from('videos').upload(path, file, { upsert: false })
     if (uploadError) { setError('업로드 실패: ' + uploadError.message); setUploading(false); return }
 
-    setProgress(70)
+    setProgress(60)
     const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(path)
 
+    // 썸네일 자동 생성
+    let thumbnailUrl: string | null = null
+    const thumbBlob = await generateThumbnail(file)
+    if (thumbBlob) {
+      const thumbPath = `thumbnails/${user.id}/${ts}.jpg`
+      const { error: thumbErr } = await supabase.storage.from('videos').upload(thumbPath, thumbBlob)
+      if (!thumbErr) {
+        const { data: { publicUrl: tUrl } } = supabase.storage.from('videos').getPublicUrl(thumbPath)
+        thumbnailUrl = tUrl
+      }
+    }
+
+    setProgress(80)
     const tagArr = tags.split(',').map(t => t.trim()).filter(Boolean)
     const { error: dbError } = await supabase.from('videos').insert({
       talent_id: user.id,
       title: title.trim(),
       description: description.trim() || null,
       video_url: publicUrl,
+      thumbnail_url: thumbnailUrl,
       category,
       tags: tagArr,
       status: 'active',
