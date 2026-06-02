@@ -31,6 +31,7 @@ export default function ReactionsPage() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [verifiedIds, setVerifiedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'contacts' | 'bookmarks'>('contacts')
+  const [loaded, setLoaded] = useState(false)
 
   async function deleteConv(convId: string) {
     if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
@@ -66,6 +67,7 @@ export default function ReactionsPage() {
 
       setConvs(list)
       setBookmarks((b as unknown as Bookmark[]) ?? [])
+      setLoaded(true)
 
       if (list.length > 0) {
         const profileIds = list.map(c => c.agency_member_id)
@@ -85,6 +87,8 @@ export default function ReactionsPage() {
     }
     load()
   }, [])
+
+  if (!loaded) return <div style={{ minHeight: '100vh', background: '#f0f0f8' }} />
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>

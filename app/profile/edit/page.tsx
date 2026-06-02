@@ -37,6 +37,7 @@ export default function ProfileEditPage() {
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [userId, setUserId] = useState('')
+  const [loaded, setLoaded] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function ProfileEditPage() {
         setSkills(data.skills ?? [])
         setAvatarUrl(data.avatar_url ?? null)
       }
+      setLoaded(true)
     }
     load()
   }, [])
@@ -113,6 +115,8 @@ export default function ProfileEditPage() {
     await supabase.auth.signOut()
     window.location.href = '/login'
   }
+
+  if (!loaded) return <div style={{ minHeight: '100vh', background: '#f0f0f8' }} />
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
