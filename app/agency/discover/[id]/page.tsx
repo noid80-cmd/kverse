@@ -25,10 +25,7 @@ export default function AgencyVideoPage() {
   const [bookmarked, setBookmarked] = useState(false)
   const [myId, setMyId] = useState('')
   const [myAgencyId, setMyAgencyId] = useState('')
-  const [contactMsg, setContactMsg] = useState('')
-  const [showContact, setShowContact] = useState(false)
-  const [sending, setSending] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [starting, setStarting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -66,19 +63,18 @@ export default function AgencyVideoPage() {
     setBookmarked(b => !b)
   }
 
-  async function handleContact() {
-    if (!contactMsg.trim() || !video?.talent) return
-    if (!myAgencyId) { alert('기획사 정보를 불러오는 중이에요. 페이지를 새로고침 해주세요.'); return }
-    setSending(true)
-    const { error } = await supabase.from('contacts').insert({
-      agency_id: myAgencyId, sender_id: myId, talent_id: video.talent.id, message: contactMsg.trim(),
-    })
-    if (error) { alert('전송에 실패했어요. 다시 시도해주세요.'); setSending(false); return }
-    await supabase.from('notifications').insert({
-      user_id: video.talent.id, type: 'contact',
-      title: '기획사에서 연락이 왔어요', body: contactMsg.trim().substring(0, 80), link: '/reactions',
-    })
-    setSending(false); setSent(true); setShowContact(false); setContactMsg('')
+  async function handleStartChat() {
+    if (!video?.talent) return
+    setStarting(true)
+    const { data: existing } = await supabase
+      .from('conversations').select('id')
+      .eq('agency_member_id', myId).eq('talent_id', video.talent.id).single()
+    if (existing) { router.push(`/chat/${existing.id}`); return }
+    const { data: newConv } = await supabase
+      .from('conversations').insert({ agency_member_id: myId, talent_id: video.talent.id })
+      .select('id').single()
+    if (newConv) router.push(`/chat/${newConv.id}`)
+    else { alert('채팅을 시작할 수 없어요.'); setStarting(false) }
   }
 
   function getAge(birth: string | null) {
@@ -169,48 +165,14 @@ export default function AgencyVideoPage() {
             </div>
           )}
 
-          {/* 연락 성공 메시지 */}
-          {sent && (
-            <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 16, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 20 }}>✅</span>
-              <span style={{ fontWeight: 700, color: '#16a34a', fontSize: 14 }}>연락이 전송됐어요</span>
-            </div>
-          )}
-
-          {/* 연락 버튼 */}
-          {!sent && (
-            <button onClick={() => setShowContact(true)}
-              className="w-full py-4 rounded-2xl text-white transition active:scale-95"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
-              💌 연락하기
-            </button>
-          )}
+          <button onClick={handleStartChat} disabled={starting}
+            className="w-full py-4 rounded-2xl text-white transition active:scale-95"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)', opacity: starting ? 0.7 : 1 }}>
+            {starting ? '연결 중...' : '💬 채팅하기'}
+          </button>
         </div>
       </div>
 
-      {/* 연락 모달 */}
-      {showContact && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', background: 'rgba(30,27,75,0.3)', backdropFilter: 'blur(6px)' }}
-          onClick={e => { if (e.target === e.currentTarget) setShowContact(false) }}>
-          <div style={{ background: '#fff', borderRadius: '24px 24px 0 0', padding: 24, width: '100%', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
-            <h3 style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 18, marginBottom: 6 }}>연락 보내기</h3>
-            <p style={{ fontSize: 13, color: '#8b8baa', marginBottom: 16 }}>{t?.name}님에게 연락이 전달돼요</p>
-            <textarea value={contactMsg} onChange={e => setContactMsg(e.target.value)}
-              placeholder="안녕하세요. 영상을 인상 깊게 봤습니다..." rows={5}
-              style={{ width: '100%', background: '#f8f7ff', border: '1px solid #e0e0f0', borderRadius: 16, padding: '14px 16px', fontSize: 15, color: '#1e1b4b', resize: 'none', marginBottom: 14, outline: 'none', fontFamily: 'inherit' }} />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setShowContact(false)}
-                style={{ flex: 1, padding: '14px', borderRadius: 14, border: '1px solid #e0e0f0', background: 'none', color: '#8b8baa', fontWeight: 700, fontSize: 15 }}>
-                취소
-              </button>
-              <button onClick={handleContact} disabled={sending || !contactMsg.trim()}
-                style={{ flex: 2, padding: '14px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 15, opacity: (!contactMsg.trim() || sending) ? 0.5 : 1 }}>
-                {sending ? '전송 중...' : '전송'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <AgencyNav />
     </>
