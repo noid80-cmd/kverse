@@ -32,7 +32,7 @@ export default function VideosPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login'; return }
       const { data } = await supabase.from('videos').select('id, title, thumbnail_url, view_count, status, created_at, category')
-        .eq('talent_id', user.id).order('created_at', { ascending: false })
+        .eq('talent_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false })
       setVideos(data ?? [])
       setLoading(false)
     }

@@ -52,7 +52,7 @@ export default function VideoDetailPage() {
 
   async function handleDelete() {
     if (!confirm('영상을 삭제할까요?')) return
-    await supabase.from('videos').update({ status: 'deleted' }).eq('id', id)
+    await supabase.from('videos').delete().eq('id', id)
     router.push('/videos')
   }
 
