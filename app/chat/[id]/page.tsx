@@ -96,6 +96,13 @@ export default function ChatPage() {
       setMessages(prev => prev.filter(m => m.id !== tempId))
       setInput(content)
       alert('전송 실패: ' + error.message)
+    } else if (conv) {
+      const recipientId = myId === conv.talent_id ? conv.agency_member_id : conv.talent_id
+      const senderName = myId === conv.talent_id
+        ? (conv.talent?.name ?? '지망생')
+        : (agencyName || conv.agency_member?.name || '기획사')
+      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` }) })
     }
     setSending(false)
   }

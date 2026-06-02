@@ -88,6 +88,18 @@ export default function UploadPage() {
     setProgress(100)
     if (dbError) { setError('저장 실패: ' + dbError.message); setUploading(false); return }
 
+    // 관심 등록한 기획사들에게 푸시 알림
+    const { data: bms } = await supabase.from('bookmarks').select('agency_member_id').eq('talent_id', user.id)
+    if (bms && bms.length > 0) {
+      const { data: prof } = await supabase.from('profiles').select('name').eq('id', user.id).single()
+      const talentName = prof?.name ?? '지망생'
+      const uniqueIds = [...new Set(bms.map(b => b.agency_member_id).filter(Boolean))]
+      uniqueIds.forEach(agencyMemberId => {
+        fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: agencyMemberId, title: `🎬 ${talentName}`, body: `새 영상을 올렸어요: ${title.trim()}`, url: '/agency/discover' }) })
+      })
+    }
+
     router.push('/videos')
   }
 

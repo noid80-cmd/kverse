@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 
 const talentNav = [
@@ -43,6 +44,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+      <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         {/* 헤더 */}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
+import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 
 const categoryLabel: Record<string, string> = {
@@ -105,6 +106,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+      <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
