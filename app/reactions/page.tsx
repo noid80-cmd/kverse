@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import Link from 'next/link'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: '🏠' },
@@ -111,15 +112,17 @@ export default function ReactionsPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {bookmarks.map(b => (
-                <div key={b.id} style={{ background: '#fff', borderRadius: 18, padding: '16px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>
-                    <span style={{ fontSize: 16 }}>⭐</span>
-                    <span style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
-                    <span style={{ fontSize: 12, color: '#8b8baa', marginLeft: 'auto' }}>{new Date(b.created_at).toLocaleDateString('ko-KR')}</span>
+                <Link key={b.id} href={b.video ? `/videos/${b.video.id}` : '#'} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: '#fff', borderRadius: 18, padding: '16px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>
+                      <span style={{ fontSize: 16 }}>⭐</span>
+                      <span style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
+                      <span style={{ fontSize: 12, color: '#8b8baa', marginLeft: 'auto' }}>{new Date(b.created_at).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                    {b.video && <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 600 }}>🎬 {b.video.title}</div>}
+                    {b.note && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 6, fontStyle: 'italic' }}>{b.note}</div>}
                   </div>
-                  {b.video && <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 600 }}>🎬 {b.video.title}</div>}
-                  {b.note && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 6, fontStyle: 'italic' }}>{b.note}</div>}
-                </div>
+                </Link>
               ))}
             </div>
           )
