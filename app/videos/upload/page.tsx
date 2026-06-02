@@ -33,11 +33,11 @@ export default function UploadPage() {
     const path = `videos/${user.id}/${Date.now()}.${ext}`
 
     setProgress(30)
-    const { error: uploadError } = await supabase.storage.from('kverse').upload(path, file, { upsert: false })
+    const { error: uploadError } = await supabase.storage.from('videos').upload(path, file, { upsert: false })
     if (uploadError) { setError('업로드 실패: ' + uploadError.message); setUploading(false); return }
 
     setProgress(70)
-    const { data: { publicUrl } } = supabase.storage.from('kverse').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(path)
 
     const tagArr = tags.split(',').map(t => t.trim()).filter(Boolean)
     const { error: dbError } = await supabase.from('videos').insert({
