@@ -53,11 +53,20 @@ export default function ChatPage() {
 
     const channel = supabase.channel(`chat:${id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
-        (payload) => setMessages(prev => [...prev, payload.new as Message])
+        (payload) => {
+          const msg = payload.new as Message
+          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
+        }
       )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    const poll = setInterval(async () => {
+      const { data } = await supabase.from('messages').select('id, content, sender_id, created_at, is_read')
+        .eq('conversation_id', id).order('created_at', { ascending: true })
+      if (data) setMessages(data)
+    }, 3000)
+
+    return () => { supabase.removeChannel(channel); clearInterval(poll) }
   }, [id])
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
