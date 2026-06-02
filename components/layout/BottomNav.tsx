@@ -21,7 +21,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
             style={{
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
               justifyContent: 'center', padding: '10px 0', gap: 3, textDecoration: 'none',
-              color: active ? '#6366f1' : '#b0b0cc', transition: 'color 0.15s',
+              outline: 'none', color: active ? '#6366f1' : '#b0b0cc', transition: 'color 0.15s',
             }}>
             <span style={{ fontSize: 22 }}>{item.icon}</span>
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500 }}>{item.label}</span>
