@@ -15,7 +15,7 @@ export default function ChatPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [conv, setConv] = useState<Conversation | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[] | null>(null)
   const [input, setInput] = useState('')
   const [myId, setMyId] = useState('')
   const [sending, setSending] = useState(false)
@@ -169,10 +169,10 @@ export default function ChatPage() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
-        {messages.length === 0 && (
+        {messages !== null && messages.length === 0 && (
           <div style={{ textAlign: 'center', color: '#b0b0cc', fontSize: 13, marginTop: 60 }}>첫 메시지를 보내보세요</div>
         )}
-        {messages.map(msg => {
+        {(messages ?? []).map(msg => {
           const isMine = msg.sender_id === myId
           const isSelected = selectedMsgId === msg.id
           return (
