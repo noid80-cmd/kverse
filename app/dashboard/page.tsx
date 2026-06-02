@@ -20,7 +20,8 @@ type Stats = { videos: number; bookmarks: number; contacts: number }
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [stats, setStats] = useState<Stats>({ videos: 0, bookmarks: 0, contacts: 0 })
-  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }[] | null>(null)
+  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }[]>([])
+  const [loaded, setLoaded] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -38,9 +39,16 @@ export default function DashboardPage() {
       setProfile(prof)
       setStats({ videos: vCount ?? 0, bookmarks: bCount ?? 0, contacts: cCount ?? 0 })
       setRecentVideos(vids ?? [])
+      setLoaded(true)
     }
     load()
   }, [])
+
+  if (!loaded) return (
+    <div style={{ minHeight: '100vh', background: '#f0f0f8' }}>
+      <PushSubscribe />
+    </div>
+  )
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>

@@ -38,23 +38,21 @@ export default function ChatPage() {
         .eq('id', id)
         .single()
       if (!convData) { router.back(); return }
-      setConv(convData as unknown as Conversation)
 
-      const { data: am } = await supabase
-        .from('agency_members').select('agency_id')
-        .eq('profile_id', (convData as unknown as Conversation).agency_member_id).single()
+      const conv = convData as unknown as Conversation
+      const [{ data: am }, { data: msgs }] = await Promise.all([
+        supabase.from('agency_members').select('agency_id').eq('profile_id', conv.agency_member_id).single(),
+        supabase.from('messages').select('id, content, sender_id, created_at, is_read').eq('conversation_id', id).order('created_at', { ascending: true }),
+      ])
+
       if (am?.agency_id) {
         const { data: ag } = await supabase
           .from('agencies').select('name, is_verified').eq('id', am.agency_id).single()
         if (ag) { setIsVerified(ag.is_verified); setAgencyName(ag.name) }
       }
 
-      const { data: msgs } = await supabase
-        .from('messages')
-        .select('id, content, sender_id, created_at, is_read')
-        .eq('conversation_id', id)
-        .order('created_at', { ascending: true })
       setMessages(msgs ?? [])
+      setConv(conv)
 
       await supabase.from('messages')
         .update({ is_read: true })
