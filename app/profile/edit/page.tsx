@@ -32,6 +32,7 @@ export default function ProfileEditPage() {
   const [skills, setSkills] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -60,10 +61,11 @@ export default function ProfileEditPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
+    setSaveError('')
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    await supabase.from('profiles').update({
+    const { error } = await supabase.from('profiles').update({
       name: name.trim(),
       bio: bio.trim() || null,
       birth_date: birthDate || null,
@@ -75,8 +77,12 @@ export default function ProfileEditPage() {
     }).eq('id', user.id)
 
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    if (error) {
+      setSaveError('저장 실패: ' + error.message)
+    } else {
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    }
   }
 
   async function handleLogout() {
@@ -142,6 +148,8 @@ export default function ProfileEditPage() {
               placeholder="기획사 담당자에게 나를 소개해보세요" rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
           </div>
+
+          {saveError && <p style={{ color: '#ef4444', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
 
           <button type="submit" disabled={saving}
             className="w-full py-4 rounded-2xl text-white disabled:opacity-50 transition active:scale-95"
