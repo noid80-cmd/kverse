@@ -67,18 +67,15 @@ export default function AgencyTalentsPage() {
           <div className="flex flex-col gap-3">
             {bookmarks.map(b => (
               <div key={b.id} style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                <Link href={`/agency/discover/${b.video?.id}`} style={{ display: 'flex', alignItems: 'stretch', textDecoration: 'none' }}>
-                  <div style={{
-                    width: 90, flexShrink: 0, background: b.video?.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                  }}>
+                <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                  <Link href={`/agency/discover/${b.video?.id}`} style={{ width: 90, flexShrink: 0, textDecoration: 'none', background: b.video?.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {b.video?.thumbnail_url
                       ? <img src={b.video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <span style={{ fontSize: 24 }}>🎬</span>
                     }
-                  </div>
+                  </Link>
                   <div style={{ flex: 1, padding: '14px 14px 14px 16px', minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <Link href={`/agency/talents/${b.talent?.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <div style={{
                         width: 28, height: 28, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
                         background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -90,15 +87,18 @@ export default function AgencyTalentsPage() {
                         }
                       </div>
                       <span style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{b.talent?.name}</span>
+                      <span style={{ fontSize: 11, color: '#6366f1', marginLeft: 2 }}>프로필 →</span>
                       {b.video?.category && (
                         <span style={{ fontSize: 11, background: '#f0f0f8', color: '#6366f1', padding: '2px 7px', borderRadius: 6, fontWeight: 600, marginLeft: 'auto' }}>
                           {categoryLabel[b.video.category]}
                         </span>
                       )}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#4b5563', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 4 }}>
-                      {b.video?.title ?? '영상'}
-                    </div>
+                    </Link>
+                    <Link href={`/agency/discover/${b.video?.id}`} style={{ textDecoration: 'none' }}>
+                      <div style={{ fontSize: 13, color: '#4b5563', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 4 }}>
+                        {b.video?.title ?? '영상'}
+                      </div>
+                    </Link>
                     {b.talent?.skills && b.talent.skills.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                         {b.talent.skills.slice(0, 3).map(s => (
@@ -107,7 +107,7 @@ export default function AgencyTalentsPage() {
                       </div>
                     )}
                   </div>
-                </Link>
+                </div>
                 <div style={{ borderTop: '1px solid #f0f0f8', padding: '10px 16px', display: 'flex', justifyContent: 'flex-end' }}>
                   <button onClick={() => removeBookmark(b.id)}
                     style={{ fontSize: 12, color: '#b0b0cc', background: 'none', border: 'none', fontWeight: 600 }}>
