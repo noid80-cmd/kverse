@@ -91,7 +91,7 @@ export default function ChatPage() {
     setMessages(prev => [...(prev ?? []), { id: tempId, content, sender_id: myId, created_at: new Date().toISOString(), is_read: false }])
     const { error } = await supabase.from('messages').insert({ conversation_id: id, sender_id: myId, content })
     if (error) {
-      setMessages(prev => prev.filter(m => m.id !== tempId))
+      setMessages(prev => (prev ?? []).filter(m => m.id !== tempId))
       setInput(content)
       alert('전송 실패: ' + error.message)
     } else if (conv) {
@@ -107,7 +107,7 @@ export default function ChatPage() {
 
   async function deleteMessage(msgId: string) {
     await supabase.from('messages').delete().eq('id', msgId)
-    setMessages(prev => prev.filter(m => m.id !== msgId))
+    setMessages(prev => (prev ?? []).filter(m => m.id !== msgId))
     setSelectedMsgId(null)
   }
 
