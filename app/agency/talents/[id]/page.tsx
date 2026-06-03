@@ -28,7 +28,7 @@ export default function TalentProfilePage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { router.push('/login'); return }
 
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()

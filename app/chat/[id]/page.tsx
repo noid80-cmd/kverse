@@ -28,7 +28,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { router.push('/login'); return }
       setMyId(user.id)
 
@@ -66,7 +66,7 @@ export default function ChatPage() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
         (payload) => {
           const msg = payload.new as Message
-          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
+          setMessages(prev => (prev ?? []).some(m => m.id === msg.id) ? prev : [...(prev ?? []), msg])
         }
       )
       .subscribe()
@@ -88,7 +88,7 @@ export default function ChatPage() {
     const content = input.trim()
     setInput('')
     const tempId = `temp-${Date.now()}`
-    setMessages(prev => [...prev, { id: tempId, content, sender_id: myId, created_at: new Date().toISOString(), is_read: false }])
+    setMessages(prev => [...(prev ?? []), { id: tempId, content, sender_id: myId, created_at: new Date().toISOString(), is_read: false }])
     const { error } = await supabase.from('messages').insert({ conversation_id: id, sender_id: myId, content })
     if (error) {
       setMessages(prev => prev.filter(m => m.id !== tempId))

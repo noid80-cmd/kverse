@@ -23,7 +23,7 @@ export default function AgencyTalentsPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
       setMyId(user.id)
 

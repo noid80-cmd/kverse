@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
 
       const [{ data: prof }, { count: vCount }, { count: bCount }, { count: cCount }, { data: vids }] = await Promise.all([

@@ -24,7 +24,7 @@ export default function AdminAgenciesPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
 
       const { data } = await supabase.from('agencies').select('*').order('created_at', { ascending: false })

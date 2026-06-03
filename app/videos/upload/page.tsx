@@ -46,7 +46,7 @@ export default function UploadPage() {
     setError(''); setUploading(true); setProgress(10)
 
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) { router.push('/login'); return }
 
     const ext = file.name.split('.').pop()

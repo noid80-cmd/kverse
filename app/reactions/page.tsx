@@ -44,7 +44,7 @@ export default function ReactionsPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
 
       const [{ data: convData }, { data: b }] = await Promise.all([

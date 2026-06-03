@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
       const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }

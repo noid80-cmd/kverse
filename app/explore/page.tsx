@@ -38,7 +38,7 @@ export default function ExplorePage() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) { window.location.href = '/login'; return }
     setMyId(user.id)
 

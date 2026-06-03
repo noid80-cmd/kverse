@@ -36,7 +36,7 @@ export default function VideoDetailPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       const { data: v } = await supabase.from('videos').select('*').eq('id', id).single()
       if (!v) { router.push('/videos'); return }
       setVideo(v)

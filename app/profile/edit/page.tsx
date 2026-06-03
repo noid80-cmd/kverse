@@ -42,7 +42,7 @@ export default function ProfileEditPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
@@ -87,7 +87,7 @@ export default function ProfileEditPage() {
     e.preventDefault()
     setSaving(true)
     setSaveError('')
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) return
 
     const { error } = await supabase.from('profiles').update({
