@@ -72,7 +72,7 @@ export default function UploadPage() {
     const res = await fetch('/api/r2-upload-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/mp4' }),
+      body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/mp4', fileSize: file.size }),
     })
     if (!res.ok) { setError('업로드 준비 실패'); setUploading(false); return }
     const { url: videoPresignedUrl, publicUrl: videoPublicUrl } = await res.json()

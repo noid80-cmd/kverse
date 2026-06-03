@@ -17,12 +17,17 @@ export async function POST(req: NextRequest) {
   const user = (await supabase.auth.getSession()).data.session?.user
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  const { filename, contentType } = await req.json()
+  const { filename, contentType, fileSize } = await req.json()
   const key = `videos/${user.id}/${Date.now()}_${filename}`
 
   const url = await getSignedUrl(
     r2,
-    new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME!, Key: key, ContentType: contentType }),
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: key,
+      ContentType: contentType,
+      ...(fileSize ? { ContentLength: fileSize } : {}),
+    }),
     { expiresIn: 3600 }
   )
 
