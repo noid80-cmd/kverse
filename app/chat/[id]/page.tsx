@@ -112,10 +112,12 @@ export default function ChatPage() {
   }
 
   async function deleteConversation() {
-    if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
+    if (!confirm('내 채팅 목록에서 삭제할까요?')) return
     setDeleting(true)
-    await supabase.from('messages').delete().eq('conversation_id', id)
-    await supabase.from('conversations').delete().eq('id', id)
+    const isAgency = conv && myId === conv.agency_member_id
+    await supabase.from('conversations')
+      .update(isAgency ? { deleted_by_agency: true } : { deleted_by_talent: true })
+      .eq('id', id)
     router.back()
   }
 

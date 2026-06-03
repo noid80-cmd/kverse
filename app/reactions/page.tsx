@@ -38,9 +38,8 @@ export default function ReactionsPage() {
   const supabase = createClient()
 
   async function deleteConv(convId: string) {
-    if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
-    await supabase.from('messages').delete().eq('conversation_id', convId)
-    await supabase.from('conversations').delete().eq('id', convId)
+    if (!confirm('내 채팅 목록에서 삭제할까요?')) return
+    await supabase.from('conversations').update({ deleted_by_talent: true }).eq('id', convId)
     setPageData(prev => prev ? { ...prev, convs: prev.convs.filter(c => c.id !== convId) } : prev)
   }
 
@@ -52,7 +51,7 @@ export default function ReactionsPage() {
       const [{ data: convData }, { data: b }] = await Promise.all([
         supabase.from('conversations')
           .select('id, created_at, agency_member_id, agency_member:profiles!agency_member_id(name, avatar_url)')
-          .eq('talent_id', user.id).order('created_at', { ascending: false }),
+          .eq('talent_id', user.id).eq('deleted_by_talent', false).order('created_at', { ascending: false }),
         supabase.from('bookmarks').select('id, created_at, note, video:videos(id, title), agency_member:profiles!agency_member_id(name)')
           .eq('talent_id', user.id).order('created_at', { ascending: false }),
       ])

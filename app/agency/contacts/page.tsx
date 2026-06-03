@@ -18,9 +18,8 @@ export default function AgencyContactsPage() {
   const supabase = createClient()
 
   async function deleteConv(convId: string) {
-    if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
-    await supabase.from('messages').delete().eq('conversation_id', convId)
-    await supabase.from('conversations').delete().eq('id', convId)
+    if (!confirm('내 채팅 목록에서 삭제할까요?')) return
+    await supabase.from('conversations').update({ deleted_by_agency: true }).eq('id', convId)
     setConvs(prev => prev.filter(c => c.id !== convId))
   }
 
@@ -35,7 +34,7 @@ export default function AgencyContactsPage() {
       const { data } = await supabase
         .from('conversations')
         .select('id, created_at, talent:profiles!talent_id(name, avatar_url)')
-        .eq('agency_member_id', user.id)
+        .eq('agency_member_id', user.id).eq('deleted_by_agency', false)
         .order('created_at', { ascending: false })
 
       const list = (data as unknown as Conversation[]) ?? []
