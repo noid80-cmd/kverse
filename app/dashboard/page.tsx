@@ -33,7 +33,7 @@ export default function DashboardPage() {
         supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single(),
         supabase.from('videos').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('status', 'active'),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
-        supabase.from('contacts').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
+        supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, created_at').eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(3),
       ])
       setProfile(prof)
@@ -45,8 +45,10 @@ export default function DashboardPage() {
   }, [])
 
   if (!loaded) return (
-    <div style={{ minHeight: '100vh', background: '#f0f0f8' }}>
+    <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <PushSubscribe />
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
