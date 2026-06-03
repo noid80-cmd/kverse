@@ -2,12 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   S3Client,
   CreateMultipartUploadCommand,
-  UploadPartCommand,
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
   ListPartsCommand,
 } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 
 const r2 = new S3Client({
@@ -27,9 +25,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { action } = body
 
-  // 멀티파트 생성 + 모든 파트 presigned URL 한번에 반환
+  // 멀티파트 생성
   if (action === 'create') {
-    const { filename, contentType, totalParts } = body
+    const { filename, contentType } = body
     const key = `videos/${user.id}/${Date.now()}_${filename}`
 
     const result = await r2.send(new CreateMultipartUploadCommand({
@@ -39,19 +37,8 @@ export async function POST(req: NextRequest) {
     }))
     const uploadId = result.UploadId!
 
-    const partUrls = await Promise.all(
-      Array.from({ length: totalParts }, (_, i) =>
-        getSignedUrl(r2, new UploadPartCommand({
-          Bucket: process.env.R2_BUCKET_NAME!,
-          Key: key,
-          UploadId: uploadId,
-          PartNumber: i + 1,
-        }), { expiresIn: 3600 })
-      )
-    )
-
     const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
-    return NextResponse.json({ uploadId, key, publicUrl, partUrls })
+    return NextResponse.json({ uploadId, key, publicUrl })
   }
 
   // 서버에서 ListParts로 ETag 수집 후 완료 (클라이언트 ETag 불필요)
