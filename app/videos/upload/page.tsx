@@ -65,7 +65,11 @@ export default function UploadPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'create', filename: videoFile.name, contentType }),
     })
-    if (!createRes.ok) { setError('업로드 준비 실패'); return null }
+    if (!createRes.ok) {
+      const err = await createRes.json().catch(() => ({}))
+      setError('업로드 준비 실패: ' + (err.error ?? `HTTP ${createRes.status}`))
+      return null
+    }
     const { uploadId, key, publicUrl } = await createRes.json()
 
     // 2) 파트별 업로드 (Vercel API 프록시 경유)

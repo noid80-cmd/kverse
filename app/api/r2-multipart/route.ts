@@ -30,15 +30,19 @@ export async function POST(req: NextRequest) {
     const { filename, contentType } = body
     const key = `videos/${user.id}/${Date.now()}_${filename}`
 
-    const result = await r2.send(new CreateMultipartUploadCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      Key: key,
-      ContentType: contentType,
-    }))
-    const uploadId = result.UploadId!
-
-    const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
-    return NextResponse.json({ uploadId, key, publicUrl })
+    try {
+      const result = await r2.send(new CreateMultipartUploadCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: key,
+        ContentType: contentType,
+      }))
+      const uploadId = result.UploadId!
+      const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
+      return NextResponse.json({ uploadId, key, publicUrl })
+    } catch (err: any) {
+      console.error('CreateMultipartUpload failed:', err.message, err.Code ?? err.name)
+      return NextResponse.json({ error: err.message, code: err.Code ?? err.name }, { status: 500 })
+    }
   }
 
   // 서버에서 ListParts로 ETag 수집 후 완료 (클라이언트 ETag 불필요)
