@@ -15,13 +15,24 @@ const talentNav = [
 ]
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
-type Stats = { videos: number; bookmarks: number; contacts: number }
+type RecentVideo = { id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }
+type PageData = {
+  profile: Profile | null
+  videos: number
+  bookmarks: number
+  contacts: number
+  recentVideos: RecentVideo[]
+}
+
+const spinner = (
+  <>
+    <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+  </>
+)
 
 export default function DashboardPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [stats, setStats] = useState<Stats>({ videos: 0, bookmarks: 0, contacts: 0 })
-  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }[]>([])
-  const [loaded, setLoaded] = useState(false)
+  const [data, setData] = useState<PageData | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -36,28 +47,32 @@ export default function DashboardPage() {
         supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, created_at').eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(3),
       ])
-      setProfile(prof)
-      setStats({ videos: vCount ?? 0, bookmarks: bCount ?? 0, contacts: cCount ?? 0 })
-      setRecentVideos(vids ?? [])
-      setLoaded(true)
+
+      setData({
+        profile: prof,
+        videos: vCount ?? 0,
+        bookmarks: bCount ?? 0,
+        contacts: cCount ?? 0,
+        recentVideos: (vids ?? []) as RecentVideo[],
+      })
     }
     load()
   }, [])
 
-  if (!loaded) return (
+  if (!data) return (
     <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <PushSubscribe />
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      {spinner}
     </div>
   )
+
+  const { profile, videos, bookmarks, contacts, recentVideos } = data
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
       <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <p style={{ fontSize: 13, color: '#8b8baa', fontWeight: 500, marginBottom: 2 }}>안녕하세요 👋</p>
@@ -76,12 +91,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 통계 카드 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 28 }}>
           {[
-            { label: '영상', value: stats.videos, icon: '🎬', href: '/videos' },
-            { label: '관심', value: stats.bookmarks, icon: '⭐', href: '/reactions?tab=bookmarks' },
-            { label: '채팅', value: stats.contacts, icon: '💬', href: '/reactions' },
+            { label: '영상', value: videos, icon: '🎬', href: '/videos' },
+            { label: '관심', value: bookmarks, icon: '⭐', href: '/reactions?tab=bookmarks' },
+            { label: '채팅', value: contacts, icon: '💬', href: '/reactions' },
           ].map(s => (
             <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
               <div style={{
@@ -97,7 +111,6 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* 프로필 완성 유도 */}
         {!profile?.bio && (
           <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
             <div style={{
@@ -113,13 +126,12 @@ export default function DashboardPage() {
           </Link>
         )}
 
-        {/* 최근 영상 */}
         <div className="flex items-center justify-between mb-4">
           <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1e1b4b' }}>최근 업로드</h2>
           <Link href="/videos" style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
         </div>
 
-        {recentVideos === null ? null : recentVideos.length === 0 ? (
+        {recentVideos.length === 0 ? (
           <Link href="/videos/upload" style={{ textDecoration: 'none' }}>
             <div style={{
               background: '#fff', borderRadius: 20, padding: 32, textAlign: 'center',

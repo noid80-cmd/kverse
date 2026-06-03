@@ -27,20 +27,18 @@ type Bookmark = {
 }
 
 export default function ReactionsPage() {
-  const [convs, setConvs] = useState<Conversation[]>([])
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
+  const [pageData, setPageData] = useState<{ convs: Conversation[]; bookmarks: Bookmark[] } | null>(null)
   const [verifiedIds, setVerifiedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'contacts' | 'bookmarks'>('contacts')
-  const [loaded, setLoaded] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
 
   async function deleteConv(convId: string) {
     if (!confirm('대화를 삭제하면 모든 메시지가 사라져요. 삭제할까요?')) return
     await supabase.from('messages').delete().eq('conversation_id', convId)
     await supabase.from('conversations').delete().eq('id', convId)
-    setConvs(prev => prev.filter(c => c.id !== convId))
+    setPageData(prev => prev ? { ...prev, convs: prev.convs.filter(c => c.id !== convId) } : prev)
   }
-  const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     async function load() {
@@ -65,9 +63,7 @@ export default function ReactionsPage() {
         list.forEach(c => { c.lastMessage = lastMap[c.id] })
       }
 
-      setConvs(list)
-      setBookmarks((b as unknown as Bookmark[]) ?? [])
-      setLoaded(true)
+      setPageData({ convs: list, bookmarks: (b as unknown as Bookmark[]) ?? [] })
 
       if (list.length > 0) {
         const profileIds = list.map(c => c.agency_member_id)
@@ -88,12 +84,14 @@ export default function ReactionsPage() {
     load()
   }, [])
 
-  if (!loaded) return (
+  if (!pageData) return (
     <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
+
+  const { convs, bookmarks } = pageData
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
