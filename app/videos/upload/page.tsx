@@ -41,7 +41,7 @@ export default function UploadPage() {
     })
   }
 
-  async function uploadToR2(presignedUrl: string, fileToUpload: File | Blob, contentType: string): Promise<boolean> {
+  async function uploadToR2(presignedUrl: string, fileToUpload: File | Blob, contentType: string): Promise<string | null> {
     return new Promise((resolve) => {
       const xhr = new XMLHttpRequest()
       xhr.open('PUT', presignedUrl)
@@ -49,8 +49,12 @@ export default function UploadPage() {
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 70) + 10)
       }
-      xhr.onload = () => resolve(xhr.status === 200)
-      xhr.onerror = () => resolve(false)
+      xhr.onload = () => {
+        if (xhr.status === 200) { resolve(null); return }
+        const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/)
+        resolve(match ? match[1] : `업로드 실패 (HTTP ${xhr.status})`)
+      }
+      xhr.onerror = () => resolve('네트워크 오류')
       xhr.send(fileToUpload)
     })
   }
@@ -76,8 +80,8 @@ export default function UploadPage() {
     setProgress(10)
 
     // 영상 R2 직접 업로드
-    const videoOk = await uploadToR2(videoPresignedUrl, file, file.type || 'video/mp4')
-    if (!videoOk) { setError('영상 업로드 실패'); setUploading(false); return }
+    const videoErr = await uploadToR2(videoPresignedUrl, file, file.type || 'video/mp4')
+    if (videoErr) { setError('영상 업로드 실패: ' + videoErr); setUploading(false); return }
 
     setProgress(80)
 
@@ -92,8 +96,8 @@ export default function UploadPage() {
       })
       if (thumbRes.ok) {
         const { url: thumbPresignedUrl, publicUrl: thumbPublicUrl } = await thumbRes.json()
-        const thumbOk = await uploadToR2(thumbPresignedUrl, thumbBlob, 'image/jpeg')
-        if (thumbOk) thumbnailUrl = thumbPublicUrl
+        const thumbErr = await uploadToR2(thumbPresignedUrl, thumbBlob, 'image/jpeg')
+        if (!thumbErr) thumbnailUrl = thumbPublicUrl
       }
     }
 
