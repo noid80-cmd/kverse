@@ -72,20 +72,29 @@ export default function UploadPage() {
     }
     const { uploadId, key, publicUrl } = await createRes.json()
 
-    // 2) 파트별 업로드 (Vercel API 프록시 경유)
+    // 2) 파트별 업로드 (Vercel API 프록시 경유, 실패 시 최대 3회 재시도)
     for (let i = 0; i < totalParts; i++) {
       const chunk = videoFile.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-      const formData = new FormData()
-      formData.append('chunk', chunk)
-      formData.append('key', key)
-      formData.append('uploadId', uploadId)
-      formData.append('partNumber', String(i + 1))
+      let lastErr = ''
+      let ok = false
 
-      const partRes = await fetch('/api/r2-upload-part', { method: 'POST', body: formData })
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const formData = new FormData()
+        formData.append('chunk', chunk)
+        formData.append('key', key)
+        formData.append('uploadId', uploadId)
+        formData.append('partNumber', String(i + 1))
 
-      if (!partRes.ok) {
+        const partRes = await fetch('/api/r2-upload-part', { method: 'POST', body: formData })
+        if (partRes.ok) { ok = true; break }
+
         const err = await partRes.json().catch(() => ({}))
-        setError('업로드 실패: ' + (err.error ?? `HTTP ${partRes.status}`))
+        lastErr = err.error ?? `HTTP ${partRes.status}`
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+      }
+
+      if (!ok) {
+        setError('업로드 실패: ' + lastErr)
         fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
         return null
       }
