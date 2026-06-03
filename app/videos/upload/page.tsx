@@ -9,6 +9,9 @@ const inputStyle = {
   borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#1e1b4b',
 }
 
+const MAX_SIZE_MB = 500
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+
 export default function UploadPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
@@ -119,13 +122,23 @@ export default function UploadPage() {
             display: 'block', background: file ? '#ede9fe' : '#fff', border: `2px dashed ${file ? '#6366f1' : '#d8d8ec'}`,
             borderRadius: 20, padding: 32, textAlign: 'center', cursor: 'pointer',
           }}>
-            <input type="file" accept="video/*" onChange={e => setFile(e.target.files?.[0] ?? null)} style={{ display: 'none' }} />
+            <input type="file" accept="video/*" onChange={e => {
+              const f = e.target.files?.[0] ?? null
+              if (f && f.size > MAX_SIZE_BYTES) {
+                setError(`파일 크기가 너무 커요. ${MAX_SIZE_MB}MB 이하로 올려주세요. (선택한 파일: ${(f.size / 1024 / 1024).toFixed(0)}MB)`)
+                setFile(null)
+                e.target.value = ''
+              } else {
+                setError('')
+                setFile(f)
+              }
+            }} style={{ display: 'none' }} />
             <div style={{ fontSize: 36, marginBottom: 10 }}>{file ? '✅' : '🎬'}</div>
             <div style={{ fontWeight: 700, color: file ? '#4f46e5' : '#1e1b4b', fontSize: 15, marginBottom: 4 }}>
               {file ? file.name : '영상 파일 선택'}
             </div>
             <div style={{ fontSize: 12, color: '#8b8baa' }}>
-              {file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : 'MP4, MOV, AVI 등 지원'}
+              {file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : `MP4, MOV, AVI 등 · 최대 ${MAX_SIZE_MB}MB`}
             </div>
           </label>
 
