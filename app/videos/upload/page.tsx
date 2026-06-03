@@ -11,6 +11,7 @@ const inputStyle = {
 
 const MAX_SIZE_MB = 500
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+const CHUNK_SIZE = 10 * 1024 * 1024 // 10MB per part
 
 export default function UploadPage() {
   const router = useRouter()
@@ -41,22 +42,90 @@ export default function UploadPage() {
     })
   }
 
-  async function uploadToR2(presignedUrl: string, fileToUpload: File | Blob, contentType: string): Promise<string | null> {
+  // 소형 파일(썸네일 등) 단순 업로드
+  async function uploadSmall(presignedUrl: string, blob: Blob, contentType: string): Promise<boolean> {
     return new Promise((resolve) => {
       const xhr = new XMLHttpRequest()
       xhr.open('PUT', presignedUrl)
       xhr.setRequestHeader('Content-Type', contentType)
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 70) + 10)
-      }
-      xhr.onload = () => {
-        if (xhr.status === 200) { resolve(null); return }
-        const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/)
-        resolve(match ? match[1] : `업로드 실패 (HTTP ${xhr.status})`)
-      }
-      xhr.onerror = () => resolve('네트워크 오류')
-      xhr.send(fileToUpload)
+      xhr.onload = () => resolve(xhr.status === 200)
+      xhr.onerror = () => resolve(false)
+      xhr.send(blob)
     })
+  }
+
+  // 영상 멀티파트 업로드
+  async function uploadMultipart(videoFile: File): Promise<string | null> {
+    const contentType = videoFile.type || 'video/mp4'
+    const totalParts = Math.ceil(videoFile.size / CHUNK_SIZE)
+
+    // 1) 멀티파트 업로드 생성
+    const createRes = await fetch('/api/r2-multipart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', filename: videoFile.name, contentType }),
+    })
+    if (!createRes.ok) { setError('업로드 준비 실패'); return null }
+    const { uploadId, key, publicUrl } = await createRes.json()
+
+    const parts: { PartNumber: number; ETag: string }[] = []
+
+    // 2) 파트별 업로드
+    for (let i = 0; i < totalParts; i++) {
+      const start = i * CHUNK_SIZE
+      const chunk = videoFile.slice(start, start + CHUNK_SIZE)
+      const partNumber = i + 1
+
+      const signRes = await fetch('/api/r2-multipart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sign-part', key, uploadId, partNumber }),
+      })
+      if (!signRes.ok) {
+        await fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
+        setError('업로드 실패 (파트 서명 오류)')
+        return null
+      }
+      const { url } = await signRes.json()
+
+      const etag = await new Promise<string | null>((resolve) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', url)
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const overall = ((i + e.loaded / e.total) / totalParts) * 70 + 10
+            setProgress(Math.round(overall))
+          }
+        }
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(xhr.getResponseHeader('ETag'))
+          } else {
+            const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/)
+            setError('업로드 실패: ' + (match ? match[1] : `HTTP ${xhr.status}`))
+            resolve(null)
+          }
+        }
+        xhr.onerror = () => { setError('네트워크 오류'); resolve(null) }
+        xhr.send(chunk)
+      })
+
+      if (!etag) {
+        await fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
+        return null
+      }
+      parts.push({ PartNumber: partNumber, ETag: etag })
+    }
+
+    // 3) 완료
+    const completeRes = await fetch('/api/r2-multipart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'complete', key, uploadId, parts }),
+    })
+    if (!completeRes.ok) { setError('업로드 완료 실패'); return null }
+
+    return publicUrl
   }
 
   async function handleUpload(e: React.FormEvent) {
@@ -68,20 +137,11 @@ export default function UploadPage() {
     const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) { router.push('/login'); return }
 
-    // 영상 presigned URL 요청
-    const res = await fetch('/api/r2-upload-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/mp4', fileSize: file.size }),
-    })
-    if (!res.ok) { setError('업로드 준비 실패'); setUploading(false); return }
-    const { url: videoPresignedUrl, publicUrl: videoPublicUrl } = await res.json()
-
     setProgress(10)
 
-    // 영상 R2 직접 업로드
-    const videoErr = await uploadToR2(videoPresignedUrl, file, file.type || 'video/mp4')
-    if (videoErr) { setError('영상 업로드 실패: ' + videoErr); setUploading(false); return }
+    // 영상 멀티파트 업로드
+    const videoPublicUrl = await uploadMultipart(file)
+    if (!videoPublicUrl) { setUploading(false); return }
 
     setProgress(80)
 
@@ -96,8 +156,8 @@ export default function UploadPage() {
       })
       if (thumbRes.ok) {
         const { url: thumbPresignedUrl, publicUrl: thumbPublicUrl } = await thumbRes.json()
-        const thumbErr = await uploadToR2(thumbPresignedUrl, thumbBlob, 'image/jpeg')
-        if (!thumbErr) thumbnailUrl = thumbPublicUrl
+        const ok = await uploadSmall(thumbPresignedUrl, thumbBlob, 'image/jpeg')
+        if (ok) thumbnailUrl = thumbPublicUrl
       }
     }
 
