@@ -24,14 +24,21 @@ export async function POST(req: NextRequest) {
 
   const buffer = Buffer.from(await chunk.arrayBuffer())
 
-  const result = await r2.send(new UploadPartCommand({
-    Bucket: process.env.R2_BUCKET_NAME!,
-    Key: key,
-    UploadId: uploadId,
-    PartNumber: partNumber,
-    Body: buffer,
-    ContentLength: buffer.length,
-  }))
-
-  return NextResponse.json({ etag: result.ETag })
+  try {
+    const result = await r2.send(new UploadPartCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+      Body: buffer,
+      ContentLength: buffer.length,
+    }))
+    return NextResponse.json({ etag: result.ETag })
+  } catch (err: any) {
+    console.error('UploadPart failed:', err.message, 'Code:', err.Code ?? err.name, 'Part:', partNumber)
+    return NextResponse.json(
+      { error: `[proxy] ${err.message}`, code: err.Code ?? err.name },
+      { status: 500 }
+    )
+  }
 }
