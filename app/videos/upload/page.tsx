@@ -29,9 +29,7 @@ export default function UploadPage() {
       video.preload = 'metadata'
       video.muted = true
       video.src = URL.createObjectURL(videoFile)
-      video.onloadedmetadata = () => {
-        video.currentTime = Math.min(1, video.duration * 0.1)
-      }
+      video.onloadedmetadata = () => { video.currentTime = Math.min(1, video.duration * 0.1) }
       video.onseeked = () => {
         const canvas = document.createElement('canvas')
         canvas.width = video.videoWidth || 640
@@ -43,45 +41,70 @@ export default function UploadPage() {
     })
   }
 
+  async function uploadToR2(presignedUrl: string, fileToUpload: File | Blob, contentType: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', presignedUrl)
+      xhr.setRequestHeader('Content-Type', contentType)
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 70) + 10)
+      }
+      xhr.onload = () => resolve(xhr.status === 200)
+      xhr.onerror = () => resolve(false)
+      xhr.send(fileToUpload)
+    })
+  }
+
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
     if (!file) { setError('영상 파일을 선택해주세요.'); return }
-    setError(''); setUploading(true); setProgress(10)
+    setError(''); setUploading(true); setProgress(5)
 
     const supabase = createClient()
     const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) { router.push('/login'); return }
 
-    const ext = file.name.split('.').pop()
-    const ts = Date.now()
-    const path = `videos/${user.id}/${ts}.${ext}`
+    // 영상 presigned URL 요청
+    const res = await fetch('/api/r2-upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/mp4' }),
+    })
+    if (!res.ok) { setError('업로드 준비 실패'); setUploading(false); return }
+    const { url: videoPresignedUrl, publicUrl: videoPublicUrl } = await res.json()
 
-    setProgress(30)
-    const { error: uploadError } = await supabase.storage.from('videos').upload(path, file, { upsert: false })
-    if (uploadError) { setError('업로드 실패: ' + uploadError.message); setUploading(false); return }
+    setProgress(10)
 
-    setProgress(60)
-    const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(path)
+    // 영상 R2 직접 업로드
+    const videoOk = await uploadToR2(videoPresignedUrl, file, file.type || 'video/mp4')
+    if (!videoOk) { setError('영상 업로드 실패'); setUploading(false); return }
 
-    // 썸네일 자동 생성
+    setProgress(80)
+
+    // 썸네일 생성 후 R2 업로드
     let thumbnailUrl: string | null = null
     const thumbBlob = await generateThumbnail(file)
     if (thumbBlob) {
-      const thumbPath = `thumbnails/${user.id}/${ts}.jpg`
-      const { error: thumbErr } = await supabase.storage.from('videos').upload(thumbPath, thumbBlob)
-      if (!thumbErr) {
-        const { data: { publicUrl: tUrl } } = supabase.storage.from('videos').getPublicUrl(thumbPath)
-        thumbnailUrl = tUrl
+      const thumbRes = await fetch('/api/r2-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'thumb.jpg', contentType: 'image/jpeg' }),
+      })
+      if (thumbRes.ok) {
+        const { url: thumbPresignedUrl, publicUrl: thumbPublicUrl } = await thumbRes.json()
+        const thumbOk = await uploadToR2(thumbPresignedUrl, thumbBlob, 'image/jpeg')
+        if (thumbOk) thumbnailUrl = thumbPublicUrl
       }
     }
 
-    setProgress(80)
+    setProgress(90)
+
     const tagArr = tags.split(',').map(t => t.trim()).filter(Boolean)
     const { error: dbError } = await supabase.from('videos').insert({
       talent_id: user.id,
       title: title.trim(),
       description: description.trim() || null,
-      video_url: publicUrl,
+      video_url: videoPublicUrl,
       thumbnail_url: thumbnailUrl,
       category,
       tags: tagArr,
@@ -117,7 +140,6 @@ export default function UploadPage() {
 
         <form onSubmit={handleUpload} className="flex flex-col gap-4">
 
-          {/* 파일 선택 */}
           <label style={{
             display: 'block', background: file ? '#ede9fe' : '#fff', border: `2px dashed ${file ? '#6366f1' : '#d8d8ec'}`,
             borderRadius: 20, padding: 32, textAlign: 'center', cursor: 'pointer',
