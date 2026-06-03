@@ -31,8 +31,12 @@ const spinner = (
   </>
 )
 
+const CACHE_KEY = 'kverse-dashboard'
+
 export default function DashboardPage() {
-  const [data, setData] = useState<PageData | null>(null)
+  const [data, setData] = useState<PageData | null>(() => {
+    try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
+  })
   const supabase = createClient()
 
   useEffect(() => {
@@ -48,13 +52,15 @@ export default function DashboardPage() {
         supabase.from('videos').select('id, title, thumbnail_url, view_count, created_at').eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(3),
       ])
 
-      setData({
+      const fresh: PageData = {
         profile: prof,
         videos: vCount ?? 0,
         bookmarks: bCount ?? 0,
         contacts: cCount ?? 0,
         recentVideos: (vids ?? []) as RecentVideo[],
-      })
+      }
+      setData(fresh)
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
     }
     load()
   }, [])

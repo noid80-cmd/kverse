@@ -22,93 +22,72 @@ const skillOptions = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '
 
 export default function ProfileEditPage() {
   const router = useRouter()
-  const [name, setName] = useState('')
-  const [bio, setBio] = useState('')
-  const [birthDate, setBirthDate] = useState('')
-  const [gender, setGender] = useState('')
-  const [height, setHeight] = useState('')
-  const [weight, setWeight] = useState('')
-  const [phone, setPhone] = useState('')
-  const [nationality, setNationality] = useState('')
-  const [skills, setSkills] = useState<string[]>([])
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; phone: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
+  const [form, setForm] = useState<ProfileForm | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
-  const [userId, setUserId] = useState('')
-  const [loaded, setLoaded] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     async function load() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { router.push('/login'); return }
-      setUserId(user.id)
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      if (data) {
-        setName(data.name ?? '')
-        setBio(data.bio ?? '')
-        setBirthDate(data.birth_date ?? '')
-        setGender(data.gender ?? '')
-        setHeight(data.height?.toString() ?? '')
-        setWeight(data.weight?.toString() ?? '')
-        setPhone(data.phone ?? '')
-        setNationality(data.nationality ?? '')
-        setSkills(data.skills ?? [])
-        setAvatarUrl(data.avatar_url ?? null)
-      }
-      setLoaded(true)
+      setForm({
+        userId: user.id,
+        name: data?.name ?? '',
+        bio: data?.bio ?? '',
+        birthDate: data?.birth_date ?? '',
+        gender: data?.gender ?? '',
+        height: data?.height?.toString() ?? '',
+        weight: data?.weight?.toString() ?? '',
+        phone: data?.phone ?? '',
+        nationality: data?.nationality ?? '',
+        skills: data?.skills ?? [],
+        avatarUrl: data?.avatar_url ?? null,
+      })
     }
     load()
   }, [])
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !userId) return
+    if (!file || !form?.userId) return
     setAvatarUploading(true)
-
     const ext = file.name.split('.').pop()
-    const path = `${userId}/avatar.${ext}`
+    const path = `${form.userId}/avatar.${ext}`
     const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
     if (uploadError) { setAvatarUploading(false); return }
-
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId)
-    setAvatarUrl(publicUrl + '?t=' + Date.now())
+    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId)
+    setForm(f => f ? { ...f, avatarUrl: publicUrl + '?t=' + Date.now() } : f)
     setAvatarUploading(false)
   }
 
   function toggleSkill(s: string) {
-    setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+    setForm(f => f ? { ...f, skills: f.skills.includes(s) ? f.skills.filter(x => x !== s) : [...f.skills, s] } : f)
   }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true)
-    setSaveError('')
-    const user = (await supabase.auth.getSession()).data.session?.user
-    if (!user) return
-
+    if (!form) return
+    setSaving(true); setSaveError('')
     const { error } = await supabase.from('profiles').update({
-      name: name.trim(),
-      bio: bio.trim() || null,
-      birth_date: birthDate || null,
-      gender: gender || null,
-      height: height ? parseInt(height) : null,
-      weight: weight ? parseInt(weight) : null,
-      phone: phone.trim() || null,
-      nationality: nationality.trim() || null,
-      skills,
-    }).eq('id', user.id)
-
+      name: form.name.trim(),
+      bio: form.bio.trim() || null,
+      birth_date: form.birthDate || null,
+      gender: form.gender || null,
+      height: form.height ? parseInt(form.height) : null,
+      weight: form.weight ? parseInt(form.weight) : null,
+      phone: form.phone.trim() || null,
+      nationality: form.nationality.trim() || null,
+      skills: form.skills,
+    }).eq('id', form.userId)
     setSaving(false)
-    if (error) {
-      setSaveError('저장 실패: ' + error.message)
-    } else {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    }
+    if (error) { setSaveError('저장 실패: ' + error.message) }
+    else { setSaved(true); setTimeout(() => setSaved(false), 2000) }
   }
 
   async function handleLogout() {
@@ -116,12 +95,13 @@ export default function ProfileEditPage() {
     window.location.href = '/login'
   }
 
-  if (!loaded) return (
+  if (!form) return (
     <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
+  const { name, bio, birthDate, gender, height, weight, phone, nationality, skills, avatarUrl } = form
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
@@ -162,19 +142,19 @@ export default function ProfileEditPage() {
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12, letterSpacing: 0.5 }}>기본 정보</p>
             <div className="flex flex-col gap-3">
-              <input type="text" value={name} onChange={e => setName(e.target.value)}
+              <input type="text" value={name} onChange={e => setForm(f => f ? { ...f, name: e.target.value } : f)}
                 placeholder="이름 *" required style={inputStyle} />
-              <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
+              <input type="date" value={birthDate} onChange={e => setForm(f => f ? { ...f, birthDate: e.target.value } : f)}
                 style={inputStyle} />
-              <select value={gender} onChange={e => setGender(e.target.value)} style={inputStyle}>
+              <select value={gender} onChange={e => setForm(f => f ? { ...f, gender: e.target.value } : f)} style={inputStyle}>
                 <option value="">성별 선택</option>
                 <option value="male">남성</option>
                 <option value="female">여성</option>
                 <option value="other">기타</option>
               </select>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+              <input type="tel" value={phone} onChange={e => setForm(f => f ? { ...f, phone: e.target.value } : f)}
                 placeholder="연락처" style={inputStyle} />
-              <select value={nationality} onChange={e => setNationality(e.target.value)} style={inputStyle}>
+              <select value={nationality} onChange={e => setForm(f => f ? { ...f, nationality: e.target.value } : f)} style={inputStyle}>
                 <option value="">국적 선택</option>
                 <optgroup label="아시아">
                   <option value="대한민국">대한민국</option>
@@ -244,9 +224,9 @@ export default function ProfileEditPage() {
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>신체 정보</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <input type="number" value={height} onChange={e => setHeight(e.target.value)}
+              <input type="number" value={height} onChange={e => setForm(f => f ? { ...f, height: e.target.value } : f)}
                 placeholder="키 (cm)" style={inputStyle} />
-              <input type="number" value={weight} onChange={e => setWeight(e.target.value)}
+              <input type="number" value={weight} onChange={e => setForm(f => f ? { ...f, weight: e.target.value } : f)}
                 placeholder="몸무게 (kg)" style={inputStyle} />
             </div>
           </div>
@@ -269,7 +249,7 @@ export default function ProfileEditPage() {
 
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>자기소개</p>
-            <textarea value={bio} onChange={e => setBio(e.target.value)}
+            <textarea value={bio} onChange={e => setForm(f => f ? { ...f, bio: e.target.value } : f)}
               placeholder="기획사 담당자에게 나를 소개해보세요" rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
           </div>

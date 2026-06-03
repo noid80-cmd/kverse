@@ -26,8 +26,12 @@ type Bookmark = {
   agency_member: { name: string } | null
 }
 
+const CACHE_KEY = 'kverse-reactions'
+
 export default function ReactionsPage() {
-  const [pageData, setPageData] = useState<{ convs: Conversation[]; bookmarks: Bookmark[] } | null>(null)
+  const [pageData, setPageData] = useState<{ convs: Conversation[]; bookmarks: Bookmark[] } | null>(() => {
+    try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
+  })
   const [verifiedIds, setVerifiedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'contacts' | 'bookmarks'>('contacts')
   const router = useRouter()
@@ -63,7 +67,9 @@ export default function ReactionsPage() {
         list.forEach(c => { c.lastMessage = lastMap[c.id] })
       }
 
-      setPageData({ convs: list, bookmarks: (b as unknown as Bookmark[]) ?? [] })
+      const fresh = { convs: list, bookmarks: (b as unknown as Bookmark[]) ?? [] }
+      setPageData(fresh)
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
 
       if (list.length > 0) {
         const profileIds = list.map(c => c.agency_member_id)
