@@ -5,6 +5,7 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
+  ListPartsCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
@@ -26,35 +27,42 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { action } = body
 
+  // 멀티파트 생성 + 모든 파트 presigned URL 한번에 반환
   if (action === 'create') {
-    const { filename, contentType } = body
+    const { filename, contentType, totalParts } = body
     const key = `videos/${user.id}/${Date.now()}_${filename}`
+
     const result = await r2.send(new CreateMultipartUploadCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: key,
       ContentType: contentType,
     }))
-    const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
-    return NextResponse.json({ uploadId: result.UploadId, key, publicUrl })
-  }
+    const uploadId = result.UploadId!
 
-  if (action === 'sign-part') {
-    const { key, uploadId, partNumber } = body
-    const url = await getSignedUrl(
-      r2,
-      new UploadPartCommand({
-        Bucket: process.env.R2_BUCKET_NAME!,
-        Key: key,
-        UploadId: uploadId,
-        PartNumber: partNumber,
-      }),
-      { expiresIn: 3600 }
+    const partUrls = await Promise.all(
+      Array.from({ length: totalParts }, (_, i) =>
+        getSignedUrl(r2, new UploadPartCommand({
+          Bucket: process.env.R2_BUCKET_NAME!,
+          Key: key,
+          UploadId: uploadId,
+          PartNumber: i + 1,
+        }), { expiresIn: 3600 })
+      )
     )
-    return NextResponse.json({ url })
+
+    const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
+    return NextResponse.json({ uploadId, key, publicUrl, partUrls })
   }
 
+  // 서버에서 ListParts로 ETag 수집 후 완료 (클라이언트 ETag 불필요)
   if (action === 'complete') {
-    const { key, uploadId, parts } = body
+    const { key, uploadId } = body
+    const { Parts } = await r2.send(new ListPartsCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: key,
+      UploadId: uploadId,
+    }))
+    const parts = (Parts ?? []).map(p => ({ PartNumber: p.PartNumber!, ETag: p.ETag! }))
     await r2.send(new CompleteMultipartUploadCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: key,

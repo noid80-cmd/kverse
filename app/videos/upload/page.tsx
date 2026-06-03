@@ -54,43 +54,26 @@ export default function UploadPage() {
     })
   }
 
-  // 영상 멀티파트 업로드
+  // 영상 멀티파트 업로드 (ETag 서버 처리)
   async function uploadMultipart(videoFile: File): Promise<string | null> {
     const contentType = videoFile.type || 'video/mp4'
     const totalParts = Math.ceil(videoFile.size / CHUNK_SIZE)
 
-    // 1) 멀티파트 업로드 생성
+    // 1) 멀티파트 생성 + 모든 파트 URL 한번에 수령
     const createRes = await fetch('/api/r2-multipart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', filename: videoFile.name, contentType }),
+      body: JSON.stringify({ action: 'create', filename: videoFile.name, contentType, totalParts }),
     })
     if (!createRes.ok) { setError('업로드 준비 실패'); return null }
-    const { uploadId, key, publicUrl } = await createRes.json()
+    const { uploadId, key, publicUrl, partUrls } = await createRes.json()
 
-    const parts: { PartNumber: number; ETag: string }[] = []
-
-    // 2) 파트별 업로드
+    // 2) 파트별 업로드 (ETag 수집 불필요)
     for (let i = 0; i < totalParts; i++) {
-      const start = i * CHUNK_SIZE
-      const chunk = videoFile.slice(start, start + CHUNK_SIZE)
-      const partNumber = i + 1
-
-      const signRes = await fetch('/api/r2-multipart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sign-part', key, uploadId, partNumber }),
-      })
-      if (!signRes.ok) {
-        await fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
-        setError('업로드 실패 (파트 서명 오류)')
-        return null
-      }
-      const { url } = await signRes.json()
-
-      const etag = await new Promise<string | null>((resolve) => {
+      const chunk = videoFile.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
+      const ok = await new Promise<boolean>((resolve) => {
         const xhr = new XMLHttpRequest()
-        xhr.open('PUT', url)
+        xhr.open('PUT', partUrls[i])
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             const overall = ((i + e.loaded / e.total) / totalParts) * 70 + 10
@@ -98,30 +81,26 @@ export default function UploadPage() {
           }
         }
         xhr.onload = () => {
-          if (xhr.status === 200) {
-            resolve(xhr.getResponseHeader('ETag'))
-          } else {
-            const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/)
-            setError('업로드 실패: ' + (match ? match[1] : `HTTP ${xhr.status}`))
-            resolve(null)
-          }
+          if (xhr.status === 200) { resolve(true); return }
+          const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/)
+          setError('업로드 실패: ' + (match ? match[1] : `HTTP ${xhr.status}`))
+          resolve(false)
         }
-        xhr.onerror = () => { setError('네트워크 오류'); resolve(null) }
+        xhr.onerror = () => { setError('네트워크 오류'); resolve(false) }
         xhr.send(chunk)
       })
 
-      if (!etag) {
-        await fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
+      if (!ok) {
+        fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
         return null
       }
-      parts.push({ PartNumber: partNumber, ETag: etag })
     }
 
-    // 3) 완료
+    // 3) 서버에서 ListParts로 ETag 수집 후 완료
     const completeRes = await fetch('/api/r2-multipart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'complete', key, uploadId, parts }),
+      body: JSON.stringify({ action: 'complete', key, uploadId }),
     })
     if (!completeRes.ok) { setError('업로드 완료 실패'); return null }
 
