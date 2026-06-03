@@ -8,19 +8,21 @@ export default function PushSubscribe() {
 
     async function register() {
       const reg = await navigator.serviceWorker.register('/sw.js')
-      const existing = await reg.pushManager.getSubscription()
-      if (existing) return
+      await navigator.serviceWorker.ready
 
-      if (Notification.permission === 'denied') return
-      if (Notification.permission === 'default') {
-        const perm = await Notification.requestPermission()
-        if (perm !== 'granted') return
+      let sub = await reg.pushManager.getSubscription()
+
+      if (!sub) {
+        if (Notification.permission === 'denied') return
+        if (Notification.permission === 'default') {
+          const perm = await Notification.requestPermission()
+          if (perm !== 'granted') return
+        }
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+        })
       }
-
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      })
 
       await fetch('/api/push/subscribe', {
         method: 'POST',

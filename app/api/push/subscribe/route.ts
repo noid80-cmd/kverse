@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
 
   const { subscription } = await req.json()
 
-  await adminSupabase.from('push_subscriptions')
-    .upsert({ user_id: user.id, subscription }, { onConflict: 'user_id,subscription' })
+  await adminSupabase.from('push_subscriptions').delete().eq('user_id', user.id)
+  await adminSupabase.from('push_subscriptions').insert({ user_id: user.id, subscription })
 
   return NextResponse.json({ ok: true })
 }
