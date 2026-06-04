@@ -118,7 +118,11 @@ export default function UploadPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'complete', key, uploadId }),
     })
-    if (!completeRes.ok) { setError('업로드 완료 실패'); return null }
+    if (!completeRes.ok) {
+      const err = await completeRes.json().catch(() => ({}))
+      setError('업로드 완료 실패: ' + (err.error ?? `HTTP ${completeRes.status}`))
+      return null
+    }
 
     return publicUrl
   }

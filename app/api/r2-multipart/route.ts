@@ -48,19 +48,24 @@ export async function POST(req: NextRequest) {
   // 서버에서 ListParts로 ETag 수집 후 완료 (클라이언트 ETag 불필요)
   if (action === 'complete') {
     const { key, uploadId } = body
-    const { Parts } = await r2.send(new ListPartsCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      Key: key,
-      UploadId: uploadId,
-    }))
-    const parts = (Parts ?? []).map(p => ({ PartNumber: p.PartNumber!, ETag: p.ETag! }))
-    await r2.send(new CompleteMultipartUploadCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      Key: key,
-      UploadId: uploadId,
-      MultipartUpload: { Parts: parts },
-    }))
-    return NextResponse.json({ ok: true })
+    try {
+      const { Parts } = await r2.send(new ListPartsCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: key,
+        UploadId: uploadId,
+      }))
+      const parts = (Parts ?? []).map(p => ({ PartNumber: p.PartNumber!, ETag: p.ETag! }))
+      await r2.send(new CompleteMultipartUploadCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: key,
+        UploadId: uploadId,
+        MultipartUpload: { Parts: parts },
+      }))
+      return NextResponse.json({ ok: true })
+    } catch (err: any) {
+      console.error('Complete failed:', err.message, err.Code ?? err.name)
+      return NextResponse.json({ error: err.message, code: err.Code ?? err.name }, { status: 500 })
+    }
   }
 
   if (action === 'abort') {
