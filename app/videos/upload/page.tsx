@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Upload, CheckCircle, Video } from 'lucide-react'
 
 const inputStyle = {
   width: '100%', background: '#fff', border: '1px solid #e0e0f0',
@@ -223,7 +224,9 @@ export default function UploadPage() {
                 setFile(f)
               }
             }} style={{ display: 'none' }} />
-            <div style={{ fontSize: 36, marginBottom: 10 }}>{file ? '✅' : '🎬'}</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10, color: file ? '#6366f1' : '#94a3b8' }}>
+              {file ? <CheckCircle size={36} strokeWidth={1.5} /> : <Video size={36} strokeWidth={1.5} />}
+            </div>
             <div style={{ fontWeight: 700, color: file ? '#4f46e5' : '#1e1b4b', fontSize: 15, marginBottom: 4 }}>
               {file ? file.name : '영상 파일 선택'}
             </div>
@@ -240,11 +243,11 @@ export default function UploadPage() {
             style={{ ...inputStyle, resize: 'none' }} />
 
           <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
-            <option value="vocal">🎤 보컬</option>
-            <option value="dance">💃 댄스</option>
-            <option value="acting">🎭 연기</option>
-            <option value="rap">🎙️ 랩</option>
-            <option value="other">✨ 기타</option>
+            <option value="vocal">보컬</option>
+            <option value="dance">댄스</option>
+            <option value="acting">연기</option>
+            <option value="rap">랩</option>
+            <option value="other">기타</option>
           </select>
 
           <input type="text" value={tags} onChange={e => setTags(e.target.value)}

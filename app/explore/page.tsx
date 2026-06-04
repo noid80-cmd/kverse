@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
-import { Home, Compass, Plus, Bell, User } from 'lucide-react'
+import { Home, Compass, Plus, Bell, User, Heart, Video } from 'lucide-react'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
@@ -16,9 +16,6 @@ const talentNav = [
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
-}
-const categoryEmoji: Record<string, string> = {
-  vocal: '🎤', dance: '💃', acting: '🎭', rap: '🎙️', other: '✨'
 }
 
 type Video = {
@@ -102,7 +99,7 @@ export default function ExplorePage() {
                   color: sort === s ? 'white' : '#8b8baa',
                   boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
                 }}>
-                {s === 'latest' ? '최신순' : '❤️ 인기순'}
+                {s === 'latest' ? '최신순' : '인기순'}
               </button>
             ))}
           </div>
@@ -118,7 +115,7 @@ export default function ExplorePage() {
                 boxShadow: category === c ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
                 outline: category === c ? 'none' : '1px solid #e0e0f0',
               }}>
-              {c === 'all' ? '전체' : `${categoryEmoji[c]} ${categoryLabel[c]}`}
+              {c === 'all' ? '전체' : categoryLabel[c]}
             </button>
           ))}
         </div>
@@ -126,8 +123,10 @@ export default function ExplorePage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
         ) : videos.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '2px dashed #d8d8ec' }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>🎬</div>
+          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+              <Video size={22} strokeWidth={1.8} />
+            </div>
             <div style={{ fontWeight: 700, color: '#1e1b4b' }}>아직 영상이 없어요</div>
           </div>
         ) : (
@@ -136,7 +135,7 @@ export default function ExplorePage() {
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)' }}>
                 {v.thumbnail_url
                   ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎬</div>
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a5b4fc' }}><Video size={24} strokeWidth={1.5} /></div>
                 }
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.65))', padding: '20px 6px 6px' }}>
                   <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.talent?.name}</div>
@@ -146,9 +145,9 @@ export default function ExplorePage() {
                   style={{
                     position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.45)',
                     border: 'none', borderRadius: 10, padding: '3px 7px', outline: 'none',
-                    display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer',
                   }}>
-                  <span style={{ fontSize: 11 }}>{liked.has(v.id) ? '❤️' : '🤍'}</span>
+                  <Heart size={10} strokeWidth={2} fill={liked.has(v.id) ? 'white' : 'none'} color="white" />
                   <span style={{ fontSize: 10, color: 'white', fontWeight: 700 }}>{likeCounts[v.id] ?? 0}</span>
                 </button>
               </Link>

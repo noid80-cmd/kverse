@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { Mic2, Building2, Mail } from 'lucide-react'
 
 const inputStyle = {
   width: '100%', background: '#fff', border: '1px solid #e0e0f0',
@@ -35,7 +36,9 @@ export default function SignupPage() {
   if (done) return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#f0f0f8' }}>
       <div className="text-center">
-        <div style={{ fontSize: 48, marginBottom: 16 }}>✉️</div>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#6366f1' }}>
+        <Mail size={26} strokeWidth={1.8} />
+      </div>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1e1b4b', marginBottom: 8 }}>이메일을 확인해주세요</h2>
         <p style={{ color: '#8b8baa', fontSize: 14, marginBottom: 24 }}>가입 확인 링크를 보냈어요</p>
         <Link href="/login" style={{ color: '#6366f1', fontWeight: 700 }}>로그인으로 돌아가기</Link>
@@ -65,8 +68,8 @@ export default function SignupPage() {
         {step === 'role' ? (
           <div className="flex flex-col gap-3">
             {([
-              { value: 'talent', label: '오디션 지망생', desc: '영상을 올리고 기획사에 노출돼요', icon: '🎤' },
-              { value: 'agency', label: '기획사 담당자', desc: '지망생 영상을 탐색하고 연락해요', icon: '🏢' },
+              { value: 'talent', label: '오디션 지망생', desc: '영상을 올리고 기획사에 노출돼요', icon: <Mic2 size={22} strokeWidth={1.8} /> },
+              { value: 'agency', label: '기획사 담당자', desc: '지망생 영상을 탐색하고 연락해요', icon: <Building2 size={22} strokeWidth={1.8} /> },
             ] as const).map(r => (
               <button key={r.value} onClick={() => setRole(r.value)}
                 className="w-full text-left p-5 rounded-2xl transition active:scale-98"
@@ -74,7 +77,7 @@ export default function SignupPage() {
                   background: role === r.value ? '#ede9fe' : '#fff',
                   border: `2px solid ${role === r.value ? '#6366f1' : '#e0e0f0'}`,
                 }}>
-                <div style={{ fontSize: 28, marginBottom: 6 }}>{r.icon}</div>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: role === r.value ? '#ede9fe' : '#f8f8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, color: role === r.value ? '#6366f1' : '#94a3b8' }}>{r.icon}</div>
                 <div style={{ fontWeight: 700, fontSize: 16, color: '#1e1b4b', marginBottom: 2 }}>{r.label}</div>
                 <div style={{ fontSize: 13, color: '#8b8baa' }}>{r.desc}</div>
               </button>

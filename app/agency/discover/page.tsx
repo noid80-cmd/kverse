@@ -5,12 +5,10 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
+import { Heart, Bookmark, Video } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
-}
-const categoryEmoji: Record<string, string> = {
-  vocal: '🎤', dance: '💃', acting: '🎭', rap: '🎙️', other: '✨'
 }
 
 type Video = {
@@ -128,7 +126,7 @@ export default function DiscoverPage() {
                   color: sort === s ? 'white' : '#8b8baa',
                   boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
                 }}>
-                {s === 'latest' ? '최신순' : '❤️ 인기순'}
+                {s === 'latest' ? '최신순' : '인기순'}
               </button>
             ))}
           </div>
@@ -145,7 +143,7 @@ export default function DiscoverPage() {
                 boxShadow: category === c ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
                 border: category === c ? '1px solid transparent' : '1px solid #e0e0f0',
               }}>
-              {c === 'all' ? '전체' : `${categoryEmoji[c]} ${categoryLabel[c]}`}
+              {c === 'all' ? '전체' : categoryLabel[c]}
             </button>
           ))}
         </div>
@@ -153,8 +151,10 @@ export default function DiscoverPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
         ) : videos.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '2px dashed #d8d8ec' }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>🎬</div>
+          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+              <Video size={22} strokeWidth={1.8} />
+            </div>
             <div style={{ fontWeight: 700, color: '#1e1b4b' }}>아직 영상이 없어요</div>
           </div>
         ) : (
@@ -170,14 +170,14 @@ export default function DiscoverPage() {
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
-                      : <span style={{ fontSize: 48 }}>🎬</span>
+                      : <Video size={40} strokeWidth={1.5} color="#a5b4fc" />
                     }
                     <div style={{
                       position: 'absolute', top: 10, left: 10,
                       background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '4px 10px', pointerEvents: 'none',
                     }}>
                       <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>
-                        {categoryEmoji[v.category]} {categoryLabel[v.category]}
+                        {categoryLabel[v.category]}
                       </span>
                     </div>
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -218,14 +218,14 @@ export default function DiscoverPage() {
                           background: liked.has(v.id) ? '#fce7f3' : '#f0f0f8',
                           color: liked.has(v.id) ? '#e11d48' : '#8b8baa',
                         }}>
-                        {liked.has(v.id) ? '❤️' : '🤍'} {likeCounts[v.id] ?? 0}
+                        <Heart size={14} strokeWidth={2} fill={liked.has(v.id) ? 'currentColor' : 'none'} /> {likeCounts[v.id] ?? 0}
                       </button>
                       <button onClick={() => v.talent && toggleBookmark(v.id, v.talent.id)}
                         style={{
                           width: 36, height: 36, borderRadius: 12, border: 'none', fontSize: 18, cursor: 'pointer',
                           background: bookmarked.has(v.id) ? '#fef9c3' : '#f0f0f8',
                         }}>
-                        {bookmarked.has(v.id) ? '⭐' : '☆'}
+                        <Bookmark size={16} strokeWidth={2} fill={bookmarked.has(v.id) ? 'currentColor' : 'none'} />
                       </button>
                     </div>
                   </div>
