@@ -87,8 +87,22 @@ export default function ReactionsPage() {
 
   async function deleteConv(convId: string) {
     if (!confirm('내 채팅 목록에서 삭제할까요?')) return
-    await supabase.from('conversations').update({ deleted_by_talent: true }).eq('id', convId)
-    setPageData(prev => prev ? { ...prev, convs: prev.convs.filter(c => c.id !== convId) } : prev)
+    const { error } = await supabase.from('conversations').update({ deleted_by_talent: true }).eq('id', convId)
+    if (error) { alert('삭제 실패: ' + error.message); return }
+    setPageData(prev => {
+      if (!prev) return prev
+      const newData = { ...prev, convs: prev.convs.filter(c => c.id !== convId) }
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(newData)) } catch {}
+      try {
+        const dash = localStorage.getItem('kverse-dashboard')
+        if (dash) {
+          const d = JSON.parse(dash)
+          d.contacts = Math.max((d.contacts ?? 1) - 1, 0)
+          localStorage.setItem('kverse-dashboard', JSON.stringify(d))
+        }
+      } catch {}
+      return newData
+    })
   }
 
   useEffect(() => {

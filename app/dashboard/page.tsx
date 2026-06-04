@@ -49,7 +49,7 @@ export default function DashboardPage() {
         supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single(),
         supabase.from('videos').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('status', 'active'),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
-        supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
+        supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('deleted_by_talent', false),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, created_at').eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(3),
       ])
 
