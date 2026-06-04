@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
+import { Bookmark, MessageCircle } from 'lucide-react'
 import AgencyNav from '@/components/layout/AgencyNav'
 
 const categoryLabel: Record<string, string> = {
@@ -66,7 +67,7 @@ export default function AgencyVideoPage() {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
       fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: video.talent.id, title: '⭐ 관심 표시', body: `${agName}이 내 영상을 관심 목록에 추가했어요`, url: '/reactions?tab=bookmarks' }) })
+        body: JSON.stringify({ userId: video.talent.id, title: '관심 표시', body: `${agName}이 내 영상을 관심 목록에 추가했어요`, url: '/reactions?tab=bookmarks' }) })
     }
     setBookmarked(b => !b)
   }
@@ -107,8 +108,8 @@ export default function AgencyVideoPage() {
             <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0 }}>←</button>
             <span style={{ fontSize: 18, fontWeight: 900, color: '#1e1b4b', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</span>
             <button onClick={toggleBookmark}
-              style={{ width: 40, height: 40, borderRadius: 12, fontSize: 20, background: bookmarked ? '#fef9c3' : '#fff', border: '1px solid #e0e0f0' }}>
-              {bookmarked ? '⭐' : '☆'}
+              style={{ width: 40, height: 40, borderRadius: 12, background: bookmarked ? '#fef9c3' : '#fff', border: '1px solid #e0e0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: bookmarked ? '#ca8a04' : '#94a3b8' }}>
+              <Bookmark size={18} strokeWidth={2} fill={bookmarked ? 'currentColor' : 'none'} />
             </button>
           </div>
 
@@ -176,7 +177,7 @@ export default function AgencyVideoPage() {
           <button onClick={handleStartChat} disabled={starting}
             className="w-full py-4 rounded-2xl text-white transition active:scale-95"
             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)', opacity: starting ? 0.7 : 1 }}>
-            {starting ? '연결 중...' : '💬 채팅하기'}
+            {starting ? '연결 중...' : '채팅하기'}
           </button>
         </div>
       </div>
