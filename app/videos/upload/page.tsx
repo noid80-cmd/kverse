@@ -11,7 +11,7 @@ const inputStyle = {
 
 const MAX_SIZE_MB = 500
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
-const CHUNK_SIZE = 4 * 1024 * 1024 // 4MB per part (Vercel body limit)
+const CHUNK_SIZE = 10 * 1024 * 1024 // 10MB per part (R2 minimum 5MB)
 
 export default function UploadPage() {
   const router = useRouter()
@@ -68,37 +68,45 @@ export default function UploadPage() {
     const contentType = videoFile.type || 'video/mp4'
     const totalParts = Math.ceil(videoFile.size / CHUNK_SIZE)
 
-    // 1) 멀티파트 생성
+    // 1) 멀티파트 생성 + 파트 presigned URL 수령
     const createRes = await fetch('/api/r2-multipart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', filename: videoFile.name, contentType }),
+      body: JSON.stringify({ action: 'create', filename: videoFile.name, contentType, totalParts }),
     })
     if (!createRes.ok) {
       const err = await createRes.json().catch(() => ({}))
       setError('업로드 준비 실패: ' + (err.error ?? `HTTP ${createRes.status}`))
       return null
     }
-    const { uploadId, key, publicUrl } = await createRes.json()
+    const { uploadId, key, publicUrl, partUrls } = await createRes.json()
 
-    // 2) 파트별 업로드 (Vercel API 프록시 경유, 실패 시 최대 3회 재시도)
+    // 2) 파트별 presigned URL로 직접 R2 업로드 (최대 3회 재시도)
     for (let i = 0; i < totalParts; i++) {
       const chunk = videoFile.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-      let lastErr = ''
       let ok = false
+      let lastErr = ''
 
       for (let attempt = 0; attempt < 3; attempt++) {
-        const formData = new FormData()
-        formData.append('chunk', chunk)
-        formData.append('key', key)
-        formData.append('uploadId', uploadId)
-        formData.append('partNumber', String(i + 1))
-
-        const partRes = await fetch('/api/r2-upload-part', { method: 'POST', body: formData })
-        if (partRes.ok) { ok = true; break }
-
-        const err = await partRes.json().catch(() => ({}))
-        lastErr = err.error ?? `HTTP ${partRes.status}`
+        const result = await new Promise<boolean>((resolve) => {
+          const xhr = new XMLHttpRequest()
+          xhr.open('PUT', partUrls[i])
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              const overall = ((i + e.loaded / e.total) / totalParts) * 70 + 10
+              setProgress(Math.round(overall))
+            }
+          }
+          xhr.onload = () => {
+            if (xhr.status === 200) { resolve(true); return }
+            const match = xhr.responseText.match(/<Message>(.*?)<\/Message>/)
+            lastErr = match ? match[1] : `HTTP ${xhr.status}`
+            resolve(false)
+          }
+          xhr.onerror = () => { lastErr = '네트워크 오류'; resolve(false) }
+          xhr.send(chunk)
+        })
+        if (result) { ok = true; break }
         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
       }
 
@@ -107,9 +115,6 @@ export default function UploadPage() {
         fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
         return null
       }
-
-      const overall = ((i + 1) / totalParts) * 70 + 10
-      setProgress(Math.round(overall))
     }
 
     // 3) 서버에서 ListParts로 ETag 수집 후 완료
