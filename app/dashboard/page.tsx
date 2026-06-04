@@ -82,7 +82,6 @@ export default function DashboardPage() {
 
         <div className="flex items-center justify-between mb-8">
           <div>
-            <p style={{ fontSize: 13, color: '#8b8baa', fontWeight: 500, marginBottom: 2 }}>안녕하세요</p>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b' }}>{profile?.name ?? '...'}</h1>
           </div>
           <div style={{
