@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Home, Compass, Plus, Bell, User, MessageCircle, Bookmark, Trash2, Video } from 'lucide-react'
@@ -168,6 +169,7 @@ export default function ReactionsPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+      <PushSubscribe />
 
       {toast && (
         <div style={{
