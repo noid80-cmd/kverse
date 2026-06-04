@@ -77,13 +77,24 @@ export default function AgencyVideoPage() {
     setStarting(true)
     const { data: existing } = await supabase
       .from('conversations').select('id')
-      .eq('agency_member_id', myId).eq('talent_id', video.talent.id).single()
+      .eq('agency_member_id', myId).eq('talent_id', video.talent.id).eq('deleted_by_agency', false).single()
     if (existing) { router.push(`/chat/${existing.id}`); return }
-    const { data: newConv } = await supabase
+    const { data: newConv, error: insertErr } = await supabase
       .from('conversations').insert({ agency_member_id: myId, talent_id: video.talent.id })
       .select('id').single()
-    if (newConv) router.push(`/chat/${newConv.id}`)
-    else { alert('채팅을 시작할 수 없어요.'); setStarting(false) }
+    if (newConv) { router.push(`/chat/${newConv.id}`); return }
+    if (insertErr) {
+      const { data: deleted } = await supabase
+        .from('conversations').select('id')
+        .eq('agency_member_id', myId).eq('talent_id', video.talent.id).single()
+      if (deleted) {
+        await supabase.from('conversations').update({ deleted_by_agency: false }).eq('id', deleted.id)
+        router.push(`/chat/${deleted.id}`)
+        return
+      }
+    }
+    alert('채팅을 시작할 수 없어요.')
+    setStarting(false)
   }
 
   function getAge(birth: string | null) {
