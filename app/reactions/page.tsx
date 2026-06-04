@@ -107,12 +107,24 @@ export default function ReactionsPage() {
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null
+    let pollInterval: ReturnType<typeof setInterval> | null = null
+
+    function onVisible() {
+      if (document.visibilityState === 'visible' && userIdRef.current) {
+        load(userIdRef.current)
+      }
+    }
 
     async function init() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
       userIdRef.current = user.id
       await load(user.id)
+
+      document.addEventListener('visibilitychange', onVisible)
+      pollInterval = setInterval(() => {
+        if (userIdRef.current) load(userIdRef.current)
+      }, 30000)
 
       channel = supabase.channel(`reactions-${user.id}`)
         .on('postgres_changes', {
@@ -138,7 +150,11 @@ export default function ReactionsPage() {
     }
 
     init()
-    return () => { channel && supabase.removeChannel(channel) }
+    return () => {
+      channel && supabase.removeChannel(channel)
+      document.removeEventListener('visibilitychange', onVisible)
+      pollInterval && clearInterval(pollInterval)
+    }
   }, [])
 
   if (!pageData) return (
