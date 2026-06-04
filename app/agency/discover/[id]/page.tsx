@@ -82,7 +82,14 @@ export default function AgencyVideoPage() {
     const { data: newConv, error: insertErr } = await supabase
       .from('conversations').insert({ agency_member_id: myId, talent_id: video.talent.id })
       .select('id').single()
-    if (newConv) { router.push(`/chat/${newConv.id}`); return }
+    if (newConv) {
+      const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
+      const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
+      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: video.talent.id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' }) })
+      router.push(`/chat/${newConv.id}`)
+      return
+    }
     if (insertErr) {
       const { data: deleted } = await supabase
         .from('conversations').select('id')
