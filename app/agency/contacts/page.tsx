@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
+import { MessageCircle, Trash2 } from 'lucide-react'
 
 type Conversation = {
   id: string; created_at: string
@@ -19,7 +20,8 @@ export default function AgencyContactsPage() {
 
   async function deleteConv(convId: string) {
     if (!confirm('내 채팅 목록에서 삭제할까요?')) return
-    await supabase.from('conversations').update({ deleted_by_agency: true }).eq('id', convId)
+    const { error } = await supabase.from('conversations').update({ deleted_by_agency: true }).eq('id', convId)
+    if (error) { alert('삭제 실패: ' + error.message); return }
     setConvs(prev => prev.filter(c => c.id !== convId))
   }
 
@@ -67,8 +69,10 @@ export default function AgencyContactsPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
         ) : convs.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '2px dashed #d8d8ec' }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>💬</div>
+          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+              <MessageCircle size={22} strokeWidth={1.8} />
+            </div>
             <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 6 }}>아직 대화가 없어요</div>
             <div style={{ fontSize: 13, color: '#8b8baa' }}>영상을 보고 마음에 드는 지망생에게 채팅을 시작해보세요</div>
           </div>
@@ -94,11 +98,11 @@ export default function AgencyContactsPage() {
                       {c.lastMessage ?? '대화를 시작해보세요'}
                     </div>
                   </div>
-                  <span style={{ color: '#c0c0d8', fontSize: 18, flexShrink: 0 }}>›</span>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
                 <button onClick={() => deleteConv(c.id)}
-                  style={{ padding: '16px 16px', background: 'none', border: 'none', cursor: 'pointer', color: '#d0b0cc', fontSize: 18, flexShrink: 0 }}>
-                  🗑️
+                  style={{ padding: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                  <Trash2 size={16} strokeWidth={1.8} />
                 </button>
               </div>
             ))}
