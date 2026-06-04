@@ -5,13 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
+import { Home, Compass, Plus, Bell, User, Video, Bookmark, MessageCircle } from 'lucide-react'
 
 const talentNav = [
-  { href: '/dashboard', label: '홈', icon: '🏠' },
-  { href: '/explore', label: '탐색', icon: '🔍' },
-  { href: '/videos/upload', label: '올리기', icon: '➕' },
-  { href: '/reactions', label: '반응', icon: '⭐' },
-  { href: '/profile/edit', label: '프로필', icon: '👤' },
+  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
+  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
+  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
+  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
+  { href: '/profile/edit', label: '프로필', icon: <User size={22} strokeWidth={1.8} /> },
 ]
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
@@ -97,21 +98,23 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 28 }}>
           {[
-            { label: '영상', value: videos, icon: '🎬', href: '/videos' },
-            { label: '관심', value: bookmarks, icon: '⭐', href: '/reactions?tab=bookmarks' },
-            { label: '채팅', value: contacts, icon: '💬', href: '/reactions' },
+            { label: '영상', value: videos, icon: <Video size={16} strokeWidth={2} />, href: '/videos', color: '#6366f1', bg: '#eef2ff' },
+            { label: '관심', value: bookmarks, icon: <Bookmark size={16} strokeWidth={2} />, href: '/reactions?tab=bookmarks', color: '#ec4899', bg: '#fdf2f8' },
+            { label: '채팅', value: contacts, icon: <MessageCircle size={16} strokeWidth={2} />, href: '/reactions', color: '#0ea5e9', bg: '#f0f9ff' },
           ].map(s => (
             <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: '#fff', borderRadius: 20, padding: '18px 12px',
-                textAlign: 'center', border: '1px solid #e8e8f2',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                background: '#fff', borderRadius: 18, padding: '16px 10px 14px',
+                textAlign: 'center', border: '1px solid #f0f0f8',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
               }}>
-                <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: '#1e1b4b', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: '#8b8baa', marginTop: 4, fontWeight: 600 }}>{s.label}</div>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
+                  {s.icon}
+                </div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
               </div>
             </Link>
           ))}
@@ -123,7 +126,9 @@ export default function DashboardPage() {
               background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', borderRadius: 20, padding: '18px 20px',
               marginBottom: 24, border: '1px solid #c4b5fd', display: 'flex', alignItems: 'center', gap: 14,
             }}>
-              <span style={{ fontSize: 28 }}>✍️</span>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(124,58,237,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#7c3aed' }}>
+                <User size={18} strokeWidth={1.8} />
+              </div>
               <div>
                 <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>프로필을 완성해보세요</div>
                 <div style={{ fontSize: 12, color: '#7c3aed', marginTop: 2 }}>자기소개와 특기를 추가하면 기획사에 더 잘 보여요</div>
@@ -140,12 +145,14 @@ export default function DashboardPage() {
         {recentVideos.length === 0 ? (
           <Link href="/videos/upload" style={{ textDecoration: 'none' }}>
             <div style={{
-              background: '#fff', borderRadius: 20, padding: 32, textAlign: 'center',
-              border: '2px dashed #d8d8ec',
+              background: '#fff', borderRadius: 20, padding: '32px 24px', textAlign: 'center',
+              border: '1.5px dashed #e2e8f0',
             }}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>🎬</div>
-              <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4 }}>첫 영상을 올려보세요</div>
-              <div style={{ fontSize: 13, color: '#8b8baa' }}>기획사 담당자들이 바로 볼 수 있어요</div>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+                <Video size={22} strokeWidth={1.8} />
+              </div>
+              <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4, fontSize: 15 }}>첫 영상을 올려보세요</div>
+              <div style={{ fontSize: 13, color: '#94a3b8' }}>기획사 담당자들이 바로 볼 수 있어요</div>
             </div>
           </Link>
         ) : (
@@ -153,25 +160,25 @@ export default function DashboardPage() {
             {recentVideos.map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{
-                  background: '#fff', borderRadius: 18, padding: '14px 16px',
-                  border: '1px solid #e8e8f2', display: 'flex', alignItems: 'center', gap: 14,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  background: '#fff', borderRadius: 16, padding: '12px 14px',
+                  border: '1px solid #f0f0f8', display: 'flex', alignItems: 'center', gap: 12,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 }}>
                   <div style={{
-                    width: 64, height: 64, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                    background: v.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)',
+                    width: 60, height: 44, borderRadius: 10, flexShrink: 0, overflow: 'hidden',
+                    background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <span style={{ fontSize: 24 }}>🎬</span>
+                      : <Video size={18} strokeWidth={1.5} color="#a5b4fc" />
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
-                    <div style={{ fontSize: 12, color: '#8b8baa' }}>조회 {v.view_count}회</div>
+                    <div style={{ fontWeight: 600, color: '#1e1b4b', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
+                    <div style={{ fontSize: 12, color: '#94a3b8' }}>조회 {v.view_count}회</div>
                   </div>
-                  <span style={{ color: '#c0c0d8', fontSize: 18 }}>›</span>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               </Link>
             ))}
