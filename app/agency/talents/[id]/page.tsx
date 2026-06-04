@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
+import { MessageCircle, Video, Heart } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -39,7 +40,7 @@ export default function TalentProfilePage() {
       const [{ data: t }, { data: v }, { data: conv }] = await Promise.all([
         supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').order('created_at', { ascending: false }),
-        supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).single(),
+        supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
       ])
 
       setTalent(t as unknown as Talent)
@@ -52,9 +53,25 @@ export default function TalentProfilePage() {
   async function handleChat() {
     if (convId) { router.push(`/chat/${convId}`); return }
     setStarting(true)
-    const { data } = await supabase.from('conversations').insert({ agency_member_id: myId, talent_id: id }).select('id').single()
-    if (data) router.push(`/chat/${data.id}`)
-    else { alert('채팅을 시작할 수 없어요.'); setStarting(false) }
+    const { data, error: insertErr } = await supabase.from('conversations').insert({ agency_member_id: myId, talent_id: id }).select('id').single()
+    if (data) {
+      const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
+      const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
+      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' }) })
+      router.push(`/chat/${data.id}`)
+      return
+    }
+    if (insertErr) {
+      const { data: deleted } = await supabase.from('conversations').select('id').eq('agency_member_id', myId).eq('talent_id', id).single()
+      if (deleted) {
+        await supabase.from('conversations').update({ deleted_by_agency: false }).eq('id', deleted.id)
+        router.push(`/chat/${deleted.id}`)
+        return
+      }
+    }
+    alert('채팅을 시작할 수 없어요.')
+    setStarting(false)
   }
 
   function getAge(birth: string | null) {
@@ -130,7 +147,10 @@ export default function TalentProfilePage() {
             fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
             marginBottom: 24, opacity: starting ? 0.7 : 1,
           }}>
-          {starting ? '연결 중...' : convId ? '💬 채팅 이어가기' : '💬 채팅하기'}
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <MessageCircle size={18} strokeWidth={2} />
+            {starting ? '연결 중...' : convId ? '채팅 이어가기' : '채팅하기'}
+          </span>
         </button>
 
         {/* 영상 목록 */}
@@ -151,7 +171,7 @@ export default function TalentProfilePage() {
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <span style={{ fontSize: 24 }}>🎬</span>
+                      : <Video size={22} strokeWidth={1.5} color="#a5b4fc" />
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -159,10 +179,10 @@ export default function TalentProfilePage() {
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <span style={{ fontSize: 11, background: '#e0e7ff', color: '#4f46e5', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category]}</span>
                       <span style={{ fontSize: 12, color: '#b0b0cc' }}>조회 {v.view_count}회</span>
-                      <span style={{ fontSize: 12, color: '#b0b0cc' }}>❤️ {v.like_count}</span>
+                      <span style={{ fontSize: 12, color: '#b0b0cc', display: 'flex', alignItems: 'center', gap: 3 }}><Heart size={11} strokeWidth={2} color="#f87171" fill="#f87171" /> {v.like_count}</span>
                     </div>
                   </div>
-                  <span style={{ color: '#c0c0d8', fontSize: 18 }}>›</span>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               </Link>
             ))}
