@@ -21,7 +21,7 @@ const categoryLabel: Record<string, string> = {
 type Video = {
   id: string; title: string; thumbnail_url: string | null
   view_count: number; like_count: number; category: string; tags: string[]; created_at: string
-  talent: { id: string; name: string; avatar_url: string | null } | null
+  talent: { id: string } | null
 }
 
 export default function ExplorePage() {
@@ -42,7 +42,7 @@ export default function ExplorePage() {
 
     let q = supabase.from('videos').select(`
       id, title, thumbnail_url, view_count, like_count, category, tags, created_at,
-      talent:profiles!talent_id(id, name, avatar_url)
+      talent:profiles!talent_id(id)
     `).eq('status', 'active').limit(60)
 
     if (category !== 'all') q = q.eq('category', category)
@@ -138,8 +138,7 @@ export default function ExplorePage() {
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a5b4fc' }}><Video size={24} strokeWidth={1.5} /></div>
                 }
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.65))', padding: '20px 6px 6px' }}>
-                  <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.talent?.name}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
+                  <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
                 </div>
                 <button onClick={e => toggleLike(e, v.id)}
                   style={{
