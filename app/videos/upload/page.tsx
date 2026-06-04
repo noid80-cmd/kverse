@@ -27,18 +27,27 @@ export default function UploadPage() {
   async function generateThumbnail(videoFile: File): Promise<Blob | null> {
     return new Promise((resolve) => {
       const video = document.createElement('video')
+      let settled = false
+      const done = (blob: Blob | null) => {
+        if (settled) return
+        settled = true
+        URL.revokeObjectURL(video.src)
+        resolve(blob)
+      }
+      const timer = setTimeout(() => done(null), 8000)
       video.preload = 'metadata'
       video.muted = true
       video.src = URL.createObjectURL(videoFile)
       video.onloadedmetadata = () => { video.currentTime = Math.min(1, video.duration * 0.1) }
       video.onseeked = () => {
+        clearTimeout(timer)
         const canvas = document.createElement('canvas')
         canvas.width = video.videoWidth || 640
         canvas.height = video.videoHeight || 360
         canvas.getContext('2d')?.drawImage(video, 0, 0)
-        canvas.toBlob(blob => { URL.revokeObjectURL(video.src); resolve(blob) }, 'image/jpeg', 0.8)
+        canvas.toBlob(blob => done(blob), 'image/jpeg', 0.8)
       }
-      video.onerror = () => { URL.revokeObjectURL(video.src); resolve(null) }
+      video.onerror = () => { clearTimeout(timer); done(null) }
     })
   }
 
