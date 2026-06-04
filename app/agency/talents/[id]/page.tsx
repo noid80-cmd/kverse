@@ -53,7 +53,7 @@ export default function TalentProfilePage() {
   async function handleChat() {
     if (convId) { router.push(`/chat/${convId}`); return }
     setStarting(true)
-    const { data, error: insertErr } = await supabase.from('conversations').insert({ agency_member_id: myId, talent_id: id }).select('id').single()
+    const { data } = await supabase.from('conversations').insert({ agency_member_id: myId, talent_id: id }).select('id').single()
     if (data) {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
@@ -61,14 +61,6 @@ export default function TalentProfilePage() {
         body: JSON.stringify({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' }) })
       router.push(`/chat/${data.id}`)
       return
-    }
-    if (insertErr) {
-      const { data: deleted } = await supabase.from('conversations').select('id').eq('agency_member_id', myId).eq('talent_id', id).single()
-      if (deleted) {
-        await supabase.from('conversations').update({ deleted_by_agency: false }).eq('id', deleted.id)
-        router.push(`/chat/${deleted.id}`)
-        return
-      }
     }
     alert('채팅을 시작할 수 없어요.')
     setStarting(false)
