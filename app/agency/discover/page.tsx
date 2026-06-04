@@ -224,6 +224,7 @@ export default function DiscoverPage() {
                         style={{
                           width: 36, height: 36, borderRadius: 12, border: 'none', fontSize: 18, cursor: 'pointer',
                           background: bookmarked.has(v.id) ? '#fef9c3' : '#f0f0f8',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                         <Bookmark size={16} strokeWidth={2} fill={bookmarked.has(v.id) ? 'currentColor' : 'none'} />
                       </button>
