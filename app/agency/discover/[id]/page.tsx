@@ -79,7 +79,7 @@ export default function AgencyVideoPage() {
       .from('conversations').select('id')
       .eq('agency_member_id', myId).eq('talent_id', video.talent.id).eq('deleted_by_agency', false).single()
     if (existing) { router.push(`/chat/${existing.id}`); return }
-    const { data: newConv } = await supabase
+    const { data: newConv, error: convErr } = await supabase
       .from('conversations').insert({ agency_member_id: myId, talent_id: video.talent.id })
       .select('id').single()
     if (newConv) {
@@ -90,7 +90,7 @@ export default function AgencyVideoPage() {
       router.push(`/chat/${newConv.id}`)
       return
     }
-    alert('채팅을 시작할 수 없어요.')
+    alert('채팅 오류: ' + (convErr?.message ?? '알 수 없는 오류'))
     setStarting(false)
   }
 
