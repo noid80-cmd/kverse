@@ -93,6 +93,9 @@ export default function DiscoverPage() {
     } else {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: talentId, video_id: videoId })
       setBookmarked(prev => new Set([...prev, videoId]))
+      const agName = agencyName ?? '기획사'
+      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: talentId, title: '관심 표시', body: `${agName}이 내 영상을 관심 목록에 추가했어요`, url: '/reactions?tab=bookmarks' }) })
     }
   }
 
