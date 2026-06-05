@@ -28,7 +28,7 @@ export default function PushSubscribe() {
       let sub = await reg.pushManager.getSubscription()
 
       // Always re-subscribe if key changed (compare against stored key)
-      const stored = localStorage.getItem('kverse-vapid-key')
+      const stored = localStorage.getItem('kverse-vapid-key-v2')
       if (sub && stored !== publicKey) {
         await sub.unsubscribe()
         sub = null
@@ -44,7 +44,7 @@ export default function PushSubscribe() {
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicKey),
         })
-        localStorage.setItem('kverse-vapid-key', publicKey)
+        localStorage.setItem('kverse-vapid-key-v2', publicKey)
       }
 
       await fetch('/api/push/subscribe', {
