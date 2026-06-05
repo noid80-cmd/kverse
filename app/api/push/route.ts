@@ -12,7 +12,7 @@ const adminSupabase = createSupabaseClient(
 export async function POST(req: NextRequest) {
   const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '').trim()
   const privateKey = (process.env.VAPID_PRIVATE_KEY || '').trim()
-  console.log('[push] publicKey len:', publicKey.length, 'ok:', /^[A-Za-z0-9\-_]+$/.test(publicKey))
+  console.log('[push] publicKey:', publicKey.slice(0, 12), 'len:', publicKey.length, 'privKey:', privateKey.slice(0, 8))
   webpush.setVapidDetails(
     `mailto:${process.env.VAPID_EMAIL}`,
     publicKey,
