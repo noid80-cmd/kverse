@@ -29,9 +29,12 @@ export async function POST(req: NextRequest) {
 
   for (const { id, subscription } of subs) {
     try {
-      await webpush.sendNotification(subscription as webpush.PushSubscription, payload)
+      const result = await webpush.sendNotification(subscription as webpush.PushSubscription, payload)
+      console.log('Push sent ok:', result.statusCode)
       sent++
-    } catch {
+    } catch (err: unknown) {
+      const e = err as { statusCode?: number; body?: string }
+      console.error('Push failed:', e.statusCode, e.body)
       await adminSupabase.from('push_subscriptions').delete().eq('id', id)
     }
   }
