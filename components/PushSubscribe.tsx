@@ -11,22 +11,25 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
-const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-const VAPID_KEY_STORE = 'kverse-vapid-key'
-
 export default function PushSubscribe() {
   useEffect(() => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
 
     async function register() {
+      // Fetch the current VAPID key from the server at runtime
+      const keyRes = await fetch('/api/push/vapid-key')
+      if (!keyRes.ok) return
+      const { publicKey } = await keyRes.json()
+      if (!publicKey) return
+
       const reg = await navigator.serviceWorker.register('/sw.js')
       await navigator.serviceWorker.ready
 
       let sub = await reg.pushManager.getSubscription()
 
-      // Force re-subscribe if VAPID key changed
-      const storedKey = localStorage.getItem(VAPID_KEY_STORE)
-      if (sub && storedKey !== VAPID_KEY) {
+      // Always re-subscribe if key changed (compare against stored key)
+      const stored = localStorage.getItem('kverse-vapid-key')
+      if (sub && stored !== publicKey) {
         await sub.unsubscribe()
         sub = null
       }
@@ -39,9 +42,9 @@ export default function PushSubscribe() {
         }
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
         })
-        localStorage.setItem(VAPID_KEY_STORE, VAPID_KEY)
+        localStorage.setItem('kverse-vapid-key', publicKey)
       }
 
       await fetch('/api/push/subscribe', {
