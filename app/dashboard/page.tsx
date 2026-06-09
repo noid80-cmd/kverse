@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<PageData | null>(() => {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
   })
+  const [auditionIdx, setAuditionIdx] = useState(0)
   const supabase = createClient()
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function DashboardPage() {
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('deleted_by_talent', false),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, created_at').eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(3),
-        supabase.from('auditions').select('id, title, category, deadline, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(3),
+        supabase.from('auditions').select('id, title, category, deadline, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
       ])
 
       const fresh: PageData = {
@@ -69,6 +70,13 @@ export default function DashboardPage() {
     }
     load()
   }, [])
+
+  useEffect(() => {
+    const len = data?.recentAuditions.length ?? 0
+    if (len <= 1) return
+    const t = setInterval(() => setAuditionIdx(i => (i + 1) % len), 3500)
+    return () => clearInterval(t)
+  }, [data?.recentAuditions.length])
 
   if (!data) return (
     <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -152,32 +160,42 @@ export default function DashboardPage() {
               <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1e1b4b' }}>열린 오디션</h2>
               <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {recentAuditions.map(a => (
-                <Link key={a.id} href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    background: '#fff', borderRadius: 16, padding: '14px 16px',
-                    border: '1px solid #e8e8f2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                    display: 'flex', alignItems: 'center', gap: 12,
-                  }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #eef2ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#6366f1' }}>
-                      <Megaphone size={18} strokeWidth={1.8} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.title}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 11, color: '#8b8baa' }}>{a.agency?.name ?? '기획사'}</span>
-                        <span style={{ fontSize: 10, color: '#6366f1', background: '#eef2ff', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
-                          {a.category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
-                        </span>
-                        {a.deadline && <span style={{ fontSize: 11, color: '#94a3b8' }}>~{a.deadline}</span>}
-                      </div>
-                    </div>
-                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
+              <div key={auditionIdx} style={{
+                background: '#fff', borderRadius: 16, padding: '14px 16px',
+                border: '1px solid #e8e8f2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                display: 'flex', alignItems: 'center', gap: 12,
+                animation: 'auditSlide 0.4s ease',
+              }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #eef2ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#6366f1' }}>
+                  <Megaphone size={18} strokeWidth={1.8} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{recentAuditions[auditionIdx].title}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: '#8b8baa' }}>{recentAuditions[auditionIdx].agency?.name ?? '기획사'}</span>
+                    <span style={{ fontSize: 10, color: '#6366f1', background: '#eef2ff', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
+                      {recentAuditions[auditionIdx].category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
+                    </span>
+                    {recentAuditions[auditionIdx].deadline && <span style={{ fontSize: 11, color: '#94a3b8' }}>~{recentAuditions[auditionIdx].deadline}</span>}
                   </div>
-                </Link>
-              ))}
-            </div>
+                </div>
+                <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+            </Link>
+            {recentAuditions.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 10 }}>
+                {recentAuditions.map((_, i) => (
+                  <div key={i} style={{
+                    height: 6, borderRadius: 3,
+                    width: i === auditionIdx ? 18 : 6,
+                    background: i === auditionIdx ? '#6366f1' : '#dde0f5',
+                    transition: 'all 0.35s ease',
+                  }} />
+                ))}
+              </div>
+            )}
+            <style>{`@keyframes auditSlide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }`}</style>
           </div>
         )}
 
@@ -209,7 +227,7 @@ export default function DashboardPage() {
                   boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 }}>
                   <div style={{
-                    width: 60, height: 44, borderRadius: 10, flexShrink: 0, overflow: 'hidden',
+                    width: 80, height: 60, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
                     background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
