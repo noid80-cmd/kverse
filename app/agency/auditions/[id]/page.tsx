@@ -52,7 +52,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     load()
   }, [])
 
-  async function updateStatus(appId: string, status: 'invited' | 'skip', talentId: string) {
+  async function updateStatus(appId: string, status: 'invited' | 'skip' | 'pending', talentId: string) {
     setUpdating(appId)
     await supabase.from('audition_applications').update({ status }).eq('id', appId)
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
@@ -167,7 +167,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                       </div>
                     )}
 
-                    {a.status === 'pending' && (
+                    {a.status === 'pending' ? (
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => updateStatus(a.id, 'skip', a.talent?.id ?? '')}
                           disabled={updating === a.id}
@@ -188,6 +188,16 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                           <CheckCircle size={15} strokeWidth={2} /> 초대
                         </button>
                       </div>
+                    ) : (
+                      <button onClick={() => updateStatus(a.id, 'pending', a.talent?.id ?? '')}
+                        disabled={updating === a.id}
+                        style={{
+                          width: '100%', background: 'none', border: '1px solid #e0e0f0',
+                          borderRadius: 12, padding: '8px', fontSize: 12, fontWeight: 600,
+                          color: '#94a3b8', cursor: 'pointer',
+                        }}>
+                        되돌리기
+                      </button>
                     )}
                   </div>
                 </div>
