@@ -40,6 +40,14 @@ export default function LoginPage() {
     })
   }
 
+  async function handleKakao() {
+    const supabase = createClient()
+    await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#f0f0f8' }}>
       <div className="fixed inset-0 pointer-events-none">
@@ -65,12 +73,15 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full flex flex-col gap-4">
-          {isKakao && (
-            <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 14, padding: '12px 16px', fontSize: 13, color: '#92400e', lineHeight: 1.5 }}>
-              카카오톡에서는 구글 로그인이 차단돼요.<br />
-              <strong>이메일로 로그인</strong>하거나, 우측 상단 <strong>⋮ → 다른 브라우저로 열기</strong>를 눌러주세요.
-            </div>
-          )}
+          <button onClick={handleKakao}
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl transition active:scale-95"
+            style={{ background: '#FEE500', color: '#191919', fontSize: 16, fontWeight: 700, border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.07)', cursor: 'pointer' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#191919">
+              <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.618 5.08 4.077 6.56l-1.04 3.84a.3.3 0 0 0 .46.33l4.5-2.97c.66.09 1.33.14 2.003.14 5.523 0 10-3.477 10-7.8S17.523 3 12 3z"/>
+            </svg>
+            카카오로 로그인
+          </button>
+
           <button onClick={handleGoogle} disabled={isKakao}
             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl transition active:scale-95"
             style={{ background: '#fff', color: isKakao ? '#94a3b8' : '#1e1b4b', fontSize: 16, fontWeight: 700, border: '1px solid #d8d8ec', boxShadow: '0 2px 12px rgba(0,0,0,0.07)', opacity: isKakao ? 0.5 : 1, cursor: isKakao ? 'default' : 'pointer' }}>
@@ -82,6 +93,9 @@ export default function LoginPage() {
             </svg>
             Google로 로그인
           </button>
+          {isKakao && (
+            <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', marginTop: -8 }}>카카오톡에서는 구글 로그인이 차단돼요. 카카오 또는 이메일로 로그인하세요.</p>
+          )}
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px" style={{ background: '#d8d8ec' }} />
