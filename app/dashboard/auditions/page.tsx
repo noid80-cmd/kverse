@@ -76,6 +76,12 @@ export default function TalentAuditionsPage() {
 
   useEffect(() => { load() }, [load])
 
+  async function cancelApplication(auditionId: string) {
+    if (!confirm('지원을 취소할까요?')) return
+    await supabase.from('audition_applications').delete().eq('audition_id', auditionId).eq('talent_id', myId)
+    setApplicationMap(prev => { const next = { ...prev }; delete next[auditionId]; return next })
+  }
+
   function openModal(audition: Audition) {
     setModalAudition(audition)
     setTab('existing')
@@ -287,14 +293,24 @@ export default function TalentAuditionsPage() {
                       </div>
                     </Link>
                   ) : (
-                    <button onClick={() => !appStatus && openModal(a)} style={{
-                      width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
-                      cursor: appStatus ? 'default' : 'pointer',
-                      background: isPending ? '#fef9c3' : isSkip ? '#f0f0f8' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                      color: isPending ? '#ca8a04' : isSkip ? '#94a3b8' : 'white',
-                    }}>
-                      {isPending ? '검토중' : isSkip ? '패스됨' : '지원하기'}
-                    </button>
+                    <>
+                      <button onClick={() => !appStatus && openModal(a)} style={{
+                        width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
+                        cursor: appStatus ? 'default' : 'pointer',
+                        background: isPending ? '#fef9c3' : isSkip ? '#f0f0f8' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        color: isPending ? '#ca8a04' : isSkip ? '#94a3b8' : 'white',
+                      }}>
+                        {isPending ? '검토중' : isSkip ? '패스됨' : '지원하기'}
+                      </button>
+                      {isPending && (
+                        <button onClick={() => cancelApplication(a.id)} style={{
+                          width: '100%', background: 'none', border: 'none', color: '#94a3b8',
+                          fontSize: 12, cursor: 'pointer', marginTop: 6, textDecoration: 'underline',
+                        }}>
+                          지원 취소
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               )
