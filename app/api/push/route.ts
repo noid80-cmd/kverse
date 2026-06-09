@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       const res = await fetch(details.endpoint, {
         method: 'POST',
         headers,
-        body: details.body ?? undefined,
+        body: details.body as unknown as BodyInit | null,
       })
 
       const resText = res.status >= 400 ? await res.text() : ''
