@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
-import { Plus, Megaphone, Users, Calendar } from 'lucide-react'
+import { Plus, Megaphone, Users, Calendar, Trash2 } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -33,6 +33,7 @@ export default function AgencyAuditionsPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], deadline: '' })
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
   const supabase = createClient()
 
   const load = useCallback(async () => {
@@ -60,6 +61,14 @@ export default function AgencyAuditionsPage() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  async function deleteAudition(id: string) {
+    if (!confirm('공고를 삭제할까요?')) return
+    setDeleting(id)
+    await supabase.from('auditions').delete().eq('id', id)
+    setAuditions(prev => prev.filter(a => a.id !== id))
+    setDeleting(null)
+  }
 
   async function createAudition() {
     if (!form.title.trim() || !agencyId || form.categories.length === 0) return
@@ -165,7 +174,8 @@ export default function AgencyAuditionsPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {auditions.map(a => (
-              <Link key={a.id} href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
+              <div key={a.id} style={{ position: 'relative' }}>
+                <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{ background: '#fff', borderRadius: 20, padding: '18px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
                     {a.category.split(',').map(c => (
@@ -190,6 +200,16 @@ export default function AgencyAuditionsPage() {
                   </div>
                 </div>
               </Link>
+                <button onClick={() => deleteAudition(a.id)} disabled={deleting === a.id}
+                  style={{
+                    position: 'absolute', top: 14, right: 14,
+                    background: '#f0f0f8', border: 'none', borderRadius: 10,
+                    width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', color: '#94a3b8', zIndex: 1,
+                  }}>
+                  <Trash2 size={14} strokeWidth={2} />
+                </button>
+              </div>
             ))}
           </div>
         )}
