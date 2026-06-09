@@ -27,6 +27,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   const [apps, setApps] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [playingId, setPlayingId] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -114,24 +115,32 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
               const age = getAge(a.talent?.birth_date ?? null)
               return (
                 <div key={a.id} style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  {/* 영상 썸네일 */}
-                  <a href={a.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-                    <div style={{
-                      height: 160, background: a.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative',
-                    }}>
-                      {a.thumbnail_url
-                        ? <img src={a.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <Video size={36} strokeWidth={1.5} color="#a5b4fc" />
-                      }
-                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>▶</div>
-                      </div>
-                      <div style={{ position: 'absolute', top: 10, right: 10 }}>
-                        <span style={{ background: badge.bg, color: badge.color, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>{badge.label}</span>
+                  {/* 영상 플레이어 */}
+                  {playingId === a.id ? (
+                    <video
+                      src={a.video_url} controls autoPlay playsInline
+                      poster={a.thumbnail_url ?? undefined}
+                      style={{ width: '100%', maxHeight: 280, display: 'block', background: '#000' }}
+                    />
+                  ) : (
+                    <div onClick={() => setPlayingId(a.id)} style={{ cursor: 'pointer' }}>
+                      <div style={{
+                        height: 160, background: a.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative',
+                      }}>
+                        {a.thumbnail_url
+                          ? <img src={a.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <Video size={36} strokeWidth={1.5} color="#a5b4fc" />
+                        }
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>▶</div>
+                        </div>
+                        <div style={{ position: 'absolute', top: 10, right: 10 }}>
+                          <span style={{ background: badge.bg, color: badge.color, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>{badge.label}</span>
+                        </div>
                       </div>
                     </div>
-                  </a>
+                  )}
 
                   <div style={{ padding: '14px 16px' }}>
                     {/* 지망생 정보 */}
