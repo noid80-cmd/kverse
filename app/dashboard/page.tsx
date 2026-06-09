@@ -195,7 +195,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-            <style>{`@keyframes auditSlide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }`}</style>
+            <style>{`@keyframes auditSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
 
