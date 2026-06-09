@@ -30,6 +30,7 @@ export default function AgencyAuditionsPage() {
   const [auditions, setAuditions] = useState<Audition[]>([])
   const [loading, setLoading] = useState(true)
   const [agencyId, setAgencyId] = useState<string | null>(null)
+  const [agencyName, setAgencyName] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], deadline: '' })
   const [saving, setSaving] = useState(false)
@@ -44,6 +45,9 @@ export default function AgencyAuditionsPage() {
     const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
     if (!am?.agency_id) { setLoading(false); return }
     setAgencyId(am.agency_id)
+
+    const { data: ag } = await supabase.from('agencies').select('name').eq('id', am.agency_id).single()
+    if (ag?.name) setAgencyName(ag.name)
 
     const { data } = await supabase.from('auditions')
       .select('id, title, description, category, deadline, status, created_at')
@@ -117,6 +121,10 @@ export default function AgencyAuditionsPage() {
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, marginBottom: 20, border: '1px solid #e0e0f0' }}>
             <h2 style={{ fontWeight: 800, color: '#1e1b4b', marginBottom: 16, fontSize: 16 }}>새 오디션 공고</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ ...inputStyle, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 8, cursor: 'default' }}>
+                <span style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '2px 8px', borderRadius: 6, fontWeight: 700, flexShrink: 0 }}>기획사</span>
+                <span style={{ fontWeight: 700, color: '#1e1b4b' }}>{agencyName}</span>
+              </div>
               <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 placeholder="공고 제목 *" style={inputStyle} />
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
