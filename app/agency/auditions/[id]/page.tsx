@@ -63,8 +63,22 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
       if (user) {
         const { data: existing } = await supabase.from('conversations').select('id')
           .eq('agency_member_id', user.id).eq('talent_id', talentId).single()
+
+        let convId = existing?.id
         if (!existing) {
-          await supabase.from('conversations').insert({ agency_member_id: user.id, talent_id: talentId })
+          const { data: newConv } = await supabase.from('conversations')
+            .insert({ agency_member_id: user.id, talent_id: talentId })
+            .select('id').single()
+          convId = newConv?.id
+        }
+
+        if (convId) {
+          const { data: agMember } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
+          const agencyDisplayName = agMember?.agency_id
+            ? (await supabase.from('agencies').select('name').eq('id', agMember.agency_id).single()).data?.name
+            : null
+          const greeting = `안녕하세요! 저희 ${agencyDisplayName ?? '기획사'}에서 "${audition?.title ?? '오디션'}"에 지원해 주신 영상을 인상 깊게 봤습니다 😊 편하게 말씀 나눠요!`
+          await supabase.from('messages').insert({ conversation_id: convId, sender_id: user.id, content: greeting })
         }
       }
       fetch('/api/push', {
