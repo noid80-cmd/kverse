@@ -70,7 +70,12 @@ export async function POST(req: NextRequest) {
       const jwt = await makeVapidJwt(sub.endpoint, publicKey)
       const headers: Record<string, string> = { ...(details.headers as unknown as Record<string, string>) }
       headers['Authorization'] = `vapid t=${jwt},k=${publicKey}`
-      console.log('[push] jwt first 30:', jwt.slice(0, 30))
+
+      // Debug: decode and log JWT payload
+      const jwtPayload = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString())
+      console.log('[push] jwt claims:', JSON.stringify(jwtPayload))
+      console.log('[push] vapid_email env:', process.env.VAPID_EMAIL?.slice(0, 5))
+      console.log('[push] auth header prefix:', headers['Authorization']?.slice(0, 40))
 
       const res = await fetch(details.endpoint, {
         method: 'POST',
