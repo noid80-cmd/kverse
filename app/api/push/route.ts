@@ -34,66 +34,76 @@ async function makeVapidJwt(endpoint: string, publicKey: string): Promise<string
   return `${signingInput}.${Buffer.from(sig).toString('base64url')}`
 }
 
-export async function POST(req: NextRequest) {
-  const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '').trim()
-  const privateKey = (process.env.VAPID_PRIVATE_KEY || '').trim()
-  console.log('[push] publicKey:', publicKey.slice(0, 12), 'len:', publicKey.length)
-
-  webpush.setVapidDetails(`mailto:${process.env.VAPID_EMAIL}`, publicKey, privateKey)
-
-  const { userId, title, body, url } = await req.json()
-  console.log('[push] userId:', userId)
-  if (!userId) return NextResponse.json({ error: 'missing userId' }, { status: 400 })
-
-  const { data: subs, error: dbErr } = await adminSupabase
-    .from('push_subscriptions')
-    .select('id, subscription')
-    .eq('user_id', userId)
-
-  console.log('[push] subs:', subs?.length ?? 0, dbErr?.message ?? 'ok')
-  if (!subs?.length) return NextResponse.json({ sent: 0 })
-
-  const payload = JSON.stringify({ title, body, url })
+async function sendToSubs(
+  subs: { id: string; subscription: unknown }[],
+  payload: string,
+  publicKey: string,
+  privateKey: string,
+): Promise<number> {
   let sent = 0
-
-  for (const { id, subscription } of subs) {
+  await Promise.allSettled(subs.map(async ({ id, subscription }) => {
     try {
       const sub = subscription as webpush.PushSubscription
-      console.log('[push] sending to:', sub.endpoint.slice(0, 40))
-
-      // Use web-push for payload encryption only
       const details = await webpush.generateRequestDetails(sub, payload, {
         vapidDetails: { subject: `mailto:${process.env.VAPID_EMAIL}`, publicKey, privateKey },
       })
-
-      // Override Authorization header with our crypto.subtle JWT
       const jwt = await makeVapidJwt(sub.endpoint, publicKey)
       const headers: Record<string, string> = { ...(details.headers as unknown as Record<string, string>) }
       headers['Authorization'] = `vapid t=${jwt},k=${publicKey}`
 
       const res = await fetch(details.endpoint, {
-        method: 'POST',
-        headers,
-        body: details.body as unknown as BodyInit | null,
+        method: 'POST', headers, body: details.body as unknown as BodyInit | null,
       })
-
-      const resText = res.status >= 400 ? await res.text() : ''
-      console.log('[push] status:', res.status, resText.slice(0, 100))
-
       if (res.status >= 200 && res.status < 300) {
         sent++
       } else if (res.status === 410 || res.status === 404) {
         await adminSupabase.from('push_subscriptions').delete().eq('id', id)
       }
     } catch (err: unknown) {
-      const e = err as { statusCode?: number; body?: string; message?: string }
-      console.error('[push] error:', e.statusCode, e.body ?? e.message)
+      const e = err as { statusCode?: number }
       if (e.statusCode === 410 || e.statusCode === 404) {
         await adminSupabase.from('push_subscriptions').delete().eq('id', id)
       }
     }
+  }))
+  return sent
+}
+
+export async function POST(req: NextRequest) {
+  const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '').trim()
+  const privateKey = (process.env.VAPID_PRIVATE_KEY || '').trim()
+
+  webpush.setVapidDetails(`mailto:${process.env.VAPID_EMAIL}`, publicKey, privateKey)
+
+  const { userId, broadcast, title, body, url } = await req.json()
+
+  let subs: { id: string; subscription: unknown }[] = []
+
+  if (broadcast) {
+    // 기획사 멤버 제외하고 전체 지망생에게 발송
+    const { data: agencyMembers } = await adminSupabase
+      .from('agency_members').select('profile_id')
+    const agencyIds = agencyMembers?.map((m: { profile_id: string }) => m.profile_id) ?? []
+
+    let query = adminSupabase.from('push_subscriptions').select('id, subscription')
+    if (agencyIds.length > 0) {
+      query = query.not('user_id', 'in', `(${agencyIds.join(',')})`)
+    }
+    const { data } = await query
+    subs = data ?? []
+    console.log('[push] broadcast to talents:', subs.length)
+  } else {
+    if (!userId) return NextResponse.json({ error: 'missing userId' }, { status: 400 })
+    const { data } = await adminSupabase
+      .from('push_subscriptions').select('id, subscription').eq('user_id', userId)
+    subs = data ?? []
+    console.log('[push] userId:', userId, 'subs:', subs.length)
   }
 
+  if (!subs.length) return NextResponse.json({ sent: 0 })
+
+  const payload = JSON.stringify({ title, body, url })
+  const sent = await sendToSubs(subs, payload, publicKey, privateKey)
   console.log('[push] done sent:', sent)
   return NextResponse.json({ sent })
 }

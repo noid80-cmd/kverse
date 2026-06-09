@@ -89,7 +89,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
           <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
           <div>
             <div style={{ fontSize: 13, color: '#8b8baa', marginBottom: 2 }}>
-              {audition ? categoryLabel[audition.category] : ''}
+              {audition ? audition.category.split(',').map(c => categoryLabel[c] ?? c).join(' · ') : ''}
               {audition?.deadline ? ` · ~${audition.deadline}` : ''}
             </div>
             <h1 style={{ fontSize: 20, fontWeight: 900, color: '#1e1b4b' }}>{audition?.title ?? '...'}</h1>

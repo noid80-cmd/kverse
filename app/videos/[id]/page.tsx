@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
-import { Home, Compass, Plus, Bell, User } from 'lucide-react'
+import { Home, Compass, Plus, Bell, Megaphone } from 'lucide-react'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
   { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
+  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
   { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
   { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-  { href: '/profile/edit', label: '프로필', icon: <User size={22} strokeWidth={1.8} /> },
 ]
 
 const categoryLabel: Record<string, string> = {

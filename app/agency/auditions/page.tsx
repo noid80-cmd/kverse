@@ -31,7 +31,7 @@ export default function AgencyAuditionsPage() {
   const [loading, setLoading] = useState(true)
   const [agencyId, setAgencyId] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', category: 'vocal', deadline: '' })
+  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], deadline: '' })
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
@@ -62,20 +62,29 @@ export default function AgencyAuditionsPage() {
   useEffect(() => { load() }, [load])
 
   async function createAudition() {
-    if (!form.title.trim() || !agencyId) return
+    if (!form.title.trim() || !agencyId || form.categories.length === 0) return
     setSaving(true)
     const { error } = await supabase.from('auditions').insert({
       agency_id: agencyId,
       title: form.title.trim(),
       description: form.description.trim() || null,
-      category: form.category,
+      category: form.categories.join(','),
       deadline: form.deadline || null,
       status: 'active',
     })
     if (!error) {
-      setForm({ title: '', description: '', category: 'vocal', deadline: '' })
+      setForm({ title: '', description: '', categories: ['vocal'], deadline: '' })
       setShowCreate(false)
       load()
+      fetch('/api/push', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          broadcast: true,
+          title: '새 오디션 공고',
+          body: `${form.title.trim()} 오디션이 올라왔어요!`,
+          url: '/dashboard/auditions',
+        }),
+      })
     }
     setSaving(false)
   }
@@ -104,13 +113,26 @@ export default function AgencyAuditionsPage() {
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 placeholder="모집 요건, 지원 방법 등 상세 내용" rows={3}
                 style={{ ...inputStyle, resize: 'none' }} />
-              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} style={inputStyle}>
-                <option value="vocal">보컬</option>
-                <option value="dance">댄스</option>
-                <option value="acting">연기</option>
-                <option value="rap">랩</option>
-                <option value="other">기타</option>
-              </select>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {(['vocal', 'dance', 'acting', 'rap', 'other'] as const).map(cat => {
+                  const selected = form.categories.includes(cat)
+                  return (
+                    <button key={cat} type="button" onClick={() => setForm(f => ({
+                      ...f,
+                      categories: selected
+                        ? f.categories.filter(c => c !== cat)
+                        : [...f.categories, cat],
+                    }))} style={{
+                      padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      cursor: 'pointer', border: selected ? 'none' : '1.5px solid #e0e0f0',
+                      background: selected ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#f8f8fc',
+                      color: selected ? 'white' : '#94a3b8',
+                    }}>
+                      {categoryLabel[cat]}
+                    </button>
+                  )
+                })}
+              </div>
               <div>
                 <label style={{ fontSize: 12, color: '#8b8baa', marginBottom: 4, display: 'block' }}>마감일 (선택)</label>
                 <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} style={inputStyle} />
@@ -145,9 +167,13 @@ export default function AgencyAuditionsPage() {
             {auditions.map(a => (
               <Link key={a.id} href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{ background: '#fff', borderRadius: 20, padding: '18px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <span style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700, display: 'inline-block', marginBottom: 8 }}>
-                    {categoryLabel[a.category] ?? a.category}
-                  </span>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                    {a.category.split(',').map(c => (
+                      <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                        {categoryLabel[c] ?? c}
+                      </span>
+                    ))}
+                  </div>
                   <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 16, marginBottom: 4 }}>{a.title}</div>
                   {a.description && (
                     <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>

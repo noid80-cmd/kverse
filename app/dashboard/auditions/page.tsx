@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
-import { Home, Compass, Plus, Bell, User, Megaphone, Video, CheckCircle, X } from 'lucide-react'
+import { Home, Compass, Plus, Bell, Megaphone, Video, CheckCircle, X } from 'lucide-react'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
@@ -11,7 +11,6 @@ const talentNav = [
   { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
   { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
   { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-  { href: '/profile/edit', label: '프로필', icon: <User size={22} strokeWidth={1.8} /> },
 ]
 
 const categoryLabel: Record<string, string> = {
@@ -250,9 +249,11 @@ export default function TalentAuditionsPage() {
               return (
                 <div key={a.id} style={{ background: '#fff', borderRadius: 20, padding: '18px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                      {categoryLabel[a.category] ?? a.category}
-                    </span>
+                    {a.category.split(',').map(c => (
+                      <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                        {categoryLabel[c] ?? c}
+                      </span>
+                    ))}
                     {a.agency?.is_verified && (
                       <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
                     )}

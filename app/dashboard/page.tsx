@@ -13,7 +13,6 @@ const talentNav = [
   { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
   { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
   { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-  { href: '/profile/edit', label: '프로필', icon: <User size={22} strokeWidth={1.8} /> },
 ]
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
@@ -85,17 +84,19 @@ export default function DashboardPage() {
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b' }}>{profile?.name ?? '...'}</h1>
           </div>
-          <div style={{
-            width: 48, height: 48, borderRadius: 16,
-            background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden',
-          }}>
-            {profile?.avatar_url
-              ? <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{profile?.name?.[0] ?? 'K'}</span>
-            }
-          </div>
+          <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 16,
+              background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              overflow: 'hidden',
+            }}>
+              {profile?.avatar_url
+                ? <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{profile?.name?.[0] ?? 'K'}</span>
+              }
+            </div>
+          </Link>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 28 }}>
