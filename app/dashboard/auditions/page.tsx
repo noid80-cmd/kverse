@@ -31,6 +31,11 @@ type Audition = {
 }
 
 type MyVideo = { id: string; title: string; thumbnail_url: string | null; video_url: string; category: string }
+const today = new Date().toISOString().slice(0, 10)
+function isExpired(deadline: string | null) {
+  return !!deadline && deadline < today
+}
+
 export default function TalentAuditionsPage() {
   const [auditions, setAuditions] = useState<Audition[]>([])
   const [loading, setLoading] = useState(true)
@@ -254,98 +259,128 @@ export default function TalentAuditionsPage() {
             </div>
             <div style={{ fontWeight: 700, color: '#1e1b4b' }}>아직 공고가 없어요</div>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {auditions.map(a => {
-              const appInfo = applicationMap[a.id]
-              const appStatus = appInfo?.status
-              const isInvited = appStatus === 'invited'
-              const isPending = appStatus === 'pending'
-              const isSkip = appStatus === 'skip'
-              return (
-                <div key={a.id} style={{
-                  background: isInvited ? 'linear-gradient(135deg, #f0fdf4, #f8fff9)' : '#fff',
-                  borderRadius: 20, padding: '18px 20px',
-                  border: `1px solid ${isInvited ? '#86efac' : '#e8e8f2'}`,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                    <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18 }}>{a.agency?.name ?? '기획사'}</div>
-                    {a.agency?.is_verified && (
-                      <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
-                    )}
-                    {isInvited && <span style={{ fontSize: 11, background: '#dcfce7', color: '#16a34a', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                    <div style={{ fontWeight: 700, color: '#6366f1', fontSize: 14 }}>{a.title}</div>
-                    {a.category.split(',').map(c => (
-                      <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                        {categoryLabel[c] ?? c}
-                      </span>
-                    ))}
-                  </div>
-                  {a.description && (
-                    <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
+        ) : (() => {
+          const active = auditions.filter(a => !isExpired(a.deadline))
+          const expired = auditions.filter(a => isExpired(a.deadline))
+
+          const AuditionCard = ({ a }: { a: Audition }) => {
+            const exp = isExpired(a.deadline)
+            const appInfo = applicationMap[a.id]
+            const appStatus = appInfo?.status
+            const isInvited = appStatus === 'invited'
+            const isPending = appStatus === 'pending'
+            const isSkip = appStatus === 'skip'
+            return (
+              <div style={{
+                background: isInvited ? 'linear-gradient(135deg, #f0fdf4, #f8fff9)' : exp ? '#f8f8fc' : '#fff',
+                borderRadius: 20, padding: '18px 20px',
+                border: `1px solid ${isInvited ? '#86efac' : '#e8e8f2'}`,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                opacity: exp && !appInfo ? 0.65 : 1,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                  <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18 }}>{a.agency?.name ?? '기획사'}</div>
+                  {a.agency?.is_verified && (
+                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
                   )}
-                  {a.deadline && (
-                    <div style={{ fontSize: 12, color: '#8b8baa', marginBottom: 12 }}>마감 {a.deadline}</div>
-                  )}
-                  {appInfo && (
-                    <div style={{ marginBottom: 10 }}>
-                      {playingAuditionId === a.id ? (
-                        <video src={appInfo.videoUrl ?? ''} controls autoPlay playsInline
-                          style={{ width: '100%', borderRadius: 12, maxHeight: 220, background: '#000', display: 'block' }} />
-                      ) : (
-                        <div onClick={() => appInfo.videoUrl && setPlayingAuditionId(a.id)}
-                          style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
-                          {appInfo.thumbnailUrl
-                            ? <img src={appInfo.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a5b4fc' }}><Video size={24} strokeWidth={1.5} /></div>
-                          }
-                          {appInfo.videoUrl && (
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>▶</div>
-                            </div>
-                          )}
-                          <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 11, color: 'white', fontWeight: 700, background: 'rgba(0,0,0,0.45)', padding: '2px 7px', borderRadius: 6 }}>제출한 영상</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {isInvited ? (
-                    <Link href="/reactions" style={{ textDecoration: 'none' }}>
-                      <div style={{
-                        width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
-                        background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white', textAlign: 'center',
-                      }}>
-                        채팅 확인하기 →
-                      </div>
-                    </Link>
-                  ) : (
-                    <>
-                      <button onClick={() => !appStatus && openModal(a)} style={{
-                        width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
-                        cursor: appStatus ? 'default' : 'pointer',
-                        background: isPending ? '#fef9c3' : isSkip ? '#f0f0f8' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        color: isPending ? '#ca8a04' : isSkip ? '#94a3b8' : 'white',
-                      }}>
-                        {isPending ? '검토중' : isSkip ? '패스됨' : '지원하기'}
-                      </button>
-                      {isPending && (
-                        <button onClick={() => cancelApplication(a.id)} style={{
-                          width: '100%', background: 'none', border: 'none', color: '#94a3b8',
-                          fontSize: 12, cursor: 'pointer', marginTop: 6, textDecoration: 'underline',
-                        }}>
-                          지원 취소
-                        </button>
-                      )}
-                    </>
-                  )}
+                  {isInvited && <span style={{ fontSize: 11, background: '#dcfce7', color: '#16a34a', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
                 </div>
-              )
-            })}
-          </div>
-        )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                  <div style={{ fontWeight: 700, color: '#6366f1', fontSize: 14 }}>{a.title}</div>
+                  {a.category.split(',').map(c => (
+                    <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                      {categoryLabel[c] ?? c}
+                    </span>
+                  ))}
+                </div>
+                {a.description && (
+                  <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
+                )}
+                {a.deadline && (
+                  <div style={{ fontSize: 12, color: exp ? '#ef4444' : '#8b8baa', fontWeight: exp ? 700 : 400, marginBottom: 12 }}>
+                    {exp ? '마감됨 · ' : '마감 '}{a.deadline}
+                  </div>
+                )}
+                {appInfo && (
+                  <div style={{ marginBottom: 10 }}>
+                    {playingAuditionId === a.id ? (
+                      <video src={appInfo.videoUrl ?? ''} controls autoPlay playsInline
+                        style={{ width: '100%', borderRadius: 12, maxHeight: 220, background: '#000', display: 'block' }} />
+                    ) : (
+                      <div onClick={() => appInfo.videoUrl && setPlayingAuditionId(a.id)}
+                        style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
+                        {appInfo.thumbnailUrl
+                          ? <img src={appInfo.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a5b4fc' }}><Video size={24} strokeWidth={1.5} /></div>
+                        }
+                        {appInfo.videoUrl && (
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>▶</div>
+                          </div>
+                        )}
+                        <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 11, color: 'white', fontWeight: 700, background: 'rgba(0,0,0,0.45)', padding: '2px 7px', borderRadius: 6 }}>제출한 영상</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {isInvited ? (
+                  <Link href="/reactions" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
+                      background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white', textAlign: 'center',
+                    }}>
+                      채팅 확인하기 →
+                    </div>
+                  </Link>
+                ) : exp ? (
+                  <div style={{
+                    width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
+                    background: '#f0f0f8', color: '#94a3b8', textAlign: 'center',
+                  }}>
+                    마감된 공고
+                  </div>
+                ) : (
+                  <>
+                    <button onClick={() => !appStatus && openModal(a)} style={{
+                      width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
+                      cursor: appStatus ? 'default' : 'pointer',
+                      background: isPending ? '#fef9c3' : isSkip ? '#f0f0f8' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      color: isPending ? '#ca8a04' : isSkip ? '#94a3b8' : 'white',
+                    }}>
+                      {isPending ? '검토중' : isSkip ? '패스됨' : '지원하기'}
+                    </button>
+                    {isPending && (
+                      <button onClick={() => cancelApplication(a.id)} style={{
+                        width: '100%', background: 'none', border: 'none', color: '#94a3b8',
+                        fontSize: 12, cursor: 'pointer', marginTop: 6, textDecoration: 'underline',
+                      }}>
+                        지원 취소
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          }
+
+          return (
+            <>
+              {active.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: expired.length > 0 ? 28 : 0 }}>
+                  {active.map(a => <AuditionCard key={a.id} a={a} />)}
+                </div>
+              )}
+              {expired.length > 0 && (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 12 }}>마감된 공고</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {expired.map(a => <AuditionCard key={a.id} a={a} />)}
+                  </div>
+                </>
+              )}
+            </>
+          )
+        })()}
       </div>
 
       {/* 지원 모달 */}

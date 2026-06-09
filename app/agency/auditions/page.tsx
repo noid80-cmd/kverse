@@ -74,8 +74,13 @@ export default function AgencyAuditionsPage() {
     setDeleting(null)
   }
 
+  const today = new Date().toISOString().slice(0, 10)
+  function isExpired(deadline: string | null) {
+    return !!deadline && deadline < today
+  }
+
   async function createAudition() {
-    if (!form.title.trim() || !agencyId || form.categories.length === 0) return
+    if (!form.title.trim() || !agencyId || form.categories.length === 0 || !form.deadline) return
     setSaving(true)
     const { error } = await supabase.from('auditions').insert({
       agency_id: agencyId,
@@ -151,18 +156,19 @@ export default function AgencyAuditionsPage() {
                 })}
               </div>
               <div>
-                <label style={{ fontSize: 12, color: '#8b8baa', marginBottom: 4, display: 'block' }}>마감일 (선택)</label>
-                <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} style={inputStyle} />
+                <label style={{ fontSize: 12, color: '#ef4444', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
+                <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
+                  style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                 <button onClick={() => setShowCreate(false)} style={{
                   flex: 1, background: '#f0f0f8', border: 'none', borderRadius: 12, padding: 12,
                   fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#8b8baa',
                 }}>취소</button>
-                <button onClick={createAudition} disabled={saving || !form.title.trim()} style={{
+                <button onClick={createAudition} disabled={saving || !form.title.trim() || !form.deadline} style={{
                   flex: 2, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
                   border: 'none', borderRadius: 12, padding: 12, fontSize: 14, fontWeight: 700,
-                  cursor: 'pointer', opacity: saving || !form.title.trim() ? 0.5 : 1,
+                  cursor: 'pointer', opacity: saving || !form.title.trim() || !form.deadline ? 0.5 : 1,
                 }}>{saving ? '저장 중...' : '공고 올리기'}</button>
               </div>
             </div>
@@ -179,12 +185,13 @@ export default function AgencyAuditionsPage() {
             <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4 }}>아직 공고가 없어요</div>
             <div style={{ fontSize: 13, color: '#8b8baa' }}>공고를 올려 지망생들의 지원을 받아보세요</div>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {auditions.map(a => (
-              <div key={a.id} style={{ position: 'relative' }}>
-                <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#fff', borderRadius: 20, padding: '18px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+        ) : (() => {
+          const active = auditions.filter(a => !isExpired(a.deadline))
+          const expired = auditions.filter(a => isExpired(a.deadline))
+          const AuditionCard = ({ a }: { a: Audition }) => (
+            <div key={a.id} style={{ position: 'relative' }}>
+              <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
+                <div style={{ background: isExpired(a.deadline) ? '#f8f8fc' : '#fff', borderRadius: 20, padding: '18px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', opacity: isExpired(a.deadline) ? 0.7 : 1 }}>
                   <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18, marginBottom: 4 }}>{agencyName}</div>
                   <div style={{ fontWeight: 600, color: '#6366f1', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -202,26 +209,42 @@ export default function AgencyAuditionsPage() {
                       <Users size={14} strokeWidth={2} /> {a.applicant_count}명 지원
                     </div>
                     {a.deadline && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#8b8baa', fontSize: 12 }}>
-                        <Calendar size={13} strokeWidth={2} /> ~{a.deadline}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: isExpired(a.deadline) ? '#ef4444' : '#8b8baa', fontSize: 12, fontWeight: isExpired(a.deadline) ? 700 : 400 }}>
+                        <Calendar size={13} strokeWidth={2} /> {isExpired(a.deadline) ? '마감 ' : '~'}{a.deadline}
                       </div>
                     )}
                   </div>
                 </div>
               </Link>
-                <button onClick={() => deleteAudition(a.id)} disabled={deleting === a.id}
-                  style={{
-                    position: 'absolute', top: 14, right: 14,
-                    background: '#f0f0f8', border: 'none', borderRadius: 10,
-                    width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#94a3b8', zIndex: 1,
-                  }}>
-                  <Trash2 size={14} strokeWidth={2} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+              <button onClick={() => deleteAudition(a.id)} disabled={deleting === a.id}
+                style={{
+                  position: 'absolute', top: 14, right: 14,
+                  background: '#f0f0f8', border: 'none', borderRadius: 10,
+                  width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#94a3b8', zIndex: 1,
+                }}>
+                <Trash2 size={14} strokeWidth={2} />
+              </button>
+            </div>
+          )
+          return (
+            <>
+              {active.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: expired.length > 0 ? 28 : 0 }}>
+                  {active.map(a => <AuditionCard key={a.id} a={a} />)}
+                </div>
+              )}
+              {expired.length > 0 && (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 12 }}>마감된 공고</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {expired.map(a => <AuditionCard key={a.id} a={a} />)}
+                  </div>
+                </>
+              )}
+            </>
+          )
+        })()}
       </div>
       <AgencyNav />
     </div>
