@@ -51,21 +51,22 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     load()
   }, [])
 
-  async function updateStatus(appId: string, status: 'pass' | 'fail', talentId: string) {
+  async function updateStatus(appId: string, status: 'invited' | 'skip', talentId: string) {
     setUpdating(appId)
     await supabase.from('audition_applications').update({ status }).eq('id', appId)
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
 
-    const label = status === 'pass' ? '합격' : '불합격'
-    fetch('/api/push', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: talentId,
-        title: `오디션 결과`,
-        body: `${audition?.title ?? '오디션'} ${label} 통보가 왔어요`,
-        url: '/dashboard/auditions',
-      }),
-    })
+    if (status === 'invited') {
+      fetch('/api/push', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: talentId,
+          title: '오디션 초대',
+          body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요!`,
+          url: '/dashboard/auditions',
+        }),
+      })
+    }
     setUpdating(null)
   }
 
@@ -75,9 +76,9 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   }
 
   const statusBadge = (s: string) => {
-    if (s === 'pass') return { bg: '#dcfce7', color: '#16a34a', label: '합격' }
-    if (s === 'fail') return { bg: '#fee2e2', color: '#dc2626', label: '불합격' }
-    return { bg: '#f0f0f8', color: '#8b8baa', label: '검토중' }
+    if (s === 'invited') return { bg: '#dcfce7', color: '#16a34a', label: '초대' }
+    if (s === 'skip') return { bg: '#f0f0f8', color: '#94a3b8', label: '패스' }
+    return { bg: '#fef9c3', color: '#ca8a04', label: '검토중' }
   }
 
   return (
@@ -159,23 +160,23 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
                     {a.status === 'pending' && (
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button onClick={() => updateStatus(a.id, 'fail', a.talent?.id ?? '')}
+                        <button onClick={() => updateStatus(a.id, 'skip', a.talent?.id ?? '')}
                           disabled={updating === a.id}
                           style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                            background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 12,
+                            background: '#f0f0f8', color: '#94a3b8', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
-                          <XCircle size={15} strokeWidth={2} /> 불합격
+                          <XCircle size={15} strokeWidth={2} /> 패스
                         </button>
-                        <button onClick={() => updateStatus(a.id, 'pass', a.talent?.id ?? '')}
+                        <button onClick={() => updateStatus(a.id, 'invited', a.talent?.id ?? '')}
                           disabled={updating === a.id}
                           style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                            background: '#dcfce7', color: '#16a34a', border: 'none', borderRadius: 12,
+                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
-                          <CheckCircle size={15} strokeWidth={2} /> 합격
+                          <CheckCircle size={15} strokeWidth={2} /> 초대
                         </button>
                       </div>
                     )}
