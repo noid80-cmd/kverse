@@ -59,12 +59,20 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
 
     if (status === 'invited') {
+      const user = (await supabase.auth.getSession()).data.session?.user
+      if (user) {
+        const { data: existing } = await supabase.from('conversations').select('id')
+          .eq('agency_member_id', user.id).eq('talent_id', talentId).single()
+        if (!existing) {
+          await supabase.from('conversations').insert({ agency_member_id: user.id, talent_id: talentId })
+        }
+      }
       fetch('/api/push', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: talentId,
-          title: '오디션 초대',
-          body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요!`,
+          title: '오디션 초대 🎉',
+          body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요! 채팅을 확인해보세요.`,
           url: '/dashboard/auditions',
         }),
       })

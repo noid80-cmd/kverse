@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Video, CheckCircle, X } from 'lucide-react'
 
 const talentNav = [
@@ -30,6 +31,10 @@ type Audition = {
 }
 
 type MyVideo = { id: string; title: string; thumbnail_url: string | null; video_url: string; category: string }
+type MyApplication = {
+  id: string; status: string
+  audition: { title: string; category: string; agency: { name: string } | null } | null
+}
 
 export default function TalentAuditionsPage() {
   const [auditions, setAuditions] = useState<Audition[]>([])
@@ -37,6 +42,7 @@ export default function TalentAuditionsPage() {
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set())
   const [myId, setMyId] = useState('')
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
+  const [myApplications, setMyApplications] = useState<MyApplication[]>([])
 
   // Apply modal state
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
@@ -56,7 +62,7 @@ export default function TalentAuditionsPage() {
     if (!user) { window.location.href = '/login'; return }
     setMyId(user.id)
 
-    const [{ data: auds }, { data: applied }, { data: vids }] = await Promise.all([
+    const [{ data: auds }, { data: applied }, { data: vids }, { data: myApps }] = await Promise.all([
       supabase.from('auditions')
         .select('id, title, description, category, deadline, created_at, agency:agencies(name, is_verified)')
         .eq('status', 'active')
@@ -64,11 +70,16 @@ export default function TalentAuditionsPage() {
       supabase.from('audition_applications').select('audition_id').eq('talent_id', user.id),
       supabase.from('videos').select('id, title, thumbnail_url, video_url, category')
         .eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }),
+      supabase.from('audition_applications')
+        .select('id, status, audition:auditions(title, category, agency:agencies(name))')
+        .eq('talent_id', user.id)
+        .order('created_at', { ascending: false }),
     ])
 
     setAuditions((auds as unknown as Audition[]) ?? [])
     setAppliedIds(new Set(applied?.map(a => a.audition_id) ?? []))
     setMyVideos((vids as unknown as MyVideo[]) ?? [])
+    setMyApplications((myApps as unknown as MyApplication[]) ?? [])
     setLoading(false)
   }, [])
 
@@ -232,6 +243,48 @@ export default function TalentAuditionsPage() {
       <div className="max-w-lg mx-auto px-4 pt-10">
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 6 }}>오디션 공고</h1>
         <p style={{ fontSize: 13, color: '#8b8baa', marginBottom: 24 }}>기획사의 오디션에 맞춤 영상으로 지원해보세요</p>
+
+        {myApplications.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#1e1b4b', marginBottom: 12 }}>내 지원 현황</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {myApplications.map(app => {
+                const isInvited = app.status === 'invited'
+                const isSkip = app.status === 'skip'
+                const badge = isInvited
+                  ? { bg: '#dcfce7', color: '#16a34a', label: '초대됨 🎉' }
+                  : isSkip
+                  ? { bg: '#f0f0f8', color: '#94a3b8', label: '패스' }
+                  : { bg: '#fef9c3', color: '#ca8a04', label: '검토중' }
+                return (
+                  <div key={app.id} style={{
+                    background: isInvited ? 'linear-gradient(135deg, #f0fdf4, #dcfce7)' : '#fff',
+                    borderRadius: 16, padding: '14px 16px',
+                    border: `1px solid ${isInvited ? '#86efac' : '#e8e8f2'}`,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{app.audition?.title ?? '오디션'}</div>
+                      <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 8, background: badge.bg, color: badge.color }}>{badge.label}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: '#8b8baa', marginBottom: isInvited ? 10 : 0 }}>{app.audition?.agency?.name ?? '기획사'}</div>
+                    {isInvited && (
+                      <Link href="/reactions" style={{ textDecoration: 'none' }}>
+                        <div style={{
+                          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+                          borderRadius: 12, padding: '10px', textAlign: 'center',
+                          fontSize: 13, fontWeight: 700,
+                        }}>
+                          채팅 확인하기 →
+                        </div>
+                      </Link>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
