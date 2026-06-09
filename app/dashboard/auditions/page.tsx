@@ -78,7 +78,8 @@ export default function TalentAuditionsPage() {
 
   async function cancelApplication(auditionId: string) {
     if (!confirm('지원을 취소할까요?')) return
-    await supabase.from('audition_applications').delete().eq('audition_id', auditionId).eq('talent_id', myId)
+    const { error } = await supabase.from('audition_applications').delete().eq('audition_id', auditionId).eq('talent_id', myId)
+    if (error) { alert('취소 실패: ' + error.message); return }
     setApplicationMap(prev => { const next = { ...prev }; delete next[auditionId]; return next })
   }
 
