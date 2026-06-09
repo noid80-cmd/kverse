@@ -74,7 +74,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const len = data?.recentAuditions.length ?? 0
     if (len <= 1) return
-    const t = setInterval(() => setAuditionIdx(i => (i + 1) % len), 3500)
+    const t = setInterval(() => setAuditionIdx(i => (i + 1) % len), 5000)
     return () => clearInterval(t)
   }, [data?.recentAuditions.length])
 
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                 background: '#fff', borderRadius: 16, padding: '14px 16px',
                 border: '1px solid #e8e8f2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 display: 'flex', alignItems: 'center', gap: 12,
-                animation: 'auditSlide 0.4s ease',
+                animation: 'auditSlide 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
               }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #eef2ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#6366f1' }}>
                   <Megaphone size={18} strokeWidth={1.8} />
@@ -195,7 +195,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-            <style>{`@keyframes auditSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+            <style>{`@keyframes auditSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
 
