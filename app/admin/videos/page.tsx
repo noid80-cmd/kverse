@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 const adminNav = [
+  { href: '/admin', label: '📊 대시보드' },
   { href: '/admin/users', label: '👥 회원' },
   { href: '/admin/agencies', label: '🏢 기획사' },
   { href: '/admin/videos', label: '🎬 영상' },

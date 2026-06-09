@@ -3,13 +3,14 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Compass, Bookmark, MessageCircle, LogOut, Megaphone } from 'lucide-react'
+import { Compass, Bookmark, MessageCircle, LogOut, Megaphone, Settings } from 'lucide-react'
 
 const agencyNav = [
   { href: '/agency/discover', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
   { href: '/agency/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
   { href: '/agency/talents', label: '관심', icon: <Bookmark size={22} strokeWidth={1.8} /> },
   { href: '/agency/contacts', label: '연락', icon: <MessageCircle size={22} strokeWidth={1.8} /> },
+  { href: '/agency/settings', label: '설정', icon: <Settings size={22} strokeWidth={1.8} /> },
 ]
 
 export default function AgencyNav() {
