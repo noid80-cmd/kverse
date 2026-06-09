@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Video, CheckCircle, XCircle } from 'lucide-react'
 
 type Application = {
@@ -144,7 +145,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
                   <div style={{ padding: '14px 16px' }}>
                     {/* 지망생 정보 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <Link href={`/agency/talents/${a.talent?.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <div style={{
                         width: 36, height: 36, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
                         background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -155,11 +156,12 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                           : <span style={{ color: 'white', fontWeight: 900, fontSize: 13 }}>{a.talent?.name?.[0] ?? '?'}</span>
                         }
                       </div>
-                      <div>
+                      <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{a.talent?.name ?? '이름 없음'}</div>
                         {age && <div style={{ fontSize: 12, color: '#8b8baa' }}>{age}세</div>}
                       </div>
-                    </div>
+                      <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </Link>
 
                     {a.message && (
                       <div style={{ fontSize: 13, color: '#6b7280', background: '#f8f8fc', borderRadius: 10, padding: '10px 12px', marginBottom: 12 }}>
