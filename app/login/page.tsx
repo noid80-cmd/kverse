@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
@@ -14,6 +14,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isKakao, setIsKakao] = useState(false)
+
+  useEffect(() => {
+    setIsKakao(/KAKAOTALK/i.test(navigator.userAgent))
+  }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -60,9 +65,15 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full flex flex-col gap-4">
-          <button onClick={handleGoogle}
+          {isKakao && (
+            <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 14, padding: '12px 16px', fontSize: 13, color: '#92400e', lineHeight: 1.5 }}>
+              카카오톡에서는 구글 로그인이 차단돼요.<br />
+              <strong>이메일로 로그인</strong>하거나, 우측 상단 <strong>⋮ → 다른 브라우저로 열기</strong>를 눌러주세요.
+            </div>
+          )}
+          <button onClick={handleGoogle} disabled={isKakao}
             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl transition active:scale-95"
-            style={{ background: '#fff', color: '#1e1b4b', fontSize: 16, fontWeight: 700, border: '1px solid #d8d8ec', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
+            style={{ background: '#fff', color: isKakao ? '#94a3b8' : '#1e1b4b', fontSize: 16, fontWeight: 700, border: '1px solid #d8d8ec', boxShadow: '0 2px 12px rgba(0,0,0,0.07)', opacity: isKakao ? 0.5 : 1, cursor: isKakao ? 'default' : 'pointer' }}>
             <svg width="22" height="22" viewBox="0 0 48 48">
               <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
               <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
