@@ -34,7 +34,9 @@ type MyVideo = { id: string; title: string; thumbnail_url: string | null; video_
 export default function TalentAuditionsPage() {
   const [auditions, setAuditions] = useState<Audition[]>([])
   const [loading, setLoading] = useState(true)
-  const [applicationMap, setApplicationMap] = useState<Record<string, string>>({})
+  type AppInfo = { status: string; videoUrl: string | null; thumbnailUrl: string | null }
+  const [applicationMap, setApplicationMap] = useState<Record<string, AppInfo>>({})
+  const [playingAuditionId, setPlayingAuditionId] = useState<string | null>(null)
   const [myId, setMyId] = useState('')
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
 
@@ -61,14 +63,14 @@ export default function TalentAuditionsPage() {
         .select('id, title, description, category, deadline, created_at, agency:agencies(name, is_verified)')
         .eq('status', 'active')
         .order('created_at', { ascending: false }),
-      supabase.from('audition_applications').select('audition_id, status').eq('talent_id', user.id),
+      supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
       supabase.from('videos').select('id, title, thumbnail_url, video_url, category')
         .eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }),
     ])
 
     setAuditions((auds as unknown as Audition[]) ?? [])
-    const map: Record<string, string> = {}
-    myApps?.forEach(a => { map[a.audition_id] = a.status })
+    const map: Record<string, AppInfo> = {}
+    myApps?.forEach(a => { map[a.audition_id] = { status: a.status, videoUrl: a.video_url, thumbnailUrl: a.thumbnail_url } })
     setApplicationMap(map)
     setMyVideos((vids as unknown as MyVideo[]) ?? [])
     setLoading(false)
@@ -81,6 +83,7 @@ export default function TalentAuditionsPage() {
     const { error } = await supabase.from('audition_applications').delete().eq('audition_id', auditionId).eq('talent_id', myId)
     if (error) { alert('취소 실패: ' + error.message); return }
     setApplicationMap(prev => { const next = { ...prev }; delete next[auditionId]; return next })
+    setPlayingAuditionId(null)
   }
 
   function openModal(audition: Audition) {
@@ -212,7 +215,7 @@ export default function TalentAuditionsPage() {
 
     if (dbErr) { setError('지원 실패: ' + dbErr.message); setSubmitting(false); return }
 
-    setApplicationMap(prev => ({ ...prev, [modalAudition.id]: 'pending' }))
+    setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
 
     // 기획사 담당자에게 푸시 알림
@@ -254,7 +257,8 @@ export default function TalentAuditionsPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {auditions.map(a => {
-              const appStatus = applicationMap[a.id]
+              const appInfo = applicationMap[a.id]
+              const appStatus = appInfo?.status
               const isInvited = appStatus === 'invited'
               const isPending = appStatus === 'pending'
               const isSkip = appStatus === 'skip'
@@ -283,6 +287,28 @@ export default function TalentAuditionsPage() {
                   )}
                   {a.deadline && (
                     <div style={{ fontSize: 12, color: '#8b8baa', marginBottom: 12 }}>마감 {a.deadline}</div>
+                  )}
+                  {appInfo && (
+                    <div style={{ marginBottom: 10 }}>
+                      {playingAuditionId === a.id ? (
+                        <video src={appInfo.videoUrl ?? ''} controls autoPlay playsInline
+                          style={{ width: '100%', borderRadius: 12, maxHeight: 220, background: '#000', display: 'block' }} />
+                      ) : (
+                        <div onClick={() => appInfo.videoUrl && setPlayingAuditionId(a.id)}
+                          style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
+                          {appInfo.thumbnailUrl
+                            ? <img src={appInfo.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a5b4fc' }}><Video size={24} strokeWidth={1.5} /></div>
+                          }
+                          {appInfo.videoUrl && (
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>▶</div>
+                            </div>
+                          )}
+                          <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 11, color: 'white', fontWeight: 700, background: 'rgba(0,0,0,0.45)', padding: '2px 7px', borderRadius: 6 }}>제출한 영상</div>
+                        </div>
+                      )}
+                    </div>
                   )}
                   {isInvited ? (
                     <Link href="/reactions" style={{ textDecoration: 'none' }}>
