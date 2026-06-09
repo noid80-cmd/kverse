@@ -185,14 +185,15 @@ export default function AgencyAuditionsPage() {
               <div key={a.id} style={{ position: 'relative' }}>
                 <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{ background: '#fff', borderRadius: 20, padding: '18px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                  <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18, marginBottom: 4 }}>{agencyName}</div>
+                  <div style={{ fontWeight: 600, color: '#6366f1', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
                     {a.category.split(',').map(c => (
                       <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                         {categoryLabel[c] ?? c}
                       </span>
                     ))}
                   </div>
-                  <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 16, marginBottom: 4 }}>{a.title}</div>
                   {a.description && (
                     <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
                   )}

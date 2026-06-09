@@ -269,19 +269,21 @@ export default function TalentAuditionsPage() {
                   border: `1px solid ${isInvited ? '#86efac' : '#e8e8f2'}`,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    {a.category.split(',').map(c => (
-                      <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                        {categoryLabel[c] ?? c}
-                      </span>
-                    ))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18 }}>{a.agency?.name ?? '기획사'}</div>
                     {a.agency?.is_verified && (
                       <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
                     )}
                     {isInvited && <span style={{ fontSize: 11, background: '#dcfce7', color: '#16a34a', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
                   </div>
-                  <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 16, marginBottom: 2 }}>{a.title}</div>
-                  <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 700, marginBottom: 6 }}>{a.agency?.name ?? '기획사'}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                    <div style={{ fontWeight: 700, color: '#6366f1', fontSize: 14 }}>{a.title}</div>
+                    {a.category.split(',').map(c => (
+                      <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                        {categoryLabel[c] ?? c}
+                      </span>
+                    ))}
+                  </div>
                   {a.description && (
                     <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
                   )}
