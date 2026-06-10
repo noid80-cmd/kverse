@@ -67,8 +67,13 @@ export default function ProfileEditPage() {
     setAvatarUploading(false)
   }
 
+  function updateForm(updater: (f: ProfileForm) => ProfileForm) {
+    setSaved(false)
+    setForm(f => f ? updater(f) : f)
+  }
+
   function toggleSkill(s: string) {
-    setForm(f => f ? { ...f, skills: f.skills.includes(s) ? f.skills.filter(x => x !== s) : [...f.skills, s] } : f)
+    updateForm(f => ({ ...f, skills: f.skills.includes(s) ? f.skills.filter(x => x !== s) : [...f.skills, s] }))
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -88,7 +93,7 @@ export default function ProfileEditPage() {
     }).eq('id', form.userId)
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
-    else { setSaved(true); setTimeout(() => setSaved(false), 2000) }
+    else { setSaved(true) }
   }
 
   async function handleLogout() {
@@ -143,20 +148,20 @@ export default function ProfileEditPage() {
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12, letterSpacing: 0.5 }}>기본 정보</p>
             <div className="flex flex-col gap-3">
-              <input type="text" value={name} onChange={e => setForm(f => f ? { ...f, name: e.target.value } : f)}
+              <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
                 placeholder="이름 *" required style={inputStyle} />
               <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>생년월일</span>
-                <input type="date" value={birthDate} onChange={e => setForm(f => f ? { ...f, birthDate: e.target.value } : f)}
+                <input type="date" value={birthDate} onChange={e => updateForm(f => ({ ...f, birthDate: e.target.value }))}
                   style={{ border: 'none', outline: 'none', fontSize: 15, color: '#1e1b4b', background: 'transparent', width: '100%', padding: 0 }} />
               </div>
-              <select value={gender} onChange={e => setForm(f => f ? { ...f, gender: e.target.value } : f)} style={inputStyle}>
+              <select value={gender} onChange={e => updateForm(f => ({ ...f, gender: e.target.value }))} style={inputStyle}>
                 <option value="">성별 선택</option>
                 <option value="male">남성</option>
                 <option value="female">여성</option>
                 <option value="other">기타</option>
               </select>
-              <select value={nationality} onChange={e => setForm(f => f ? { ...f, nationality: e.target.value } : f)} style={inputStyle}>
+              <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
                 <option value="">국적 선택</option>
                 <optgroup label="아시아">
                   <option value="대한민국">대한민국</option>
@@ -226,9 +231,9 @@ export default function ProfileEditPage() {
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>신체 정보</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <input type="number" value={height} onChange={e => setForm(f => f ? { ...f, height: e.target.value } : f)}
+              <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
                 placeholder="키 (cm)" style={inputStyle} />
-              <input type="number" value={weight} onChange={e => setForm(f => f ? { ...f, weight: e.target.value } : f)}
+              <input type="number" value={weight} onChange={e => updateForm(f => ({ ...f, weight: e.target.value }))}
                 placeholder="몸무게 (kg)" style={inputStyle} />
             </div>
           </div>
@@ -251,7 +256,7 @@ export default function ProfileEditPage() {
 
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>자기소개</p>
-            <textarea value={bio} onChange={e => setForm(f => f ? { ...f, bio: e.target.value } : f)}
+            <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
               placeholder="기획사 담당자에게 나를 소개해보세요" rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
           </div>
@@ -263,7 +268,7 @@ export default function ProfileEditPage() {
             style={saved
               ? { background: '#fff', border: '1px solid #e0e0f0', color: '#8b8baa', fontSize: 17, fontWeight: 700 }
               : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
-            {saving ? '저장 중...' : saved ? '✓ 저장됨' : '저장'}
+            {saving ? '저장 중...' : saved ? '✓ 저장완료' : '저장'}
           </button>
 
           <button type="button" onClick={handleLogout}
