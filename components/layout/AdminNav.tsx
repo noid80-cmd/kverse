@@ -10,6 +10,7 @@ const adminNav = [
   { href: '/admin/users', label: '회원', emoji: '👥' },
   { href: '/admin/agencies', label: '기획사', emoji: '🏢' },
   { href: '/admin/videos', label: '영상', emoji: '🎬' },
+  { href: '/admin/auditions', label: '오디션', emoji: '🎤' },
 ]
 
 export default function AdminNav() {
