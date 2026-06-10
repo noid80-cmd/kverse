@@ -50,6 +50,12 @@ export default function AdminVideosPage() {
     setVideos(prev => prev.map(v => v.id === id ? { ...v, is_featured: !current } : v))
   }
 
+  async function deleteVideo(id: string, title: string) {
+    if (!confirm(`"${title}" 영상을 완전히 삭제할까요? 이 작업은 되돌릴 수 없습니다.`)) return
+    await supabase.from('videos').delete().eq('id', id)
+    setVideos(prev => prev.filter(v => v.id !== id))
+  }
+
   const filtered = statusFilter === 'all' ? videos : videos.filter(v => v.status === statusFilter)
 
   return (
@@ -101,6 +107,10 @@ export default function AdminVideosPage() {
                     <button onClick={() => toggleFeatured(v.id, v.is_featured)}
                       style={{ fontSize: 11, padding: '5px 8px', borderRadius: 8, border: '1px solid #e0e0f0', background: 'none', color: v.is_featured ? '#d97706' : '#8b8baa', fontWeight: 700 }}>
                       {v.is_featured ? '⭐ 추천중' : '추천'}
+                    </button>
+                    <button onClick={() => deleteVideo(v.id, v.title)}
+                      style={{ fontSize: 11, padding: '5px 8px', borderRadius: 8, border: '1px solid #fee2e2', background: 'none', color: '#ef4444', fontWeight: 700 }}>
+                      완전삭제
                     </button>
                   </div>
                 </div>
