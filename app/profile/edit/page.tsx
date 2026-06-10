@@ -23,7 +23,7 @@ const skillOptions = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '
 
 export default function ProfileEditPage() {
   const router = useRouter()
-  type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; phone: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
+  type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -44,7 +44,7 @@ export default function ProfileEditPage() {
         gender: data?.gender ?? '',
         height: data?.height?.toString() ?? '',
         weight: data?.weight?.toString() ?? '',
-        phone: data?.phone ?? '',
+
         nationality: data?.nationality ?? '',
         skills: data?.skills ?? [],
         avatarUrl: data?.avatar_url ?? null,
@@ -82,7 +82,7 @@ export default function ProfileEditPage() {
       gender: form.gender || null,
       height: form.height ? parseInt(form.height) : null,
       weight: form.weight ? parseInt(form.weight) : null,
-      phone: form.phone.trim() || null,
+
       nationality: form.nationality.trim() || null,
       skills: form.skills,
     }).eq('id', form.userId)
@@ -102,7 +102,7 @@ export default function ProfileEditPage() {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
-  const { name, bio, birthDate, gender, height, weight, phone, nationality, skills, avatarUrl } = form
+  const { name, bio, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
@@ -156,8 +156,6 @@ export default function ProfileEditPage() {
                 <option value="female">여성</option>
                 <option value="other">기타</option>
               </select>
-              <input type="tel" value={phone} onChange={e => setForm(f => f ? { ...f, phone: e.target.value } : f)}
-                placeholder="연락처" style={inputStyle} />
               <select value={nationality} onChange={e => setForm(f => f ? { ...f, nationality: e.target.value } : f)} style={inputStyle}>
                 <option value="">국적 선택</option>
                 <optgroup label="아시아">
