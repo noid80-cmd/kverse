@@ -259,8 +259,10 @@ export default function ProfileEditPage() {
           {saveError && <p style={{ color: '#ef4444', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
 
           <button type="submit" disabled={saving}
-            className="w-full py-4 rounded-2xl text-white disabled:opacity-50 transition active:scale-95"
-            style={{ background: saved ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
+            className="w-full py-4 rounded-2xl disabled:opacity-50 transition active:scale-95"
+            style={saved
+              ? { background: '#fff', border: '1px solid #e0e0f0', color: '#8b8baa', fontSize: 17, fontWeight: 700 }
+              : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
             {saving ? '저장 중...' : saved ? '✓ 저장됨' : '저장'}
           </button>
 
