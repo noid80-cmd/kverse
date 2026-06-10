@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const publicPaths = ['/login', '/signup', '/auth']
+  const publicPaths = ['/login', '/signup', '/auth', '/api/upload-business-reg']
 
   if (!user && !publicPaths.some(p => pathname.startsWith(p)) && pathname !== '/') {
     return NextResponse.redirect(new URL('/login', request.url))
