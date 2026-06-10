@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
-
-const adminNav = [
-  { href: '/admin', label: '📊 대시보드' },
-  { href: '/admin/users', label: '👥 회원' },
-  { href: '/admin/agencies', label: '🏢 기획사' },
-  { href: '/admin/videos', label: '🎬 영상' },
-]
+import AdminNav from '@/components/layout/AdminNav'
 
 type Video = {
   id: string; title: string; status: string; view_count: number; is_featured: boolean; created_at: string; category: string
@@ -61,19 +54,7 @@ export default function AdminVideosPage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ background: '#f0f0f8' }}>
-      <div style={{ background: '#fff', borderBottom: '1px solid #e8e8f2', position: 'sticky', top: 0, zIndex: 30 }}>
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <span style={{ fontWeight: 900, fontSize: 18, color: '#1e1b4b' }}>KVERSE 관리자</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {adminNav.map(n => (
-              <Link key={n.href} href={n.href}
-                style={{ fontSize: 13, fontWeight: 700, color: n.href === '/admin/videos' ? '#6366f1' : '#8b8baa', padding: '6px 12px', borderRadius: 10, textDecoration: 'none', background: n.href === '/admin/videos' ? '#ede9fe' : 'transparent' }}>
-                {n.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
+      <AdminNav />
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <div className="flex items-center justify-between mb-6">

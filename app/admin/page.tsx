@@ -3,13 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-
-const adminNav = [
-  { href: '/admin', label: '📊 대시보드' },
-  { href: '/admin/users', label: '👥 회원' },
-  { href: '/admin/agencies', label: '🏢 기획사' },
-  { href: '/admin/videos', label: '🎬 영상' },
-]
+import AdminNav from '@/components/layout/AdminNav'
 
 type Stats = {
   totalUsers: number
@@ -74,19 +68,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ background: '#f0f0f8' }}>
-      <div style={{ background: '#fff', borderBottom: '1px solid #e8e8f2', position: 'sticky', top: 0, zIndex: 30 }}>
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <span style={{ fontWeight: 900, fontSize: 18, color: '#1e1b4b' }}>KVERSE 관리자</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {adminNav.map(n => (
-              <Link key={n.href} href={n.href}
-                style={{ fontSize: 13, fontWeight: 700, color: n.href === '/admin' ? '#6366f1' : '#8b8baa', padding: '6px 12px', borderRadius: 10, textDecoration: 'none', background: n.href === '/admin' ? '#ede9fe' : 'transparent' }}>
-                {n.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
+      <AdminNav />
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b', marginBottom: 24 }}>대시보드</h1>

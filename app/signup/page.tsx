@@ -110,15 +110,6 @@ export default function SignupPage() {
         {/* Step 2: 가입 방법 선택 (지망생만) */}
         {step === 'method' && (
           <div className="flex flex-col gap-3">
-            <button onClick={() => handleSocialLogin('kakao')}
-              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl"
-              style={{ background: '#FEE500', color: '#191919', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="#191919">
-                <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.618 5.08 4.077 6.56l-1.04 3.84a.3.3 0 0 0 .46.33l4.5-2.97c.66.09 1.33.14 2.003.14 5.523 0 10-3.477 10-7.8S17.523 3 12 3z"/>
-              </svg>
-              카카오로 가입
-            </button>
-
             {!isKakao && (
               <button onClick={() => handleSocialLogin('google')}
                 className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl"
