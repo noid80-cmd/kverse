@@ -14,6 +14,8 @@ export default function SignupPage() {
   const [step, setStep] = useState<'role' | 'method' | 'form'>('role')
   const [role, setRole] = useState<'talent' | 'agency'>('talent')
   const [name, setName] = useState('')
+  const [agencyName, setAgencyName] = useState('')
+  const [businessNumber, setBusinessNumber] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -42,7 +44,7 @@ export default function SignupPage() {
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { name, role } },
+      options: { data: { name, role, ...(role === 'agency' ? { agency_name: agencyName.trim(), business_number: businessNumber.trim() } : {}) } },
     })
     setLoading(false)
     if (error) { setError(error.message); return }
@@ -146,13 +148,21 @@ export default function SignupPage() {
         {step === 'form' && (
           <form onSubmit={handleSignup} className="flex flex-col gap-3">
             <input type="text" value={name} onChange={e => setName(e.target.value)}
-              placeholder="이름" required style={inputStyle} />
+              placeholder="담당자 이름" required style={inputStyle} />
+            {role === 'agency' && (
+              <>
+                <input type="text" value={agencyName} onChange={e => setAgencyName(e.target.value)}
+                  placeholder="기획사명 *" required style={inputStyle} />
+                <input type="text" value={businessNumber} onChange={e => setBusinessNumber(e.target.value)}
+                  placeholder="사업자등록번호 (000-00-00000)" style={inputStyle} />
+              </>
+            )}
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="이메일" required style={inputStyle} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="비밀번호 (6자 이상)" minLength={6} required style={inputStyle} />
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <button type="submit" disabled={loading}
+            <button type="submit" disabled={loading || (role === 'agency' && !agencyName.trim())}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 mt-1"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
               {loading ? '가입 중...' : '가입하기'}
