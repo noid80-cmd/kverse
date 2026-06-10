@@ -145,8 +145,11 @@ export default function ProfileEditPage() {
             <div className="flex flex-col gap-3">
               <input type="text" value={name} onChange={e => setForm(f => f ? { ...f, name: e.target.value } : f)}
                 placeholder="이름 *" required style={inputStyle} />
-              <input type="date" value={birthDate} onChange={e => setForm(f => f ? { ...f, birthDate: e.target.value } : f)}
-                style={inputStyle} />
+              <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>생년월일</span>
+                <input type="date" value={birthDate} onChange={e => setForm(f => f ? { ...f, birthDate: e.target.value } : f)}
+                  style={{ border: 'none', outline: 'none', fontSize: 15, color: '#1e1b4b', background: 'transparent', width: '100%', padding: 0 }} />
+              </div>
               <select value={gender} onChange={e => setForm(f => f ? { ...f, gender: e.target.value } : f)} style={inputStyle}>
                 <option value="">성별 선택</option>
                 <option value="male">남성</option>
