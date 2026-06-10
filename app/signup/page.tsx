@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Mic2, Building2, Mail } from 'lucide-react'
+import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
 
 const inputStyle = {
   width: '100%', background: '#fff', border: '1px solid #e0e0f0',
@@ -16,6 +16,10 @@ export default function SignupPage() {
   const [name, setName] = useState('')
   const [agencyName, setAgencyName] = useState('')
   const [businessNumber, setBusinessNumber] = useState('')
+  const [bizRegFile, setBizRegFile] = useState<File | null>(null)
+  const [bizRegUrl, setBizRegUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -38,18 +42,61 @@ export default function SignupPage() {
     })
   }
 
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setBizRegFile(file)
+    setUploading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/upload-business-reg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      })
+      if (!res.ok) throw new Error('업로드 URL 생성 실패')
+      const { url, publicUrl } = await res.json()
+      const ok = await new Promise<boolean>(resolve => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', url)
+        xhr.setRequestHeader('Content-Type', file.type)
+        xhr.onload = () => resolve(xhr.status === 200)
+        xhr.onerror = () => resolve(false)
+        xhr.send(file)
+      })
+      if (!ok) throw new Error('업로드 실패')
+      setBizRegUrl(publicUrl)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : '업로드 실패')
+      setBizRegFile(null)
+    }
+    setUploading(false)
+  }
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+    if (role === 'agency' && !bizRegUrl) { setError('사업자등록증을 업로드해주세요'); return }
     setError(''); setLoading(true)
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { name, role, ...(role === 'agency' ? { agency_name: agencyName.trim(), business_number: businessNumber.trim() } : {}) } },
+      options: {
+        data: {
+          name, role,
+          ...(role === 'agency' ? {
+            agency_name: agencyName.trim(),
+            business_number: businessNumber.trim(),
+            business_reg_url: bizRegUrl,
+          } : {}),
+        },
+      },
     })
     setLoading(false)
     if (error) { setError(error.message); return }
     setDone(true)
   }
+
+  const agencyFormValid = role !== 'agency' || (agencyName.trim() && businessNumber.trim() && bizRegUrl)
 
   if (done) return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#f0f0f8' }}>
@@ -154,7 +201,26 @@ export default function SignupPage() {
                 <input type="text" value={agencyName} onChange={e => setAgencyName(e.target.value)}
                   placeholder="기획사명 *" required style={inputStyle} />
                 <input type="text" value={businessNumber} onChange={e => setBusinessNumber(e.target.value)}
-                  placeholder="사업자등록번호 (000-00-00000)" style={inputStyle} />
+                  placeholder="사업자등록번호 * (000-00-00000)" required style={inputStyle} />
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 6 }}>사업자등록증 * (이미지)</p>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+                  {bizRegUrl ? (
+                    <div style={{ border: '1px solid #e0e0f0', borderRadius: 14, overflow: 'hidden' }}>
+                      <img src={bizRegUrl} alt="사업자등록증" style={{ width: '100%', maxHeight: 160, objectFit: 'contain', background: '#f8f8fc', display: 'block' }} />
+                      <button type="button" onClick={() => fileInputRef.current?.click()}
+                        style={{ width: '100%', padding: '10px', background: 'none', border: 'none', borderTop: '1px solid #e0e0f0', color: '#6366f1', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                        <CheckCircle size={14} strokeWidth={2} /> 업로드 완료 · 교체하기
+                      </button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                      style={{ width: '100%', padding: '16px', borderRadius: 14, border: '1.5px dashed #a5b4fc', background: '#f5f3ff', color: uploading ? '#94a3b8' : '#6366f1', fontSize: 14, fontWeight: 700, cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                      <Upload size={16} strokeWidth={2} />
+                      {uploading ? '업로드 중...' : '사진 업로드'}
+                    </button>
+                  )}
+                </div>
               </>
             )}
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
@@ -162,7 +228,7 @@ export default function SignupPage() {
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="비밀번호 (6자 이상)" minLength={6} required style={inputStyle} />
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <button type="submit" disabled={loading || (role === 'agency' && !agencyName.trim())}
+            <button type="submit" disabled={loading || !agencyFormValid}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 mt-1"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
               {loading ? '가입 중...' : '가입하기'}
