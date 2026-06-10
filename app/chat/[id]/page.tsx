@@ -23,6 +23,7 @@ export default function ChatPage() {
   const [agencyName, setAgencyName] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null)
+  const [activeUsers, setActiveUsers] = useState<Set<string>>(new Set())
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -62,14 +63,24 @@ export default function ChatPage() {
     }
     load()
 
-    const channel = supabase.channel(`chat:${id}`)
+    const user = (await supabase.auth.getSession()).data.session?.user
+    const channel = supabase.channel(`chat:${id}`, { config: { presence: { key: user?.id ?? '' } } })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
         (payload) => {
           const msg = payload.new as Message
           setMessages(prev => (prev ?? []).some(m => m.id === msg.id) ? prev : [...(prev ?? []), msg])
         }
       )
-      .subscribe()
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState<{ user_id: string }>()
+        const ids = new Set(Object.values(state).flat().map(p => p.user_id))
+        setActiveUsers(ids)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED' && user) {
+          await channel.track({ user_id: user.id })
+        }
+      })
 
     const poll = setInterval(async () => {
       const { data } = await supabase.from('messages').select('id, content, sender_id, created_at, is_read')
@@ -96,11 +107,13 @@ export default function ChatPage() {
       alert('전송 실패: ' + error.message)
     } else if (conv) {
       const recipientId = myId === conv.talent_id ? conv.agency_member_id : conv.talent_id
-      const senderName = myId === conv.talent_id
-        ? (conv.talent?.name ?? '지망생')
-        : (agencyName || conv.agency_member?.name || '기획사')
-      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` }) })
+      if (!activeUsers.has(recipientId)) {
+        const senderName = myId === conv.talent_id
+          ? (conv.talent?.name ?? '지망생')
+          : (agencyName || conv.agency_member?.name || '기획사')
+        fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` }) })
+      }
     }
     setSending(false)
   }
