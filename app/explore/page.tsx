@@ -82,21 +82,21 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 4 }}>탐색</h1>
-            <p style={{ fontSize: 13, color: '#8b8baa' }}>다른 지망생들의 영상을 구경해보세요</p>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>탐색</h1>
+            <p style={{ fontSize: 13, color: '#8888aa' }}>다른 지망생들의 영상을 구경해보세요</p>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {(['latest', 'likes'] as const).map(s => (
               <button key={s} onClick={() => setSort(s)}
                 style={{
                   padding: '6px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#fff',
-                  color: sort === s ? 'white' : '#8b8baa',
+                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                  color: sort === s ? 'white' : '#8888aa',
                   boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
                 }}>
                 {s === 'latest' ? '최신순' : '인기순'}
@@ -110,10 +110,10 @@ export default function ExplorePage() {
             <button key={c} onClick={() => setCategory(c)}
               style={{
                 flexShrink: 0, padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, transition: 'all 0.15s', border: 'none', cursor: 'pointer',
-                background: category === c ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#fff',
-                color: category === c ? 'white' : '#8b8baa',
+                background: category === c ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                color: category === c ? 'white' : '#8888aa',
                 boxShadow: category === c ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
-                outline: category === c ? 'none' : '1px solid #e0e0f0',
+                outline: category === c ? 'none' : '1px solid rgba(255,255,255,0.07)',
               }}>
               {c === 'all' ? '전체' : categoryLabel[c]}
             </button>
@@ -121,28 +121,28 @@ export default function ExplorePage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : videos.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
               <Video size={22} strokeWidth={1.8} />
             </div>
-            <div style={{ fontWeight: 700, color: '#1e1b4b' }}>아직 영상이 없어요</div>
+            <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
             {videos.map(v => (
-              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)' }}>
+              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'rgba(99,102,241,0.08)' }}>
                 {v.thumbnail_url
                   ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a5b4fc' }}><Video size={24} strokeWidth={1.5} /></div>
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333350' }}><Video size={24} strokeWidth={1.5} /></div>
                 }
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.65))', padding: '20px 6px 6px' }}>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.75))', padding: '20px 6px 6px' }}>
                   <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
                 </div>
                 <button onClick={e => toggleLike(e, v.id)}
                   style={{
-                    position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.45)',
+                    position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.55)',
                     border: 'none', borderRadius: 10, padding: '3px 7px', outline: 'none',
                     display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer',
                   }}>

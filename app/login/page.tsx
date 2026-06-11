@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 const inputStyle = {
-  width: '100%', background: '#ffffff', border: '1px solid #e0e0f0',
-  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#1e1b4b',
+  width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
 }
 
 export default function LoginPage() {
@@ -41,12 +41,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#09090f' }}>
       <div className="fixed inset-0 pointer-events-none">
         <div style={{
           position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
           width: 600, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)',
         }} />
       </div>
 
@@ -56,18 +56,18 @@ export default function LoginPage() {
             width: 72, height: 72, borderRadius: 22, marginBottom: 16,
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.3)',
+            boxShadow: '0 8px 32px rgba(99,102,241,0.4)',
           }}>
             <span style={{ color: 'white', fontSize: 28, fontWeight: 900, letterSpacing: -1 }}>K</span>
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#1e1b4b', marginBottom: 4, letterSpacing: -0.5 }}>KVERSE</h1>
-          <p style={{ fontSize: 13, color: '#8b8baa', fontWeight: 500 }}>기획사가 직접 보는 오디션 플랫폼</p>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 4, letterSpacing: -0.5 }}>KVERSE</h1>
+          <p style={{ fontSize: 13, color: '#8888aa', fontWeight: 500 }}>기획사가 직접 보는 오디션 플랫폼</p>
         </div>
 
         <div className="w-full flex flex-col gap-4">
           <button onClick={handleGoogle} disabled={isKakao}
             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl transition active:scale-95"
-            style={{ background: '#fff', color: isKakao ? '#94a3b8' : '#1e1b4b', fontSize: 16, fontWeight: 700, border: '1px solid #d8d8ec', boxShadow: '0 2px 12px rgba(0,0,0,0.07)', opacity: isKakao ? 0.5 : 1, cursor: isKakao ? 'default' : 'pointer' }}>
+            style={{ background: '#1a1a25', color: isKakao ? '#555570' : '#eeeeff', fontSize: 16, fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)', opacity: isKakao ? 0.5 : 1, cursor: isKakao ? 'default' : 'pointer' }}>
             <svg width="22" height="22" viewBox="0 0 48 48">
               <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
               <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
@@ -77,13 +77,13 @@ export default function LoginPage() {
             Google로 로그인
           </button>
           {isKakao && (
-            <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', marginTop: -8 }}>카카오톡에서는 구글 로그인이 차단돼요. 이메일로 로그인하세요.</p>
+            <p style={{ fontSize: 12, color: '#555570', textAlign: 'center', marginTop: -8 }}>카카오톡에서는 구글 로그인이 차단돼요. 이메일로 로그인하세요.</p>
           )}
 
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px" style={{ background: '#d8d8ec' }} />
-            <span style={{ fontSize: 12, color: '#8b8baa', fontWeight: 600 }}>이메일로 로그인</span>
-            <div className="flex-1 h-px" style={{ background: '#d8d8ec' }} />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+            <span style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>이메일로 로그인</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-3">
@@ -91,17 +91,17 @@ export default function LoginPage() {
               placeholder="이메일" required style={inputStyle} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="비밀번호" required style={inputStyle} />
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
             <button type="submit" disabled={loading}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 transition active:scale-95 mt-1"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}>
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 24px rgba(99,102,241,0.4)', border: 'none' }}>
               {loading ? '로그인 중...' : '로그인'}
             </button>
           </form>
 
-          <p className="text-center text-sm font-medium mt-1" style={{ color: '#8b8baa' }}>
+          <p className="text-center text-sm font-medium mt-1" style={{ color: '#8888aa' }}>
             계정이 없으신가요?{' '}
-            <Link href="/signup" style={{ color: '#6366f1', fontWeight: 700 }}>가입하기</Link>
+            <Link href="/signup" style={{ color: '#818cf8', fontWeight: 700 }}>가입하기</Link>
           </p>
         </div>
       </div>

@@ -29,7 +29,7 @@ type PageData = {
 
 const spinner = (
   <>
-    <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
     <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
   </>
 )
@@ -79,7 +79,7 @@ export default function DashboardPage() {
   }, [data?.recentAuditions.length])
 
   if (!data) return (
-    <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <PushSubscribe />
       {spinner}
     </div>
@@ -92,20 +92,20 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b' }}>{profile?.name ?? '...'}</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{profile?.name ?? '...'}</h1>
           </div>
           <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
             <div style={{
               width: 48, height: 48, borderRadius: 16,
               background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden',
+              overflow: 'hidden', border: '2px solid rgba(255,255,255,0.1)',
             }}>
               {profile?.avatar_url
                 ? <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -117,21 +117,20 @@ export default function DashboardPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 28 }}>
           {[
-            { label: '영상', value: videos, icon: <Video size={16} strokeWidth={2} />, href: '/videos', color: '#6366f1', bg: '#eef2ff' },
-            { label: '관심', value: bookmarks, icon: <Bookmark size={16} strokeWidth={2} />, href: '/reactions?tab=bookmarks', color: '#ec4899', bg: '#fdf2f8' },
-            { label: '채팅', value: contacts, icon: <MessageCircle size={16} strokeWidth={2} />, href: '/reactions', color: '#0ea5e9', bg: '#f0f9ff' },
+            { label: '영상', value: videos, icon: <Video size={16} strokeWidth={2} />, href: '/videos', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
+            { label: '관심', value: bookmarks, icon: <Bookmark size={16} strokeWidth={2} />, href: '/reactions?tab=bookmarks', color: '#f472b6', bg: 'rgba(236,72,153,0.12)' },
+            { label: '채팅', value: contacts, icon: <MessageCircle size={16} strokeWidth={2} />, href: '/reactions', color: '#38bdf8', bg: 'rgba(14,165,233,0.12)' },
           ].map(s => (
             <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: '#fff', borderRadius: 18, padding: '16px 10px 14px',
-                textAlign: 'center', border: '1px solid #f0f0f8',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+                background: '#111118', borderRadius: 18, padding: '16px 10px 14px',
+                textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)',
               }}>
                 <div style={{ width: 32, height: 32, borderRadius: 10, background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
                   {s.icon}
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: 11, color: '#555570', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
               </div>
             </Link>
           ))}
@@ -140,15 +139,15 @@ export default function DashboardPage() {
         {!profile?.bio && (
           <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', borderRadius: 20, padding: '18px 20px',
-              marginBottom: 24, border: '1px solid #c4b5fd', display: 'flex', alignItems: 'center', gap: 14,
+              background: 'rgba(99,102,241,0.1)', borderRadius: 20, padding: '18px 20px',
+              marginBottom: 24, border: '1px solid rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', gap: 14,
             }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(124,58,237,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#7c3aed' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#818cf8' }}>
                 <User size={18} strokeWidth={1.8} />
               </div>
               <div>
-                <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>프로필을 완성해보세요</div>
-                <div style={{ fontSize: 12, color: '#7c3aed', marginTop: 2 }}>자기소개와 특기를 추가하면 기획사에 더 잘 보여요</div>
+                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>프로필을 완성해보세요</div>
+                <div style={{ fontSize: 12, color: '#818cf8', marginTop: 2 }}>자기소개와 특기를 추가하면 기획사에 더 잘 보여요</div>
               </div>
             </div>
           </Link>
@@ -157,30 +156,30 @@ export default function DashboardPage() {
         {recentAuditions.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <div className="flex items-center justify-between mb-4">
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1e1b4b' }}>열린 오디션</h2>
-              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>열린 오디션</h2>
+              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#818cf8', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
             </div>
             <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
               <div key={auditionIdx} style={{
-                background: '#fff', borderRadius: 16, padding: '14px 16px',
-                border: '1px solid #e8e8f2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                background: '#111118', borderRadius: 16, padding: '14px 16px',
+                border: '1px solid rgba(255,255,255,0.07)',
                 display: 'flex', alignItems: 'center', gap: 12,
                 animation: 'auditSlide 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
               }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #eef2ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#6366f1' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#818cf8' }}>
                   <Megaphone size={18} strokeWidth={1.8} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{recentAuditions[auditionIdx].title}</div>
+                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{recentAuditions[auditionIdx].title}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 11, color: '#8b8baa' }}>{recentAuditions[auditionIdx].agency?.name ?? '기획사'}</span>
-                    <span style={{ fontSize: 10, color: '#6366f1', background: '#eef2ff', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
+                    <span style={{ fontSize: 11, color: '#8888aa' }}>{recentAuditions[auditionIdx].agency?.name ?? '기획사'}</span>
+                    <span style={{ fontSize: 10, color: '#818cf8', background: 'rgba(99,102,241,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
                       {recentAuditions[auditionIdx].category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
                     </span>
-                    {recentAuditions[auditionIdx].deadline && <span style={{ fontSize: 11, color: '#94a3b8' }}>~{recentAuditions[auditionIdx].deadline}</span>}
+                    {recentAuditions[auditionIdx].deadline && <span style={{ fontSize: 11, color: '#555570' }}>~{recentAuditions[auditionIdx].deadline}</span>}
                   </div>
                 </div>
-                <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#333350" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
             </Link>
             {recentAuditions.length > 1 && (
@@ -189,7 +188,7 @@ export default function DashboardPage() {
                   <div key={i} style={{
                     height: 6, borderRadius: 3,
                     width: i === auditionIdx ? 18 : 6,
-                    background: i === auditionIdx ? '#6366f1' : '#dde0f5',
+                    background: i === auditionIdx ? '#6366f1' : 'rgba(255,255,255,0.1)',
                     transition: 'all 0.35s ease',
                   }} />
                 ))}
@@ -200,21 +199,21 @@ export default function DashboardPage() {
         )}
 
         <div className="flex items-center justify-between mb-4">
-          <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1e1b4b' }}>최근 업로드</h2>
-          <Link href="/videos" style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
+          <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>최근 업로드</h2>
+          <Link href="/videos" style={{ fontSize: 13, color: '#818cf8', fontWeight: 600, textDecoration: 'none' }}>전체보기</Link>
         </div>
 
         {recentVideos.length === 0 ? (
           <Link href="/videos/upload" style={{ textDecoration: 'none' }}>
             <div style={{
-              background: '#fff', borderRadius: 20, padding: '32px 24px', textAlign: 'center',
-              border: '1.5px dashed #e2e8f0',
+              background: '#111118', borderRadius: 20, padding: '32px 24px', textAlign: 'center',
+              border: '1.5px dashed rgba(255,255,255,0.1)',
             }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
                 <Video size={22} strokeWidth={1.8} />
               </div>
-              <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4, fontSize: 15 }}>첫 영상을 올려보세요</div>
-              <div style={{ fontSize: 13, color: '#94a3b8' }}>기획사 담당자들이 바로 볼 수 있어요</div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4, fontSize: 15 }}>첫 영상을 올려보세요</div>
+              <div style={{ fontSize: 13, color: '#555570' }}>기획사 담당자들이 바로 볼 수 있어요</div>
             </div>
           </Link>
         ) : (
@@ -222,25 +221,24 @@ export default function DashboardPage() {
             {recentVideos.map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{
-                  background: '#fff', borderRadius: 16, padding: '12px 14px',
-                  border: '1px solid #f0f0f8', display: 'flex', alignItems: 'center', gap: 12,
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  background: '#111118', borderRadius: 16, padding: '12px 14px',
+                  border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12,
                 }}>
                   <div style={{
                     width: 80, height: 60, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                    background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Video size={18} strokeWidth={1.5} color="#a5b4fc" />
+                      : <Video size={18} strokeWidth={1.5} color="#4a4a6a" />
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, color: '#1e1b4b', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
-                    <div style={{ fontSize: 12, color: '#94a3b8' }}>조회 {v.view_count}회</div>
+                    <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
+                    <div style={{ fontSize: 12, color: '#555570' }}>조회 {v.view_count}회</div>
                   </div>
-                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#333350" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               </Link>
             ))}

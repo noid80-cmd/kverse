@@ -15,8 +15,8 @@ const talentNav = [
 ]
 
 const inputStyle = {
-  width: '100%', background: '#fff', border: '1px solid #e0e0f0',
-  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#1e1b4b',
+  width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
 }
 
 const skillOptions = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '악기', '퍼포먼스']
@@ -44,7 +44,6 @@ export default function ProfileEditPage() {
         gender: data?.gender ?? '',
         height: data?.height?.toString() ?? '',
         weight: data?.weight?.toString() ?? '',
-
         nationality: data?.nationality ?? '',
         skills: data?.skills ?? [],
         avatarUrl: data?.avatar_url ?? null,
@@ -87,7 +86,6 @@ export default function ProfileEditPage() {
       gender: form.gender || null,
       height: form.height ? parseInt(form.height) : null,
       weight: form.weight ? parseInt(form.weight) : null,
-
       nationality: form.nationality.trim() || null,
       skills: form.skills,
     }).eq('id', form.userId)
@@ -102,27 +100,26 @@ export default function ProfileEditPage() {
   }
 
   if (!form) return (
-    <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
   const { name, bio, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 24 }}>내 프로필</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 24 }}>내 프로필</h1>
 
-        {/* 프로필 사진 */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
           <label style={{ cursor: 'pointer', position: 'relative' }}>
             <div style={{
               width: 96, height: 96, borderRadius: 28, overflow: 'hidden',
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '3px solid #fff', boxShadow: '0 4px 16px rgba(99,102,241,0.2)',
+              border: '3px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 24px rgba(99,102,241,0.3)',
             }}>
               {avatarUrl
                 ? <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -132,28 +129,28 @@ export default function ProfileEditPage() {
             <div style={{
               position: 'absolute', bottom: 0, right: 0,
               width: 28, height: 28, borderRadius: '50%',
-              background: '#6366f1', border: '2px solid #fff',
+              background: '#6366f1', border: '2px solid #09090f',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13,
             }}>📷</div>
             <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
           </label>
-          <p style={{ fontSize: 12, color: '#8b8baa', marginTop: 8 }}>
+          <p style={{ fontSize: 12, color: '#8888aa', marginTop: 8 }}>
             {avatarUploading ? '업로드 중...' : '사진 변경'}
           </p>
         </div>
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
 
-          <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12, letterSpacing: 0.5 }}>기본 정보</p>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>기본 정보</p>
             <div className="flex flex-col gap-3">
               <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
                 placeholder="이름 *" required style={inputStyle} />
               <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>생년월일</span>
+                <span style={{ fontSize: 11, color: '#555570', fontWeight: 600 }}>생년월일</span>
                 <input type="date" value={birthDate} onChange={e => updateForm(f => ({ ...f, birthDate: e.target.value }))}
-                  style={{ border: 'none', outline: 'none', fontSize: 15, color: '#1e1b4b', background: 'transparent', width: '100%', padding: 0 }} />
+                  style={{ border: 'none', outline: 'none', fontSize: 15, color: '#eeeeff', background: 'transparent', width: '100%', padding: 0, colorScheme: 'dark' }} />
               </div>
               <select value={gender} onChange={e => updateForm(f => ({ ...f, gender: e.target.value }))} style={inputStyle}>
                 <option value="">성별 선택</option>
@@ -228,8 +225,8 @@ export default function ProfileEditPage() {
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>신체 정보</p>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>신체 정보</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
                 placeholder="키 (cm)" style={inputStyle} />
@@ -238,15 +235,15 @@ export default function ProfileEditPage() {
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>특기</p>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>특기</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {skillOptions.map(s => (
                 <button key={s} type="button" onClick={() => toggleSkill(s)}
                   style={{
                     padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', transition: 'all 0.15s',
-                    background: skills.includes(s) ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#f0f0f8',
-                    color: skills.includes(s) ? 'white' : '#8b8baa',
+                    background: skills.includes(s) ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                    color: skills.includes(s) ? 'white' : '#8888aa',
                   }}>
                   {s}
                 </button>
@@ -254,25 +251,25 @@ export default function ProfileEditPage() {
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#8b8baa', marginBottom: 12 }}>자기소개</p>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>자기소개</p>
             <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
               placeholder="기획사 담당자에게 나를 소개해보세요" rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
           </div>
 
-          {saveError && <p style={{ color: '#ef4444', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
+          {saveError && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
 
           <button type="submit" disabled={saving}
             className="w-full py-4 rounded-2xl disabled:opacity-50 transition active:scale-95"
             style={saved
-              ? { background: '#fff', border: '1px solid #e0e0f0', color: '#8b8baa', fontSize: 17, fontWeight: 700 }
-              : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
+              ? { background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', color: '#8888aa', fontSize: 17, fontWeight: 700 }
+              : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}>
             {saving ? '저장 중...' : saved ? '✓ 저장완료' : '저장'}
           </button>
 
           <button type="button" onClick={handleLogout}
-            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid #e0e0f0', color: '#8b8baa', fontWeight: 700, fontSize: 15 }}>
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(255,255,255,0.08)', color: '#555570', fontWeight: 700, fontSize: 15 }}>
             로그아웃
           </button>
         </form>

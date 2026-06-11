@@ -79,48 +79,47 @@ export default function VideoDetailPage() {
   }
 
   if (!video) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f8', color: '#8b8baa' }}>
-      불러오는 중...
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0 }}>←</button>
-          <h1 style={{ fontSize: 20, fontWeight: 900, color: '#1e1b4b', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</h1>
+          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0 }}>←</button>
+          <h1 style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</h1>
         </div>
 
-        {/* 영상 플레이어 */}
-        <div style={{ borderRadius: 20, overflow: 'hidden', background: '#000', marginBottom: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+        <div style={{ borderRadius: 20, overflow: 'hidden', background: '#000', marginBottom: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
           {video.video_url ? (
             <video src={video.video_url} controls style={{ width: '100%', maxHeight: 280, display: 'block' }}
               poster={video.thumbnail_url ?? undefined} />
           ) : (
-            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: 14 }}>
+            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', fontSize: 14 }}>
               영상 준비 중...
             </div>
           )}
         </div>
 
-        {/* 정보 카드 */}
-        <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2', marginBottom: 16 }}>
+        <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 12, background: '#f0f0f8', color: '#6366f1', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
+            <span style={{ fontSize: 12, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
               {categoryLabel[video.category] ?? video.category}
             </span>
-            <span style={{ fontSize: 12, color: '#8b8baa' }}>조회 {video.view_count}회</span>
-            <span style={{ fontSize: 12, color: video.status === 'active' ? '#22c55e' : '#f59e0b', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, color: '#555570' }}>조회 {video.view_count}회</span>
+            <span style={{ fontSize: 12, color: video.status === 'active' ? '#34d399' : '#fbbf24', fontWeight: 700 }}>
               {video.status === 'active' ? '● 공개' : '● 검토중'}
             </span>
           </div>
-          {video.description && <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.6, marginBottom: 12 }}>{video.description}</p>}
+          {video.description && <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.6, marginBottom: 12 }}>{video.description}</p>}
           {video.tags.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {video.tags.map(t => (
-                <span key={t} style={{ fontSize: 12, background: '#f5f3ff', color: '#7c3aed', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
+                <span key={t} style={{ fontSize: 12, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
                   #{t}
                 </span>
               ))}
@@ -128,33 +127,31 @@ export default function VideoDetailPage() {
           )}
         </div>
 
-        {/* 반응 통계 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
           <button onClick={toggleLike}
             style={{
-              background: liked ? 'linear-gradient(135deg, #fce7f3, #fecdd3)' : '#fff',
-              border: liked ? '1px solid #f9a8d4' : '1px solid #e8e8f2',
+              background: liked ? 'rgba(244,63,94,0.12)' : '#111118',
+              border: liked ? '1px solid rgba(244,63,94,0.3)' : '1px solid rgba(255,255,255,0.07)',
               borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
             }}>
             <span style={{ fontSize: 28 }}>{liked ? '❤️' : '🤍'}</span>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: liked ? '#e11d48' : '#1e1b4b' }}>{likeCount}</div>
-              <div style={{ fontSize: 12, color: liked ? '#e11d48' : '#8b8baa', fontWeight: 600 }}>좋아요</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: liked ? '#f43f5e' : '#eeeeff' }}>{likeCount}</div>
+              <div style={{ fontSize: 12, color: liked ? '#f43f5e' : '#555570', fontWeight: 600 }}>좋아요</div>
             </div>
           </button>
-          <div style={{ background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', borderRadius: 20, padding: 20, border: '1px solid #c4b5fd', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: 'rgba(99,102,241,0.1)', borderRadius: 20, padding: 20, border: '1px solid rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 28 }}>⭐</span>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#4f46e5' }}>{bookmarkCount}</div>
-              <div style={{ fontSize: 12, color: '#7c3aed', fontWeight: 600 }}>기획사 관심</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#818cf8' }}>{bookmarkCount}</div>
+              <div style={{ fontSize: 12, color: '#818cf8', fontWeight: 600 }}>기획사 관심</div>
             </div>
           </div>
         </div>
 
-        {/* 소유자 액션 */}
         {isOwner && (
           <button onClick={handleDelete}
-            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid #fca5a5', color: '#ef4444', fontWeight: 700, fontSize: 15 }}>
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontWeight: 700, fontSize: 15 }}>
             영상 삭제
           </button>
         )}

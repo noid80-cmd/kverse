@@ -94,14 +94,6 @@ export default function ReactionsPage() {
       if (!prev) return prev
       const newData = { ...prev, convs: prev.convs.filter(c => c.id !== convId) }
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(newData)) } catch {}
-      try {
-        const dash = localStorage.getItem('kverse-dashboard')
-        if (dash) {
-          const d = JSON.parse(dash)
-          d.contacts = Math.max((d.contacts ?? 1) - 1, 0)
-          localStorage.setItem('kverse-dashboard', JSON.stringify(d))
-        }
-      } catch {}
       return newData
     })
   }
@@ -128,25 +120,12 @@ export default function ReactionsPage() {
       }, 30000)
 
       channel = supabase.channel(`reactions-${user.id}`)
-        .on('postgres_changes', {
-          event: 'INSERT', schema: 'public', table: 'bookmarks',
-          filter: `talent_id=eq.${user.id}`,
-        }, () => {
-          load(user.id)
-          showToast('새로운 관심 표시가 왔어요!')
-        })
-        .on('postgres_changes', {
-          event: 'INSERT', schema: 'public', table: 'conversations',
-          filter: `talent_id=eq.${user.id}`,
-        }, () => {
-          load(user.id)
-          showToast('기획사에서 채팅을 시작했어요!')
-        })
-        .on('postgres_changes', {
-          event: 'INSERT', schema: 'public', table: 'messages',
-        }, () => {
-          if (userIdRef.current) load(userIdRef.current)
-        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookmarks', filter: `talent_id=eq.${user.id}` },
+          () => { load(user.id); showToast('새로운 관심 표시가 왔어요!') })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversations', filter: `talent_id=eq.${user.id}` },
+          () => { load(user.id); showToast('기획사에서 채팅을 시작했어요!') })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' },
+          () => { if (userIdRef.current) load(userIdRef.current) })
         .subscribe()
     }
 
@@ -159,8 +138,8 @@ export default function ReactionsPage() {
   }, [])
 
   if (!pageData) return (
-    <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -168,15 +147,16 @@ export default function ReactionsPage() {
   const { convs, bookmarks } = pageData
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <PushSubscribe />
 
       {toast && (
         <div style={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
-          background: '#1e1b4b', color: 'white', padding: '12px 20px', borderRadius: 14,
-          fontSize: 14, fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+          background: '#1a1a25', color: '#eeeeff', padding: '12px 20px', borderRadius: 14,
+          fontSize: 14, fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
           whiteSpace: 'nowrap', animation: 'fadeIn 0.3s ease',
+          border: '1px solid rgba(255,255,255,0.1)',
         }}>
           {toast}
         </div>
@@ -185,16 +165,16 @@ export default function ReactionsPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 6 }}>기획사 반응</h1>
-        <p style={{ fontSize: 13, color: '#8b8baa', marginBottom: 20 }}>내 영상에 관심을 보인 기획사들</p>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>기획사 반응</h1>
+        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>내 영상에 관심을 보인 기획사들</p>
 
-        <div style={{ display: 'flex', background: '#fff', borderRadius: 16, padding: 4, marginBottom: 20, border: '1px solid #e8e8f2' }}>
+        <div style={{ display: 'flex', background: '#111118', borderRadius: 16, padding: 4, marginBottom: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
           {(['contacts', 'bookmarks'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               style={{
                 flex: 1, padding: '10px', borderRadius: 12, border: 'none', fontWeight: 700, fontSize: 14, transition: 'all 0.15s', cursor: 'pointer',
                 background: tab === t ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'transparent',
-                color: tab === t ? 'white' : '#8b8baa',
+                color: tab === t ? 'white' : '#555570',
               }}>
               {t === 'contacts' ? `채팅 ${convs.length}` : `북마크 ${bookmarks.length}`}
             </button>
@@ -203,17 +183,17 @@ export default function ReactionsPage() {
 
         {tab === 'contacts' ? (
           convs.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+            <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
                 <MessageCircle size={22} strokeWidth={1.8} />
               </div>
-              <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4 }}>아직 대화가 없어요</div>
-              <div style={{ fontSize: 13, color: '#8b8baa' }}>영상을 올리면 기획사에서 채팅이 올 수 있어요</div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 대화가 없어요</div>
+              <div style={{ fontSize: 13, color: '#555570' }}>영상을 올리면 기획사에서 채팅이 올 수 있어요</div>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               {convs.map(c => (
-                <div key={c.id} style={{ background: '#fff', borderRadius: 18, border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center' }}>
+                <div key={c.id} style={{ background: '#111118', borderRadius: 18, border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center' }}>
                   <button onClick={() => router.push(`/chat/${c.id}`)}
                     style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', minWidth: 0 }}>
                     <div style={{
@@ -228,19 +208,19 @@ export default function ReactionsPage() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15 }}>{c.agency_member?.name ?? '기획사'}</span>
+                        <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 15 }}>{c.agency_member?.name ?? '기획사'}</span>
                         {verifiedIds.has(c.agency_member_id) && (
                           <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
                         )}
                       </div>
-                      <div style={{ fontSize: 13, color: '#8b8baa', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontSize: 13, color: '#555570', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                         {c.lastMessage ?? '대화를 시작해보세요'}
                       </div>
                     </div>
-                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#333350" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </button>
                   <button onClick={() => deleteConv(c.id)}
-                    style={{ padding: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                    style={{ padding: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#333350', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
                     <Trash2 size={16} strokeWidth={1.8} />
                   </button>
                 </div>
@@ -249,29 +229,29 @@ export default function ReactionsPage() {
           )
         ) : (
           bookmarks.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+            <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
                 <Bookmark size={22} strokeWidth={1.8} />
               </div>
-              <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4 }}>아직 관심 표시가 없어요</div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 관심 표시가 없어요</div>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {bookmarks.map(b => (
                 <Link key={b.id} href={b.video ? `/videos/${b.video.id}` : '#'} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: '#fff', borderRadius: 18, padding: '16px 20px', border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                  <div style={{ background: '#111118', borderRadius: 18, padding: '16px 20px', border: '1px solid rgba(255,255,255,0.07)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <Bookmark size={14} strokeWidth={2} color="#6366f1" fill="#6366f1" />
-                      <span style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
-                      <span style={{ fontSize: 12, color: '#8b8baa', marginLeft: 'auto' }}>{new Date(b.created_at).toLocaleDateString('ko-KR')}</span>
+                      <Bookmark size={14} strokeWidth={2} color="#818cf8" fill="#818cf8" />
+                      <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
+                      <span style={{ fontSize: 12, color: '#555570', marginLeft: 'auto' }}>{new Date(b.created_at).toLocaleDateString('ko-KR')}</span>
                     </div>
                     {b.video && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#6366f1', fontWeight: 600 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#818cf8', fontWeight: 600 }}>
                         <Video size={13} strokeWidth={2} />
                         {b.video.title}
                       </div>
                     )}
-                    {b.note && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 6, fontStyle: 'italic' }}>{b.note}</div>}
+                    {b.note && <div style={{ fontSize: 13, color: '#8888aa', marginTop: 6, fontStyle: 'italic' }}>{b.note}</div>}
                   </div>
                 </Link>
               ))}

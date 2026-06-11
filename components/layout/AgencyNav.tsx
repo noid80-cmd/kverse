@@ -26,8 +26,8 @@ export default function AgencyNav() {
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-      background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)',
-      borderTop: '1px solid rgba(0,0,0,0.06)',
+      background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(24px)',
+      borderTop: '1px solid rgba(255,255,255,0.07)',
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
       {agencyNav.map(item => {
@@ -36,7 +36,7 @@ export default function AgencyNav() {
           <Link key={item.href} href={item.href} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
-            outline: 'none', color: active ? '#6366f1' : '#94a3b8', transition: 'color 0.15s',
+            outline: 'none', color: active ? '#818cf8' : '#3a3a5c', transition: 'color 0.15s',
           }}>
             {item.icon}
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: 0.3 }}>{item.label}</span>
@@ -46,7 +46,7 @@ export default function AgencyNav() {
       <button onClick={handleLogout} style={{
         flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', padding: '10px 0 8px', gap: 4,
-        background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8',
+        background: 'none', border: 'none', cursor: 'pointer', color: '#3a3a5c',
       }}>
         <LogOut size={22} strokeWidth={1.8} />
         <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: 0.3 }}>로그아웃</span>

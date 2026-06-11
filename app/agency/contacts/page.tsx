@@ -61,25 +61,25 @@ export default function AgencyContactsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', marginBottom: 6 }}>채팅</h1>
-        <p style={{ fontSize: 13, color: '#8b8baa', marginBottom: 20 }}>지망생과의 대화</p>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>채팅</h1>
+        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>지망생과의 대화</p>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : convs.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
               <MessageCircle size={22} strokeWidth={1.8} />
             </div>
-            <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 6 }}>아직 대화가 없어요</div>
-            <div style={{ fontSize: 13, color: '#8b8baa' }}>영상을 보고 마음에 드는 지망생에게 채팅을 시작해보세요</div>
+            <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>아직 대화가 없어요</div>
+            <div style={{ fontSize: 13, color: '#555570' }}>영상을 보고 마음에 드는 지망생에게 채팅을 시작해보세요</div>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
             {convs.map(c => (
-              <div key={c.id} style={{ background: '#fff', borderRadius: 18, border: '1px solid #e8e8f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center' }}>
+              <div key={c.id} style={{ background: '#111118', borderRadius: 18, border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center' }}>
                 <button onClick={() => router.push(`/chat/${c.id}`)}
                   style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', minWidth: 0 }}>
                   <div style={{
@@ -93,15 +93,15 @@ export default function AgencyContactsPage() {
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15, marginBottom: 3 }}>{c.talent?.name ?? '지망생'}</div>
-                    <div style={{ fontSize: 13, color: '#8b8baa', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 15, marginBottom: 3 }}>{c.talent?.name ?? '지망생'}</div>
+                    <div style={{ fontSize: 13, color: '#555570', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {c.lastMessage ?? '대화를 시작해보세요'}
                     </div>
                   </div>
-                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#333350" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
                 <button onClick={() => deleteConv(c.id)}
-                  style={{ padding: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                  style={{ padding: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#333350', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
                   <Trash2 size={16} strokeWidth={1.8} />
                 </button>
               </div>

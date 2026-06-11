@@ -17,8 +17,8 @@ type Agency = {
 }
 
 const inputStyle = {
-  background: '#f8f8fc', border: '1px solid #e0e0f0',
-  borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#1e1b4b', width: '100%',
+  background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#eeeeff', width: '100%',
 }
 
 export default function AgencySettingsPage() {
@@ -98,55 +98,53 @@ export default function AgencySettingsPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8b8baa' }}>불러오는 중...</div>
+    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}>불러오는 중...</div>
   )
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>기획사 설정</h1>
+          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>기획사 설정</h1>
         </div>
 
-        {/* 인증 상태 */}
         <div style={{
-          background: agency?.is_verified ? 'linear-gradient(135deg, #f0fdf4, #dcfce7)' : 'linear-gradient(135deg, #fef9c3, #fef3c7)',
-          border: `1px solid ${agency?.is_verified ? '#86efac' : '#fcd34d'}`,
+          background: agency?.is_verified ? 'rgba(34,197,94,0.08)' : 'rgba(251,191,36,0.08)',
+          border: `1px solid ${agency?.is_verified ? 'rgba(34,197,94,0.25)' : 'rgba(251,191,36,0.25)'}`,
           borderRadius: 20, padding: '18px 20px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 14,
         }}>
           <div style={{ fontSize: 28 }}>{agency?.is_verified ? '✅' : '⏳'}</div>
           <div>
-            <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15 }}>
+            <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>
               {agency?.is_verified ? '인증된 기획사' : '인증 대기 중'}
             </div>
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: '#8888aa', marginTop: 2 }}>
               {agency?.is_verified
-                ? '사업자등록이 확인된 기획사입니다.'
+                ? '인증이 완료된 기획사입니다.'
                 : agency?.business_registration_url
-                  ? '사업자등록증이 제출되었습니다. 관리자 검토 후 인증됩니다.'
-                  : '사업자등록증을 제출하면 인증 심사를 받을 수 있습니다.'}
+                  ? '명함이 제출되었습니다. 관리자 검토 후 인증됩니다.'
+                  : '명함을 제출하면 인증 심사를 받을 수 있습니다.'}
             </div>
           </div>
         </div>
 
-        {/* 사업자등록증 업로드 */}
-        <div style={{ background: '#fff', borderRadius: 20, padding: 20, marginBottom: 16, border: '1px solid #e0e0f0' }}>
+        <div style={{ background: '#111118', borderRadius: 20, padding: 20, marginBottom: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Building2 size={18} color="#6366f1" strokeWidth={2} />
-            <span style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15 }}>사업자등록증</span>
+            <Building2 size={18} color="#818cf8" strokeWidth={2} />
+            <span style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>명함</span>
           </div>
 
           {agency?.business_registration_url ? (
             <div style={{ marginBottom: 12 }}>
               <img
                 src={agency.business_registration_url}
-                alt="사업자등록증"
-                style={{ width: '100%', borderRadius: 12, border: '1px solid #e0e0f0', maxHeight: 300, objectFit: 'contain', background: '#f8f8fc' }}
+                alt="명함"
+                style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)', maxHeight: 300, objectFit: 'contain', background: '#1a1a25' }}
               />
-              <div style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ fontSize: 12, color: '#34d399', fontWeight: 600, marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <CheckCircle size={13} strokeWidth={2} /> 제출 완료
               </div>
             </div>
@@ -154,42 +152,35 @@ export default function AgencySettingsPage() {
 
           <label style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            background: uploading ? '#f0f0f8' : 'linear-gradient(135deg, #eef2ff, #ede9fe)',
-            border: '1.5px dashed #a5b4fc', borderRadius: 14, padding: '16px',
-            cursor: uploading ? 'default' : 'pointer', color: '#6366f1', fontWeight: 700, fontSize: 14,
+            background: uploading ? '#1a1a25' : 'rgba(99,102,241,0.06)',
+            border: '1.5px dashed rgba(99,102,241,0.4)', borderRadius: 14, padding: '16px',
+            cursor: uploading ? 'default' : 'pointer', color: '#818cf8', fontWeight: 700, fontSize: 14,
           }}>
             <input type="file" accept="image/*" style={{ display: 'none' }}
               onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
               disabled={uploading} />
             <Upload size={18} strokeWidth={2} />
-            {uploading ? '업로드 중...' : agency?.business_registration_url ? '사진 교체' : '사진 업로드'}
+            {uploading ? '업로드 중...' : agency?.business_registration_url ? '명함 교체' : '명함 업로드'}
           </label>
-          <div style={{ fontSize: 12, color: '#8b8baa', marginTop: 8, textAlign: 'center' }}>
-            JPG, PNG 등 이미지 파일 · 사업자등록증 원본 또는 사본
+          <div style={{ fontSize: 12, color: '#555570', marginTop: 8, textAlign: 'center' }}>
+            회사명이 보이는 명함 앞면 사진 (JPG, PNG)
           </div>
         </div>
 
-        {/* 기본 정보 */}
-        <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e0e0f0' }}>
-          <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15, marginBottom: 16 }}>기본 정보</div>
+        <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15, marginBottom: 16 }}>기본 정보</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div>
-              <label style={{ fontSize: 12, color: '#8b8baa', marginBottom: 4, display: 'block' }}>기획사명 *</label>
+              <label style={{ fontSize: 12, color: '#555570', marginBottom: 4, display: 'block' }}>기획사명 *</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: '#8b8baa', marginBottom: 4, display: 'block' }}>사업자등록번호</label>
-              <input value={form.business_registration_number}
-                onChange={e => setForm(f => ({ ...f, business_registration_number: e.target.value }))}
-                placeholder="000-00-00000" style={inputStyle} />
-            </div>
-            <div>
-              <label style={{ fontSize: 12, color: '#8b8baa', marginBottom: 4, display: 'block' }}>소개</label>
+              <label style={{ fontSize: 12, color: '#555570', marginBottom: 4, display: 'block' }}>소개</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 rows={3} style={{ ...inputStyle, resize: 'none' }} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: '#8b8baa', marginBottom: 4, display: 'block' }}>웹사이트</label>
+              <label style={{ fontSize: 12, color: '#555570', marginBottom: 4, display: 'block' }}>웹사이트</label>
               <input value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
                 placeholder="https://" style={inputStyle} />
             </div>

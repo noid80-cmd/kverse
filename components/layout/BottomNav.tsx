@@ -11,8 +11,8 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-      background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)',
-      borderTop: '1px solid rgba(0,0,0,0.06)',
+      background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(24px)',
+      borderTop: '1px solid rgba(255,255,255,0.07)',
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
       {items.map(item => {
@@ -23,7 +23,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
               justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
               outline: 'none',
-              color: active ? '#6366f1' : '#94a3b8',
+              color: active ? '#818cf8' : '#3a3a5c',
               transition: 'color 0.15s',
             }}>
             {item.icon}

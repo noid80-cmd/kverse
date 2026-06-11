@@ -63,8 +63,7 @@ export default function ChatPage() {
     }
     load()
 
-    const user = (await supabase.auth.getSession()).data.session?.user
-    const channel = supabase.channel(`chat:${id}`, { config: { presence: { key: user?.id ?? '' } } })
+    const channel = supabase.channel(`chat:${id}`, { config: { presence: { key: '' } } })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
         (payload) => {
           const msg = payload.new as Message
@@ -77,8 +76,9 @@ export default function ChatPage() {
         setActiveUsers(ids)
       })
       .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED' && user) {
-          await channel.track({ user_id: user.id })
+        if (status === 'SUBSCRIBED') {
+          const u = (await supabase.auth.getSession()).data.session?.user
+          if (u) await channel.track({ user_id: u.id })
         }
       })
 
@@ -137,21 +137,21 @@ export default function ChatPage() {
   const other = conv ? (myId === conv.talent_id ? conv.agency_member : conv.talent) : null
 
   if (!conv) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f8' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e0e0f0', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#f0f0f8' }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#09090f' }}>
       <div style={{
         flexShrink: 0, zIndex: 40,
-        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid #e8e8f2', padding: '12px 16px',
+        background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+        <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
         <div style={{
           width: 40, height: 40, borderRadius: 13, overflow: 'hidden', flexShrink: 0,
           background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -164,7 +164,7 @@ export default function ChatPage() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 17 }}>
+            <span style={{ fontWeight: 800, color: '#eeeeff', fontSize: 17 }}>
               {conv && myId === conv.talent_id && agencyName ? agencyName : other?.name ?? '...'}
             </span>
             {isVerified && conv && myId === conv.talent_id && (
@@ -172,11 +172,11 @@ export default function ChatPage() {
             )}
           </div>
           {conv && myId === conv.talent_id && agencyName && other?.name && (
-            <span style={{ fontSize: 12, color: '#8b8baa' }}>{other.name}</span>
+            <span style={{ fontSize: 12, color: '#555570' }}>{other.name}</span>
           )}
         </div>
         <button onClick={deleteConversation} disabled={deleting}
-          style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', borderRadius: 10, color: '#c0b0cc', fontSize: 20 }}
+          style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', borderRadius: 10, color: '#3a3a5c', fontSize: 20 }}
           title="대화 삭제">
           🗑️
         </button>
@@ -184,7 +184,7 @@ export default function ChatPage() {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
         {messages !== null && messages.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#b0b0cc', fontSize: 13, marginTop: 60 }}>첫 메시지를 보내보세요</div>
+          <div style={{ textAlign: 'center', color: '#555570', fontSize: 13, marginTop: 60 }}>첫 메시지를 보내보세요</div>
         )}
         {(messages ?? []).map(msg => {
           const isMine = msg.sender_id === myId
@@ -195,21 +195,21 @@ export default function ChatPage() {
               <div style={{
                 maxWidth: '72%', padding: '10px 14px',
                 borderRadius: isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: isMine ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#fff',
-                color: isMine ? 'white' : '#1e1b4b',
+                background: isMine ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                color: isMine ? 'white' : '#eeeeff',
                 fontSize: 15, lineHeight: 1.5,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                 opacity: isSelected ? 0.85 : 1,
                 cursor: isMine ? 'pointer' : 'default',
               }}>
                 {msg.content}
-                <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: isMine ? 'right' : 'left' }}>
+                <div style={{ fontSize: 10, opacity: 0.5, marginTop: 4, textAlign: isMine ? 'right' : 'left' }}>
                   {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
               {isSelected && (
                 <button onClick={e => { e.stopPropagation(); deleteMessage(msg.id) }}
-                  style={{ marginTop: 4, fontSize: 12, color: '#ef4444', background: '#fff', border: '1px solid #fca5a5', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 700 }}>
+                  style={{ marginTop: 4, fontSize: 12, color: '#f87171', background: '#1a1a25', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 700 }}>
                   삭제
                 </button>
               )}
@@ -221,20 +221,20 @@ export default function ChatPage() {
 
       <div style={{
         flexShrink: 0,
-        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-        borderTop: '1px solid #e8e8f2',
+        background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(16px)',
+        borderTop: '1px solid rgba(255,255,255,0.07)',
         padding: '10px 16px', paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
         display: 'flex', gap: 10,
       }}>
         <input value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
           placeholder="메시지 입력..."
-          style={{ flex: 1, background: '#f0f0f8', border: 'none', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#1e1b4b', outline: 'none' }}
+          style={{ flex: 1, background: '#1a1a25', border: 'none', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#eeeeff', outline: 'none' }}
         />
         <button onClick={sendMessage} disabled={!input.trim() || sending}
           style={{
             width: 44, height: 44, borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: input.trim() ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#e0e0f0',
+            background: input.trim() ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
             color: 'white', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>↑</button>
       </div>

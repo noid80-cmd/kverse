@@ -106,27 +106,27 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1e1b4b', minHeight: 32 }}>{agencyName ?? ''}</h1>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', minHeight: 32 }}>{agencyName ?? ''}</h1>
               {agencyVerified && (
                 <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 8 }}>인증</span>
               )}
             </div>
-            <p style={{ fontSize: 13, color: '#8b8baa' }}>오디션 지망생 영상 탐색</p>
+            <p style={{ fontSize: 13, color: '#8888aa' }}>오디션 지망생 영상 탐색</p>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {(['latest', 'likes'] as const).map(s => (
               <button key={s} onClick={() => setSort(s)}
                 style={{
                   padding: '6px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#fff',
-                  color: sort === s ? 'white' : '#8b8baa',
+                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                  color: sort === s ? 'white' : '#8888aa',
                   boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
                 }}>
                 {s === 'latest' ? '최신순' : '인기순'}
@@ -135,16 +135,15 @@ export default function DiscoverPage() {
           </div>
         </div>
 
-        {/* 카테고리 필터 */}
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20 }}>
           {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
             <button key={c} onClick={() => setCategory(c)}
               style={{
                 flexShrink: 0, padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
-                background: category === c ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#fff',
-                color: category === c ? 'white' : '#8b8baa',
+                background: category === c ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                color: category === c ? 'white' : '#8888aa',
                 boxShadow: category === c ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
-                border: category === c ? '1px solid transparent' : '1px solid #e0e0f0',
+                border: category === c ? '1px solid transparent' : '1px solid rgba(255,255,255,0.07)',
               }}>
               {c === 'all' ? '전체' : categoryLabel[c]}
             </button>
@@ -152,32 +151,31 @@ export default function DiscoverPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : videos.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#6366f1' }}>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
               <Video size={22} strokeWidth={1.8} />
             </div>
-            <div style={{ fontWeight: 700, color: '#1e1b4b' }}>아직 영상이 없어요</div>
+            <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
             {videos.map(v => (
-              <div key={v.id} style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid #e8e8f2', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
-                {/* 썸네일 */}
+              <div key={v.id} style={{ background: '#111118', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <Link href={`/agency/discover/${v.id}`} style={{ display: 'block', textDecoration: 'none' }}>
                   <div style={{
-                    height: 180, background: v.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, #e0e7ff, #ede9fe)',
+                    height: 180, background: v.thumbnail_url ? 'transparent' : 'rgba(99,102,241,0.08)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative',
                     cursor: 'pointer',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
-                      : <Video size={40} strokeWidth={1.5} color="#a5b4fc" />
+                      : <Video size={40} strokeWidth={1.5} color="#555570" />
                     }
                     <div style={{
                       position: 'absolute', top: 10, left: 10,
-                      background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '4px 10px', pointerEvents: 'none',
+                      background: 'rgba(0,0,0,0.6)', borderRadius: 8, padding: '4px 10px', pointerEvents: 'none',
                     }}>
                       <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>
                         {categoryLabel[v.category]}
@@ -185,7 +183,7 @@ export default function DiscoverPage() {
                     </div>
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                       <div style={{
-                        width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.9)',
+                        width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.15)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
                       }}>▶</div>
                     </div>
@@ -193,7 +191,6 @@ export default function DiscoverPage() {
                 </Link>
 
                 <div style={{ padding: '14px 16px' }}>
-                  {/* 지망생 정보 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                     <Link href={`/agency/talents/${v.talent?.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, textDecoration: 'none', minWidth: 0 }}>
                       <div style={{
@@ -207,9 +204,9 @@ export default function DiscoverPage() {
                         }
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{v.talent?.name ?? '이름 없음'}</div>
+                        <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{v.talent?.name ?? '이름 없음'}</div>
                         {getAge(v.talent?.birth_date ?? null) && (
-                          <div style={{ fontSize: 12, color: '#8b8baa' }}>{getAge(v.talent?.birth_date ?? null)}세</div>
+                          <div style={{ fontSize: 12, color: '#555570' }}>{getAge(v.talent?.birth_date ?? null)}세</div>
                         )}
                       </div>
                     </Link>
@@ -218,16 +215,17 @@ export default function DiscoverPage() {
                         style={{
                           height: 36, borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700,
                           padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
-                          background: liked.has(v.id) ? '#fce7f3' : '#f0f0f8',
-                          color: liked.has(v.id) ? '#e11d48' : '#8b8baa',
+                          background: liked.has(v.id) ? 'rgba(244,63,94,0.12)' : '#1a1a25',
+                          color: liked.has(v.id) ? '#f43f5e' : '#555570',
                         }}>
                         <Heart size={14} strokeWidth={2} fill={liked.has(v.id) ? 'currentColor' : 'none'} /> {likeCounts[v.id] ?? 0}
                       </button>
                       <button onClick={() => v.talent && toggleBookmark(v.id, v.talent.id)}
                         style={{
                           width: 36, height: 36, borderRadius: 12, border: 'none', fontSize: 18, cursor: 'pointer',
-                          background: bookmarked.has(v.id) ? '#fef9c3' : '#f0f0f8',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: bookmarked.has(v.id) ? 'rgba(251,191,36,0.12)' : '#1a1a25',
+                          color: bookmarked.has(v.id) ? '#fbbf24' : '#555570',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                         <Bookmark size={16} strokeWidth={2} fill={bookmarked.has(v.id) ? 'currentColor' : 'none'} />
                       </button>
@@ -235,19 +233,19 @@ export default function DiscoverPage() {
                   </div>
 
                   <Link href={`/agency/discover/${v.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 15, marginBottom: 6 }}>{v.title}</div>
-                    {v.description && <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{v.description}</div>}
+                    <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 15, marginBottom: 6 }}>{v.title}</div>
+                    {v.description && <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{v.description}</div>}
                   </Link>
 
                   {v.tags.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8 }}>
                       {v.tags.slice(0, 4).map(t => (
-                        <span key={t} style={{ fontSize: 11, background: '#f5f3ff', color: '#7c3aed', padding: '3px 8px', borderRadius: 20, fontWeight: 600 }}>#{t}</span>
+                        <span key={t} style={{ fontSize: 11, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '3px 8px', borderRadius: 20, fontWeight: 600 }}>#{t}</span>
                       ))}
                     </div>
                   )}
 
-                  <div style={{ fontSize: 12, color: '#b0b0cc' }}>조회 {v.view_count}회</div>
+                  <div style={{ fontSize: 12, color: '#555570' }}>조회 {v.view_count}회</div>
                 </div>
               </div>
             ))}
