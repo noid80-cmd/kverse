@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
-import { Home, Compass, Plus, Bell, Megaphone, Heart, Video } from 'lucide-react'
+import { Home, Compass, Plus, Bell, Megaphone, Heart, Volume2, VolumeX, Video } from 'lucide-react'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
@@ -18,20 +18,190 @@ const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
 }
 
-type Video = {
-  id: string; title: string; thumbnail_url: string | null
-  view_count: number; like_count: number; category: string; tags: string[]; created_at: string
-  talent: { id: string } | null
+type VideoItem = {
+  id: string
+  title: string
+  thumbnail_url: string | null
+  video_url: string | null
+  view_count: number
+  like_count: number
+  category: string
+  tags: string[]
+  created_at: string
+  talent: { id: string; name: string | null; avatar_url: string | null } | null
+}
+
+function VideoCard({
+  video,
+  muted,
+  onMuteToggle,
+  liked,
+  likeCount,
+  onLike,
+  myId,
+}: {
+  video: VideoItem
+  muted: boolean
+  onMuteToggle: () => void
+  liked: boolean
+  likeCount: number
+  onLike: () => void
+  myId: string
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (!videoRef.current) return
+        if (entry.isIntersecting) {
+          videoRef.current.play().catch(() => {})
+        } else {
+          videoRef.current.pause()
+          videoRef.current.currentTime = 0
+        }
+      },
+      { threshold: 0.7 }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted
+  }, [muted])
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        height: '100dvh',
+        scrollSnapAlign: 'start',
+        position: 'relative',
+        background: '#000',
+        flexShrink: 0,
+        overflow: 'hidden',
+      }}
+    >
+      {video.video_url ? (
+        <video
+          ref={videoRef}
+          src={video.video_url}
+          poster={video.thumbnail_url ?? undefined}
+          loop
+          muted={muted}
+          playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : video.thumbnail_url ? (
+        <img
+          src={video.thumbnail_url}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333350' }}>
+          <Video size={48} strokeWidth={1.5} />
+        </div>
+      )}
+
+      {/* Bottom gradient + info */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        background: 'linear-gradient(transparent, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.92))',
+        padding: '80px 16px 100px',
+      }}>
+        <Link href={`/videos/${video.id}`} style={{ textDecoration: 'none' }}>
+          <div style={{ fontWeight: 900, color: '#fff', fontSize: 17, marginBottom: 6, lineHeight: 1.3 }}>
+            {video.title}
+          </div>
+        </Link>
+        {video.talent && (
+          <Link href={`/talent/${video.talent.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%', overflow: 'hidden',
+              background: 'rgba(99,102,241,0.4)', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {video.talent.avatar_url
+                ? <img src={video.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ fontSize: 14 }}>🎤</span>
+              }
+            </div>
+            <span style={{ color: '#eeeeff', fontWeight: 700, fontSize: 14 }}>
+              {video.talent.name ?? '지망생'}
+            </span>
+          </Link>
+        )}
+        {video.tags?.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {video.tags.slice(0, 4).map(t => (
+              <span key={t} style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>#{t}</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Right-side actions */}
+      <div style={{
+        position: 'absolute', right: 14, bottom: 110,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
+      }}>
+        {/* Like */}
+        <button
+          onClick={onLike}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
+        >
+          <div style={{
+            width: 46, height: 46, borderRadius: '50%',
+            background: liked ? 'rgba(244,63,94,0.25)' : 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(8px)',
+          }}>
+            <Heart
+              size={22}
+              strokeWidth={2}
+              fill={liked ? '#f43f5e' : 'none'}
+              color={liked ? '#f43f5e' : 'white'}
+            />
+          </div>
+          <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>{likeCount}</span>
+        </button>
+
+        {/* Mute */}
+        <button
+          onClick={onMuteToggle}
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{
+            width: 46, height: 46, borderRadius: '50%',
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(8px)',
+          }}>
+            {muted
+              ? <VolumeX size={20} strokeWidth={2} color="white" />
+              : <Volume2 size={20} strokeWidth={2} color="white" />
+            }
+          </div>
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function ExplorePage() {
-  const [videos, setVideos] = useState<Video[]>([])
+  const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
   const [sort, setSort] = useState<'latest' | 'likes'>('latest')
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState('')
+  const [muted, setMuted] = useState(true)
   const supabase = createClient()
 
   const load = useCallback(async () => {
@@ -41,9 +211,9 @@ export default function ExplorePage() {
     setMyId(user.id)
 
     let q = supabase.from('videos').select(`
-      id, title, thumbnail_url, view_count, like_count, category, tags, created_at,
-      talent:profiles!talent_id(id)
-    `).eq('status', 'active').limit(60)
+      id, title, thumbnail_url, video_url, view_count, like_count, category, tags, created_at,
+      talent:profiles!talent_id(id, name, avatar_url)
+    `).eq('status', 'active').limit(30)
 
     if (category !== 'all') q = q.eq('category', category)
     q = sort === 'likes'
@@ -51,7 +221,7 @@ export default function ExplorePage() {
       : q.order('created_at', { ascending: false })
 
     const { data } = await q
-    const vids = (data as unknown as Video[]) ?? []
+    const vids = (data as unknown as VideoItem[]) ?? []
     setVideos(vids)
 
     const counts: Record<string, number> = {}
@@ -66,9 +236,7 @@ export default function ExplorePage() {
 
   useEffect(() => { load() }, [load])
 
-  async function toggleLike(e: React.MouseEvent, videoId: string) {
-    e.preventDefault()
-    e.stopPropagation()
+  async function toggleLike(videoId: string) {
     if (!myId) return
     if (liked.has(videoId)) {
       await supabase.from('likes').delete().eq('video_id', videoId).eq('user_id', myId)
@@ -82,78 +250,65 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
-
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>탐색</h1>
-            <p style={{ fontSize: 13, color: '#8888aa' }}>다른 지망생들의 영상을 구경해보세요</p>
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['latest', 'likes'] as const).map(s => (
-              <button key={s} onClick={() => setSort(s)}
-                style={{
-                  padding: '6px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
-                  color: sort === s ? 'white' : '#8888aa',
-                  boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
-                }}>
-                {s === 'latest' ? '최신순' : '인기순'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20 }}>
+    <div style={{ position: 'fixed', inset: 0, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
+      {/* Category filter — fixed top overlay */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30,
+        padding: '12px 16px 8px',
+        background: 'linear-gradient(rgba(0,0,0,0.6), transparent)',
+      }}>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
           {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
             <button key={c} onClick={() => setCategory(c)}
               style={{
-                flexShrink: 0, padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, transition: 'all 0.15s', border: 'none', cursor: 'pointer',
-                background: category === c ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
-                color: category === c ? 'white' : '#8888aa',
-                boxShadow: category === c ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
-                outline: category === c ? 'none' : '1px solid rgba(255,255,255,0.07)',
+                flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer',
+                background: category === c ? 'rgba(99,102,241,0.85)' : 'rgba(0,0,0,0.5)',
+                color: 'white',
+                backdropFilter: 'blur(8px)',
+                boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
               }}>
               {c === 'all' ? '전체' : categoryLabel[c]}
             </button>
           ))}
-        </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
-        ) : videos.length === 0 ? (
-          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
-              <Video size={22} strokeWidth={1.8} />
-            </div>
-            <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
-            {videos.map(v => (
-              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'rgba(99,102,241,0.08)' }}>
-                {v.thumbnail_url
-                  ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333350' }}><Video size={24} strokeWidth={1.5} /></div>
-                }
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.75))', padding: '20px 6px 6px' }}>
-                  <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
-                </div>
-                <button onClick={e => toggleLike(e, v.id)}
-                  style={{
-                    position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.55)',
-                    border: 'none', borderRadius: 10, padding: '3px 7px', outline: 'none',
-                    display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer',
-                  }}>
-                  <Heart size={10} strokeWidth={2} fill={liked.has(v.id) ? 'white' : 'none'} color="white" />
-                  <span style={{ fontSize: 10, color: 'white', fontWeight: 700 }}>{likeCounts[v.id] ?? 0}</span>
-                </button>
-              </Link>
+          <div style={{ display: 'flex', gap: 6, marginLeft: 4 }}>
+            {(['latest', 'likes'] as const).map(s => (
+              <button key={s} onClick={() => setSort(s)}
+                style={{
+                  flexShrink: 0, padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
+                  background: sort === s ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.4)',
+                  color: sort === s ? 'white' : 'rgba(255,255,255,0.6)',
+                  backdropFilter: 'blur(8px)',
+                }}>
+                {s === 'latest' ? '최신' : '인기'}
+              </button>
             ))}
           </div>
-        )}
+        </div>
       </div>
+
+      {loading ? (
+        <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', scrollSnapAlign: 'start' }}>
+          불러오는 중...
+        </div>
+      ) : videos.length === 0 ? (
+        <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, scrollSnapAlign: 'start' }}>
+          <div style={{ color: '#818cf8' }}><Video size={48} strokeWidth={1.5} /></div>
+          <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
+        </div>
+      ) : (
+        videos.map(v => (
+          <VideoCard
+            key={v.id}
+            video={v}
+            muted={muted}
+            onMuteToggle={() => setMuted(m => !m)}
+            liked={liked.has(v.id)}
+            likeCount={likeCounts[v.id] ?? 0}
+            onLike={() => toggleLike(v.id)}
+            myId={myId}
+          />
+        ))
+      )}
 
       <BottomNav items={talentNav} />
     </div>
