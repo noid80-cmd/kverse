@@ -1,12 +1,13 @@
+self.addEventListener('install', () => self.skipWaiting())
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()))
+
 self.addEventListener('push', (event) => {
   if (!event.data) return
   const { title, body, url } = event.data.json()
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // 해당 URL을 현재 포그라운드에서 보고 있으면 알림 표시 안 함
-      const isViewing = clientList.some(c =>
-        c.visibilityState === 'visible' && url && c.url.includes(url)
-      )
+      const isViewing = url && clientList.some(c => c.url.includes(url))
       if (isViewing) return
       return self.registration.showNotification(title, {
         body,
