@@ -38,7 +38,6 @@ function VideoCard({
   liked,
   likeCount,
   onLike,
-  myId,
 }: {
   video: VideoItem
   muted: boolean
@@ -46,7 +45,6 @@ function VideoCard({
   liked: boolean
   likeCount: number
   onLike: () => void
-  myId: string
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -55,20 +53,17 @@ function VideoCard({
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (!videoRef.current) return
-        if (entry.isIntersecting) {
-          videoRef.current.play().catch(() => {})
-          setPaused(false)
-        } else {
-          videoRef.current.pause()
-          videoRef.current.currentTime = 0
-          setPaused(false)
-        }
-      },
-      { threshold: 0.7 }
-    )
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!videoRef.current) return
+      if (entry.isIntersecting) {
+        videoRef.current.play().catch(() => {})
+        setPaused(false)
+      } else {
+        videoRef.current.pause()
+        videoRef.current.currentTime = 0
+        setPaused(false)
+      }
+    }, { threshold: 0.7 })
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
@@ -77,7 +72,7 @@ function VideoCard({
     if (videoRef.current) videoRef.current.muted = muted
   }, [muted])
 
-  function togglePlay() {
+  function handleTap() {
     if (!videoRef.current) return
     if (videoRef.current.paused) {
       videoRef.current.play().catch(() => {})
@@ -91,36 +86,39 @@ function VideoCard({
   return (
     <div
       ref={containerRef}
-      onClick={togglePlay}
-      style={{
-        height: '100dvh',
-        scrollSnapAlign: 'start',
-        position: 'relative',
-        background: '#000',
-        flexShrink: 0,
-        overflow: 'hidden',
-        cursor: 'pointer',
-      }}
+      style={{ height: '100dvh', scrollSnapAlign: 'start', position: 'relative', background: '#000', flexShrink: 0, overflow: 'hidden' }}
     >
+      {/* 영상 or 썸네일 */}
       {video.video_url ? (
         <video
           ref={videoRef}
           src={video.video_url}
           poster={video.thumbnail_url ?? undefined}
-          loop
-          muted={muted}
-          playsInline
+          loop muted={muted} playsInline
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
         />
+      ) : video.thumbnail_url ? (
+        <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+      ) : (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333350' }}>
+          <Video size={48} strokeWidth={1.5} />
+        </div>
       )}
+
+      {/* 탭 인식 투명 레이어 (영상 위, 버튼 아래) */}
+      <div
+        onClick={handleTap}
+        style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'pointer' }}
+      />
+
+      {/* 일시정지 아이콘 */}
       {paused && (
         <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
           width: 64, height: 64, borderRadius: '50%',
           background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          pointerEvents: 'none',
+          zIndex: 6, pointerEvents: 'none',
         }}>
           <svg width="22" height="26" viewBox="0 0 22 26" fill="white">
             <rect x="0" y="0" width="8" height="26" rx="2"/>
@@ -128,17 +126,10 @@ function VideoCard({
           </svg>
         </div>
       )}
-      {!video.video_url && (video.thumbnail_url ? (
-        <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
-      ) : (
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333350' }}>
-          <Video size={48} strokeWidth={1.5} />
-        </div>
-      ))}
 
-      {/* Bottom gradient + info */}
-      <div onClick={e => e.stopPropagation()} style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
+      {/* 하단 그라디언트 + 정보 */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
         background: 'linear-gradient(transparent, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.92))',
         padding: '80px 16px 100px',
       }}>
@@ -159,9 +150,7 @@ function VideoCard({
                 : <span style={{ fontSize: 14 }}>🎤</span>
               }
             </div>
-            <span style={{ color: '#eeeeff', fontWeight: 700, fontSize: 14 }}>
-              {video.talent.name ?? '지망생'}
-            </span>
+            <span style={{ color: '#eeeeff', fontWeight: 700, fontSize: 14 }}>{video.talent.name ?? '지망생'}</span>
           </Link>
         )}
         {video.tags?.length > 0 && (
@@ -173,47 +162,30 @@ function VideoCard({
         )}
       </div>
 
-      {/* Right-side actions */}
-      <div onClick={e => e.stopPropagation()} style={{
-        position: 'absolute', right: 14, bottom: 110,
+      {/* 우측 버튼 */}
+      <div style={{
+        position: 'absolute', right: 14, bottom: 110, zIndex: 10,
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
       }}>
-        {/* Like */}
-        <button
-          onClick={onLike}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
-        >
+        <button onClick={onLike}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
           <div style={{
             width: 46, height: 46, borderRadius: '50%',
             background: liked ? 'rgba(244,63,94,0.25)' : 'rgba(0,0,0,0.45)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)',
           }}>
-            <Heart
-              size={22}
-              strokeWidth={2}
-              fill={liked ? '#f43f5e' : 'none'}
-              color={liked ? '#f43f5e' : 'white'}
-            />
+            <Heart size={22} strokeWidth={2} fill={liked ? '#f43f5e' : 'none'} color={liked ? '#f43f5e' : 'white'} />
           </div>
           <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>{likeCount}</span>
         </button>
 
-        {/* Mute */}
-        <button
-          onClick={onMuteToggle}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
+        <button onClick={onMuteToggle} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <div style={{
             width: 46, height: 46, borderRadius: '50%',
             background: 'rgba(0,0,0,0.45)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)',
           }}>
-            {muted
-              ? <VolumeX size={20} strokeWidth={2} color="white" />
-              : <Volume2 size={20} strokeWidth={2} color="white" />
-            }
+            {muted ? <VolumeX size={20} strokeWidth={2} color="white" /> : <Volume2 size={20} strokeWidth={2} color="white" />}
           </div>
         </button>
       </div>
@@ -279,42 +251,41 @@ export default function ExplorePage() {
 
   return (
     <>
-      {/* Category filter — fixed top, outside scroll container */}
+      {/* 상단 필터 — scroll 컨테이너 밖에 고정 */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        padding: 'env(safe-area-inset-top, 12px) 16px 8px',
         paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)',
-        background: 'linear-gradient(rgba(0,0,0,0.6), transparent)',
+        padding: '12px 16px 8px',
+        background: 'linear-gradient(rgba(0,0,0,0.65), transparent)',
         pointerEvents: 'none',
       }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', pointerEvents: 'auto' }}>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', flex: 1 }}>
             {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
-              <button key={c} onClick={() => setCategory(c)}
-                style={{
-                  flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: category === c ? 'rgba(99,102,241,0.85)' : 'rgba(0,0,0,0.5)',
-                  color: 'white',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
-                }}>
+              <button key={c} onClick={() => setCategory(c)} style={{
+                flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700,
+                border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)',
+                background: category === c ? 'rgba(99,102,241,0.85)' : 'rgba(0,0,0,0.5)',
+                color: 'white',
+                boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
+              }}>
                 {c === 'all' ? '전체' : categoryLabel[c]}
               </button>
             ))}
           </div>
-          <button onClick={() => setSort(s => s === 'latest' ? 'likes' : 'latest')}
+          <button
+            onClick={() => setSort(s => s === 'latest' ? 'likes' : 'latest')}
             style={{
               flexShrink: 0, padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-              border: 'none', cursor: 'pointer',
-              background: 'rgba(0,0,0,0.5)', color: 'white', backdropFilter: 'blur(8px)',
-              display: 'flex', alignItems: 'center', gap: 4,
+              border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)',
+              background: 'rgba(0,0,0,0.5)', color: 'white',
             }}>
             {sort === 'latest' ? '🕐 최신순' : '❤️ 좋아요순'}
           </button>
         </div>
       </div>
 
-      {/* Scroll container */}
+      {/* 영상 스크롤 컨테이너 */}
       <div style={{ position: 'fixed', inset: 0, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
         {loading ? (
           <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', scrollSnapAlign: 'start' }}>
@@ -335,13 +306,11 @@ export default function ExplorePage() {
               liked={liked.has(v.id)}
               likeCount={likeCounts[v.id] ?? 0}
               onLike={() => toggleLike(v.id)}
-              myId={myId}
             />
           ))
         )}
       </div>
 
-      {/* BottomNav outside scroll container */}
       <BottomNav items={talentNav} />
     </>
   )
