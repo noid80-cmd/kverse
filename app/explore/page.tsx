@@ -259,32 +259,34 @@ export default function ExplorePage() {
         background: 'linear-gradient(rgba(0,0,0,0.6), transparent)',
         pointerEvents: 'none',
       }}>
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, pointerEvents: 'auto' }}>
-          {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
-            <button key={c} onClick={() => setCategory(c)}
-              style={{
-                flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer',
-                background: category === c ? 'rgba(99,102,241,0.85)' : 'rgba(0,0,0,0.5)',
-                color: 'white',
-                backdropFilter: 'blur(8px)',
-                boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
-              }}>
-              {c === 'all' ? '전체' : categoryLabel[c]}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 6, pointerEvents: 'auto' }}>
-          {(['latest', 'likes'] as const).map(s => (
-            <button key={s} onClick={() => setSort(s)}
-              style={{
-                padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                background: sort === s ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.4)',
-                color: sort === s ? 'white' : 'rgba(255,255,255,0.5)',
-                backdropFilter: 'blur(8px)',
-              }}>
-              {s === 'latest' ? '최신순' : '좋아요순'}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', pointerEvents: 'auto' }}>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', flex: 1 }}>
+            {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
+              <button key={c} onClick={() => setCategory(c)}
+                style={{
+                  flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer',
+                  background: category === c ? 'rgba(99,102,241,0.85)' : 'rgba(0,0,0,0.5)',
+                  color: 'white',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
+                }}>
+                {c === 'all' ? '전체' : categoryLabel[c]}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+            {(['latest', 'likes'] as const).map(s => (
+              <button key={s} onClick={() => setSort(s)}
+                style={{
+                  padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, border: 'none', cursor: 'pointer',
+                  background: sort === s ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.4)',
+                  color: sort === s ? 'white' : 'rgba(255,255,255,0.5)',
+                  backdropFilter: 'blur(8px)',
+                }}>
+                {s === 'latest' ? '최신순' : '좋아요순'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
