@@ -302,19 +302,15 @@ export default function ExplorePage() {
               </button>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-            {(['latest', 'likes'] as const).map(s => (
-              <button key={s} onClick={() => setSort(s)}
-                style={{
-                  padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: sort === s ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.4)',
-                  color: sort === s ? 'white' : 'rgba(255,255,255,0.5)',
-                  backdropFilter: 'blur(8px)',
-                }}>
-                {s === 'latest' ? '최신순' : '좋아요순'}
-              </button>
-            ))}
-          </div>
+          <button onClick={() => setSort(s => s === 'latest' ? 'likes' : 'latest')}
+            style={{
+              flexShrink: 0, padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+              border: 'none', cursor: 'pointer',
+              background: 'rgba(0,0,0,0.5)', color: 'white', backdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+            {sort === 'latest' ? '🕐 최신순' : '❤️ 좋아요순'}
+          </button>
         </div>
       </div>
 
