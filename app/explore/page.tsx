@@ -250,14 +250,16 @@ export default function ExplorePage() {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
-      {/* Category filter — fixed top overlay */}
+    <>
+      {/* Category filter — fixed top, outside scroll container */}
       <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30,
-        padding: '12px 16px 8px',
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        padding: 'env(safe-area-inset-top, 12px) 16px 8px',
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)',
         background: 'linear-gradient(rgba(0,0,0,0.6), transparent)',
+        pointerEvents: 'none',
       }}>
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, pointerEvents: 'auto' }}>
           {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
             <button key={c} onClick={() => setCategory(c)}
               style={{
@@ -286,31 +288,35 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', scrollSnapAlign: 'start' }}>
-          불러오는 중...
-        </div>
-      ) : videos.length === 0 ? (
-        <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, scrollSnapAlign: 'start' }}>
-          <div style={{ color: '#818cf8' }}><Video size={48} strokeWidth={1.5} /></div>
-          <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
-        </div>
-      ) : (
-        videos.map(v => (
-          <VideoCard
-            key={v.id}
-            video={v}
-            muted={muted}
-            onMuteToggle={() => setMuted(m => !m)}
-            liked={liked.has(v.id)}
-            likeCount={likeCounts[v.id] ?? 0}
-            onLike={() => toggleLike(v.id)}
-            myId={myId}
-          />
-        ))
-      )}
+      {/* Scroll container */}
+      <div style={{ position: 'fixed', inset: 0, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
+        {loading ? (
+          <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', scrollSnapAlign: 'start' }}>
+            불러오는 중...
+          </div>
+        ) : videos.length === 0 ? (
+          <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, scrollSnapAlign: 'start' }}>
+            <div style={{ color: '#818cf8' }}><Video size={48} strokeWidth={1.5} /></div>
+            <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
+          </div>
+        ) : (
+          videos.map(v => (
+            <VideoCard
+              key={v.id}
+              video={v}
+              muted={muted}
+              onMuteToggle={() => setMuted(m => !m)}
+              liked={liked.has(v.id)}
+              likeCount={likeCounts[v.id] ?? 0}
+              onLike={() => toggleLike(v.id)}
+              myId={myId}
+            />
+          ))
+        )}
+      </div>
 
+      {/* BottomNav outside scroll container */}
       <BottomNav items={talentNav} />
-    </div>
+    </>
   )
 }
