@@ -197,6 +197,7 @@ export default function ExplorePage() {
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
+  const [sort, setSort] = useState<'latest' | 'likes'>('latest')
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState('')
@@ -215,7 +216,9 @@ export default function ExplorePage() {
     `).eq('status', 'active').limit(30)
 
     if (category !== 'all') q = q.eq('category', category)
-    q = q.order('created_at', { ascending: false })
+    q = sort === 'likes'
+      ? q.order('like_count', { ascending: false })
+      : q.order('created_at', { ascending: false })
 
     const { data } = await q
     const vids = (data as unknown as VideoItem[]) ?? []
@@ -229,7 +232,7 @@ export default function ExplorePage() {
     setLiked(new Set(myLikes?.map(l => l.video_id).filter(Boolean) as string[]))
 
     setLoading(false)
-  }, [category])
+  }, [category, sort])
 
   useEffect(() => { load() }, [load])
 
@@ -256,7 +259,7 @@ export default function ExplorePage() {
         background: 'linear-gradient(rgba(0,0,0,0.6), transparent)',
         pointerEvents: 'none',
       }}>
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, pointerEvents: 'auto' }}>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, pointerEvents: 'auto' }}>
           {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
             <button key={c} onClick={() => setCategory(c)}
               style={{
@@ -267,6 +270,19 @@ export default function ExplorePage() {
                 boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
               }}>
               {c === 'all' ? '전체' : categoryLabel[c]}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 6, pointerEvents: 'auto' }}>
+          {(['latest', 'likes'] as const).map(s => (
+            <button key={s} onClick={() => setSort(s)}
+              style={{
+                padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
+                background: sort === s ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.4)',
+                color: sort === s ? 'white' : 'rgba(255,255,255,0.5)',
+                backdropFilter: 'blur(8px)',
+              }}>
+              {s === 'latest' ? '최신순' : '좋아요순'}
             </button>
           ))}
         </div>
