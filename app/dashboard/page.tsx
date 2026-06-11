@@ -34,7 +34,7 @@ const spinner = (
   </>
 )
 
-const CACHE_KEY = 'kverse-dashboard-v2'
+const CACHE_KEY = 'kpick-dashboard-v2'
 
 export default function DashboardPage() {
   const [data, setData] = useState<PageData | null>(() => {

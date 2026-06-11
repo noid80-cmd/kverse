@@ -122,7 +122,7 @@ export default function SignupPage() {
           }}>
             <span style={{ color: 'white', fontSize: 24, fontWeight: 900 }}>K</span>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>KVERSE 가입</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>Kpick 가입</h1>
           <p style={{ fontSize: 13, color: '#8888aa' }}>
             {step === 'role' ? '어떤 계정으로 가입할까요?' : step === 'method' ? '가입 방법을 선택해주세요' : '기본 정보를 입력해주세요'}
           </p>

@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'KVERSE',
-    short_name: 'KVERSE',
+    name: 'Kpick',
+    short_name: 'Kpick',
     description: '기획사가 직접 보는 오디션 영상 플랫폼',
     start_url: '/',
     display: 'standalone',

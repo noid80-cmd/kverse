@@ -28,7 +28,7 @@ type Bookmark = {
   agency_member: { name: string } | null
 }
 
-const CACHE_KEY = 'kverse-reactions'
+const CACHE_KEY = 'kpick-reactions'
 
 export default function ReactionsPage() {
   const [pageData, setPageData] = useState<{ convs: Conversation[]; bookmarks: Bookmark[] } | null>(() => {

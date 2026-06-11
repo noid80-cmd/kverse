@@ -60,7 +60,7 @@ export default function LoginPage() {
           }}>
             <span style={{ color: 'white', fontSize: 28, fontWeight: 900, letterSpacing: -1 }}>K</span>
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 4, letterSpacing: -0.5 }}>KVERSE</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 4, letterSpacing: -0.5 }}>Kpick</h1>
           <p style={{ fontSize: 13, color: '#8888aa', fontWeight: 500 }}>기획사가 직접 보는 오디션 플랫폼</p>
         </div>
 
