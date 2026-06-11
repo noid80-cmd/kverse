@@ -10,6 +10,10 @@ type Conversation = {
   agency_member: { name: string; avatar_url: string | null } | null
   talent: { name: string; avatar_url: string | null } | null
 }
+type AgencyCard = {
+  name: string; description: string | null; website: string | null
+  logo_url: string | null; is_verified: boolean
+}
 
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>()
@@ -19,8 +23,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [myId, setMyId] = useState('')
   const [sending, setSending] = useState(false)
-  const [isVerified, setIsVerified] = useState(false)
-  const [agencyName, setAgencyName] = useState('')
+  const [agencyCard, setAgencyCard] = useState<AgencyCard | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null)
   const [activeUsers, setActiveUsers] = useState<Set<string>>(new Set())
@@ -48,8 +51,8 @@ export default function ChatPage() {
 
       if (am?.agency_id) {
         const { data: ag } = await supabase
-          .from('agencies').select('name, is_verified').eq('id', am.agency_id).single()
-        if (ag) { setIsVerified(ag.is_verified); setAgencyName(ag.name) }
+          .from('agencies').select('name, description, website, logo_url, is_verified').eq('id', am.agency_id).single()
+        if (ag) setAgencyCard(ag as AgencyCard)
       }
 
       setMessages(msgs ?? [])
@@ -110,7 +113,7 @@ export default function ChatPage() {
       if (!activeUsers.has(recipientId)) {
         const senderName = myId === conv.talent_id
           ? (conv.talent?.name ?? '지망생')
-          : (agencyName || conv.agency_member?.name || '기획사')
+          : (agencyCard?.name || conv.agency_member?.name || '기획사')
         fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` }) })
       }
@@ -165,13 +168,13 @@ export default function ChatPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontWeight: 800, color: '#eeeeff', fontSize: 17 }}>
-              {conv && myId === conv.talent_id && agencyName ? agencyName : other?.name ?? '...'}
+              {conv && myId === conv.talent_id && agencyCard ? agencyCard.name : other?.name ?? '...'}
             </span>
-            {isVerified && conv && myId === conv.talent_id && (
+            {agencyCard?.is_verified && conv && myId === conv.talent_id && (
               <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
             )}
           </div>
-          {conv && myId === conv.talent_id && agencyName && other?.name && (
+          {conv && myId === conv.talent_id && agencyCard && other?.name && (
             <span style={{ fontSize: 12, color: '#555570' }}>{other.name}</span>
           )}
         </div>
@@ -183,8 +186,49 @@ export default function ChatPage() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
+
+        {/* 기획사 명함 카드 — 지망생에게만 표시 */}
+        {conv && myId === conv.talent_id && agencyCard && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))',
+            border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: 20, padding: '18px 18px 16px', marginBottom: 20,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: agencyCard.description || agencyCard.website ? 14 : 0 }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
+                background: 'rgba(99,102,241,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {agencyCard.logo_url
+                  ? <img src={agencyCard.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <span style={{ fontSize: 22 }}>🏢</span>
+                }
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
+                  <span style={{ fontWeight: 900, color: '#eeeeff', fontSize: 16 }}>{agencyCard.name}</span>
+                  {agencyCard.is_verified && (
+                    <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: '#818cf8', fontWeight: 600 }}>기획사</div>
+              </div>
+            </div>
+            {agencyCard.description && (
+              <p style={{ fontSize: 13, color: '#8888aa', lineHeight: 1.6, margin: '0 0 10px' }}>{agencyCard.description}</p>
+            )}
+            {agencyCard.website && (
+              <a href={agencyCard.website} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: 12, color: '#818cf8', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                🔗 {agencyCard.website.replace(/^https?:\/\//, '')}
+              </a>
+            )}
+          </div>
+        )}
+
         {messages !== null && messages.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#555570', fontSize: 13, marginTop: 60 }}>첫 메시지를 보내보세요</div>
+          <div style={{ textAlign: 'center', color: '#555570', fontSize: 13, marginTop: 40 }}>첫 메시지를 보내보세요</div>
         )}
         {(messages ?? []).map(msg => {
           const isMine = msg.sender_id === myId
