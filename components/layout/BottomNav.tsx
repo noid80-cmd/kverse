@@ -23,7 +23,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
               justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
               outline: 'none',
-              color: active ? '#818cf8' : '#3a3a5c',
+              color: active ? '#818cf8' : '#6b6b8a',
               transition: 'color 0.15s',
             }}>
             {item.icon}
