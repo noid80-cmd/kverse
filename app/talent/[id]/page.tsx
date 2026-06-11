@@ -47,8 +47,13 @@ export default function TalentPublicProfilePage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       setMyRole(profile?.role ?? 'talent')
 
+      const isAgency = profile?.role === 'agency'
+      const profileFields = isAgency
+        ? 'id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality'
+        : 'id, name, avatar_url'
+
       const [{ data: t }, { data: v }] = await Promise.all([
-        supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
+        supabase.from('profiles').select(profileFields).eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').order('created_at', { ascending: false }),
       ])
 
@@ -128,14 +133,14 @@ export default function TalentPublicProfilePage() {
             </div>
           </div>
 
-          {(talent.height || talent.weight) && (
+          {myRole === 'agency' && (talent.height || talent.weight) && (
             <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
               {talent.height && <span style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
               {talent.weight && <span style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
             </div>
           )}
 
-          {talent.skills?.length > 0 && (
+          {myRole === 'agency' && talent.skills?.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: talent.bio ? 16 : 0 }}>
               {talent.skills.map(s => (
                 <span key={s} style={{ fontSize: 13, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '5px 12px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
@@ -143,7 +148,7 @@ export default function TalentPublicProfilePage() {
             </div>
           )}
 
-          {talent.bio && (
+          {myRole === 'agency' && talent.bio && (
             <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.7, background: '#1a1a25', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
           )}
         </div>
