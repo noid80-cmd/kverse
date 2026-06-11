@@ -50,6 +50,7 @@ function VideoCard({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [paused, setPaused] = useState(false)
 
   useEffect(() => {
     const el = containerRef.current
@@ -59,9 +60,11 @@ function VideoCard({
         if (!videoRef.current) return
         if (entry.isIntersecting) {
           videoRef.current.play().catch(() => {})
+          setPaused(false)
         } else {
           videoRef.current.pause()
           videoRef.current.currentTime = 0
+          setPaused(false)
         }
       },
       { threshold: 0.7 }
@@ -74,9 +77,21 @@ function VideoCard({
     if (videoRef.current) videoRef.current.muted = muted
   }, [muted])
 
+  function togglePlay() {
+    if (!videoRef.current) return
+    if (videoRef.current.paused) {
+      videoRef.current.play().catch(() => {})
+      setPaused(false)
+    } else {
+      videoRef.current.pause()
+      setPaused(true)
+    }
+  }
+
   return (
     <div
       ref={containerRef}
+      onClick={togglePlay}
       style={{
         height: '100dvh',
         scrollSnapAlign: 'start',
@@ -84,6 +99,7 @@ function VideoCard({
         background: '#000',
         flexShrink: 0,
         overflow: 'hidden',
+        cursor: 'pointer',
       }}
     >
       {video.video_url ? (
@@ -96,20 +112,32 @@ function VideoCard({
           playsInline
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
         />
-      ) : video.thumbnail_url ? (
-        <img
-          src={video.thumbnail_url}
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-        />
+      )}
+      {paused && (
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 64, height: 64, borderRadius: '50%',
+          background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none',
+        }}>
+          <svg width="22" height="26" viewBox="0 0 22 26" fill="white">
+            <rect x="0" y="0" width="8" height="26" rx="2"/>
+            <rect x="14" y="0" width="8" height="26" rx="2"/>
+          </svg>
+        </div>
+      )}
+      {!video.video_url && (video.thumbnail_url ? (
+        <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
       ) : (
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333350' }}>
           <Video size={48} strokeWidth={1.5} />
         </div>
-      )}
+      ))}
 
       {/* Bottom gradient + info */}
-      <div style={{
+      <div onClick={e => e.stopPropagation()} style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
         background: 'linear-gradient(transparent, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.92))',
         padding: '80px 16px 100px',
@@ -146,7 +174,7 @@ function VideoCard({
       </div>
 
       {/* Right-side actions */}
-      <div style={{
+      <div onClick={e => e.stopPropagation()} style={{
         position: 'absolute', right: 14, bottom: 110,
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
       }}>
