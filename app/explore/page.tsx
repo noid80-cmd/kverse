@@ -197,7 +197,6 @@ export default function ExplorePage() {
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
-  const [sort, setSort] = useState<'latest' | 'likes'>('latest')
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState('')
@@ -216,9 +215,7 @@ export default function ExplorePage() {
     `).eq('status', 'active').limit(30)
 
     if (category !== 'all') q = q.eq('category', category)
-    q = sort === 'likes'
-      ? q.order('like_count', { ascending: false })
-      : q.order('created_at', { ascending: false })
+    q = q.order('created_at', { ascending: false })
 
     const { data } = await q
     const vids = (data as unknown as VideoItem[]) ?? []
@@ -232,7 +229,7 @@ export default function ExplorePage() {
     setLiked(new Set(myLikes?.map(l => l.video_id).filter(Boolean) as string[]))
 
     setLoading(false)
-  }, [category, sort])
+  }, [category])
 
   useEffect(() => { load() }, [load])
 
@@ -272,19 +269,6 @@ export default function ExplorePage() {
               {c === 'all' ? '전체' : categoryLabel[c]}
             </button>
           ))}
-          <div style={{ display: 'flex', gap: 6, marginLeft: 4 }}>
-            {(['latest', 'likes'] as const).map(s => (
-              <button key={s} onClick={() => setSort(s)}
-                style={{
-                  flexShrink: 0, padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: sort === s ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.4)',
-                  color: sort === s ? 'white' : 'rgba(255,255,255,0.6)',
-                  backdropFilter: 'blur(8px)',
-                }}>
-                {s === 'latest' ? '최신' : '인기'}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
