@@ -108,7 +108,7 @@ function VideoCard({
       {/* 탭 인식 투명 레이어 (영상 위, 버튼 아래) */}
       <div
         onClick={handleTap}
-        style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'pointer' }}
+        style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'pointer', touchAction: 'pan-y' }}
       />
 
       {/* 일시정지 아이콘 */}
