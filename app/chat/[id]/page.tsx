@@ -234,10 +234,10 @@ export default function ChatPage() {
           const isMine = msg.sender_id === myId
           const isSelected = selectedMsgId === msg.id
           return (
-            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMine ? 'flex-end' : 'flex-start', marginBottom: 8 }}
+            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMine ? 'flex-end' : 'flex-start', marginBottom: 8, paddingRight: isMine ? 4 : 0, paddingLeft: isMine ? 0 : 4 }}
               onClick={() => isMine ? setSelectedMsgId(isSelected ? null : msg.id) : setSelectedMsgId(null)}>
               <div style={{
-                maxWidth: '72%', padding: '10px 14px',
+                maxWidth: '70%', padding: '10px 14px',
                 borderRadius: isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                 background: isMine ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
                 color: isMine ? 'white' : '#eeeeff',
