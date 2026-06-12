@@ -217,31 +217,54 @@ export default function DashboardPage() {
             </div>
           </Link>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {recentVideos.map(v => (
-              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#111118', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <div style={{
-                    width: '100%', aspectRatio: '16/9', overflow: 'hidden',
-                    background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.05))',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                  }}>
-                    {v.thumbnail_url
-                      ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Video size={22} strokeWidth={1.5} color="#2a2a3a" />
-                    }
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)',
-                    }} />
-                  </div>
-                  <div style={{ padding: '10px 12px 12px' }}>
-                    <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 13, marginBottom: 3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{v.title}</div>
-                    <div style={{ fontSize: 11, color: '#555570' }}>조회 {v.view_count}회</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* 히어로 카드 — 첫 번째 영상 */}
+            <Link href={`/videos/${recentVideos[0].id}`} style={{ textDecoration: 'none' }}>
+              <div style={{ background: '#111118', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', position: 'relative' }}>
+                <div style={{
+                  width: '100%', aspectRatio: '16/9', overflow: 'hidden',
+                  background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.05))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                }}>
+                  {recentVideos[0].thumbnail_url
+                    ? <img src={recentVideos[0].thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <Video size={32} strokeWidth={1.5} color="#2a2a3a" />
+                  }
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 55%)' }} />
+                  <div style={{ position: 'absolute', bottom: 14, left: 16, right: 16 }}>
+                    <div style={{ fontWeight: 700, color: '#fff', fontSize: 15, marginBottom: 4 }}>{recentVideos[0].title}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>조회 {recentVideos[0].view_count}회</div>
                   </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+            </Link>
+
+            {/* 나머지 영상 — 2열 */}
+            {recentVideos.length > 1 && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {recentVideos.slice(1).map(v => (
+                  <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ background: '#111118', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <div style={{
+                        width: '100%', aspectRatio: '16/9', overflow: 'hidden',
+                        background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.05))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                      }}>
+                        {v.thumbnail_url
+                          ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <Video size={18} strokeWidth={1.5} color="#2a2a3a" />
+                        }
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 55%)' }} />
+                        <div style={{ position: 'absolute', bottom: 8, left: 10, right: 10 }}>
+                          <div style={{ fontWeight: 600, color: '#fff', fontSize: 12, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
+                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>조회 {v.view_count}회</div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
