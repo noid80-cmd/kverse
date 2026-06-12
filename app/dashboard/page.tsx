@@ -54,7 +54,6 @@ export default function DashboardPage() {
   const [data, setData] = useState<PageData | null>(() => {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
   })
-  const [auditionIdx, setAuditionIdx] = useState(0)
   const supabase = createClient()
 
   useEffect(() => {
@@ -84,13 +83,6 @@ export default function DashboardPage() {
     }
     load()
   }, [])
-
-  useEffect(() => {
-    const len = data?.recentAuditions.length ?? 0
-    if (len <= 1) return
-    const t = setInterval(() => setAuditionIdx(i => (i + 1) % len), 5000)
-    return () => clearInterval(t)
-  }, [data?.recentAuditions.length])
 
   if (!data) return (
     <div style={{ minHeight: '100vh', background: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -259,45 +251,34 @@ export default function DashboardPage() {
                 전체보기 <ChevronRight size={14} />
               </Link>
             </div>
-            <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-              <div key={auditionIdx} style={{
-                background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
-                border: '1px solid rgba(255,255,255,0.07)',
-                display: 'flex', alignItems: 'center', gap: 12,
-                animation: 'auditSlide 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
-              }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
-                  <Megaphone size={18} strokeWidth={1.8} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {recentAuditions[auditionIdx].title}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {recentAuditions.slice(0, 3).map(a => (
+                <Link key={a.id} href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                  }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+                      <Megaphone size={18} strokeWidth={1.8} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {a.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 11, color: '#8888aa' }}>{a.agency?.name ?? '기획사'}</span>
+                        <span style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
+                          {a.category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
+                        </span>
+                        {a.deadline && <span style={{ fontSize: 11, color: '#555570' }}>~{a.deadline}</span>}
+                      </div>
+                    </div>
+                    <ChevronRight size={16} color="#333350" />
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 11, color: '#8888aa' }}>{recentAuditions[auditionIdx].agency?.name ?? '기획사'}</span>
-                    <span style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
-                      {recentAuditions[auditionIdx].category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
-                    </span>
-                    {recentAuditions[auditionIdx].deadline && (
-                      <span style={{ fontSize: 11, color: '#555570' }}>~{recentAuditions[auditionIdx].deadline}</span>
-                    )}
-                  </div>
-                </div>
-                <ChevronRight size={16} color="#333350" />
-              </div>
-            </Link>
-            {recentAuditions.length > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 10 }}>
-                {recentAuditions.map((_, i) => (
-                  <div key={i} style={{
-                    height: 5, borderRadius: 3,
-                    width: i === auditionIdx ? 16 : 5,
-                    background: i === auditionIdx ? '#0891b2' : 'rgba(255,255,255,0.1)',
-                    transition: 'all 0.35s ease',
-                  }} />
-                ))}
-              </div>
-            )}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
@@ -322,8 +303,7 @@ export default function DashboardPage() {
 
       </div>
 
-      <style>{`@keyframes auditSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-      <BottomNav items={talentNav} />
+          <BottomNav items={talentNav} />
     </div>
   )
 }
