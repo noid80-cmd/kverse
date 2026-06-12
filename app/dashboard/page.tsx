@@ -29,9 +29,6 @@ const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
 }
 
-const auditionAccents = [
-  'linear-gradient(90deg, #0891b2, #06b6d4)',
-]
 
 function getAuditionDisplayTitle(a: RecentAudition, lang: string) {
   if (lang === 'ko') return a.title
@@ -311,7 +308,7 @@ export default function DashboardPage() {
                 <div>
                   <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
                     <div key={auditionIdx} style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', animation: 'fadeSlide 0.4s ease' }}>
-                      <div style={{ height: 4, background: auditionAccents[auditionIdx % auditionAccents.length] }} />
+                      <div style={{ height: 4, background: 'linear-gradient(90deg, #0891b2, #06b6d4)' }} />
                       <div style={{ padding: '16px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
