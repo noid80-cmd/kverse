@@ -170,7 +170,12 @@ export default function ReactionsPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>{tx.reactions.pageTitle}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
+          <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+          </button>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{tx.reactions.pageTitle}</h1>
+        </div>
         <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>{tx.reactions.pageDesc}</p>
 
         <div style={{ display: 'flex', background: '#111118', borderRadius: 16, padding: 4, marginBottom: 20, border: '1px solid rgba(255,255,255,0.07)' }}>

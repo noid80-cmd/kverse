@@ -154,7 +154,9 @@ export default function ChatPage() {
         borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+        <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        </button>
         <div style={{
           width: 40, height: 40, borderRadius: 13, overflow: 'hidden', flexShrink: 0,
           background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
