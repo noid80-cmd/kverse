@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Upload, CheckCircle, Video } from 'lucide-react'
+import { Upload, CheckCircle, Video, ArrowLeft } from 'lucide-react'
 
 const inputStyle = {
   width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
@@ -195,7 +195,12 @@ export default function UploadPage() {
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div className="flex items-center gap-3 mb-8">
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0 }}>←</button>
+          <button onClick={() => router.back()} style={{
+            width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0,
+          }}>
+            <ArrowLeft size={20} strokeWidth={2} />
+          </button>
           <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>영상 업로드</h1>
         </div>
 
