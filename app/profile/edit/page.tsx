@@ -1,18 +1,12 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { Home, Compass, Plus, Bell, Megaphone } from 'lucide-react'
-
-const talentNav = [
-  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
-  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
-  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-]
+import { useLang } from '@/lib/i18n/context'
+import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
 
 const inputStyle = {
   width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
@@ -23,6 +17,17 @@ const skillOptions = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '
 
 export default function ProfileEditPage() {
   const router = useRouter()
+  const { lang, setLang } = useLang()
+  const tx = useT(lang)
+
+  const talentNav = [
+    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
+    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
+    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
+    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
+    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
+  ]
+
   type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -111,7 +116,7 @@ export default function ProfileEditPage() {
     <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 24 }}>내 프로필</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 24 }}>{tx.profile.myProfile}</h1>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
           <label style={{ cursor: 'pointer', position: 'relative' }}>
@@ -136,30 +141,30 @@ export default function ProfileEditPage() {
             <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
           </label>
           <p style={{ fontSize: 12, color: '#8888aa', marginTop: 8 }}>
-            {avatarUploading ? '업로드 중...' : '사진 변경'}
+            {avatarUploading ? tx.profile.avatarUploading : tx.profile.changePhoto}
           </p>
         </div>
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
 
           <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>기본 정보</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.basicInfo}</p>
             <div className="flex flex-col gap-3">
               <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="이름 *" required style={inputStyle} />
+                placeholder={tx.profile.nameRequired} required style={inputStyle} />
               <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 11, color: '#555570', fontWeight: 600 }}>생년월일</span>
+                <span style={{ fontSize: 11, color: '#555570', fontWeight: 600 }}>{tx.profile.birthDate}</span>
                 <input type="date" value={birthDate} onChange={e => updateForm(f => ({ ...f, birthDate: e.target.value }))}
                   style={{ border: 'none', outline: 'none', fontSize: 15, color: '#eeeeff', background: 'transparent', width: '100%', padding: 0, colorScheme: 'dark' }} />
               </div>
               <select value={gender} onChange={e => updateForm(f => ({ ...f, gender: e.target.value }))} style={inputStyle}>
-                <option value="">성별 선택</option>
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-                <option value="other">기타</option>
+                <option value="">{tx.profile.selectGender}</option>
+                <option value="male">{tx.profile.genderMale}</option>
+                <option value="female">{tx.profile.genderFemale}</option>
+                <option value="other">{tx.profile.genderOther}</option>
               </select>
               <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
-                <option value="">국적 선택</option>
+                <option value="">{tx.profile.selectNationality}</option>
                 <optgroup label="아시아">
                   <option value="대한민국">대한민국</option>
                   <option value="조선민주주의인민공화국">북한</option>
@@ -226,17 +231,17 @@ export default function ProfileEditPage() {
           </div>
 
           <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>신체 정보</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.bodyInfo}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
-                placeholder="키 (cm)" style={inputStyle} />
+                placeholder={tx.profile.heightPlaceholder} style={inputStyle} />
               <input type="number" value={weight} onChange={e => updateForm(f => ({ ...f, weight: e.target.value }))}
-                placeholder="몸무게 (kg)" style={inputStyle} />
+                placeholder={tx.profile.weightPlaceholder} style={inputStyle} />
             </div>
           </div>
 
           <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>특기</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.skillsLabel}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {skillOptions.map(s => (
                 <button key={s} type="button" onClick={() => toggleSkill(s)}
@@ -252,9 +257,9 @@ export default function ProfileEditPage() {
           </div>
 
           <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>자기소개</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.aboutMe}</p>
             <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
-              placeholder="기획사 담당자에게 나를 소개해보세요" rows={4}
+              placeholder={tx.profile.bioPlaceholderLong} rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
           </div>
 
@@ -265,14 +270,30 @@ export default function ProfileEditPage() {
             style={saved
               ? { background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', color: '#8888aa', fontSize: 17, fontWeight: 700 }
               : { background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
-            {saving ? '저장 중...' : saved ? '✓ 저장완료' : '저장'}
+            {saving ? tx.profile.saving : saved ? tx.profile.saveDone : tx.profile.saveBtn}
           </button>
 
           <button type="button" onClick={handleLogout}
             style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(255,255,255,0.08)', color: '#555570', fontWeight: 700, fontSize: 15 }}>
-            로그아웃
+            {tx.profile.logout}
           </button>
         </form>
+
+        <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginTop: 16 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>{tx.settings.language}</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {LANGS.map(l => (
+              <button key={l} type="button" onClick={() => setLang(l as Lang)}
+                style={{
+                  padding: '8px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                  background: lang === l ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
+                  color: lang === l ? 'white' : '#8888aa',
+                }}>
+                {LANG_LABELS[l as Lang]}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <BottomNav items={talentNav} />

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -7,14 +7,8 @@ import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Home, Compass, Plus, Bell, Megaphone, MessageCircle, Bookmark, Trash2, Video } from 'lucide-react'
-
-const talentNav = [
-  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
-  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
-  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-]
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 type Conversation = {
   id: string; created_at: string; agency_member_id: string
@@ -31,6 +25,17 @@ type Bookmark = {
 const CACHE_KEY = 'kpick-reactions'
 
 export default function ReactionsPage() {
+  const { lang } = useLang()
+  const tx = useT(lang)
+
+  const talentNav = [
+    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
+    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
+    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
+    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
+    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
+  ]
+
   const [pageData, setPageData] = useState<{ convs: Conversation[]; bookmarks: Bookmark[] } | null>(() => {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
   })
@@ -121,9 +126,9 @@ export default function ReactionsPage() {
 
       channel = supabase.channel(`reactions-${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookmarks', filter: `talent_id=eq.${user.id}` },
-          () => { load(user.id); showToast('새로운 관심 표시가 왔어요!') })
+          () => { load(user.id); showToast(tx.reactions.newInterestToast) })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversations', filter: `talent_id=eq.${user.id}` },
-          () => { load(user.id); showToast('기획사에서 채팅을 시작했어요!') })
+          () => { load(user.id); showToast(tx.reactions.agencyChatToast) })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' },
           () => { if (userIdRef.current) load(userIdRef.current) })
         .subscribe()
@@ -165,8 +170,8 @@ export default function ReactionsPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>기획사 반응</h1>
-        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>내 영상에 관심을 보인 기획사들</p>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>{tx.reactions.pageTitle}</h1>
+        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>{tx.reactions.pageDesc}</p>
 
         <div style={{ display: 'flex', background: '#111118', borderRadius: 16, padding: 4, marginBottom: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
           {(['contacts', 'bookmarks'] as const).map(t => (
@@ -176,7 +181,7 @@ export default function ReactionsPage() {
                 background: tab === t ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'transparent',
                 color: tab === t ? 'white' : '#555570',
               }}>
-              {t === 'contacts' ? `채팅 ${convs.length}` : `북마크 ${bookmarks.length}`}
+              {t === 'contacts' ? `${tx.dashboard.chats} ${convs.length}` : `${tx.dashboard.bookmarks} ${bookmarks.length}`}
             </button>
           ))}
         </div>
@@ -187,8 +192,8 @@ export default function ReactionsPage() {
               <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
                 <MessageCircle size={22} strokeWidth={1.8} />
               </div>
-              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 대화가 없어요</div>
-              <div style={{ fontSize: 13, color: '#555570' }}>영상을 올리면 기획사에서 채팅이 올 수 있어요</div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>{tx.reactions.noChats}</div>
+              <div style={{ fontSize: 13, color: '#555570' }}>{tx.reactions.noChatsDesc}</div>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -233,7 +238,7 @@ export default function ReactionsPage() {
               <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
                 <Bookmark size={22} strokeWidth={1.8} />
               </div>
-              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 관심 표시가 없어요</div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>{tx.reactions.noBookmarksYet}</div>
             </div>
           ) : (
             <div className="flex flex-col gap-3">

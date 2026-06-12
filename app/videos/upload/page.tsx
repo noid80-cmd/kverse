@@ -1,9 +1,11 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Upload, CheckCircle, Video, ArrowLeft } from 'lucide-react'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 const inputStyle = {
   width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
@@ -16,6 +18,9 @@ const CHUNK_SIZE = 10 * 1024 * 1024
 
 export default function UploadPage() {
   const router = useRouter()
+  const { lang } = useLang()
+  const tx = useT(lang)
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('vocal')
@@ -201,7 +206,7 @@ export default function UploadPage() {
           }}>
             <ArrowLeft size={20} strokeWidth={2} />
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>영상 업로드</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>{tx.videos.uploadTitle}</h1>
         </div>
 
         <form onSubmit={handleUpload} className="flex flex-col gap-4">
@@ -227,7 +232,7 @@ export default function UploadPage() {
               {file ? <CheckCircle size={36} strokeWidth={1.5} /> : <Video size={36} strokeWidth={1.5} />}
             </div>
             <div style={{ fontWeight: 700, color: file ? '#22d3ee' : '#eeeeff', fontSize: 15, marginBottom: 4 }}>
-              {file ? file.name : '영상 파일 선택'}
+              {file ? file.name : tx.videos.selectVideoFile}
             </div>
             <div style={{ fontSize: 12, color: '#555570' }}>
               {file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : `MP4, MOV, AVI 등 · 최대 ${MAX_SIZE_MB}MB`}
@@ -235,22 +240,22 @@ export default function UploadPage() {
           </label>
 
           <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-            placeholder="영상 제목 *" required style={inputStyle} />
+            placeholder={tx.videos.titleRequired} required style={inputStyle} />
 
           <textarea value={description} onChange={e => setDescription(e.target.value)}
-            placeholder="설명 (선택사항)" rows={3}
+            placeholder={tx.videos.descPlaceholder} rows={3}
             style={{ ...inputStyle, resize: 'none' }} />
 
           <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
-            <option value="vocal">보컬</option>
-            <option value="dance">댄스</option>
-            <option value="acting">연기</option>
-            <option value="rap">랩</option>
-            <option value="other">기타</option>
+            <option value="vocal">{tx.videos.vocal}</option>
+            <option value="dance">{tx.videos.dance}</option>
+            <option value="acting">{tx.videos.acting}</option>
+            <option value="rap">{tx.videos.rap}</option>
+            <option value="other">{tx.videos.other}</option>
           </select>
 
           <input type="text" value={tags} onChange={e => setTags(e.target.value)}
-            placeholder="태그 (쉼표로 구분, 예: 발라드, 고음)" style={inputStyle} />
+            placeholder={tx.videos.tagsPlaceholder} style={inputStyle} />
 
           {error && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{error}</p>}
 
@@ -259,14 +264,14 @@ export default function UploadPage() {
               <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', transition: 'width 0.3s', borderRadius: 3 }} />
               </div>
-              <p style={{ fontSize: 12, color: '#8888aa', marginTop: 6, textAlign: 'center' }}>업로드 중... {progress}%</p>
+              <p style={{ fontSize: 12, color: '#8888aa', marginTop: 6, textAlign: 'center' }}>{tx.videos.uploading} {progress}%</p>
             </div>
           )}
 
           <button type="submit" disabled={uploading}
             className="w-full py-4 rounded-2xl text-white disabled:opacity-50 transition active:scale-95"
             style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.35)', border: 'none', marginTop: 4 }}>
-            {uploading ? '업로드 중...' : '업로드'}
+            {uploading ? tx.videos.uploading : tx.videos.uploadBtn}
           </button>
         </form>
       </div>

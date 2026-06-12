@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 const inputStyle = {
   width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
@@ -11,6 +13,8 @@ const inputStyle = {
 }
 
 export default function SignupPage() {
+  const { lang } = useLang()
+  const tx = useT(lang)
   const [step, setStep] = useState<'role' | 'method' | 'form'>('role')
   const [role, setRole] = useState<'talent' | 'agency'>('talent')
   const [name, setName] = useState('')
@@ -74,7 +78,7 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
-    if (role === 'agency' && !bizRegUrl) { setError('명함을 업로드해주세요'); return }
+    if (role === 'agency' && !bizRegUrl) { setError(tx.auth.bizRegRequired); return }
     setError(''); setLoading(true)
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
@@ -102,9 +106,9 @@ export default function SignupPage() {
         <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#22d3ee' }}>
           <Mail size={26} strokeWidth={1.8} />
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#eeeeff', marginBottom: 8 }}>가입 완료!</h2>
-        <p style={{ color: '#8888aa', fontSize: 14, marginBottom: 24 }}>이제 로그인하세요</p>
-        <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>로그인하러 가기</Link>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#eeeeff', marginBottom: 8 }}>{tx.auth.signupDone}</h2>
+        <p style={{ color: '#8888aa', fontSize: 14, marginBottom: 24 }}>{tx.auth.goToDashboard}</p>
+        <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>{tx.auth.loginLink}</Link>
       </div>
     </div>
   )
@@ -122,17 +126,17 @@ export default function SignupPage() {
           }}>
             <span style={{ color: 'white', fontSize: 24, fontWeight: 900 }}>K</span>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>Kpick 가입</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>{tx.auth.signupTitle}</h1>
           <p style={{ fontSize: 13, color: '#8888aa' }}>
-            {step === 'role' ? '어떤 계정으로 가입할까요?' : step === 'method' ? '가입 방법을 선택해주세요' : '기본 정보를 입력해주세요'}
+            {step === 'role' ? tx.auth.signupStepRole : step === 'method' ? tx.auth.signupStepMethod : tx.auth.signupStepForm}
           </p>
         </div>
 
         {step === 'role' && (
           <div className="flex flex-col gap-3">
             {([
-              { value: 'talent', label: '오디션 지망생', desc: '영상을 올리고 기획사에 노출돼요', icon: <Mic2 size={22} strokeWidth={1.8} /> },
-              { value: 'agency', label: '기획사 담당자', desc: '지망생 영상을 탐색하고 연락해요', icon: <Building2 size={22} strokeWidth={1.8} /> },
+              { value: 'talent', label: tx.auth.roleTalent, desc: tx.auth.roleTalentDesc, icon: <Mic2 size={22} strokeWidth={1.8} /> },
+              { value: 'agency', label: tx.auth.roleAgency, desc: tx.auth.roleAgencyDesc, icon: <Building2 size={22} strokeWidth={1.8} /> },
             ] as const).map(r => (
               <button key={r.value} onClick={() => setRole(r.value)}
                 className="w-full text-left p-5 rounded-2xl transition"
@@ -148,7 +152,7 @@ export default function SignupPage() {
             <button onClick={() => role === 'agency' ? setStep('form') : setStep('method')}
               className="w-full py-4 rounded-2xl text-white mt-1"
               style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.3)' }}>
-              다음
+              {tx.common.next}
             </button>
           </div>
         )}
@@ -165,24 +169,24 @@ export default function SignupPage() {
                   <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.3 44 24 44z"/>
                   <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C41 35.8 44 30.3 44 24c0-1.3-.1-2.7-.4-3.9z"/>
                 </svg>
-                Google로 가입
+                {tx.auth.signupGoogle}
               </button>
             )}
 
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
-              <span style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>이메일로 가입</span>
+              <span style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>{tx.auth.signupEmailBtn}</span>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
             </div>
 
             <button onClick={() => setStep('form')}
               className="w-full py-4 rounded-2xl"
               style={{ background: '#111118', color: '#22d3ee', fontSize: 15, fontWeight: 700, border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <Mail size={18} strokeWidth={2} /> 이메일로 가입
+              <Mail size={18} strokeWidth={2} /> {tx.auth.signupEmailBtn}
             </button>
 
             <button onClick={() => setStep('role')} style={{ background: 'none', border: 'none', color: '#555570', fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
-              뒤로
+              {tx.common.back}
             </button>
           </div>
         )}
@@ -190,14 +194,14 @@ export default function SignupPage() {
         {step === 'form' && (
           <form onSubmit={handleSignup} className="flex flex-col gap-3">
             <input type="text" value={name} onChange={e => setName(e.target.value)}
-              placeholder="담당자 이름" required style={inputStyle} />
+              placeholder={tx.auth.namePlaceholder} required style={inputStyle} />
             {role === 'agency' && (
               <>
                 <input type="text" value={agencyName} onChange={e => setAgencyName(e.target.value)}
-                  placeholder="기획사명 *" required style={inputStyle} />
+                  placeholder={tx.auth.agencyNamePlaceholder} required style={inputStyle} />
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: '#8888aa', marginBottom: 4 }}>명함 * (회사명이 포함된 이미지)</p>
-                  <p style={{ fontSize: 11, color: '#555570', marginBottom: 8 }}>회사명이 보이는 명함 앞면을 촬영해 업로드해주세요</p>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#8888aa', marginBottom: 4 }}>{tx.auth.bizRegUpload}</p>
+                  <p style={{ fontSize: 11, color: '#555570', marginBottom: 8 }}>{tx.auth.bizRegUpload}</p>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
                   {bizRegUrl ? (
                     <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, overflow: 'hidden' }}>
@@ -211,32 +215,32 @@ export default function SignupPage() {
                     <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
                       style={{ width: '100%', padding: '16px', borderRadius: 14, border: '1.5px dashed rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.06)', color: uploading ? '#555570' : '#22d3ee', fontSize: 14, fontWeight: 700, cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                       <Upload size={16} strokeWidth={2} />
-                      {uploading ? '업로드 중...' : '명함 사진 업로드'}
+                      {uploading ? tx.auth.bizRegUploading : tx.auth.bizRegUpload}
                     </button>
                   )}
                 </div>
               </>
             )}
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="이메일" required style={inputStyle} />
+              placeholder={tx.auth.emailPlaceholder} required style={inputStyle} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="비밀번호 (6자 이상)" minLength={6} required style={inputStyle} />
+              placeholder={tx.auth.passwordMinPlaceholder} minLength={6} required style={inputStyle} />
             {error && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{error}</p>}
             <button type="submit" disabled={loading || !agencyFormValid}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 mt-1"
               style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.3)' }}>
-              {loading ? '가입 중...' : '가입하기'}
+              {loading ? tx.auth.signingUp : tx.auth.signupBtn}
             </button>
             <button type="button" onClick={() => setStep(role === 'agency' ? 'role' : 'method')}
               style={{ background: 'none', border: 'none', color: '#555570', fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
-              뒤로
+              {tx.common.back}
             </button>
           </form>
         )}
 
         <p className="text-center text-sm font-medium mt-6" style={{ color: '#8888aa' }}>
-          이미 계정이 있으신가요?{' '}
-          <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>로그인</Link>
+          {tx.auth.hasAccount}{' '}
+          <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>{tx.auth.loginLink}</Link>
         </p>
       </div>
     </div>

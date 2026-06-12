@@ -1,22 +1,12 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Video, CheckCircle, X } from 'lucide-react'
-
-const talentNav = [
-  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
-  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
-  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-]
-
-const categoryLabel: Record<string, string> = {
-  vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
-}
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 
@@ -37,6 +27,21 @@ function isExpired(deadline: string | null) {
 }
 
 export default function TalentAuditionsPage() {
+  const { lang } = useLang()
+  const tx = useT(lang)
+
+  const talentNav = [
+    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
+    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
+    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
+    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
+    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
+  ]
+
+  const categoryLabels: Record<string, string> = {
+    vocal: tx.videos.vocal, dance: tx.videos.dance, acting: tx.videos.acting, rap: tx.videos.rap, other: tx.videos.other,
+  }
+
   const [auditions, setAuditions] = useState<Audition[]>([])
   const [loading, setLoading] = useState(true)
   type AppInfo = { status: string; videoUrl: string | null; thumbnailUrl: string | null }
@@ -45,7 +50,6 @@ export default function TalentAuditionsPage() {
   const [myId, setMyId] = useState('')
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
 
-  // Apply modal state
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
   const [tab, setTab] = useState<'existing' | 'new'>('existing')
   const [selectedVideo, setSelectedVideo] = useState<MyVideo | null>(null)
@@ -169,8 +173,8 @@ export default function TalentAuditionsPage() {
 
   async function submitApplication() {
     if (!modalAudition) return
-    if (tab === 'existing' && !selectedVideo) { setError('영상을 선택해주세요'); return }
-    if (tab === 'new' && !newFile) { setError('영상 파일을 선택해주세요'); return }
+    if (tab === 'existing' && !selectedVideo) { setError(tx.auditions.selectVideoError); return }
+    if (tab === 'new' && !newFile) { setError(tx.videos.selectVideoFile); return }
 
     setSubmitting(true); setError('')
 
@@ -223,7 +227,6 @@ export default function TalentAuditionsPage() {
     setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
 
-    // 기획사 담당자에게 푸시 알림
     const { data: audData } = await supabase.from('auditions').select('agency_id').eq('id', modalAudition.id).single()
     if (audData?.agency_id) {
       const { data: members } = await supabase.from('agency_members').select('profile_id').eq('agency_id', audData.agency_id)
@@ -247,17 +250,17 @@ export default function TalentAuditionsPage() {
   return (
     <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>오디션 공고</h1>
-        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 24 }}>기획사의 오디션에 맞춤 영상으로 지원해보세요</p>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 6 }}>{tx.auditions.title}</h1>
+        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 24 }}>{tx.auditions.pageDesc}</p>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>{tx.common.loading}</div>
         ) : auditions.length === 0 ? (
           <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
             <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
               <Megaphone size={22} strokeWidth={1.8} />
             </div>
-            <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 공고가 없어요</div>
+            <div style={{ fontWeight: 700, color: '#eeeeff' }}>{tx.auditions.noAuditions}</div>
           </div>
         ) : (() => {
           const active = auditions.filter(a => !isExpired(a.deadline))
@@ -282,13 +285,13 @@ export default function TalentAuditionsPage() {
                   {a.agency?.is_verified && (
                     <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
                   )}
-                  {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
+                  {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>{tx.dashboard.invited} 🎉</span>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                   <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{a.title}</div>
                   {a.category.split(',').map(c => (
                     <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                      {categoryLabel[c] ?? c}
+                      {categoryLabels[c] ?? c}
                     </span>
                   ))}
                 </div>
@@ -297,7 +300,7 @@ export default function TalentAuditionsPage() {
                 )}
                 {a.deadline && (
                   <div style={{ fontSize: 12, color: exp ? '#f87171' : '#555570', fontWeight: exp ? 700 : 400, marginBottom: 12 }}>
-                    {exp ? '마감됨 · ' : '마감 '}{a.deadline}
+                    {exp ? `${tx.auditions.expired} · ` : `${tx.auditions.deadline} `}{a.deadline}
                   </div>
                 )}
                 {appInfo && (
@@ -317,7 +320,7 @@ export default function TalentAuditionsPage() {
                             <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: 'white' }}>▶</div>
                           </div>
                         )}
-                        <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 11, color: 'white', fontWeight: 700, background: 'rgba(0,0,0,0.45)', padding: '2px 7px', borderRadius: 6 }}>제출한 영상</div>
+                        <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 11, color: 'white', fontWeight: 700, background: 'rgba(0,0,0,0.45)', padding: '2px 7px', borderRadius: 6 }}>{tx.auditions.submittedVideo}</div>
                       </div>
                     )}
                   </div>
@@ -328,7 +331,7 @@ export default function TalentAuditionsPage() {
                       width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
                       background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white', textAlign: 'center',
                     }}>
-                      채팅 확인하기 →
+                      {tx.auditions.checkChat}
                     </div>
                   </Link>
                 ) : exp ? (
@@ -336,7 +339,7 @@ export default function TalentAuditionsPage() {
                     width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
                     background: '#1a1a25', color: '#555570', textAlign: 'center',
                   }}>
-                    마감된 공고
+                    {tx.auditions.expiredPost}
                   </div>
                 ) : (
                   <>
@@ -346,14 +349,14 @@ export default function TalentAuditionsPage() {
                       background: isPending ? 'rgba(251,191,36,0.12)' : isSkip ? '#1a1a25' : 'linear-gradient(135deg, #0891b2, #06b6d4)',
                       color: isPending ? '#fbbf24' : isSkip ? '#555570' : 'white',
                     }}>
-                      {isPending ? '검토중' : isSkip ? '패스됨' : '지원하기'}
+                      {isPending ? tx.auditions.review : isSkip ? tx.auditions.skipped : tx.auditions.apply}
                     </button>
                     {isPending && (
                       <button onClick={() => cancelApplication(a.id)} style={{
                         width: '100%', background: 'none', border: 'none', color: '#555570',
                         fontSize: 12, cursor: 'pointer', marginTop: 6, textDecoration: 'underline',
                       }}>
-                        지원 취소
+                        {tx.auditions.cancelApplication}
                       </button>
                     )}
                   </>
@@ -371,7 +374,7 @@ export default function TalentAuditionsPage() {
               )}
               {expired.length > 0 && (
                 <>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#555570', marginBottom: 12 }}>마감된 공고</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.auditions.expiredPost}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     {expired.map(a => <AuditionCard key={a.id} a={a} />)}
                   </div>
@@ -382,7 +385,6 @@ export default function TalentAuditionsPage() {
         })()}
       </div>
 
-      {/* 지원 모달 */}
       {modalAudition && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 100,
@@ -404,7 +406,6 @@ export default function TalentAuditionsPage() {
               </button>
             </div>
 
-            {/* 탭 */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
               {(['existing', 'new'] as const).map(t => (
                 <button key={t} onClick={() => setTab(t)} style={{
@@ -413,7 +414,7 @@ export default function TalentAuditionsPage() {
                   background: tab === t ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                   color: tab === t ? 'white' : '#555570',
                 }}>
-                  {t === 'existing' ? '기존 영상 선택' : '새 영상 업로드'}
+                  {t === 'existing' ? tx.auditions.existingVideo : tx.auditions.newVideoTab}
                 </button>
               ))}
             </div>
@@ -422,7 +423,7 @@ export default function TalentAuditionsPage() {
               <div>
                 {myVideos.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: 32, color: '#555570', fontSize: 14 }}>
-                    업로드된 영상이 없어요
+                    {tx.auditions.noVideosYet}
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
@@ -442,7 +443,7 @@ export default function TalentAuditionsPage() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.title}</div>
-                          <div style={{ fontSize: 11, color: '#555570' }}>{categoryLabel[v.category] ?? v.category}</div>
+                          <div style={{ fontSize: 11, color: '#555570' }}>{categoryLabels[v.category] ?? v.category}</div>
                         </div>
                         {selectedVideo?.id === v.id && <CheckCircle size={18} color="#0891b2" strokeWidth={2} />}
                       </div>
@@ -465,7 +466,7 @@ export default function TalentAuditionsPage() {
                     {newFile ? <CheckCircle size={28} strokeWidth={1.5} /> : <Video size={28} strokeWidth={1.5} />}
                   </div>
                   <div style={{ fontWeight: 700, color: newFile ? '#22d3ee' : '#eeeeff', fontSize: 14 }}>
-                    {newFile ? newFile.name : '영상 파일 선택'}
+                    {newFile ? newFile.name : tx.videos.selectVideoFile}
                   </div>
                   {newFile && <div style={{ fontSize: 12, color: '#555570', marginTop: 2 }}>{(newFile.size / 1024 / 1024).toFixed(1)} MB</div>}
                 </label>
@@ -481,7 +482,7 @@ export default function TalentAuditionsPage() {
             )}
 
             <textarea value={message} onChange={e => setMessage(e.target.value)}
-              placeholder="한마디 (선택사항) — 지원 동기, 강점 등" rows={3}
+              placeholder={tx.auditions.messagePlaceholder} rows={3}
               style={{ width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '12px 16px', fontSize: 14, color: '#eeeeff', resize: 'none', marginBottom: 12 }} />
 
             {error && <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 8, textAlign: 'center' }}>{error}</p>}
@@ -492,7 +493,7 @@ export default function TalentAuditionsPage() {
               cursor: submitting ? 'default' : 'pointer', opacity: submitting ? 0.7 : 1,
               boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
             }}>
-              {submitting ? '지원 중...' : '지원하기'}
+              {submitting ? tx.auditions.submitting : tx.auditions.apply}
             </button>
           </div>
         </div>

@@ -1,22 +1,12 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Heart, Volume2, VolumeX, Video } from 'lucide-react'
-
-const talentNav = [
-  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
-  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
-  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-]
-
-const categoryLabel: Record<string, string> = {
-  vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
-}
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 type VideoItem = {
   id: string
@@ -88,7 +78,6 @@ function VideoCard({
       ref={containerRef}
       style={{ height: '100dvh', scrollSnapAlign: 'start', position: 'relative', background: '#000', flexShrink: 0, overflow: 'hidden' }}
     >
-      {/* 영상 or 썸네일 */}
       {video.video_url ? (
         <video
           ref={videoRef}
@@ -105,13 +94,11 @@ function VideoCard({
         </div>
       )}
 
-      {/* 탭 인식 투명 레이어 (영상 위, 버튼 아래) */}
       <div
         onClick={handleTap}
         style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'pointer', touchAction: 'pan-y' }}
       />
 
-      {/* 일시정지 아이콘 */}
       {paused && (
         <div style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
@@ -127,7 +114,6 @@ function VideoCard({
         </div>
       )}
 
-      {/* 하단 그라디언트 + 정보 */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
         background: 'linear-gradient(transparent, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.92))',
@@ -162,7 +148,6 @@ function VideoCard({
         )}
       </div>
 
-      {/* 우측 버튼 */}
       <div style={{
         position: 'absolute', right: 14, bottom: 110, zIndex: 10,
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
@@ -194,6 +179,8 @@ function VideoCard({
 }
 
 export default function ExplorePage() {
+  const { lang } = useLang()
+  const tx = useT(lang)
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
@@ -203,6 +190,18 @@ export default function ExplorePage() {
   const [myId, setMyId] = useState('')
   const [muted, setMuted] = useState(true)
   const supabase = createClient()
+
+  const talentNav = [
+    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
+    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
+    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
+    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
+    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
+  ]
+
+  const categoryLabels: Record<string, string> = {
+    vocal: tx.videos.vocal, dance: tx.videos.dance, acting: tx.videos.acting, rap: tx.videos.rap, other: tx.videos.other,
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -251,7 +250,6 @@ export default function ExplorePage() {
 
   return (
     <>
-      {/* 상단 필터 — scroll 컨테이너 밖에 고정 */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
         paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)',
@@ -269,7 +267,7 @@ export default function ExplorePage() {
                 color: 'white',
                 boxShadow: category === c ? '0 2px 8px rgba(6,182,212,0.4)' : 'none',
               }}>
-                {c === 'all' ? '전체' : categoryLabel[c]}
+                {c === 'all' ? tx.explore.allCategories : categoryLabels[c]}
               </button>
             ))}
           </div>
@@ -285,16 +283,15 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* 영상 스크롤 컨테이너 */}
       <div style={{ position: 'fixed', inset: 0, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
         {loading ? (
           <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', scrollSnapAlign: 'start' }}>
-            불러오는 중...
+            {tx.common.loading}
           </div>
         ) : videos.length === 0 ? (
           <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, scrollSnapAlign: 'start' }}>
             <div style={{ color: '#22d3ee' }}><Video size={48} strokeWidth={1.5} /></div>
-            <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
+            <div style={{ fontWeight: 700, color: '#eeeeff' }}>{tx.explore.noVideos}</div>
           </div>
         ) : (
           videos.map(v => (
