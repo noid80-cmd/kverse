@@ -195,9 +195,6 @@ export default function LandingPage() {
               {langs.map(l => <option key={l} value={l} style={{ background: '#111118' }}>{l}</option>)}
             </select>
             <Link href="/login" style={{ fontSize: 14, color: '#8888aa', fontWeight: 600, textDecoration: 'none' }}>{tx.login}</Link>
-            <Link href="/signup" style={{ fontSize: 14, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, padding: '8px 18px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 12px rgba(6,182,212,0.3)' }}>
-              {tx.ctaTalent.split(' ').slice(0, 2).join(' ')}
-            </Link>
           </div>
         </div>
       </nav>
