@@ -13,12 +13,19 @@ const inputStyle = {
   borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
 }
 
-const skillOptions = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '악기', '퍼포먼스']
+const SKILL_KEYS = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '악기', '퍼포먼스'] as const
 
 export default function ProfileEditPage() {
   const router = useRouter()
   const { lang, setLang } = useLang()
   const tx = useT(lang)
+
+  const skillLabels: Record<string, string> = {
+    '보컬': tx.profile.skillVocal, '댄스': tx.profile.skillDance,
+    '랩': tx.profile.skillRap, '연기': tx.profile.skillActing,
+    '작사': tx.profile.skillLyrics, '작곡': tx.profile.skillCompose,
+    '악기': tx.profile.skillInstrument, '퍼포먼스': tx.profile.skillPerformance,
+  }
 
   const talentNav = [
     { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
@@ -243,14 +250,14 @@ export default function ProfileEditPage() {
           <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.skillsLabel}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {skillOptions.map(s => (
+              {SKILL_KEYS.map(s => (
                 <button key={s} type="button" onClick={() => toggleSkill(s)}
                   style={{
                     padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', transition: 'all 0.15s',
                     background: skills.includes(s) ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                     color: skills.includes(s) ? 'white' : '#8888aa',
                   }}>
-                  {s}
+                  {skillLabels[s]}
                 </button>
               ))}
             </div>
@@ -281,18 +288,12 @@ export default function ProfileEditPage() {
 
         <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginTop: 16 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>{tx.settings.language}</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <select value={lang} onChange={e => setLang(e.target.value as Lang)}
+            style={{ width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff', cursor: 'pointer' }}>
             {LANGS.map(l => (
-              <button key={l} type="button" onClick={() => setLang(l as Lang)}
-                style={{
-                  padding: '8px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-                  background: lang === l ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
-                  color: lang === l ? 'white' : '#8888aa',
-                }}>
-                {LANG_LABELS[l as Lang]}
-              </button>
+              <option key={l} value={l}>{LANG_LABELS[l as Lang]}</option>
             ))}
-          </div>
+          </select>
         </div>
       </div>
 

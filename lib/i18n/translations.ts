@@ -198,6 +198,14 @@ const t = {
     saveBtn:         ['저장', 'Save', '保存', '保存', '儲存', 'บันทึก', 'Simpan', 'Lưu', 'I-save', 'Guardar'],
     avatarUploading: ['업로드 중...', 'Uploading...', 'アップロード中...', '上传中...', '上傳中...', 'กำลังอัปโหลด...', 'Mengunggah...', 'Đang tải lên...', 'Nag-a-upload...', 'Subiendo...'],
     selectNationality: ['국적 선택', 'Select nationality', '国籍を選択', '选择国籍', '選擇國籍', 'เลือกสัญชาติ', 'Pilih kewarganegaraan', 'Chọn quốc tịch', 'Pumili ng nasyonalidad', 'Seleccionar nacionalidad'],
+    skillVocal:        ['보컬', 'Vocal', 'ボーカル', '声乐', '聲樂', 'ร้องเพลง', 'Vokal', 'Giọng hát', 'Vocal', 'Vocal'],
+    skillDance:        ['댄스', 'Dance', 'ダンス', '舞蹈', '舞蹈', 'เต้น', 'Tari', 'Nhảy', 'Sayaw', 'Baile'],
+    skillRap:          ['랩', 'Rap', 'ラップ', '说唱', '說唱', 'แร็พ', 'Rap', 'Rap', 'Rap', 'Rap'],
+    skillActing:       ['연기', 'Acting', '演技', '表演', '表演', 'การแสดง', 'Akting', 'Diễn xuất', 'Pag-arte', 'Actuación'],
+    skillLyrics:       ['작사', 'Lyricist', '作詞', '作词', '作詞', 'เขียนเนื้อเพลง', 'Penulis lirik', 'Viết lời nhạc', 'Manunulat ng lyrics', 'Letrista'],
+    skillCompose:      ['작곡', 'Composer', '作曲', '作曲', '作曲', 'แต่งเพลง', 'Komposer', 'Sáng tác', 'Kompositor', 'Compositor'],
+    skillInstrument:   ['악기', 'Instrument', '楽器', '乐器', '樂器', 'เครื่องดนตรี', 'Instrumen', 'Nhạc cụ', 'Instrumento', 'Instrumento'],
+    skillPerformance:  ['퍼포먼스', 'Performance', 'パフォーマンス', '表演', '表演', 'การแสดง', 'Pertunjukan', 'Biểu diễn', 'Pagtatanghal', 'Actuación'],
   },
 
   // ── Settings / Language ──────────────────────────────

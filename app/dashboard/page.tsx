@@ -7,7 +7,7 @@ import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Video, Bookmark, MessageCircle, User, ChevronRight } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
-import { useT } from '@/lib/i18n/translations'
+import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
 type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string } | null }
@@ -45,7 +45,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function DashboardPage() {
-  const { lang } = useLang()
+  const { lang, setLang } = useLang()
   const tx = useT(lang)
   const talentNav = [
     { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
@@ -139,9 +139,15 @@ export default function DashboardPage() {
               </div>
             </Link>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff', lineHeight: 1.2, marginBottom: 4 }}>
-                {profile?.name ?? '...'}
-              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff', lineHeight: 1.2 }}>
+                  {profile?.name ?? '...'}
+                </h1>
+                <select value={lang} onChange={e => setLang(e.target.value as Lang)}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '5px 8px', fontSize: 12, color: '#8888aa', cursor: 'pointer', flexShrink: 0 }}>
+                  {LANGS.map(l => <option key={l} value={l}>{LANG_LABELS[l as Lang]}</option>)}
+                </select>
+              </div>
               {profile?.bio
                 ? <p style={{ fontSize: 13, color: '#8888aa', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{profile.bio}</p>
                 : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>+ 자기소개 추가하기</span></Link>
