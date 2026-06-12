@@ -65,7 +65,14 @@ export default function DashboardPage() {
   const [data, setData] = useState<PageData | null>(() => {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
   })
+  const [auditionIdx, setAuditionIdx] = useState(0)
   const supabase = createClient()
+
+  useEffect(() => {
+    if (!data || data.recentAuditions.length <= 1) return
+    const t = setInterval(() => setAuditionIdx(i => (i + 1) % data.recentAuditions.length), 3500)
+    return () => clearInterval(t)
+  }, [data?.recentAuditions.length])
 
   useEffect(() => {
     async function load() {
@@ -111,6 +118,7 @@ export default function DashboardPage() {
       <PushSubscribe />
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes fadeSlide{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
         .no-scrollbar::-webkit-scrollbar{display:none}
       `}</style>
 
@@ -162,7 +170,7 @@ export default function DashboardPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {[
               { label: '관심', value: bookmarks, icon: <Bookmark size={16} strokeWidth={1.8} />, href: '/reactions?tab=bookmarks', accent: '#22d3ee', bg: 'rgba(6,182,212,0.1)' },
-              { label: '채팅', value: contacts, icon: <MessageCircle size={16} strokeWidth={1.8} />, href: '/reactions', accent: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
+              { label: '채팅', value: contacts, icon: <MessageCircle size={16} strokeWidth={1.8} />, href: '/reactions', accent: '#22d3ee', bg: 'rgba(6,182,212,0.1)' },
             ].map(s => (
               <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -299,15 +307,16 @@ export default function DashboardPage() {
                 <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>현재 열린 오디션이 없어요</div>
                 <div style={{ fontSize: 12, color: '#555570' }}>새 오디션이 열리면 알려드릴게요</div>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {recentAuditions.slice(0, 3).map((a, i) => (
-                  <Link key={a.id} href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-                    <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}>
-                      <div style={{ height: 4, background: auditionAccents[i] }} />
-                      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            ) : (() => {
+              const a = recentAuditions[auditionIdx]
+              return (
+                <div>
+                  <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
+                    <div key={auditionIdx} style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', animation: 'fadeSlide 0.4s ease' }}>
+                      <div style={{ height: 4, background: auditionAccents[auditionIdx % auditionAccents.length] }} />
+                      <div style={{ padding: '16px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {getAuditionDisplayTitle(a, lang)}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -324,16 +333,20 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </Link>
-                ))}
-                {recentAuditions.length > 3 && (
-                  <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-                    <div style={{ textAlign: 'center', padding: '10px', fontSize: 13, color: '#22d3ee', fontWeight: 600 }}>
-                      +{recentAuditions.length - 3}개 더보기
+                  {recentAuditions.length > 1 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 10 }}>
+                      {recentAuditions.map((_, i) => (
+                        <button key={i} onClick={() => setAuditionIdx(i)}
+                          style={{ width: i === auditionIdx ? 16 : 5, height: 5, borderRadius: 3, border: 'none', cursor: 'pointer', transition: 'all 0.3s',
+                            background: i === auditionIdx ? '#22d3ee' : 'rgba(255,255,255,0.15)',
+                            padding: 0,
+                          }} />
+                      ))}
                     </div>
-                  </Link>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )
+            })()}
           </div>
 
           {/* Profile CTA */}
