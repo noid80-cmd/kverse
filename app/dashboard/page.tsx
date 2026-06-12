@@ -251,34 +251,33 @@ export default function DashboardPage() {
                 전체보기 <ChevronRight size={14} />
               </Link>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {recentAuditions.slice(0, 3).map(a => (
-                <Link key={a.id} href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                    display: 'flex', alignItems: 'center', gap: 12,
-                  }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
-                      <Megaphone size={18} strokeWidth={1.8} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {a.title}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 11, color: '#8888aa' }}>{a.agency?.name ?? '기획사'}</span>
-                        <span style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
-                          {a.category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
-                        </span>
-                        {a.deadline && <span style={{ fontSize: 11, color: '#555570' }}>~{a.deadline}</span>}
-                      </div>
-                    </div>
-                    <ChevronRight size={16} color="#333350" />
+            <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+                  <Megaphone size={18} strokeWidth={1.8} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {recentAuditions[0].title}
                   </div>
-                </Link>
-              ))}
-            </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: '#8888aa' }}>{recentAuditions[0].agency?.name ?? '기획사'}</span>
+                    <span style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
+                      {recentAuditions[0].category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
+                    </span>
+                    {recentAuditions[0].deadline && <span style={{ fontSize: 11, color: '#555570' }}>~{recentAuditions[0].deadline}</span>}
+                  </div>
+                </div>
+                <div style={{ flexShrink: 0, fontSize: 11, color: '#555570', textAlign: 'right' }}>
+                  <div style={{ color: '#22d3ee', fontWeight: 700 }}>{recentAuditions.length}개</div>
+                  <div>진행중</div>
+                </div>
+              </div>
+            </Link>
           </div>
         )}
 
