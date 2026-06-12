@@ -217,28 +217,28 @@ export default function DashboardPage() {
             </div>
           </Link>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {recentVideos.map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: '#111118', borderRadius: 16, padding: '12px 14px',
-                  border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12,
-                }}>
+                <div style={{ background: '#111118', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
                   <div style={{
-                    width: 80, height: 60, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                    background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(8,145,178,0.08))',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: '100%', aspectRatio: '16/9', overflow: 'hidden',
+                    background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.05))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Video size={18} strokeWidth={1.5} color="#4a4a6a" />
+                      : <Video size={22} strokeWidth={1.5} color="#2a2a3a" />
                     }
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)',
+                    }} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
-                    <div style={{ fontSize: 12, color: '#555570' }}>조회 {v.view_count}회</div>
+                  <div style={{ padding: '10px 12px 12px' }}>
+                    <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 13, marginBottom: 3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{v.title}</div>
+                    <div style={{ fontSize: 11, color: '#555570' }}>조회 {v.view_count}회</div>
                   </div>
-                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#333350" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               </Link>
             ))}
