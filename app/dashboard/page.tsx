@@ -10,7 +10,7 @@ import { useLang } from '@/lib/i18n/context'
 import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
-type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string } | null }
+type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string } | null; translations?: Record<string, { title: string; description: string }> | null }
 type RecentBookmark = { id: string; created_at: string; video: { id: string; title: string } | null; agency_member: { name: string } | null }
 type PageData = {
   profile: Profile | null
@@ -32,6 +32,12 @@ const CACHE_KEY = 'kpick-dashboard-v3'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
+}
+
+function getAuditionDisplayTitle(a: RecentAudition, lang: string) {
+  if (lang === 'ko') return a.title
+  const key = lang === 'ja' ? 'ja' : (lang === 'zh' || lang === 'zh-TW') ? 'zh-CN' : lang === 'th' ? 'th' : 'en'
+  return a.translations?.[key]?.title || a.title
 }
 
 function timeAgo(dateStr: string) {
@@ -69,7 +75,7 @@ export default function DashboardPage() {
         supabase.from('videos').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('status', 'active'),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('deleted_by_talent', false),
-        supabase.from('auditions').select('id, title, category, deadline, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
+        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
         supabase.from('bookmarks').select('id, created_at, video:videos(id, title), agency_member:profiles!agency_member_id(name)').eq('talent_id', user.id).order('created_at', { ascending: false }).limit(2),
       ])
 
@@ -300,7 +306,7 @@ export default function DashboardPage() {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {recentAuditions[0].title}
+                    {getAuditionDisplayTitle(recentAuditions[0], lang)}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 11, color: '#8888aa' }}>{recentAuditions[0].agency?.name ?? '기획사'}</span>

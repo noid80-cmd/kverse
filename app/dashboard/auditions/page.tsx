@@ -10,6 +10,8 @@ import { useT } from '@/lib/i18n/translations'
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 
+type AuditionTranslations = Record<string, { title: string; description: string }>
+
 type Audition = {
   id: string
   title: string
@@ -18,6 +20,25 @@ type Audition = {
   deadline: string | null
   created_at: string
   agency: { name: string; is_verified: boolean } | null
+  translations?: AuditionTranslations | null
+}
+
+function getTranslationKey(lang: string): string | null {
+  if (lang === 'ko') return null
+  if (lang === 'ja') return 'ja'
+  if (lang === 'zh' || lang === 'zh-TW') return 'zh-CN'
+  if (lang === 'th') return 'th'
+  return 'en'
+}
+
+function getAuditionTitle(a: Audition, lang: string) {
+  const key = getTranslationKey(lang)
+  return (key && a.translations?.[key]?.title) || a.title
+}
+
+function getAuditionDesc(a: Audition, lang: string) {
+  const key = getTranslationKey(lang)
+  return (key && a.translations?.[key]?.description) || a.description
 }
 
 type MyVideo = { id: string; title: string; thumbnail_url: string | null; video_url: string; category: string }
@@ -69,7 +90,7 @@ export default function TalentAuditionsPage() {
 
     const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
       supabase.from('auditions')
-        .select('id, title, description, category, deadline, created_at, agency:agencies(name, is_verified)')
+        .select('id, title, description, category, deadline, created_at, translations, agency:agencies(name, is_verified)')
         .eq('status', 'active')
         .order('created_at', { ascending: false }),
       supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
@@ -269,6 +290,8 @@ export default function TalentAuditionsPage() {
           const AuditionCard = ({ a }: { a: Audition }) => {
             const exp = isExpired(a.deadline)
             const appInfo = applicationMap[a.id]
+            const displayTitle = getAuditionTitle(a, lang)
+            const displayDesc = getAuditionDesc(a, lang)
             const appStatus = appInfo?.status
             const isInvited = appStatus === 'invited'
             const isPending = appStatus === 'pending'
@@ -288,15 +311,15 @@ export default function TalentAuditionsPage() {
                   {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>{tx.dashboard.invited} 🎉</span>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                  <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{a.title}</div>
+                  <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{displayTitle}</div>
                   {a.category.split(',').map(c => (
                     <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                       {categoryLabels[c] ?? c}
                     </span>
                   ))}
                 </div>
-                {a.description && (
-                  <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
+                {displayDesc && (
+                  <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{displayDesc}</div>
                 )}
                 {a.deadline && (
                   <div style={{ fontSize: 12, color: exp ? '#f87171' : '#555570', fontWeight: exp ? 700 : 400, marginBottom: 12 }}>
