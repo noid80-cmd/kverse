@@ -73,8 +73,9 @@ export default function ProfileEditPage() {
     const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
     if (uploadError) { setAvatarUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId)
-    setForm(f => f ? { ...f, avatarUrl: publicUrl + '?t=' + Date.now() } : f)
+    const versionedUrl = publicUrl + '?v=' + Date.now()
+    await supabase.from('profiles').update({ avatar_url: versionedUrl }).eq('id', form.userId)
+    setForm(f => f ? { ...f, avatarUrl: versionedUrl } : f)
     setAvatarUploading(false)
   }
 
