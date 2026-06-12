@@ -214,11 +214,8 @@ export default function LandingPage() {
             {tx.heroSub}
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href={loggedIn ? '/dashboard' : '/signup'} style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
+            <Link href="/signup" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
               {tx.ctaTalent}
-            </Link>
-            <Link href="/login" style={{ background: 'rgba(255,255,255,0.05)', color: '#eeeeff', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)' }}>
-              {tx.ctaAgency}
             </Link>
           </div>
         </section>
