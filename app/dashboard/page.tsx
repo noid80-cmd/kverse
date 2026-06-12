@@ -175,7 +175,58 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent videos — main content */}
+        {/* Auditions — pinned above videos so always visible */}
+        {recentAuditions.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>열린 오디션</h2>
+              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+                전체보기 <ChevronRight size={14} />
+              </Link>
+            </div>
+            <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
+              <div key={auditionIdx} style={{
+                background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                display: 'flex', alignItems: 'center', gap: 12,
+                animation: 'auditSlide 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
+              }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+                  <Megaphone size={18} strokeWidth={1.8} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {recentAuditions[auditionIdx].title}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: '#8888aa' }}>{recentAuditions[auditionIdx].agency?.name ?? '기획사'}</span>
+                    <span style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
+                      {recentAuditions[auditionIdx].category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
+                    </span>
+                    {recentAuditions[auditionIdx].deadline && (
+                      <span style={{ fontSize: 11, color: '#555570' }}>~{recentAuditions[auditionIdx].deadline}</span>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight size={16} color="#333350" />
+              </div>
+            </Link>
+            {recentAuditions.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 10 }}>
+                {recentAuditions.map((_, i) => (
+                  <div key={i} style={{
+                    height: 5, borderRadius: 3,
+                    width: i === auditionIdx ? 16 : 5,
+                    background: i === auditionIdx ? '#0891b2' : 'rgba(255,255,255,0.1)',
+                    transition: 'all 0.35s ease',
+                  }} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Recent videos */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>최근 업로드</h2>
@@ -227,57 +278,6 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-
-        {/* Auditions — secondary section */}
-        {recentAuditions.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>열린 오디션</h2>
-              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-                전체보기 <ChevronRight size={14} />
-              </Link>
-            </div>
-            <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-              <div key={auditionIdx} style={{
-                background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
-                border: '1px solid rgba(255,255,255,0.07)',
-                display: 'flex', alignItems: 'center', gap: 12,
-                animation: 'auditSlide 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
-              }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
-                  <Megaphone size={18} strokeWidth={1.8} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {recentAuditions[auditionIdx].title}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 11, color: '#8888aa' }}>{recentAuditions[auditionIdx].agency?.name ?? '기획사'}</span>
-                    <span style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
-                      {recentAuditions[auditionIdx].category.split(',').map(c => categoryLabel[c] ?? c).join('·')}
-                    </span>
-                    {recentAuditions[auditionIdx].deadline && (
-                      <span style={{ fontSize: 11, color: '#555570' }}>~{recentAuditions[auditionIdx].deadline}</span>
-                    )}
-                  </div>
-                </div>
-                <ChevronRight size={16} color="#333350" />
-              </div>
-            </Link>
-            {recentAuditions.length > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 10 }}>
-                {recentAuditions.map((_, i) => (
-                  <div key={i} style={{
-                    height: 5, borderRadius: 3,
-                    width: i === auditionIdx ? 16 : 5,
-                    background: i === auditionIdx ? '#0891b2' : 'rgba(255,255,255,0.1)',
-                    transition: 'all 0.35s ease',
-                  }} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Profile CTA — only when no bio */}
         {!profile?.bio && (
