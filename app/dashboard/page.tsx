@@ -178,6 +178,24 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* My videos shortcut */}
+        <Link href="/videos" style={{ textDecoration: 'none', display: 'block', marginBottom: 12 }}>
+          <div style={{
+            background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
+            border: '1px solid rgba(255,255,255,0.07)',
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+              <Video size={18} strokeWidth={1.8} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>내 영상</div>
+              <div style={{ fontSize: 12, color: '#555570', marginTop: 1 }}>총 {videos}개 업로드됨</div>
+            </div>
+            <ChevronRight size={16} color="#333350" />
+          </div>
+        </Link>
+
         {/* Agency interest */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
