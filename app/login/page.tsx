@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 export default function LoginPage() {
+  const { lang } = useLang()
+  const tx = useT(lang).auth
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -20,7 +24,7 @@ export default function LoginPage() {
     setError(''); setLoading(true)
     const supabase = createClient()
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError('이메일 또는 비밀번호가 올바르지 않아요.'); setLoading(false); return }
+    if (error) { setError(tx.loginError); setLoading(false); return }
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
     const role = profile?.role ?? 'talent'
@@ -105,7 +109,7 @@ export default function LoginPage() {
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>Kpick</h1>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.32)', fontWeight: 500, letterSpacing: 0.3 }}>
-            기획사가 직접 발굴하는 오디션 플랫폼
+            {tx.tagline}
           </p>
         </div>
 
@@ -130,31 +134,31 @@ export default function LoginPage() {
                 <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.3 44 24 44z" />
                 <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C41 35.8 44 30.3 44 24c0-1.3-.1-2.7-.4-3.9z" />
               </svg>
-              Google로 로그인
+              {tx.loginGoogle}
             </button>
           )}
           {isKakao && (
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginBottom: 20, lineHeight: 1.7 }}>
-              카카오톡에서는 구글 로그인이 차단돼요.<br />이메일로 로그인하세요.
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginBottom: 20, lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+              {tx.kakaoBlock}
             </p>
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 600, letterSpacing: 0.5 }}>이메일로 로그인</span>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 600, letterSpacing: 0.5 }}>{tx.loginEmail}</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="이메일" required className="kpick-input"
+              placeholder={tx.emailPlaceholder} required className="kpick-input"
               style={{
                 width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
                 outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
               }} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="비밀번호" required className="kpick-input"
+              placeholder={tx.passwordPlaceholder} required className="kpick-input"
               style={{
                 width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
@@ -170,14 +174,14 @@ export default function LoginPage() {
                 boxShadow: '0 4px 20px rgba(6,182,212,0.35)',
                 marginTop: 4, opacity: loading ? 0.7 : 1, transition: 'all 0.2s',
               }}>
-              {loading ? '로그인 중...' : '로그인'}
+              {loading ? tx.loggingIn : tx.loginBtn}
             </button>
           </form>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.25)', marginTop: 24, fontWeight: 500 }}>
-          계정이 없으신가요?{' '}
-          <Link href="/signup" style={{ color: '#06b6d4', fontWeight: 700, textDecoration: 'none' }}>가입하기</Link>
+          {tx.noAccount}{' '}
+          <Link href="/signup" style={{ color: '#06b6d4', fontWeight: 700, textDecoration: 'none' }}>{tx.signupLink}</Link>
         </p>
       </div>
 
