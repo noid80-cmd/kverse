@@ -157,8 +157,14 @@ export default function LandingPage() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) setLoggedIn(true)
+    supabase.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      const role = profile?.role ?? 'talent'
+      if (role === 'admin') window.location.href = '/admin/users'
+      else if (role === 'agency') window.location.href = '/agency/discover'
+      else window.location.href = '/dashboard'
     })
   }, [])
 
