@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -73,7 +73,7 @@ export default function AdminAgenciesPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>기획사 관리 <span style={{ fontSize: 14, color: '#555570', fontWeight: 500 }}>({agencies.length}개)</span></h1>
           <button onClick={() => setShowForm(v => !v)}
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(99,102,241,0.3)' }}>
+            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(6,182,212,0.3)' }}>
             + 추가
           </button>
         </div>
@@ -89,7 +89,7 @@ export default function AdminAgenciesPage() {
           </button>
           <button onClick={() => setTab('all')} style={{
             padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer',
-            background: tab === 'all' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+            background: tab === 'all' ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
             color: tab === 'all' ? 'white' : '#555570',
           }}>
             전체
@@ -107,7 +107,7 @@ export default function AdminAgenciesPage() {
                 <button type="button" onClick={() => setShowForm(false)}
                   style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'none', color: '#555570', fontWeight: 700 }}>취소</button>
                 <button type="submit" disabled={saving}
-                  style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700 }}>
+                  style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700 }}>
                   {saving ? '저장 중...' : '등록'}
                 </button>
               </div>
@@ -132,7 +132,7 @@ export default function AdminAgenciesPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: a.business_registration_url ? 14 : 0 }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: 14, flexShrink: 0, overflow: 'hidden',
-                    background: 'rgba(99,102,241,0.12)',
+                    background: 'rgba(6,182,212,0.12)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {a.logo_url

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -94,7 +94,7 @@ export default function AdminAuditionsPage() {
           <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>오디션 관리 <span style={{ fontSize: 14, color: '#8b8baa', fontWeight: 500 }}>({auditions.length}개)</span></h1>
           <button onClick={() => setShowCreate(v => !v)} style={{
             display: 'flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
             borderRadius: 14, padding: '10px 16px', fontSize: 14, fontWeight: 700,
           }}>
             <Plus size={16} strokeWidth={2.5} /> 공고 올리기
@@ -125,7 +125,7 @@ export default function AdminAuditionsPage() {
                     }))} style={{
                       padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                       cursor: 'pointer', border: selected ? 'none' : '1.5px solid #e0e0f0',
-                      background: selected ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#f8f8fc',
+                      background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#f8f8fc',
                       color: selected ? 'white' : '#94a3b8',
                     }}>
                       {categoryLabel[cat]}
@@ -144,7 +144,7 @@ export default function AdminAuditionsPage() {
                   fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#8b8baa',
                 }}>취소</button>
                 <button onClick={createAudition} disabled={saving || !form.title.trim() || !form.deadline || !form.agencyId} style={{
-                  flex: 2, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+                  flex: 2, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
                   border: 'none', borderRadius: 12, padding: 12, fontSize: 14, fontWeight: 700,
                   cursor: 'pointer', opacity: saving || !form.title.trim() || !form.deadline || !form.agencyId ? 0.5 : 1,
                 }}>{saving ? '저장 중...' : '공고 올리기'}</button>
@@ -162,10 +162,10 @@ export default function AdminAuditionsPage() {
                 {active.map(a => (
                   <div key={a.id} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', position: 'relative' }}>
                     <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '?'}</div>
-                    <div style={{ fontWeight: 600, color: '#6366f1', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
+                    <div style={{ fontWeight: 600, color: '#0891b2', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       {a.category.split(',').map(c => (
-                        <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#6366f1', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+                        <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#0891b2', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
                       ))}
                       <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       {a.deadline && <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}

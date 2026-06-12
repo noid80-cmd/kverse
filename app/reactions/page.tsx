@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -139,7 +139,7 @@ export default function ReactionsPage() {
 
   if (!pageData) return (
     <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -173,7 +173,7 @@ export default function ReactionsPage() {
             <button key={t} onClick={() => setTab(t)}
               style={{
                 flex: 1, padding: '10px', borderRadius: 12, border: 'none', fontWeight: 700, fontSize: 14, transition: 'all 0.15s', cursor: 'pointer',
-                background: tab === t ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'transparent',
+                background: tab === t ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'transparent',
                 color: tab === t ? 'white' : '#555570',
               }}>
               {t === 'contacts' ? `채팅 ${convs.length}` : `북마크 ${bookmarks.length}`}
@@ -184,7 +184,7 @@ export default function ReactionsPage() {
         {tab === 'contacts' ? (
           convs.length === 0 ? (
             <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
                 <MessageCircle size={22} strokeWidth={1.8} />
               </div>
               <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 대화가 없어요</div>
@@ -198,7 +198,7 @@ export default function ReactionsPage() {
                     style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', minWidth: 0 }}>
                     <div style={{
                       width: 48, height: 48, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
-                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {c.agency_member?.avatar_url
@@ -210,7 +210,7 @@ export default function ReactionsPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                         <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 15 }}>{c.agency_member?.name ?? '기획사'}</span>
                         {verifiedIds.has(c.agency_member_id) && (
-                          <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                          <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
                         )}
                       </div>
                       <div style={{ fontSize: 13, color: '#555570', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
@@ -230,7 +230,7 @@ export default function ReactionsPage() {
         ) : (
           bookmarks.length === 0 ? (
             <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
                 <Bookmark size={22} strokeWidth={1.8} />
               </div>
               <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 관심 표시가 없어요</div>
@@ -241,12 +241,12 @@ export default function ReactionsPage() {
                 <Link key={b.id} href={b.video ? `/videos/${b.video.id}` : '#'} style={{ textDecoration: 'none' }}>
                   <div style={{ background: '#111118', borderRadius: 18, padding: '16px 20px', border: '1px solid rgba(255,255,255,0.07)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <Bookmark size={14} strokeWidth={2} color="#818cf8" fill="#818cf8" />
+                      <Bookmark size={14} strokeWidth={2} color="#22d3ee" fill="#22d3ee" />
                       <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
                       <span style={{ fontSize: 12, color: '#555570', marginLeft: 'auto' }}>{new Date(b.created_at).toLocaleDateString('ko-KR')}</span>
                     </div>
                     {b.video && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#818cf8', fontWeight: 600 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#22d3ee', fontWeight: 600 }}>
                         <Video size={13} strokeWidth={2} />
                         {b.video.title}
                       </div>

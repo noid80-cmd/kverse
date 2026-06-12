@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -113,12 +113,12 @@ export default function TalentPublicProfilePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <div style={{
               width: 72, height: 72, borderRadius: 22, flexShrink: 0, overflow: 'hidden',
-              background: 'rgba(99,102,241,0.2)',
+              background: 'rgba(6,182,212,0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {talent.avatar_url
                 ? <img src={talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ color: '#818cf8', fontWeight: 900, fontSize: 26 }}>{talent.name?.[0] ?? '?'}</span>
+                : <span style={{ color: '#22d3ee', fontWeight: 900, fontSize: 26 }}>{talent.name?.[0] ?? '?'}</span>
               }
             </div>
             <div>
@@ -135,15 +135,15 @@ export default function TalentPublicProfilePage() {
 
           {myRole === 'agency' && (talent.height || talent.weight) && (
             <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-              {talent.height && <span style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
-              {talent.weight && <span style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
+              {talent.height && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
+              {talent.weight && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
             </div>
           )}
 
           {myRole === 'agency' && talent.skills?.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: talent.bio ? 16 : 0 }}>
               {talent.skills.map(s => (
-                <span key={s} style={{ fontSize: 13, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '5px 12px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
+                <span key={s} style={{ fontSize: 13, background: 'rgba(8,145,178,0.12)', color: '#a78bfa', padding: '5px 12px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
               ))}
             </div>
           )}
@@ -158,8 +158,8 @@ export default function TalentPublicProfilePage() {
           <button onClick={handleChat} disabled={starting}
             style={{
               width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
-              fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
+              background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
+              fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
               marginBottom: 24, opacity: starting ? 0.7 : 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}>
@@ -181,18 +181,18 @@ export default function TalentPublicProfilePage() {
                 <div style={{ background: '#111118', borderRadius: 18, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{
                     width: 64, height: 64, borderRadius: 14, flexShrink: 0, overflow: 'hidden',
-                    background: 'rgba(99,102,241,0.12)',
+                    background: 'rgba(6,182,212,0.12)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Video size={22} strokeWidth={1.5} color="#818cf8" />
+                      : <Video size={22} strokeWidth={1.5} color="#22d3ee" />
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category] ?? v.category}</span>
+                      <span style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category] ?? v.category}</span>
                       <span style={{ fontSize: 12, color: '#555570' }}>조회 {v.view_count}회</span>
                       <span style={{ fontSize: 12, color: '#555570', display: 'flex', alignItems: 'center', gap: 3 }}>
                         <Heart size={11} strokeWidth={2} color="#f43f5e" fill="#f43f5e" /> {v.like_count}

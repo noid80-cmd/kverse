@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -141,7 +141,7 @@ export default function ChatPage() {
 
   if (!conv) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -157,7 +157,7 @@ export default function ChatPage() {
         <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
         <div style={{
           width: 40, height: 40, borderRadius: 13, overflow: 'hidden', flexShrink: 0,
-          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+          background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           {other?.avatar_url
@@ -171,7 +171,7 @@ export default function ChatPage() {
               {conv && myId === conv.talent_id && agencyCard ? agencyCard.name : other?.name ?? '...'}
             </span>
             {agencyCard?.is_verified && conv && myId === conv.talent_id && (
-              <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+              <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
             )}
           </div>
           {conv && myId === conv.talent_id && agencyCard && other?.name && (
@@ -190,14 +190,14 @@ export default function ChatPage() {
         {/* 기획사 명함 카드 — 지망생에게만 표시 */}
         {conv && myId === conv.talent_id && agencyCard && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))',
-            border: '1px solid rgba(99,102,241,0.25)',
+            background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(8,145,178,0.08))',
+            border: '1px solid rgba(6,182,212,0.25)',
             borderRadius: 20, padding: '18px 18px 16px', marginBottom: 20,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: agencyCard.description || agencyCard.website ? 14 : 0 }}>
               <div style={{
                 width: 52, height: 52, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
-                background: 'rgba(99,102,241,0.2)',
+                background: 'rgba(6,182,212,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 {agencyCard.logo_url
@@ -209,10 +209,10 @@ export default function ChatPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
                   <span style={{ fontWeight: 900, color: '#eeeeff', fontSize: 16 }}>{agencyCard.name}</span>
                   {agencyCard.is_verified && (
-                    <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                    <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
                   )}
                 </div>
-                <div style={{ fontSize: 11, color: '#818cf8', fontWeight: 600 }}>기획사</div>
+                <div style={{ fontSize: 11, color: '#22d3ee', fontWeight: 600 }}>기획사</div>
               </div>
             </div>
             {agencyCard.description && (
@@ -220,7 +220,7 @@ export default function ChatPage() {
             )}
             {agencyCard.website && (
               <a href={agencyCard.website} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 12, color: '#818cf8', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 🔗 {agencyCard.website.replace(/^https?:\/\//, '')}
               </a>
             )}
@@ -239,7 +239,7 @@ export default function ChatPage() {
               <div style={{
                 maxWidth: '70%', padding: '10px 14px',
                 borderRadius: isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: isMine ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                background: isMine ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                 color: isMine ? 'white' : '#eeeeff',
                 fontSize: 15, lineHeight: 1.5,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
@@ -278,7 +278,7 @@ export default function ChatPage() {
         <button onClick={sendMessage} disabled={!input.trim() || sending}
           style={{
             width: 44, height: 44, borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: input.trim() ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+            background: input.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
             color: 'white', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>↑</button>
       </div>

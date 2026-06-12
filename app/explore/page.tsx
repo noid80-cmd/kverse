@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -142,7 +142,7 @@ function VideoCard({
           <Link href={`/talent/${video.talent.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <div style={{
               width: 28, height: 28, borderRadius: '50%', overflow: 'hidden',
-              background: 'rgba(99,102,241,0.4)', flexShrink: 0,
+              background: 'rgba(6,182,212,0.4)', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {video.talent.avatar_url
@@ -265,9 +265,9 @@ export default function ExplorePage() {
               <button key={c} onClick={() => setCategory(c)} style={{
                 flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700,
                 border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)',
-                background: category === c ? 'rgba(99,102,241,0.85)' : 'rgba(0,0,0,0.5)',
+                background: category === c ? 'rgba(6,182,212,0.85)' : 'rgba(0,0,0,0.5)',
                 color: 'white',
-                boxShadow: category === c ? '0 2px 8px rgba(99,102,241,0.4)' : 'none',
+                boxShadow: category === c ? '0 2px 8px rgba(6,182,212,0.4)' : 'none',
               }}>
                 {c === 'all' ? '전체' : categoryLabel[c]}
               </button>
@@ -293,7 +293,7 @@ export default function ExplorePage() {
           </div>
         ) : videos.length === 0 ? (
           <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, scrollSnapAlign: 'start' }}>
-            <div style={{ color: '#818cf8' }}><Video size={48} strokeWidth={1.5} /></div>
+            <div style={{ color: '#22d3ee' }}><Video size={48} strokeWidth={1.5} /></div>
             <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
           </div>
         ) : (

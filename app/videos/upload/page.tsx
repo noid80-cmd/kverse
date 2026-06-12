@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -203,8 +203,8 @@ export default function UploadPage() {
 
           <label style={{
             display: 'block',
-            background: file ? 'rgba(99,102,241,0.1)' : '#111118',
-            border: `2px dashed ${file ? '#6366f1' : 'rgba(255,255,255,0.1)'}`,
+            background: file ? 'rgba(6,182,212,0.1)' : '#111118',
+            border: `2px dashed ${file ? '#0891b2' : 'rgba(255,255,255,0.1)'}`,
             borderRadius: 20, padding: 32, textAlign: 'center', cursor: 'pointer',
           }}>
             <input type="file" accept="video/*" onChange={e => {
@@ -218,10 +218,10 @@ export default function UploadPage() {
                 setFile(f)
               }
             }} style={{ display: 'none' }} />
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10, color: file ? '#818cf8' : '#555570' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10, color: file ? '#22d3ee' : '#555570' }}>
               {file ? <CheckCircle size={36} strokeWidth={1.5} /> : <Video size={36} strokeWidth={1.5} />}
             </div>
-            <div style={{ fontWeight: 700, color: file ? '#818cf8' : '#eeeeff', fontSize: 15, marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, color: file ? '#22d3ee' : '#eeeeff', fontSize: 15, marginBottom: 4 }}>
               {file ? file.name : '영상 파일 선택'}
             </div>
             <div style={{ fontSize: 12, color: '#555570' }}>
@@ -252,7 +252,7 @@ export default function UploadPage() {
           {uploading && (
             <div>
               <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', transition: 'width 0.3s', borderRadius: 3 }} />
+                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', transition: 'width 0.3s', borderRadius: 3 }} />
               </div>
               <p style={{ fontSize: 12, color: '#8888aa', marginTop: 6, textAlign: 'center' }}>업로드 중... {progress}%</p>
             </div>
@@ -260,7 +260,7 @@ export default function UploadPage() {
 
           <button type="submit" disabled={uploading}
             className="w-full py-4 rounded-2xl text-white disabled:opacity-50 transition active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.35)', border: 'none', marginTop: 4 }}>
+            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.35)', border: 'none', marginTop: 4 }}>
             {uploading ? '업로드 중...' : '업로드'}
           </button>
         </form>

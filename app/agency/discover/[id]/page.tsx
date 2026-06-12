@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -147,7 +147,7 @@ export default function AgencyVideoPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
                 <div style={{
                   width: 56, height: 56, borderRadius: 18, flexShrink: 0, overflow: 'hidden',
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                  background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {t.avatar_url
@@ -165,8 +165,8 @@ export default function AgencyVideoPage() {
 
               {(t.height || t.weight) && (
                 <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  {t.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#6366f1', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>키 {t.height}cm</span>}
-                  {t.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#6366f1', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>몸무게 {t.weight}kg</span>}
+                  {t.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>키 {t.height}cm</span>}
+                  {t.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>몸무게 {t.weight}kg</span>}
                 </div>
               )}
 
@@ -184,7 +184,7 @@ export default function AgencyVideoPage() {
 
           <button onClick={handleStartChat} disabled={starting}
             className="w-full py-4 rounded-2xl text-white transition active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)', opacity: starting ? 0.7 : 1 }}>
+            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.3)', opacity: starting ? 0.7 : 1 }}>
             {starting ? '연결 중...' : '채팅하기'}
           </button>
         </div>

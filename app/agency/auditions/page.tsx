@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -115,7 +115,7 @@ export default function AgencyAuditionsPage() {
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>오디션 공고</h1>
           <button onClick={() => setShowCreate(v => !v)} style={{
             display: 'flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
             borderRadius: 14, padding: '10px 16px', fontSize: 14, fontWeight: 700,
           }}>
             <Plus size={16} strokeWidth={2.5} /> 공고 올리기
@@ -127,7 +127,7 @@ export default function AgencyAuditionsPage() {
             <h2 style={{ fontWeight: 800, color: '#eeeeff', marginBottom: 16, fontSize: 16 }}>새 오디션 공고</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 8, cursor: 'default' }}>
-                <span style={{ fontSize: 11, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '2px 8px', borderRadius: 6, fontWeight: 700, flexShrink: 0 }}>기획사</span>
+                <span style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 8px', borderRadius: 6, fontWeight: 700, flexShrink: 0 }}>기획사</span>
                 <span style={{ fontWeight: 700, color: '#eeeeff' }}>{agencyName}</span>
               </div>
               <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
@@ -147,7 +147,7 @@ export default function AgencyAuditionsPage() {
                     }))} style={{
                       padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                       cursor: 'pointer', border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.1)',
-                      background: selected ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                      background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                       color: selected ? 'white' : '#555570',
                     }}>
                       {categoryLabel[cat]}
@@ -166,7 +166,7 @@ export default function AgencyAuditionsPage() {
                   fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#555570',
                 }}>취소</button>
                 <button onClick={createAudition} disabled={saving || !form.title.trim() || !form.deadline} style={{
-                  flex: 2, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+                  flex: 2, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
                   border: 'none', borderRadius: 12, padding: 12, fontSize: 14, fontWeight: 700,
                   cursor: 'pointer', opacity: saving || !form.title.trim() || !form.deadline ? 0.5 : 1,
                 }}>{saving ? '저장 중...' : '공고 올리기'}</button>
@@ -179,7 +179,7 @@ export default function AgencyAuditionsPage() {
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : auditions.length === 0 ? (
           <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
               <Megaphone size={22} strokeWidth={1.8} />
             </div>
             <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 공고가 없어요</div>
@@ -193,10 +193,10 @@ export default function AgencyAuditionsPage() {
               <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{ background: isExpired(a.deadline) ? 'rgba(255,255,255,0.02)' : '#111118', borderRadius: 20, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.07)', opacity: isExpired(a.deadline) ? 0.7 : 1 }}>
                   <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18, marginBottom: 4 }}>{agencyName}</div>
-                  <div style={{ fontWeight: 600, color: '#818cf8', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
+                  <div style={{ fontWeight: 600, color: '#22d3ee', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
                     {a.category.split(',').map(c => (
-                      <span key={c} style={{ fontSize: 11, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                      <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                         {categoryLabel[c] ?? c}
                       </span>
                     ))}
@@ -205,7 +205,7 @@ export default function AgencyAuditionsPage() {
                     <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#818cf8', fontSize: 13, fontWeight: 700 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#22d3ee', fontSize: 13, fontWeight: 700 }}>
                       <Users size={14} strokeWidth={2} /> {a.applicant_count}명 지원
                     </div>
                     {a.deadline && (

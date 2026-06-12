@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -57,16 +57,16 @@ export default function VideosPage() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{ display: 'flex', background: '#1a1a25', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
               <button onClick={() => setViewMode('list')}
-                style={{ padding: '8px 12px', border: 'none', fontSize: 16, cursor: 'pointer', background: viewMode === 'list' ? '#6366f1' : 'transparent', color: viewMode === 'list' ? 'white' : '#555570', transition: 'all 0.15s' }}>
+                style={{ padding: '8px 12px', border: 'none', fontSize: 16, cursor: 'pointer', background: viewMode === 'list' ? '#0891b2' : 'transparent', color: viewMode === 'list' ? 'white' : '#555570', transition: 'all 0.15s' }}>
                 ☰
               </button>
               <button onClick={() => setViewMode('grid')}
-                style={{ padding: '8px 12px', border: 'none', fontSize: 16, cursor: 'pointer', background: viewMode === 'grid' ? '#6366f1' : 'transparent', color: viewMode === 'grid' ? 'white' : '#555570', transition: 'all 0.15s' }}>
+                style={{ padding: '8px 12px', border: 'none', fontSize: 16, cursor: 'pointer', background: viewMode === 'grid' ? '#0891b2' : 'transparent', color: viewMode === 'grid' ? 'white' : '#555570', transition: 'all 0.15s' }}>
                 ⊞
               </button>
             </div>
             <Link href="/videos/upload"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 4px 12px rgba(99,102,241,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 4px 12px rgba(6,182,212,0.3)' }}>
               + 업로드
             </Link>
           </div>
@@ -80,7 +80,7 @@ export default function VideosPage() {
             <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>아직 영상이 없어요</div>
             <div style={{ fontSize: 13, color: '#555570', marginBottom: 20 }}>첫 영상을 올리고 기획사에 노출되어 보세요</div>
             <Link href="/videos/upload"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 14, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>
+              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 14, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>
               영상 업로드
             </Link>
           </div>
@@ -94,7 +94,7 @@ export default function VideosPage() {
                   display: 'flex', alignItems: 'stretch',
                 }}>
                   <div style={{
-                    width: 100, flexShrink: 0, background: v.thumbnail_url ? 'transparent' : 'rgba(99,102,241,0.08)',
+                    width: 100, flexShrink: 0, background: v.thumbnail_url ? 'transparent' : 'rgba(6,182,212,0.08)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
                   }}>
                     {v.thumbnail_url
@@ -105,7 +105,7 @@ export default function VideosPage() {
                   <div style={{ flex: 1, padding: '14px 16px', minWidth: 0 }}>
                     <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 11, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '3px 8px', borderRadius: 6, fontWeight: 600 }}>
+                      <span style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 6, fontWeight: 600 }}>
                         {categoryLabel[v.category] ?? v.category}
                       </span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: statusColor[v.status] }}>
@@ -124,7 +124,7 @@ export default function VideosPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
             {videos.map(v => (
-              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'rgba(99,102,241,0.08)' }}>
+              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'rgba(6,182,212,0.08)' }}>
                 {v.thumbnail_url
                   ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎬</div>

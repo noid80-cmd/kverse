@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -35,8 +35,8 @@ export default function AdminNav() {
                 style={{
                   fontSize: 12, fontWeight: 700, textDecoration: 'none',
                   padding: '6px 10px', borderRadius: 10,
-                  color: active ? '#818cf8' : '#555570',
-                  background: active ? 'rgba(99,102,241,0.12)' : 'transparent',
+                  color: active ? '#22d3ee' : '#555570',
+                  background: active ? 'rgba(6,182,212,0.12)' : 'transparent',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
                 <span style={{ fontSize: 16 }}>{n.emoji}</span>

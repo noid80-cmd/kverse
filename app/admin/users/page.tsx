@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -10,7 +10,7 @@ type Profile = {
 }
 
 const roleLabel: Record<string, string> = { talent: '지망생', agency: '기획사', admin: '관리자' }
-const roleColor: Record<string, string> = { talent: '#6366f1', agency: '#16a34a', admin: '#dc2626' }
+const roleColor: Record<string, string> = { talent: '#0891b2', agency: '#16a34a', admin: '#dc2626' }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<Profile[]>([])
@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
               }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                  background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <span style={{ color: 'white', fontWeight: 900, fontSize: 16 }}>{u.name[0]}</span>

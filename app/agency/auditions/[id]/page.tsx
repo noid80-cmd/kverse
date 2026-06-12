@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -170,7 +170,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                     <Link href={`/agency/talents/${a.talent?.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <div style={{
                         width: 36, height: 36, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {a.talent?.avatar_url
@@ -206,7 +206,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                           disabled={updating === a.id}
                           style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', borderRadius: 12,
+                            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
                           <CheckCircle size={15} strokeWidth={2} /> 초대

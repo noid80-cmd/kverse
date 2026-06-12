@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -23,7 +23,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
               justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
               outline: 'none',
-              color: active ? '#818cf8' : '#9494b0',
+              color: active ? '#22d3ee' : '#9494b0',
               transition: 'color 0.15s',
             }}>
             {item.icon}

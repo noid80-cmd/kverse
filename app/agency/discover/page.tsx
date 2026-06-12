@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -115,7 +115,7 @@ export default function DiscoverPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', minHeight: 32 }}>{agencyName ?? ''}</h1>
               {agencyVerified && (
-                <span style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 8 }}>인증</span>
+                <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 8 }}>인증</span>
               )}
             </div>
             <p style={{ fontSize: 13, color: '#8888aa' }}>오디션 지망생 영상 탐색</p>
@@ -125,9 +125,9 @@ export default function DiscoverPage() {
               <button key={s} onClick={() => setSort(s)}
                 style={{
                   padding: '6px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                  background: sort === s ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                  background: sort === s ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                   color: sort === s ? 'white' : '#8888aa',
-                  boxShadow: sort === s ? '0 2px 8px rgba(99,102,241,0.3)' : 'none',
+                  boxShadow: sort === s ? '0 2px 8px rgba(6,182,212,0.3)' : 'none',
                 }}>
                 {s === 'latest' ? '최신순' : '인기순'}
               </button>
@@ -140,9 +140,9 @@ export default function DiscoverPage() {
             <button key={c} onClick={() => setCategory(c)}
               style={{
                 flexShrink: 0, padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, transition: 'all 0.15s',
-                background: category === c ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                background: category === c ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                 color: category === c ? 'white' : '#8888aa',
-                boxShadow: category === c ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
+                boxShadow: category === c ? '0 4px 12px rgba(6,182,212,0.3)' : 'none',
                 border: category === c ? '1px solid transparent' : '1px solid rgba(255,255,255,0.07)',
               }}>
               {c === 'all' ? '전체' : categoryLabel[c]}
@@ -154,7 +154,7 @@ export default function DiscoverPage() {
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : videos.length === 0 ? (
           <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
               <Video size={22} strokeWidth={1.8} />
             </div>
             <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
@@ -165,7 +165,7 @@ export default function DiscoverPage() {
               <div key={v.id} style={{ background: '#111118', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <Link href={`/agency/discover/${v.id}`} style={{ display: 'block', textDecoration: 'none' }}>
                   <div style={{
-                    height: 180, background: v.thumbnail_url ? 'transparent' : 'rgba(99,102,241,0.08)',
+                    height: 180, background: v.thumbnail_url ? 'transparent' : 'rgba(6,182,212,0.08)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative',
                     cursor: 'pointer',
                   }}>
@@ -195,7 +195,7 @@ export default function DiscoverPage() {
                     <Link href={`/agency/talents/${v.talent?.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, textDecoration: 'none', minWidth: 0 }}>
                       <div style={{
                         width: 36, height: 36, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {v.talent?.avatar_url
@@ -240,7 +240,7 @@ export default function DiscoverPage() {
                   {v.tags.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8 }}>
                       {v.tags.slice(0, 4).map(t => (
-                        <span key={t} style={{ fontSize: 11, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '3px 8px', borderRadius: 20, fontWeight: 600 }}>#{t}</span>
+                        <span key={t} style={{ fontSize: 11, background: 'rgba(8,145,178,0.12)', color: '#a78bfa', padding: '3px 8px', borderRadius: 20, fontWeight: 600 }}>#{t}</span>
                       ))}
                     </div>
                   )}

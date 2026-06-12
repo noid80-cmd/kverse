@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -36,7 +36,7 @@ export default function AgencyNav() {
           <Link key={item.href} href={item.href} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
-            outline: 'none', color: active ? '#818cf8' : '#3a3a5c', transition: 'color 0.15s',
+            outline: 'none', color: active ? '#22d3ee' : '#3a3a5c', transition: 'color 0.15s',
           }}>
             {item.icon}
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: 0.3 }}>{item.label}</span>

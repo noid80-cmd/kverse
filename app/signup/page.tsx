@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -99,12 +99,12 @@ export default function SignupPage() {
   if (done) return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#09090f' }}>
       <div className="text-center">
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#818cf8' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#22d3ee' }}>
           <Mail size={26} strokeWidth={1.8} />
         </div>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#eeeeff', marginBottom: 8 }}>가입 완료!</h2>
         <p style={{ color: '#8888aa', fontSize: 14, marginBottom: 24 }}>이제 로그인하세요</p>
-        <Link href="/login" style={{ color: '#818cf8', fontWeight: 700 }}>로그인하러 가기</Link>
+        <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>로그인하러 가기</Link>
       </div>
     </div>
   )
@@ -116,9 +116,9 @@ export default function SignupPage() {
         <div className="flex flex-col items-center mb-8">
           <div style={{
             width: 64, height: 64, borderRadius: 20, marginBottom: 14,
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.3)',
+            boxShadow: '0 8px 32px rgba(6,182,212,0.3)',
           }}>
             <span style={{ color: 'white', fontSize: 24, fontWeight: 900 }}>K</span>
           </div>
@@ -137,17 +137,17 @@ export default function SignupPage() {
               <button key={r.value} onClick={() => setRole(r.value)}
                 className="w-full text-left p-5 rounded-2xl transition"
                 style={{
-                  background: role === r.value ? 'rgba(99,102,241,0.12)' : '#111118',
-                  border: `2px solid ${role === r.value ? '#6366f1' : 'rgba(255,255,255,0.08)'}`,
+                  background: role === r.value ? 'rgba(6,182,212,0.12)' : '#111118',
+                  border: `2px solid ${role === r.value ? '#0891b2' : 'rgba(255,255,255,0.08)'}`,
                 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: role === r.value ? 'rgba(99,102,241,0.15)' : '#1a1a25', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, color: role === r.value ? '#818cf8' : '#555570' }}>{r.icon}</div>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: role === r.value ? 'rgba(6,182,212,0.15)' : '#1a1a25', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, color: role === r.value ? '#22d3ee' : '#555570' }}>{r.icon}</div>
                 <div style={{ fontWeight: 700, fontSize: 16, color: '#eeeeff', marginBottom: 2 }}>{r.label}</div>
                 <div style={{ fontSize: 13, color: '#8888aa' }}>{r.desc}</div>
               </button>
             ))}
             <button onClick={() => role === 'agency' ? setStep('form') : setStep('method')}
               className="w-full py-4 rounded-2xl text-white mt-1"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.3)' }}>
               다음
             </button>
           </div>
@@ -177,7 +177,7 @@ export default function SignupPage() {
 
             <button onClick={() => setStep('form')}
               className="w-full py-4 rounded-2xl"
-              style={{ background: '#111118', color: '#818cf8', fontSize: 15, fontWeight: 700, border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              style={{ background: '#111118', color: '#22d3ee', fontSize: 15, fontWeight: 700, border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Mail size={18} strokeWidth={2} /> 이메일로 가입
             </button>
 
@@ -203,13 +203,13 @@ export default function SignupPage() {
                     <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, overflow: 'hidden' }}>
                       <img src={bizRegUrl} alt="명함" style={{ width: '100%', maxHeight: 160, objectFit: 'contain', background: '#1a1a25', display: 'block' }} />
                       <button type="button" onClick={() => fileInputRef.current?.click()}
-                        style={{ width: '100%', padding: '10px', background: 'none', border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', color: '#818cf8', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                        style={{ width: '100%', padding: '10px', background: 'none', border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', color: '#22d3ee', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                         <CheckCircle size={14} strokeWidth={2} /> 업로드 완료 · 교체하기
                       </button>
                     </div>
                   ) : (
                     <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                      style={{ width: '100%', padding: '16px', borderRadius: 14, border: '1.5px dashed rgba(99,102,241,0.4)', background: 'rgba(99,102,241,0.06)', color: uploading ? '#555570' : '#818cf8', fontSize: 14, fontWeight: 700, cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                      style={{ width: '100%', padding: '16px', borderRadius: 14, border: '1.5px dashed rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.06)', color: uploading ? '#555570' : '#22d3ee', fontSize: 14, fontWeight: 700, cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                       <Upload size={16} strokeWidth={2} />
                       {uploading ? '업로드 중...' : '명함 사진 업로드'}
                     </button>
@@ -224,7 +224,7 @@ export default function SignupPage() {
             {error && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{error}</p>}
             <button type="submit" disabled={loading || !agencyFormValid}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 mt-1"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.3)' }}>
               {loading ? '가입 중...' : '가입하기'}
             </button>
             <button type="button" onClick={() => setStep(role === 'agency' ? 'role' : 'method')}
@@ -236,7 +236,7 @@ export default function SignupPage() {
 
         <p className="text-center text-sm font-medium mt-6" style={{ color: '#8888aa' }}>
           이미 계정이 있으신가요?{' '}
-          <Link href="/login" style={{ color: '#818cf8', fontWeight: 700 }}>로그인</Link>
+          <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>로그인</Link>
         </p>
       </div>
     </div>

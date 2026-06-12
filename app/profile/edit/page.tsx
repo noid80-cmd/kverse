@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -101,7 +101,7 @@ export default function ProfileEditPage() {
 
   if (!form) return (
     <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -117,9 +117,9 @@ export default function ProfileEditPage() {
           <label style={{ cursor: 'pointer', position: 'relative' }}>
             <div style={{
               width: 96, height: 96, borderRadius: 28, overflow: 'hidden',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '3px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 24px rgba(99,102,241,0.3)',
+              border: '3px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 24px rgba(6,182,212,0.3)',
             }}>
               {avatarUrl
                 ? <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -129,7 +129,7 @@ export default function ProfileEditPage() {
             <div style={{
               position: 'absolute', bottom: 0, right: 0,
               width: 28, height: 28, borderRadius: '50%',
-              background: '#6366f1', border: '2px solid #09090f',
+              background: '#0891b2', border: '2px solid #09090f',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13,
             }}>📷</div>
@@ -242,7 +242,7 @@ export default function ProfileEditPage() {
                 <button key={s} type="button" onClick={() => toggleSkill(s)}
                   style={{
                     padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', transition: 'all 0.15s',
-                    background: skills.includes(s) ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                    background: skills.includes(s) ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                     color: skills.includes(s) ? 'white' : '#8888aa',
                   }}>
                   {s}
@@ -264,7 +264,7 @@ export default function ProfileEditPage() {
             className="w-full py-4 rounded-2xl disabled:opacity-50 transition active:scale-95"
             style={saved
               ? { background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', color: '#8888aa', fontSize: 17, fontWeight: 700 }
-              : { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}>
+              : { background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
             {saving ? '저장 중...' : saved ? '✓ 저장완료' : '저장'}
           </button>
 

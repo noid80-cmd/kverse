@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -80,7 +80,7 @@ export default function VideoDetailPage() {
 
   if (!video) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -107,7 +107,7 @@ export default function VideoDetailPage() {
 
         <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 12, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
+            <span style={{ fontSize: 12, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
               {categoryLabel[video.category] ?? video.category}
             </span>
             <span style={{ fontSize: 12, color: '#555570' }}>조회 {video.view_count}회</span>
@@ -119,7 +119,7 @@ export default function VideoDetailPage() {
           {video.tags.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {video.tags.map(t => (
-                <span key={t} style={{ fontSize: 12, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
+                <span key={t} style={{ fontSize: 12, background: 'rgba(8,145,178,0.12)', color: '#a78bfa', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
                   #{t}
                 </span>
               ))}
@@ -140,11 +140,11 @@ export default function VideoDetailPage() {
               <div style={{ fontSize: 12, color: liked ? '#f43f5e' : '#555570', fontWeight: 600 }}>좋아요</div>
             </div>
           </button>
-          <div style={{ background: 'rgba(99,102,241,0.1)', borderRadius: 20, padding: 20, border: '1px solid rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: 'rgba(6,182,212,0.1)', borderRadius: 20, padding: 20, border: '1px solid rgba(6,182,212,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 28 }}>⭐</span>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#818cf8' }}>{bookmarkCount}</div>
-              <div style={{ fontSize: 12, color: '#818cf8', fontWeight: 600 }}>기획사 관심</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#22d3ee' }}>{bookmarkCount}</div>
+              <div style={{ fontSize: 12, color: '#22d3ee', fontWeight: 600 }}>기획사 관심</div>
             </div>
           </div>
         </div>

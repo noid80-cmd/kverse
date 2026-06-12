@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -133,7 +133,7 @@ export default function AgencySettingsPage() {
 
         <div style={{ background: '#111118', borderRadius: 20, padding: 20, marginBottom: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Building2 size={18} color="#818cf8" strokeWidth={2} />
+            <Building2 size={18} color="#22d3ee" strokeWidth={2} />
             <span style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>명함</span>
           </div>
 
@@ -152,9 +152,9 @@ export default function AgencySettingsPage() {
 
           <label style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            background: uploading ? '#1a1a25' : 'rgba(99,102,241,0.06)',
-            border: '1.5px dashed rgba(99,102,241,0.4)', borderRadius: 14, padding: '16px',
-            cursor: uploading ? 'default' : 'pointer', color: '#818cf8', fontWeight: 700, fontSize: 14,
+            background: uploading ? '#1a1a25' : 'rgba(6,182,212,0.06)',
+            border: '1.5px dashed rgba(6,182,212,0.4)', borderRadius: 14, padding: '16px',
+            cursor: uploading ? 'default' : 'pointer', color: '#22d3ee', fontWeight: 700, fontSize: 14,
           }}>
             <input type="file" accept="image/*" style={{ display: 'none' }}
               onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
@@ -186,7 +186,7 @@ export default function AgencySettingsPage() {
             </div>
             <button onClick={handleSave} disabled={saving || !form.name.trim()} style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+              background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
               fontSize: 15, fontWeight: 700, cursor: 'pointer',
               opacity: saving || !form.name.trim() ? 0.6 : 1, marginTop: 4,
             }}>

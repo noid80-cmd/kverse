@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -254,7 +254,7 @@ export default function TalentAuditionsPage() {
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : auditions.length === 0 ? (
           <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
               <Megaphone size={22} strokeWidth={1.8} />
             </div>
             <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 공고가 없어요</div>
@@ -280,14 +280,14 @@ export default function TalentAuditionsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                   <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18 }}>{a.agency?.name ?? '기획사'}</div>
                   {a.agency?.is_verified && (
-                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
+                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
                   )}
                   {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                  <div style={{ fontWeight: 700, color: '#818cf8', fontSize: 14 }}>{a.title}</div>
+                  <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{a.title}</div>
                   {a.category.split(',').map(c => (
-                    <span key={c} style={{ fontSize: 11, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                    <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                       {categoryLabel[c] ?? c}
                     </span>
                   ))}
@@ -307,7 +307,7 @@ export default function TalentAuditionsPage() {
                         style={{ width: '100%', borderRadius: 12, maxHeight: 220, background: '#000', display: 'block' }} />
                     ) : (
                       <div onClick={() => appInfo.videoUrl && setPlayingAuditionId(a.id)}
-                        style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'rgba(99,102,241,0.08)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
+                        style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'rgba(6,182,212,0.08)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
                         {appInfo.thumbnailUrl
                           ? <img src={appInfo.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}><Video size={24} strokeWidth={1.5} /></div>
@@ -343,7 +343,7 @@ export default function TalentAuditionsPage() {
                     <button onClick={() => !appStatus && openModal(a)} style={{
                       width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
                       cursor: appStatus ? 'default' : 'pointer',
-                      background: isPending ? 'rgba(251,191,36,0.12)' : isSkip ? '#1a1a25' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      background: isPending ? 'rgba(251,191,36,0.12)' : isSkip ? '#1a1a25' : 'linear-gradient(135deg, #0891b2, #06b6d4)',
                       color: isPending ? '#fbbf24' : isSkip ? '#555570' : 'white',
                     }}>
                       {isPending ? '검토중' : isSkip ? '패스됨' : '지원하기'}
@@ -410,7 +410,7 @@ export default function TalentAuditionsPage() {
                 <button key={t} onClick={() => setTab(t)} style={{
                   flex: 1, padding: '10px', borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700,
                   cursor: 'pointer',
-                  background: tab === t ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a25',
+                  background: tab === t ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
                   color: tab === t ? 'white' : '#555570',
                 }}>
                   {t === 'existing' ? '기존 영상 선택' : '새 영상 업로드'}
@@ -431,10 +431,10 @@ export default function TalentAuditionsPage() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                           borderRadius: 14, cursor: 'pointer', border: '2px solid',
-                          borderColor: selectedVideo?.id === v.id ? '#6366f1' : 'rgba(255,255,255,0.07)',
-                          background: selectedVideo?.id === v.id ? 'rgba(99,102,241,0.12)' : '#1a1a25',
+                          borderColor: selectedVideo?.id === v.id ? '#0891b2' : 'rgba(255,255,255,0.07)',
+                          background: selectedVideo?.id === v.id ? 'rgba(6,182,212,0.12)' : '#1a1a25',
                         }}>
-                        <div style={{ width: 56, height: 42, borderRadius: 8, overflow: 'hidden', background: 'rgba(99,102,241,0.1)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: 56, height: 42, borderRadius: 8, overflow: 'hidden', background: 'rgba(6,182,212,0.1)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {v.thumbnail_url
                             ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             : <Video size={16} color="#555570" />
@@ -444,7 +444,7 @@ export default function TalentAuditionsPage() {
                           <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.title}</div>
                           <div style={{ fontSize: 11, color: '#555570' }}>{categoryLabel[v.category] ?? v.category}</div>
                         </div>
-                        {selectedVideo?.id === v.id && <CheckCircle size={18} color="#6366f1" strokeWidth={2} />}
+                        {selectedVideo?.id === v.id && <CheckCircle size={18} color="#0891b2" strokeWidth={2} />}
                       </div>
                     ))}
                   </div>
@@ -453,18 +453,18 @@ export default function TalentAuditionsPage() {
             ) : (
               <div style={{ marginBottom: 16 }}>
                 <label style={{
-                  display: 'block', background: newFile ? 'rgba(99,102,241,0.1)' : '#1a1a25',
-                  border: `2px dashed ${newFile ? '#6366f1' : 'rgba(255,255,255,0.12)'}`,
+                  display: 'block', background: newFile ? 'rgba(6,182,212,0.1)' : '#1a1a25',
+                  border: `2px dashed ${newFile ? '#0891b2' : 'rgba(255,255,255,0.12)'}`,
                   borderRadius: 16, padding: '24px', textAlign: 'center', cursor: 'pointer', marginBottom: 8,
                 }}>
                   <input type="file" accept="video/*" onChange={e => {
                     const f = e.target.files?.[0] ?? null
                     setNewFile(f); setError('')
                   }} style={{ display: 'none' }} />
-                  <div style={{ color: newFile ? '#818cf8' : '#555570', marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ color: newFile ? '#22d3ee' : '#555570', marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
                     {newFile ? <CheckCircle size={28} strokeWidth={1.5} /> : <Video size={28} strokeWidth={1.5} />}
                   </div>
-                  <div style={{ fontWeight: 700, color: newFile ? '#818cf8' : '#eeeeff', fontSize: 14 }}>
+                  <div style={{ fontWeight: 700, color: newFile ? '#22d3ee' : '#eeeeff', fontSize: 14 }}>
                     {newFile ? newFile.name : '영상 파일 선택'}
                   </div>
                   {newFile && <div style={{ fontSize: 12, color: '#555570', marginTop: 2 }}>{(newFile.size / 1024 / 1024).toFixed(1)} MB</div>}
@@ -472,7 +472,7 @@ export default function TalentAuditionsPage() {
                 {submitting && progress > 0 && (
                   <div>
                     <div style={{ height: 5, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', transition: 'width 0.3s' }} />
+                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', transition: 'width 0.3s' }} />
                     </div>
                     <div style={{ fontSize: 12, color: '#555570', marginTop: 4, textAlign: 'center' }}>{progress}%</div>
                   </div>
@@ -488,9 +488,9 @@ export default function TalentAuditionsPage() {
 
             <button onClick={submitApplication} disabled={submitting} style={{
               width: '100%', padding: '14px', borderRadius: 16, border: 'none', fontSize: 16, fontWeight: 700,
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
+              background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
               cursor: submitting ? 'default' : 'pointer', opacity: submitting ? 0.7 : 1,
-              boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
+              boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
             }}>
               {submitting ? '지원 중...' : '지원하기'}
             </button>

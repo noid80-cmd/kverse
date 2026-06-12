@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -70,7 +70,7 @@ export default function AgencyContactsPage() {
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
         ) : convs.length === 0 ? (
           <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#818cf8' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
               <MessageCircle size={22} strokeWidth={1.8} />
             </div>
             <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>아직 대화가 없어요</div>
@@ -84,7 +84,7 @@ export default function AgencyContactsPage() {
                   style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', minWidth: 0 }}>
                   <div style={{
                     width: 48, height: 48, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
-                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                    background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {c.talent?.avatar_url

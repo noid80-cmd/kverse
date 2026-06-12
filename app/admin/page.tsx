@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -60,9 +60,9 @@ export default function AdminDashboardPage() {
   }, [])
 
   const statCards = stats ? [
-    { label: '전체 회원', value: stats.totalUsers, sub: `지망생 ${stats.talentCount} · 기획사 ${stats.agencyCount}`, color: '#6366f1', bg: '#eef2ff', href: '/admin/users' },
+    { label: '전체 회원', value: stats.totalUsers, sub: `지망생 ${stats.talentCount} · 기획사 ${stats.agencyCount}`, color: '#0891b2', bg: '#eef2ff', href: '/admin/users' },
     { label: '인증 대기', value: stats.pendingVerifications, sub: '사업자등록증 제출됨', color: stats.pendingVerifications > 0 ? '#d97706' : '#22c55e', bg: stats.pendingVerifications > 0 ? '#fef9c3' : '#f0fdf4', href: '/admin/agencies' },
-    { label: '활성 영상', value: stats.totalVideos, sub: '공개 중인 영상', color: '#8b5cf6', bg: '#f5f3ff', href: '/admin/videos' },
+    { label: '활성 영상', value: stats.totalVideos, sub: '공개 중인 영상', color: '#06b6d4', bg: '#f5f3ff', href: '/admin/videos' },
     { label: '활성 오디션', value: stats.totalAuditions, sub: '진행 중인 공고', color: '#0ea5e9', bg: '#f0f9ff', href: '/admin/agencies' },
   ] : []
 

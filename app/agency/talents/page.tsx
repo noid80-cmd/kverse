@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -59,7 +59,7 @@ export default function AgencyTalentsPage() {
             <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>관심 지망생이 없어요</div>
             <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>영상 탐색에서 별표를 눌러 저장해보세요</div>
             <Link href="/agency/discover"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontWeight: 700, fontSize: 14, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>
+              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 14, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>
               탐색하기
             </Link>
           </div>
@@ -68,7 +68,7 @@ export default function AgencyTalentsPage() {
             {bookmarks.map(b => (
               <div key={b.id} style={{ background: '#111118', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                  <Link href={`/agency/discover/${b.video?.id}`} style={{ width: 90, flexShrink: 0, textDecoration: 'none', background: b.video?.thumbnail_url ? 'transparent' : 'rgba(99,102,241,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  <Link href={`/agency/discover/${b.video?.id}`} style={{ width: 90, flexShrink: 0, textDecoration: 'none', background: b.video?.thumbnail_url ? 'transparent' : 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {b.video?.thumbnail_url
                       ? <img src={b.video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <span style={{ fontSize: 24 }}>🎬</span>
@@ -78,7 +78,7 @@ export default function AgencyTalentsPage() {
                     <Link href={`/agency/talents/${b.talent?.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <div style={{
                         width: 28, height: 28, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {b.talent?.avatar_url
@@ -87,9 +87,9 @@ export default function AgencyTalentsPage() {
                         }
                       </div>
                       <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{b.talent?.name}</span>
-                      <span style={{ fontSize: 11, color: '#818cf8', marginLeft: 2 }}>프로필 →</span>
+                      <span style={{ fontSize: 11, color: '#22d3ee', marginLeft: 2 }}>프로필 →</span>
                       {b.video?.category && (
-                        <span style={{ fontSize: 11, background: 'rgba(99,102,241,0.12)', color: '#818cf8', padding: '2px 7px', borderRadius: 6, fontWeight: 600, marginLeft: 'auto' }}>
+                        <span style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 7px', borderRadius: 6, fontWeight: 600, marginLeft: 'auto' }}>
                           {categoryLabel[b.video.category]}
                         </span>
                       )}
@@ -102,7 +102,7 @@ export default function AgencyTalentsPage() {
                     {b.talent?.skills && b.talent.skills.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                         {b.talent.skills.slice(0, 3).map(s => (
-                          <span key={s} style={{ fontSize: 11, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', padding: '2px 7px', borderRadius: 10, fontWeight: 600 }}>{s}</span>
+                          <span key={s} style={{ fontSize: 11, background: 'rgba(8,145,178,0.12)', color: '#a78bfa', padding: '2px 7px', borderRadius: 10, fontWeight: 600 }}>{s}</span>
                         ))}
                       </div>
                     )}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -71,7 +71,7 @@ export default function AdminVideosPage() {
           {(['all', 'active', 'processing', 'hidden', 'deleted'] as const).map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
               style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700, transition: 'all 0.15s', cursor: 'pointer',
-                background: statusFilter === s ? '#6366f1' : '#fff',
+                background: statusFilter === s ? '#0891b2' : '#fff',
                 color: statusFilter === s ? 'white' : '#8b8baa',
                 border: statusFilter === s ? '1px solid transparent' : '1px solid #e0e0f0',
               }}>
@@ -91,7 +91,7 @@ export default function AdminVideosPage() {
                     <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>{v.title}</div>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={{ fontSize: 12, color: '#8b8baa' }}>{v.talent?.name ?? '?'}</span>
-                      <span style={{ fontSize: 11, background: '#f0f0f8', color: '#6366f1', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>{categoryLabel[v.category]}</span>
+                      <span style={{ fontSize: 11, background: '#f0f0f8', color: '#0891b2', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>{categoryLabel[v.category]}</span>
                       <span style={{ fontSize: 12, color: '#8b8baa' }}>조회 {v.view_count}</span>
                       {v.is_featured && <span style={{ fontSize: 11, background: '#fef9c3', color: '#d97706', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>⭐추천</span>}
                     </div>

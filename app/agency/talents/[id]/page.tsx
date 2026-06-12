@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -91,7 +91,7 @@ export default function TalentProfilePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <div style={{
               width: 72, height: 72, borderRadius: 22, flexShrink: 0, overflow: 'hidden',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {talent.avatar_url
@@ -113,8 +113,8 @@ export default function TalentProfilePage() {
 
           {(talent.height || talent.weight) && (
             <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-              {talent.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#6366f1', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
-              {talent.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#6366f1', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
+              {talent.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
+              {talent.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
             </div>
           )}
 
@@ -135,8 +135,8 @@ export default function TalentProfilePage() {
         <button onClick={handleChat} disabled={starting}
           style={{
             width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white',
-            fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
+            fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
             marginBottom: 24, opacity: starting ? 0.7 : 1,
           }}>
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
