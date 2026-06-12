@@ -171,22 +171,41 @@ export default function DashboardPage() {
         </div>
 
         {/* My videos shortcut */}
-        <Link href="/videos" style={{ textDecoration: 'none', display: 'block', marginBottom: 12 }}>
-          <div style={{
-            background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
-            border: '1px solid rgba(255,255,255,0.07)',
-            display: 'flex', alignItems: 'center', gap: 12,
-          }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
-              <Video size={18} strokeWidth={1.8} />
+        {videos === 0 ? (
+          <Link href="/videos/upload" style={{ textDecoration: 'none', display: 'block', marginBottom: 12 }}>
+            <div style={{
+              background: 'rgba(6,182,212,0.06)', borderRadius: 16, padding: '18px 16px',
+              border: '1.5px dashed rgba(6,182,212,0.25)',
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+                <Plus size={20} strokeWidth={2.2} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>첫 영상을 올려보세요</div>
+                <div style={{ fontSize: 12, color: '#22d3ee', marginTop: 1, opacity: 0.8 }}>기획사 담당자가 바로 볼 수 있어요</div>
+              </div>
+              <ChevronRight size={16} color="#22d3ee" />
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>내 영상</div>
-              <div style={{ fontSize: 12, color: '#555570', marginTop: 1 }}>총 {videos}개 업로드됨</div>
+          </Link>
+        ) : (
+          <Link href="/videos" style={{ textDecoration: 'none', display: 'block', marginBottom: 12 }}>
+            <div style={{
+              background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
+              border: '1px solid rgba(255,255,255,0.07)',
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+                <Video size={18} strokeWidth={1.8} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>내 영상</div>
+                <div style={{ fontSize: 12, color: '#555570', marginTop: 1 }}>총 {videos}개 업로드됨</div>
+              </div>
+              <ChevronRight size={16} color="#333350" />
             </div>
-            <ChevronRight size={16} color="#333350" />
-          </div>
-        </Link>
+          </Link>
+        )}
 
         {/* Agency interest */}
         <div style={{ marginBottom: 28 }}>
@@ -243,14 +262,25 @@ export default function DashboardPage() {
         </div>
 
         {/* Auditions */}
-        {recentAuditions.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>열린 오디션</h2>
-              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-                전체보기 <ChevronRight size={14} />
-              </Link>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>열린 오디션</h2>
+            <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+              전체보기 <ChevronRight size={14} />
+            </Link>
+          </div>
+          {recentAuditions.length === 0 ? (
+            <div style={{
+              background: 'rgba(255,255,255,0.02)', borderRadius: 16, padding: '24px 20px', textAlign: 'center',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#22d3ee' }}>
+                <Megaphone size={20} strokeWidth={1.5} />
+              </div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>현재 열린 오디션이 없어요</div>
+              <div style={{ fontSize: 12, color: '#555570' }}>새 오디션이 열리면 알려드릴게요</div>
             </div>
+          ) : (
             <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
               <div style={{
                 background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '14px 16px',
@@ -278,8 +308,8 @@ export default function DashboardPage() {
                 </div>
               </div>
             </Link>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Profile CTA */}
         {!profile?.bio && (
