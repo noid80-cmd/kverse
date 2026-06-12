@@ -67,7 +67,7 @@ export default function DashboardPage() {
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('deleted_by_talent', false),
         supabase.from('auditions').select('id, title, category, deadline, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
-        supabase.from('bookmarks').select('id, created_at, video:videos(id, title), agency_member:profiles!agency_member_id(name)').eq('talent_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.from('bookmarks').select('id, created_at, video:videos(id, title), agency_member:profiles!agency_member_id(name)').eq('talent_id', user.id).order('created_at', { ascending: false }).limit(2),
       ])
 
       const fresh: PageData = {
@@ -154,7 +154,6 @@ export default function DashboardPage() {
             borderRadius: 16, padding: '12px 16px',
           }}>
             {[
-              { label: '영상', value: videos, icon: <Video size={14} />, href: '/videos' },
               { label: '관심', value: bookmarks, icon: <Bookmark size={14} />, href: '/reactions?tab=bookmarks' },
               { label: '채팅', value: contacts, icon: <MessageCircle size={14} />, href: '/reactions' },
             ].map((s, i) => (
