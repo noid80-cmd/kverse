@@ -152,14 +152,14 @@ const t: Record<Lang, {
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>('한국어')
   const [tab, setTab] = useState<'talent' | 'agency'>('talent')
-  const [loggedIn, setLoggedIn] = useState(false)
+  const [ready, setReady] = useState(false)
   const tx = t[lang]
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(async ({ data }) => {
       const user = data.session?.user
-      if (!user) return
+      if (!user) { setReady(true); return }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       const role = profile?.role ?? 'talent'
       if (role === 'admin') window.location.href = '/admin/users'
@@ -167,6 +167,8 @@ export default function LandingPage() {
       else window.location.href = '/dashboard'
     })
   }, [])
+
+  if (!ready) return <div style={{ minHeight: '100vh', background: '#07070d' }} />
 
   return (
     <div style={{ minHeight: '100vh', background: '#07070d', color: '#eeeeff', fontFamily: 'inherit', overflowX: 'hidden' }}>
