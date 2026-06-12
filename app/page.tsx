@@ -268,7 +268,7 @@ export default function LandingPage() {
           <div style={{ background: 'linear-gradient(135deg, rgba(8,145,178,0.2), rgba(6,182,212,0.1))', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 28, padding: '64px 40px', textAlign: 'center' }}>
             <h2 style={{ fontSize: 36, fontWeight: 900, color: '#eeeeff', marginBottom: 12 }}>{tx.ctaTitle}</h2>
             <p style={{ fontSize: 16, color: '#22d3ee', marginBottom: 36, fontWeight: 600 }}>{tx.ctaSub}</p>
-            <Link href={loggedIn ? '/dashboard' : '/signup'} style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 17, padding: '18px 48px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(6,182,212,0.45)', display: 'inline-block' }}>
+            <Link href="/signup" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 17, padding: '18px 48px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(6,182,212,0.45)', display: 'inline-block' }}>
               {tx.ctaStart}
             </Link>
           </div>
