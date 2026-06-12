@@ -154,14 +154,14 @@ export default function DashboardPage() {
             borderRadius: 16, padding: '12px 16px',
           }}>
             {[
-              { label: '관심', value: bookmarks, icon: <Bookmark size={14} />, href: '/reactions?tab=bookmarks' },
-              { label: '채팅', value: contacts, icon: <MessageCircle size={14} />, href: '/reactions' },
+              { label: '관심', value: bookmarks, icon: <Bookmark size={14} />, href: '/reactions?tab=bookmarks', color: '#22d3ee', bg: 'rgba(6,182,212,0.08)' },
+              { label: '채팅', value: contacts, icon: <MessageCircle size={14} />, href: '/reactions', color: '#34d399', bg: 'rgba(52,211,153,0.08)' },
             ].map((s, i) => (
               <Link key={s.label} href={s.href} style={{ flex: 1, textDecoration: 'none', textAlign: 'center', position: 'relative' }}>
                 {i > 0 && <div style={{ position: 'absolute', left: 0, top: '10%', height: '80%', width: 1, background: 'rgba(255,255,255,0.07)' }} />}
                 <div style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{s.value}</div>
                 <div style={{ fontSize: 11, color: '#555570', marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, fontWeight: 500 }}>
-                  <span style={{ color: '#22d3ee', opacity: 0.7 }}>{s.icon}</span>
+                  <span style={{ color: s.color, opacity: 0.85 }}>{s.icon}</span>
                   {s.label}
                 </div>
               </Link>
