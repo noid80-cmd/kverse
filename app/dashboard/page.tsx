@@ -31,8 +31,6 @@ const categoryLabel: Record<string, string> = {
 
 const auditionAccents = [
   'linear-gradient(90deg, #0891b2, #06b6d4)',
-  'linear-gradient(90deg, #7c3aed, #a78bfa)',
-  'linear-gradient(90deg, #059669, #10b981)',
 ]
 
 function getAuditionDisplayTitle(a: RecentAudition, lang: string) {
