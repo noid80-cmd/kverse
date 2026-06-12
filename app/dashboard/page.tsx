@@ -16,15 +16,15 @@ const talentNav = [
 ]
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
-type RecentVideo = { id: string; title: string; thumbnail_url: string | null; view_count: number; created_at: string }
 type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string } | null }
+type RecentBookmark = { id: string; created_at: string; video: { id: string; title: string } | null; agency_member: { name: string } | null }
 type PageData = {
   profile: Profile | null
   videos: number
   bookmarks: number
   contacts: number
-  recentVideos: RecentVideo[]
   recentAuditions: RecentAudition[]
+  recentBookmarks: RecentBookmark[]
 }
 
 const spinner = (
@@ -34,10 +34,20 @@ const spinner = (
   </>
 )
 
-const CACHE_KEY = 'kpick-dashboard-v2'
+const CACHE_KEY = 'kpick-dashboard-v3'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
+}
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const h = Math.floor(diff / 3600000)
+  if (h < 1) return '방금'
+  if (h < 24) return `${h}시간 전`
+  const d = Math.floor(h / 24)
+  if (d < 7) return `${d}일 전`
+  return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
 }
 
 export default function DashboardPage() {
@@ -52,13 +62,13 @@ export default function DashboardPage() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
 
-      const [{ data: prof }, { count: vCount }, { count: bCount }, { count: cCount }, { data: vids }, { data: auds }] = await Promise.all([
+      const [{ data: prof }, { count: vCount }, { count: bCount }, { count: cCount }, { data: auds }, { data: bms }] = await Promise.all([
         supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single(),
         supabase.from('videos').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('status', 'active'),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('deleted_by_talent', false),
-        supabase.from('videos').select('id, title, thumbnail_url, view_count, created_at').eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(4),
         supabase.from('auditions').select('id, title, category, deadline, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
+        supabase.from('bookmarks').select('id, created_at, video:videos(id, title), agency_member:profiles!agency_member_id(name)').eq('talent_id', user.id).order('created_at', { ascending: false }).limit(5),
       ])
 
       const fresh: PageData = {
@@ -66,8 +76,8 @@ export default function DashboardPage() {
         videos: vCount ?? 0,
         bookmarks: bCount ?? 0,
         contacts: cCount ?? 0,
-        recentVideos: (vids ?? []) as RecentVideo[],
         recentAuditions: (auds as unknown as RecentAudition[]) ?? [],
+        recentBookmarks: (bms as unknown as RecentBookmark[]) ?? [],
       }
       setData(fresh)
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
@@ -89,7 +99,7 @@ export default function DashboardPage() {
     </div>
   )
 
-  const { profile, videos, bookmarks, contacts, recentVideos, recentAuditions } = data
+  const { profile, videos, bookmarks, contacts, recentAuditions, recentBookmarks } = data
 
   return (
     <div style={{ minHeight: '100vh', background: '#07070d', paddingBottom: 112, position: 'relative', overflow: 'hidden' }}>
@@ -107,8 +117,7 @@ export default function DashboardPage() {
           background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 60%)',
         }} />
         <div style={{
-          position: 'absolute',
-          inset: 0,
+          position: 'absolute', inset: 0,
           backgroundImage: 'linear-gradient(rgba(6,182,212,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.012) 1px, transparent 1px)',
           backgroundSize: '80px 80px',
         }} />
@@ -116,7 +125,7 @@ export default function DashboardPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-10" style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* Profile hero */}
+        {/* Profile */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
             <Link href="/profile/edit" style={{ textDecoration: 'none', flexShrink: 0 }}>
@@ -140,21 +149,17 @@ export default function DashboardPage() {
               </h1>
               {profile?.bio
                 ? <p style={{ fontSize: 13, color: '#8888aa', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{profile.bio}</p>
-                : (
-                  <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
-                    <span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>+ 자기소개 추가하기</span>
-                  </Link>
-                )
+                : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>+ 자기소개 추가하기</span></Link>
               }
             </div>
           </div>
 
-          {/* Stats inline */}
+          {/* Stats bar */}
           <div style={{
             display: 'flex', alignItems: 'center',
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 16, padding: '12px 16px', gap: 0,
+            borderRadius: 16, padding: '12px 16px',
           }}>
             {[
               { label: '영상', value: videos, icon: <Video size={14} />, href: '/videos' },
@@ -162,9 +167,7 @@ export default function DashboardPage() {
               { label: '채팅', value: contacts, icon: <MessageCircle size={14} />, href: '/reactions' },
             ].map((s, i) => (
               <Link key={s.label} href={s.href} style={{ flex: 1, textDecoration: 'none', textAlign: 'center', position: 'relative' }}>
-                {i > 0 && (
-                  <div style={{ position: 'absolute', left: 0, top: '10%', height: '80%', width: 1, background: 'rgba(255,255,255,0.07)' }} />
-                )}
+                {i > 0 && <div style={{ position: 'absolute', left: 0, top: '10%', height: '80%', width: 1, background: 'rgba(255,255,255,0.07)' }} />}
                 <div style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{s.value}</div>
                 <div style={{ fontSize: 11, color: '#555570', marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, fontWeight: 500 }}>
                   <span style={{ color: '#22d3ee', opacity: 0.7 }}>{s.icon}</span>
@@ -175,7 +178,61 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Auditions — pinned above videos so always visible */}
+        {/* Agency interest */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>기획사 관심</h2>
+            <Link href="/reactions?tab=bookmarks" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+              전체보기 <ChevronRight size={14} />
+            </Link>
+          </div>
+
+          {recentBookmarks.length === 0 ? (
+            <div style={{
+              background: 'rgba(255,255,255,0.02)', borderRadius: 16, padding: '28px 20px', textAlign: 'center',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#22d3ee' }}>
+                <Bookmark size={20} strokeWidth={1.5} />
+              </div>
+              <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>아직 관심 표시가 없어요</div>
+              <div style={{ fontSize: 12, color: '#555570' }}>영상을 올리면 기획사 담당자가 관심 표시를 할 수 있어요</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {recentBookmarks.map(bm => (
+                <Link key={bm.id} href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    background: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: '12px 14px',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                  }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(8,145,178,0.15))',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#22d3ee', fontWeight: 900, fontSize: 15,
+                    }}>
+                      {bm.agency_member?.name?.[0] ?? 'A'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                        <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{bm.agency_member?.name ?? '담당자'}</span>
+                        <span style={{ fontSize: 10, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '1px 6px', borderRadius: 5, fontWeight: 700 }}>관심</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#555570', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {bm.video?.title ?? '영상'}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, color: '#444460', flexShrink: 0 }}>{timeAgo(bm.created_at)}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Auditions */}
         {recentAuditions.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -226,60 +283,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Recent videos */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>최근 업로드</h2>
-            <Link href="/videos" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-              전체보기 <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          {recentVideos.length === 0 ? (
-            <Link href="/videos/upload" style={{ textDecoration: 'none' }}>
-              <div style={{
-                background: 'rgba(255,255,255,0.02)', borderRadius: 20, padding: '36px 24px', textAlign: 'center',
-                border: '1.5px dashed rgba(255,255,255,0.08)',
-              }}>
-                <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
-                  <Video size={24} strokeWidth={1.5} />
-                </div>
-                <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 6, fontSize: 15 }}>첫 영상을 올려보세요</div>
-                <div style={{ fontSize: 13, color: '#555570' }}>기획사 담당자들이 바로 볼 수 있어요</div>
-                <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(6,182,212,0.12)', borderRadius: 10, padding: '8px 16px', color: '#22d3ee', fontSize: 13, fontWeight: 700 }}>
-                  <Plus size={14} strokeWidth={2.5} />
-                  영상 올리기
-                </div>
-              </div>
-            </Link>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {recentVideos.map(v => (
-                <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div style={{
-                      width: '100%', aspectRatio: '16/9', overflow: 'hidden',
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.04))',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                    }}>
-                      {v.thumbnail_url
-                        ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <Video size={22} strokeWidth={1.5} color="#2a2a3a" />
-                      }
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%)' }} />
-                    </div>
-                    <div style={{ padding: '10px 12px 12px' }}>
-                      <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 13, marginBottom: 3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{v.title}</div>
-                      <div style={{ fontSize: 11, color: '#555570' }}>조회 {v.view_count}회</div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Profile CTA — only when no bio */}
+        {/* Profile CTA */}
         {!profile?.bio && (
           <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
             <div style={{
