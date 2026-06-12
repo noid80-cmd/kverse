@@ -198,7 +198,7 @@ export default function ReactionsPage() {
           ) : (
             <div className="flex flex-col gap-2">
               {convs.map(c => (
-                <div key={c.id} style={{ background: '#111118', borderRadius: 18, border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center' }}>
+                <div key={c.id} style={{ background: '#0f1419', borderRadius: 18, border: '1px solid rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center' }}>
                   <button onClick={() => router.push(`/chat/${c.id}`)}
                     style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', minWidth: 0 }}>
                     <div style={{
@@ -244,7 +244,7 @@ export default function ReactionsPage() {
             <div className="flex flex-col gap-3">
               {bookmarks.map(b => (
                 <Link key={b.id} href={b.video ? `/videos/${b.video.id}` : '#'} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: '#111118', borderRadius: 18, padding: '16px 20px', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div style={{ background: '#121018', borderRadius: 18, padding: '16px 20px', border: '1px solid rgba(168,85,247,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <Bookmark size={14} strokeWidth={2} color="#22d3ee" fill="#22d3ee" />
                       <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
