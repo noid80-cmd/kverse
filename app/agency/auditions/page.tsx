@@ -82,15 +82,27 @@ export default function AgencyAuditionsPage() {
   async function createAudition() {
     if (!form.title.trim() || !agencyId || form.categories.length === 0 || !form.deadline) return
     setSaving(true)
-    const { error } = await supabase.from('auditions').insert({
+    const { data: inserted, error } = await supabase.from('auditions').insert({
       agency_id: agencyId,
       title: form.title.trim(),
       description: form.description.trim() || null,
       category: form.categories.join(','),
       deadline: form.deadline || null,
       status: 'active',
-    })
-    if (!error) {
+    }).select('id').single()
+    if (!error && inserted) {
+      // auto-translate in background
+      fetch('/api/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts: [form.title.trim(), form.description.trim() || ''] }),
+      }).then(r => r.json()).then(async (results) => {
+        const translations: Record<string, { title: string; description: string }> = {}
+        Object.entries(results).forEach(([lang, texts]) => {
+          translations[lang] = { title: (texts as string[])[0], description: (texts as string[])[1] }
+        })
+        await supabase.from('auditions').update({ translations }).eq('id', inserted.id)
+      })
+
       setForm({ title: '', description: '', categories: ['vocal'], deadline: '' })
       setShowCreate(false)
       load()
