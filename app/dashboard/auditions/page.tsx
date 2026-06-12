@@ -326,7 +326,7 @@ export default function TalentAuditionsPage() {
                   <Link href="/reactions" style={{ textDecoration: 'none' }}>
                     <div style={{
                       width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
-                      background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white', textAlign: 'center',
+                      background: 'linear-gradient(135deg, #d97706, #f59e0b)', color: 'white', textAlign: 'center',
                     }}>
                       채팅 확인하기 →
                     </div>
