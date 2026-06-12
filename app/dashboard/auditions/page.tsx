@@ -282,7 +282,7 @@ export default function TalentAuditionsPage() {
                   {a.agency?.is_verified && (
                     <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
                   )}
-                  {isInvited && <span style={{ fontSize: 11, background: 'rgba(99,102,241,0.18)', color: '#818cf8', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
+                  {isInvited && <span style={{ fontSize: 11, background: 'rgba(125,211,252,0.15)', color: '#7dd3fc', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>초대됨 🎉</span>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                   <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{a.title}</div>
@@ -326,7 +326,7 @@ export default function TalentAuditionsPage() {
                   <Link href="/reactions" style={{ textDecoration: 'none' }}>
                     <div style={{
                       width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
-                      background: 'linear-gradient(135deg, #4f46e5, #6366f1)', color: 'white', textAlign: 'center',
+                      background: 'linear-gradient(135deg, #38bdf8, #7dd3fc)', color: '#07070d', textAlign: 'center',
                     }}>
                       채팅 확인하기 →
                     </div>
