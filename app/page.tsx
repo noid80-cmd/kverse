@@ -7,6 +7,13 @@ import Link from 'next/link'
 const langs = ['한국어', 'English', '日本語', '中文', 'ภาษาไทย'] as const
 type Lang = typeof langs[number]
 
+const langToAppCode: Record<Lang, string> = {
+  '한국어': 'ko', 'English': 'en', '日本語': 'ja', '中文': 'zh', 'ภาษาไทย': 'th',
+}
+const appCodeToLang: Record<string, Lang> = {
+  'ko': '한국어', 'en': 'English', 'ja': '日本語', 'zh': 'zh', 'zh-TW': '中文', 'th': 'ภาษาไทย',
+}
+
 const t: Record<Lang, {
   tagline: string
   hero: string
@@ -150,10 +157,20 @@ const t: Record<Lang, {
 }
 
 export default function LandingPage() {
-  const [lang, setLang] = useState<Lang>('한국어')
+  const [lang, setLang] = useState<Lang>(() => {
+    try {
+      const saved = localStorage.getItem('kpick-lang')
+      return (saved && appCodeToLang[saved]) ? appCodeToLang[saved] : '한국어'
+    } catch { return '한국어' }
+  })
   const [tab, setTab] = useState<'talent' | 'agency'>('talent')
   const [ready, setReady] = useState(false)
   const tx = t[lang]
+
+  function changeLang(l: Lang) {
+    setLang(l)
+    try { localStorage.setItem('kpick-lang', langToAppCode[l]) } catch {}
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -190,7 +207,7 @@ export default function LandingPage() {
             <span style={{ fontWeight: 900, fontSize: 18, color: '#eeeeff' }}>Kpick</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <select value={lang} onChange={e => setLang(e.target.value as Lang)}
+            <select value={lang} onChange={e => changeLang(e.target.value as Lang)}
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#eeeeff', fontSize: 13, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
               {langs.map(l => <option key={l} value={l} style={{ background: '#111118' }}>{l}</option>)}
             </select>
