@@ -280,7 +280,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingLeft: 16, scrollbarWidth: 'none' }}>
+          <div className="max-w-lg mx-auto no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingLeft: 16, scrollbarWidth: 'none' }}>
             {recentVideos.slice(0, 5).map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
                 <div style={{ width: 152 }}>
