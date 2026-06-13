@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { Home, Compass, Plus, Bell, Megaphone } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
-import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
+import { useT, type Lang } from '@/lib/i18n/translations'
 
 const inputStyle = {
   width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
@@ -353,15 +353,6 @@ export default function ProfileEditPage() {
           </button>
         </form>
 
-        <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginTop: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>{tx.settings.language}</p>
-          <select value={lang} onChange={e => setLang(e.target.value as Lang)}
-            style={{ width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff', cursor: 'pointer' }}>
-            {LANGS.map(l => (
-              <option key={l} value={l}>{LANG_LABELS[l as Lang]}</option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <BottomNav items={talentNav} />

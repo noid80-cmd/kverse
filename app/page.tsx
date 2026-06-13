@@ -165,12 +165,20 @@ export default function LandingPage() {
   })
   const [tab, setTab] = useState<'talent' | 'agency'>('talent')
   const [ready, setReady] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
   const tx = t[lang]
 
   function changeLang(l: Lang) {
     setLang(l)
     try { localStorage.setItem('kpick-lang', langToAppCode[l]) } catch {}
   }
+
+  useEffect(() => {
+    if (!langOpen) return
+    const close = () => setLangOpen(false)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [langOpen])
 
   useEffect(() => {
     const supabase = createClient()
@@ -207,10 +215,23 @@ export default function LandingPage() {
             <span style={{ fontWeight: 900, fontSize: 18, color: '#eeeeff' }}>Kpick</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <select value={lang} onChange={e => changeLang(e.target.value as Lang)}
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#eeeeff', fontSize: 13, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
-              {langs.map(l => <option key={l} value={l} style={{ background: '#111118' }}>{l}</option>)}
-            </select>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setLangOpen(o => !o)}
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#eeeeff', fontSize: 13, padding: '5px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, minWidth: 80, justifyContent: 'center' }}>
+                {lang}
+                <span style={{ fontSize: 10, opacity: 0.6 }}>▼</span>
+              </button>
+              {langOpen && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: '#111118', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 120, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                  {langs.map(l => (
+                    <button key={l} onClick={() => { changeLang(l); setLangOpen(false) }}
+                      style={{ display: 'block', width: '100%', padding: '10px 16px', fontSize: 13, textAlign: 'center', cursor: 'pointer', background: l === lang ? 'rgba(6,182,212,0.15)' : 'none', color: l === lang ? '#22d3ee' : '#ccccdd', border: 'none', fontWeight: l === lang ? 700 : 400 }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Link href="/login" style={{ fontSize: 14, color: '#8888aa', fontWeight: 600, textDecoration: 'none' }}>{tx.login}</Link>
           </div>
         </div>
