@@ -38,6 +38,11 @@ export default function AdminUsersPage() {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, is_active: !current } : u))
   }
 
+  async function changeRole(id: string, newRole: string) {
+    await supabase.from('profiles').update({ role: newRole }).eq('id', id)
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, role: newRole } : u))
+  }
+
   const filtered = users.filter(u => {
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase())
     const matchRole = roleFilter === 'all' || u.role === roleFilter
@@ -90,6 +95,12 @@ export default function AdminUsersPage() {
                 <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 8, background: `${roleColor[u.role]}15`, color: roleColor[u.role] }}>
                   {roleLabel[u.role]}
                 </span>
+                <select value={u.role} onChange={e => changeRole(u.id, e.target.value)}
+                  style={{ fontSize: 12, padding: '6px 10px', borderRadius: 10, border: `1px solid ${roleColor[u.role]}40`, background: `${roleColor[u.role]}10`, color: roleColor[u.role], fontWeight: 700, cursor: 'pointer', outline: 'none' }}>
+                  <option value="talent">지망생</option>
+                  <option value="agency">기획사</option>
+                  <option value="admin">관리자</option>
+                </select>
                 <button onClick={() => toggleActive(u.id, u.is_active)}
                   style={{ fontSize: 12, padding: '6px 12px', borderRadius: 10, border: '1px solid #e0e0f0', background: 'none', color: u.is_active ? '#ef4444' : '#22c55e', fontWeight: 700 }}>
                   {u.is_active ? '비활성화' : '활성화'}
