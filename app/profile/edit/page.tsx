@@ -88,7 +88,8 @@ export default function ProfileEditPage() {
       const { error: dbError, data: updatedRows } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId).select()
       if (dbError) throw new Error('3단계 실패: ' + dbError.message)
 
-      setSaveError('완료! 저장된 URL: ...' + publicUrl.slice(-20))
+      const { data: verify } = await supabase.from('profiles').select('avatar_url').eq('id', form.userId).single()
+      setSaveError('DB확인: ' + (verify?.avatar_url?.slice(-25) ?? 'null'))
       setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
       try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
     } catch (err: any) {
