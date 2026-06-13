@@ -68,14 +68,23 @@ export default function ProfileEditPage() {
     const file = e.target.files?.[0]
     if (!file || !form?.userId) return
     setAvatarUploading(true)
-    const ext = file.name.split('.').pop()
-    const path = `${form.userId}/avatar.${ext}`
+    setSaveError('')
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${form.userId}/avatar_${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-    if (uploadError) { setAvatarUploading(false); return }
+    if (uploadError) {
+      setSaveError('사진 업로드 실패: ' + uploadError.message)
+      setAvatarUploading(false)
+      return
+    }
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    const versionedUrl = publicUrl + '?v=' + Date.now()
-    await supabase.from('profiles').update({ avatar_url: versionedUrl }).eq('id', form.userId)
-    setForm(f => f ? { ...f, avatarUrl: versionedUrl } : f)
+    const { error: dbError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId)
+    if (dbError) {
+      setSaveError('사진 저장 실패: ' + dbError.message)
+      setAvatarUploading(false)
+      return
+    }
+    setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
     setAvatarUploading(false)
   }
 
