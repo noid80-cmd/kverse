@@ -74,12 +74,12 @@ export default function ProfileEditPage() {
       const urlRes = await fetch('/api/r2-upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: `avatar_${form.userId}_${Date.now()}.jpg`, contentType: file.type || 'image/jpeg' }),
+        body: JSON.stringify({ filename: `avatar_${form.userId}_${Date.now()}.jpg`, contentType: 'image/jpeg' }),
       })
       if (!urlRes.ok) throw new Error('업로드 URL 요청 실패')
       const { url: presignedUrl, publicUrl } = await urlRes.json()
 
-      const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': file.type || 'image/jpeg' }, body: file })
+      const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: file })
       if (!uploadRes.ok) throw new Error('파일 업로드 실패')
 
       const { error: dbError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId)
@@ -116,7 +116,6 @@ export default function ProfileEditPage() {
       weight: form.weight ? parseInt(form.weight) : null,
       nationality: form.nationality.trim() || null,
       skills: form.skills,
-      avatar_url: form.avatarUrl,
     }).eq('id', form.userId)
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
@@ -289,7 +288,7 @@ export default function ProfileEditPage() {
 
           {saveError && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
 
-          <button type="submit" disabled={saving}
+          <button type="submit" disabled={saving || avatarUploading}
             className="w-full py-4 rounded-2xl disabled:opacity-50 transition active:scale-95"
             style={saved
               ? { background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', color: '#8888aa', fontSize: 17, fontWeight: 700 }
