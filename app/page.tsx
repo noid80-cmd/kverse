@@ -11,7 +11,7 @@ const langToAppCode: Record<Lang, string> = {
   '한국어': 'ko', 'English': 'en', '日本語': 'ja', '中文': 'zh', 'ภาษาไทย': 'th',
 }
 const appCodeToLang: Record<string, Lang> = {
-  'ko': '한국어', 'en': 'English', 'ja': '日本語', 'zh': 'zh', 'zh-TW': '中文', 'th': 'ภาษาไทย',
+  'ko': '한국어', 'en': 'English', 'ja': '日本語', 'zh': '中文', 'zh-TW': '中文', 'th': 'ภาษาไทย',
 }
 
 const t: Record<Lang, {
