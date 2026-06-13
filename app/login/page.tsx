@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
 export default function LoginPage() {
   const { lang } = useLang()
   const tx = useT(lang).auth
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -28,7 +30,9 @@ export default function LoginPage() {
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
     const role = profile?.role ?? 'talent'
-    window.location.href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
+    const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
+    router.push(href)
+    router.refresh()
   }
 
   async function handleGoogle() {
