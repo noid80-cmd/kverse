@@ -39,16 +39,11 @@ export default function ProfileEditPage() {
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarStatus, setAvatarStatus] = useState<{ msg: string; ok: boolean } | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
-  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const supabase = createClient()
-
-  function showToast(msg: string, ok: boolean) {
-    setToast({ msg, ok })
-    setTimeout(() => setToast(null), 4000)
-  }
 
   useEffect(() => {
     async function load() {
@@ -77,11 +72,9 @@ export default function ProfileEditPage() {
     const file = e.target.files?.[0]
     if (!file || !form?.userId) return
     setAvatarUploading(true)
-    setSaveError('')
+    setAvatarStatus({ msg: '1/3 변환 중...', ok: true })
 
     try {
-      setSaveError('')
-
       const jpegBlob = await new Promise<Blob>((resolve, reject) => {
         const img = new Image()
         const blobUrl = URL.createObjectURL(file)
@@ -97,23 +90,27 @@ export default function ProfileEditPage() {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
           canvas.toBlob(b => b ? resolve(b) : reject(new Error('변환 실패')), 'image/jpeg', 0.85)
         }
-        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('이미지 읽기 실패')) }
+        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('이미지 로드 실패')) }
         img.src = blobUrl
       })
+
+      setAvatarStatus({ msg: `2/3 업로드 중... (${Math.round(jpegBlob.size / 1024)}KB)`, ok: true })
 
       const urlRes = await fetch('/api/r2-upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: `avatar_${form.userId}_${Date.now()}.jpg`, contentType: 'image/jpeg' }),
       })
-      if (!urlRes.ok) throw new Error(`1단계 실패 (${urlRes.status})`)
+      if (!urlRes.ok) throw new Error(`URL 요청 실패 (${urlRes.status})`)
       const { url: presignedUrl, publicUrl } = await urlRes.json()
 
       const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: jpegBlob })
-      if (!uploadRes.ok) throw new Error(`2단계 실패 (${uploadRes.status})`)
+      if (!uploadRes.ok) throw new Error(`R2 업로드 실패 (${uploadRes.status})`)
+
+      setAvatarStatus({ msg: '3/3 DB 저장 중...', ok: true })
 
       const { data: { user: currentUser } } = await supabase.auth.getUser()
-      if (!currentUser) throw new Error('세션 만료')
+      if (!currentUser) throw new Error('세션 만료 — 다시 로그인')
 
       const { error: dbError } = await supabase
         .from('profiles')
@@ -131,10 +128,11 @@ export default function ProfileEditPage() {
           localStorage.removeItem('kpick-dashboard-v4')
         }
       } catch {}
-      showToast('✓ 사진 변경 완료!', true)
-      setTimeout(() => { window.location.href = '/dashboard' }, 1800)
+
+      setAvatarStatus({ msg: '✓ 완료! 홈으로 이동 중...', ok: true })
+      setTimeout(() => { window.location.href = '/dashboard' }, 2000)
     } catch (err: any) {
-      showToast('오류: ' + (err.message ?? '알 수 없는 오류'), false)
+      setAvatarStatus({ msg: '✗ ' + (err.message ?? '오류'), ok: false })
     }
 
     setAvatarUploading(false)
@@ -184,20 +182,6 @@ export default function ProfileEditPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
-
-      {toast && (
-        <div style={{
-          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
-          background: toast.ok ? '#0f3a2a' : '#3a0f0f',
-          border: `1px solid ${toast.ok ? 'rgba(34,197,94,0.4)' : 'rgba(248,113,113,0.4)'}`,
-          color: toast.ok ? '#4ade80' : '#f87171',
-          padding: '14px 22px', borderRadius: 16, fontSize: 15, fontWeight: 700,
-          boxShadow: '0 4px 24px rgba(0,0,0,0.6)', whiteSpace: 'nowrap',
-        }}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 24 }}>{tx.profile.myProfile}</h1>
@@ -224,9 +208,15 @@ export default function ProfileEditPage() {
             }}>📷</div>
             <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
           </label>
-          <p style={{ fontSize: 12, color: '#8888aa', marginTop: 8 }}>
-            {avatarUploading ? tx.profile.avatarUploading : tx.profile.changePhoto}
-          </p>
+          {avatarStatus ? (
+            <p style={{ fontSize: 13, color: avatarStatus.ok ? '#4ade80' : '#f87171', marginTop: 8, fontWeight: 700, textAlign: 'center' }}>
+              {avatarStatus.msg}
+            </p>
+          ) : (
+            <p style={{ fontSize: 12, color: '#8888aa', marginTop: 8 }}>
+              {avatarUploading ? tx.profile.avatarUploading : tx.profile.changePhoto}
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
