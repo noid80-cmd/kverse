@@ -29,7 +29,9 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
       if (!res.ok) { setError(tx.loginError); setLoading(false); return }
-      const { href } = await res.json()
+      const { href, access_token, refresh_token } = await res.json()
+      const supabase = createClient()
+      await supabase.auth.setSession({ access_token, refresh_token })
       window.location.href = href
     } catch {
       setError(tx.loginError)

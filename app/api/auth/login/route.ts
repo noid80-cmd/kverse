@@ -16,7 +16,11 @@ export async function POST(req: NextRequest) {
     const role = profile?.role ?? 'talent'
     const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
 
-    return NextResponse.json({ href })
+    return NextResponse.json({
+      href,
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    })
   } catch (e) {
     console.error('Login error:', e)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
