@@ -44,6 +44,7 @@ export default function ChatPage() {
       if (!convData) { router.back(); return }
 
       const conv = convData as unknown as Conversation
+      if (conv.talent_id !== user.id && conv.agency_member_id !== user.id) { router.back(); return }
       const [{ data: am }, { data: msgs }] = await Promise.all([
         supabase.from('agency_members').select('agency_id').eq('profile_id', conv.agency_member_id).single(),
         supabase.from('messages').select('id, content, sender_id, created_at, is_read').eq('conversation_id', id).order('created_at', { ascending: true }),
@@ -85,13 +86,7 @@ export default function ChatPage() {
         }
       })
 
-    const poll = setInterval(async () => {
-      const { data } = await supabase.from('messages').select('id, content, sender_id, created_at, is_read')
-        .eq('conversation_id', id).order('created_at', { ascending: true })
-      if (data) setMessages(data)
-    }, 3000)
-
-    return () => { supabase.removeChannel(channel); clearInterval(poll) }
+    return () => { supabase.removeChannel(channel) }
   }, [id])
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])

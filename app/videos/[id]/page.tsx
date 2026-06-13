@@ -45,7 +45,7 @@ export default function VideoDetailPage() {
       if (user) {
         setMyId(user.id)
         setIsOwner(user.id === v.talent_id)
-        const { data: lk } = await supabase.from('likes').select('id').eq('video_id', id).eq('user_id', user.id).single()
+        const { data: lk } = await supabase.from('likes').select('id').eq('video_id', id).eq('user_id', user.id).maybeSingle()
         setLiked(!!lk)
       }
 

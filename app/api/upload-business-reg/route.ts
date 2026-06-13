@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { createClient } from '@/lib/supabase/server'
 
 const r2 = new S3Client({
   region: 'auto',
@@ -12,6 +13,10 @@ const r2 = new S3Client({
 })
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getSession()).data.session?.user
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const { filename, contentType } = await req.json()
 
   if (!contentType.startsWith('image/')) {
