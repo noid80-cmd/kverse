@@ -217,9 +217,9 @@ export default function LandingPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(o => !o)}
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#eeeeff', fontSize: 13, padding: '5px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, minWidth: 80, justifyContent: 'center' }}>
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#eeeeff', fontSize: 13, padding: '5px 20px 5px 20px', cursor: 'pointer', position: 'relative', minWidth: 88, textAlign: 'center' }}>
                 {lang}
-                <span style={{ fontSize: 10, opacity: 0.6 }}>▼</span>
+                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 10, opacity: 0.5 }}>▼</span>
               </button>
               {langOpen && (
                 <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: '#111118', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 120, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
