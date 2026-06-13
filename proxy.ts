@@ -2,6 +2,17 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const publicPaths = ['/login', '/signup', '/auth', '/api', '/color-preview']
+
+  // Return early for public paths — skips Supabase client creation entirely.
+  // This prevents _recoverAndRefresh() from running and sending Set-Cookie
+  // delete headers that would wipe the PKCE code verifier before the
+  // /auth/confirm page can call exchangeCodeForSession.
+  if (publicPaths.some(p => pathname.startsWith(p)) || pathname === '/') {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -23,10 +34,7 @@ export async function proxy(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  const { pathname } = request.nextUrl
-  const publicPaths = ['/login', '/signup', '/auth', '/api', '/color-preview']
-
-  if (!session && !publicPaths.some(p => pathname.startsWith(p)) && pathname !== '/') {
+  if (!session) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
