@@ -28,6 +28,7 @@ export default function DiscoverPage() {
   const [myId, setMyId] = useState<string>('')
   const [agencyName, setAgencyName] = useState<string | null>(null)
   const [agencyVerified, setAgencyVerified] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const supabase = createClient()
 
   const load = useCallback(async () => {
@@ -36,7 +37,8 @@ export default function DiscoverPage() {
     if (!user) { window.location.href = '/login'; return }
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'agency') { window.location.href = '/dashboard'; return }
+    if (profile?.role !== 'agency' && profile?.role !== 'admin') { window.location.href = '/dashboard'; return }
+    if (profile?.role === 'admin') setIsAdmin(true)
 
     setMyId(user.id)
 
@@ -107,6 +109,16 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+      {isAdmin && (
+        <a href="/admin" style={{
+          position: 'fixed', bottom: 24, right: 16, zIndex: 999,
+          background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+          color: 'white', fontSize: 12, fontWeight: 800,
+          padding: '8px 14px', borderRadius: 20,
+          textDecoration: 'none', boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
+          display: 'flex', alignItems: 'center', gap: 6,
+        }}>⚙️ 관리자</a>
+      )}
       <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 

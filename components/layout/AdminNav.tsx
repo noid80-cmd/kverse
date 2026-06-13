@@ -13,6 +13,11 @@ const adminNav = [
   { href: '/admin/auditions', label: '오디션', emoji: '🎤' },
 ]
 
+const previewNav = [
+  { href: '/dashboard', label: '지망생', emoji: '🎤' },
+  { href: '/agency/discover', label: '기획사', emoji: '🏢' },
+]
+
 export default function AdminNav() {
   const pathname = usePathname()
   const router = useRouter()
@@ -28,6 +33,21 @@ export default function AdminNav() {
       <div className="max-w-2xl mx-auto px-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
         <span style={{ fontWeight: 900, fontSize: 16, color: '#eeeeff', flexShrink: 0 }}>관리자</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {previewNav.map(n => (
+            <Link key={n.href} href={n.href}
+              style={{
+                fontSize: 11, fontWeight: 700, textDecoration: 'none',
+                padding: '4px 9px', borderRadius: 8,
+                color: '#8888aa',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <span>{n.emoji}</span>
+              <span>{n.label}</span>
+            </Link>
+          ))}
+          <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.08)', margin: '0 4px' }} />
           {adminNav.map(n => {
             const active = pathname === n.href || (n.href !== '/admin' && pathname.startsWith(n.href))
             return (

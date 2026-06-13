@@ -61,6 +61,7 @@ export default function DashboardPage() {
   const [auditionIdx, setAuditionIdx] = useState(0)
   const [langOpen, setLangOpen] = useState(false)
   const [unread, setUnread] = useState({ bookmarks: 0, messages: 0 })
+  const [isAdmin, setIsAdmin] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -80,6 +81,9 @@ export default function DashboardPage() {
     async function load() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
+
+      const { data: roleData } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (roleData?.role === 'admin') setIsAdmin(true)
 
       const [{ data: prof }, { data: vids, count: vCount }, { count: bCount }, { data: convs, count: cCount }, { data: auds }] = await Promise.all([
         supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single(),
@@ -152,6 +156,16 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#07070d', paddingBottom: 112, position: 'relative', overflow: 'hidden' }}>
+      {isAdmin && (
+        <a href="/admin" style={{
+          position: 'fixed', bottom: 24, right: 16, zIndex: 999,
+          background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+          color: 'white', fontSize: 12, fontWeight: 800,
+          padding: '8px 14px', borderRadius: 20,
+          textDecoration: 'none', boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
+          display: 'flex', alignItems: 'center', gap: 6,
+        }}>⚙️ 관리자</a>
+      )}
       <PushSubscribe />
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
