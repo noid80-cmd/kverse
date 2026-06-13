@@ -81,6 +81,26 @@ export default function ProfileEditPage() {
 
     try {
       setSaveError('')
+
+      const jpegBlob = await new Promise<Blob>((resolve, reject) => {
+        const img = new Image()
+        const blobUrl = URL.createObjectURL(file)
+        img.onload = () => {
+          URL.revokeObjectURL(blobUrl)
+          const MAX = 720
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height))
+          const canvas = document.createElement('canvas')
+          canvas.width = Math.round(img.width * scale)
+          canvas.height = Math.round(img.height * scale)
+          const ctx = canvas.getContext('2d')
+          if (!ctx) { reject(new Error('캔버스 오류')); return }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error('변환 실패')), 'image/jpeg', 0.85)
+        }
+        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('이미지 읽기 실패')) }
+        img.src = blobUrl
+      })
+
       const urlRes = await fetch('/api/r2-upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -89,7 +109,7 @@ export default function ProfileEditPage() {
       if (!urlRes.ok) throw new Error(`1단계 실패 (${urlRes.status})`)
       const { url: presignedUrl, publicUrl } = await urlRes.json()
 
-      const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: file })
+      const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: jpegBlob })
       if (!uploadRes.ok) throw new Error(`2단계 실패 (${uploadRes.status})`)
 
       const { data: { user: currentUser } } = await supabase.auth.getUser()
