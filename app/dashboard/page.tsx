@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               {profile?.bio
-                ? <p style={{ fontSize: 13, color: '#8888aa', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{profile.bio}</p>
+                ? null
                 : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>+ 자기소개 추가하기</span></Link>
               }
             </div>
