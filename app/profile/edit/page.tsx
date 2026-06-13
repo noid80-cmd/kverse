@@ -37,18 +37,30 @@ export default function ProfileEditPage() {
 
   type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
+  const [original, setOriginal] = useState<ProfileForm | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
   const supabase = createClient()
 
+  const isDirty = form && original && (
+    form.name !== original.name ||
+    form.bio !== original.bio ||
+    form.birthDate !== original.birthDate ||
+    form.gender !== original.gender ||
+    form.height !== original.height ||
+    form.weight !== original.weight ||
+    form.nationality !== original.nationality ||
+    JSON.stringify(form.skills) !== JSON.stringify(original.skills)
+  )
+
   useEffect(() => {
     async function load() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { router.push('/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      setForm({
+      const loaded: ProfileForm = {
         userId: user.id,
         name: data?.name ?? '',
         bio: data?.bio ?? '',
@@ -59,7 +71,9 @@ export default function ProfileEditPage() {
         nationality: data?.nationality ?? '',
         skills: data?.skills ?? [],
         avatarUrl: data?.avatar_url ?? null,
-      })
+      }
+      setForm(loaded)
+      setOriginal(loaded)
     }
     load()
   }, [])
@@ -129,7 +143,7 @@ export default function ProfileEditPage() {
     }).eq('id', form.userId)
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
-    else { setSaved(true); router.refresh() }
+    else { setSaved(true); setOriginal(form); router.refresh() }
   }
 
   async function handleLogout() {
@@ -298,7 +312,7 @@ export default function ProfileEditPage() {
 
           {saveError && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
 
-          <button type="submit" disabled={saving || avatarUploading}
+          <button type="submit" disabled={saving || avatarUploading || !isDirty}
             className="w-full py-4 rounded-2xl disabled:opacity-50 transition active:scale-95"
             style={saved
               ? { background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', color: '#8888aa', fontSize: 17, fontWeight: 700 }
