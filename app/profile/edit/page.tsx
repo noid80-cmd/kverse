@@ -42,7 +42,13 @@ export default function ProfileEditPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const supabase = createClient()
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 4000)
+  }
 
   useEffect(() => {
     async function load() {
@@ -87,22 +93,20 @@ export default function ProfileEditPage() {
       if (!uploadRes.ok) throw new Error(`2단계 실패 (${uploadRes.status})`)
 
       const { data: { user: currentUser } } = await supabase.auth.getUser()
-      if (!currentUser) throw new Error('세션 만료 - 다시 로그인해주세요')
+      if (!currentUser) throw new Error('세션 만료')
 
-      const { error: dbError, data: updated } = await supabase
+      const { error: dbError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
         .eq('id', currentUser.id)
-        .select('id')
       if (dbError) throw new Error('DB 오류: ' + dbError.message)
-      if (!updated || updated.length === 0) throw new Error('저장 실패: RLS (0 rows)')
 
       setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
       try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
-      setSaveError('✓ 사진 변경 완료')
-      setTimeout(() => { window.location.href = '/dashboard' }, 1200)
+      showToast('✓ 사진 변경 완료 — 이동 중...', true)
+      setTimeout(() => { window.location.href = '/dashboard' }, 1800)
     } catch (err: any) {
-      setSaveError('오류: ' + (err.message ?? '알 수 없는 오류'))
+      showToast('오류: ' + (err.message ?? '알 수 없는 오류'), false)
     }
 
     setAvatarUploading(false)
@@ -152,6 +156,20 @@ export default function ProfileEditPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100,
+          background: toast.ok ? '#0f3a2a' : '#3a0f0f',
+          border: `1px solid ${toast.ok ? 'rgba(34,197,94,0.4)' : 'rgba(248,113,113,0.4)'}`,
+          color: toast.ok ? '#4ade80' : '#f87171',
+          padding: '14px 22px', borderRadius: 16, fontSize: 15, fontWeight: 700,
+          boxShadow: '0 4px 24px rgba(0,0,0,0.6)', whiteSpace: 'nowrap',
+        }}>
+          {toast.msg}
+        </div>
+      )}
+
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 24 }}>{tx.profile.myProfile}</h1>
