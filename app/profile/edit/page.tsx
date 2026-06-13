@@ -106,9 +106,13 @@ export default function ProfileEditPage() {
         .eq('id', currentUser.id)
         .select('id')
       if (dbError) throw new Error('DB 오류: ' + dbError.message)
-      if (!updated || updated.length === 0) throw new Error('저장 실패: RLS 권한 오류 (0 rows)')
+      if (!updated || updated.length === 0) throw new Error('저장 실패: RLS (0 rows)')
 
-      setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
+      const { data: check } = await supabase.from('profiles').select('avatar_url').eq('id', currentUser.id).single()
+      const saved = check?.avatar_url === publicUrl
+      setSaveError(saved ? '✓ 사진 저장 확인됨' : '✗ DB에 이전 사진 그대로 (' + (check?.avatar_url?.slice(-15) ?? 'null') + ')')
+
+      setForm(f => f ? { ...f, avatarUrl: check?.avatar_url ?? publicUrl } : f)
       try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
       router.refresh()
     } catch (err: any) {
