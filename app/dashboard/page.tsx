@@ -298,35 +298,34 @@ export default function DashboardPage() {
                 <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>아직 관심 표시가 없어요</div>
                 <div style={{ fontSize: 12, color: '#555570' }}>영상을 올리면 기획사 담당자가 관심 표시를 할 수 있어요</div>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {recentBookmarks.map(bm => (
-                  <Link key={bm.id} href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '13px 14px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{
-                        width: 44, height: 44, borderRadius: 15, flexShrink: 0,
-                        background: 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(8,145,178,0.12))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#22d3ee', fontWeight: 900, fontSize: 18,
-                        border: '1px solid rgba(6,182,212,0.2)',
-                      }}>
-                        {bm.agency_member?.name?.[0] ?? 'A'}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                          <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{bm.agency_member?.name ?? '담당자'}</span>
-                          <span style={{ fontSize: 10, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>관심</span>
-                        </div>
-                        <div style={{ fontSize: 12, color: '#555570', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {bm.video?.title ?? '영상'}
-                        </div>
-                      </div>
-                      <span style={{ fontSize: 11, color: '#444460', flexShrink: 0 }}>{timeAgo(bm.created_at)}</span>
+            ) : (() => {
+              const bm = recentBookmarks[0]
+              return (
+                <Link href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '13px 14px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 15, flexShrink: 0,
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(8,145,178,0.12))',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#22d3ee', fontWeight: 900, fontSize: 18,
+                      border: '1px solid rgba(6,182,212,0.2)',
+                    }}>
+                      {bm.agency_member?.name?.[0] ?? 'A'}
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                        <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{bm.agency_member?.name ?? '담당자'}</span>
+                        <span style={{ fontSize: 10, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>관심</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#555570', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {bm.video?.title ?? '영상'}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, color: '#444460', flexShrink: 0 }}>{timeAgo(bm.created_at)}</span>
+                  </div>
+                </Link>
+              )
+            })()}
           </div>
 
           {/* ── Auditions ── */}
