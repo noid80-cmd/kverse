@@ -169,11 +169,11 @@ export default function DashboardPage() {
       <div style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ── Profile header ── */}
-        <div className="max-w-lg mx-auto px-4 pt-10" style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 18 }}>
+        <div className="max-w-lg mx-auto px-4 pt-10" style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 20 }}>
             <Link href="/profile/edit" style={{ textDecoration: 'none', flexShrink: 0 }}>
               <div style={{
-                width: 64, height: 64, borderRadius: 22,
+                width: 80, height: 80, borderRadius: 26,
                 background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, #0891b2, #06b6d4)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 overflow: 'hidden',
@@ -182,7 +182,7 @@ export default function DashboardPage() {
               }}>
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ color: 'white', fontWeight: 900, fontSize: 24 }}>{profile?.name?.[0] ?? 'K'}</span>
+                  : <span style={{ color: 'white', fontWeight: 900, fontSize: 30 }}>{profile?.name?.[0] ?? 'K'}</span>
                 }
               </div>
             </Link>
@@ -218,16 +218,16 @@ export default function DashboardPage() {
           </div>
 
           {/* Stats grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Link href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}
               onClick={() => { localStorage.setItem('kpick-seen-bm', String(bookmarks)); setUnread(u => ({ ...u, bookmarks: 0 })) }}>
-              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 13, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
-                  <Bookmark size={16} strokeWidth={1.8} />
+              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '20px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
+                  <Bookmark size={20} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{bookmarks}</div>
-                  <div style={{ fontSize: 11, color: '#555570', marginTop: 4 }}>관심</div>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{bookmarks}</div>
+                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>관심</div>
                 </div>
                 {unread.bookmarks > 0 && (
                   <div style={{ position: 'absolute', top: 10, right: 12, background: '#22d3ee', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
@@ -237,13 +237,13 @@ export default function DashboardPage() {
               </div>
             </Link>
             <Link href="/reactions" style={{ textDecoration: 'none' }}>
-              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 13, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
-                  <MessageCircle size={16} strokeWidth={1.8} />
+              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '20px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
+                  <MessageCircle size={20} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{contacts}</div>
-                  <div style={{ fontSize: 11, color: '#555570', marginTop: 4 }}>채팅</div>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{contacts}</div>
+                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>채팅</div>
                 </div>
                 {unread.messages > 0 && (
                   <div style={{ position: 'absolute', top: 10, right: 12, background: '#f87171', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── My Videos (horizontal scroll) ── */}
-        <div style={{ marginBottom: 32 }}>
+        <div style={{ marginBottom: 36 }}>
           <div className="max-w-lg mx-auto px-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>내 영상</h2>
             {videoCount > 0 && (
@@ -266,12 +266,12 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="no-scrollbar" style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingLeft: 16, scrollbarWidth: 'none' }}>
+          <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingLeft: 16, scrollbarWidth: 'none' }}>
             {recentVideos.slice(0, 5).map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                <div style={{ width: 128 }}>
+                <div style={{ width: 152 }}>
                   <div style={{
-                    width: 128, height: 86, borderRadius: 14, overflow: 'hidden', marginBottom: 7,
+                    width: 152, height: 102, borderRadius: 16, overflow: 'hidden', marginBottom: 8,
                     background: 'linear-gradient(135deg, #111825, #0d1520)',
                     border: '1px solid rgba(255,255,255,0.07)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -279,26 +279,26 @@ export default function DashboardPage() {
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Play size={22} color="#333350" strokeWidth={1.5} />
+                      : <Play size={26} color="#333350" strokeWidth={1.5} />
                     }
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
                   </div>
-                  <div style={{ fontSize: 12, color: '#cccce8', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
+                  <div style={{ fontSize: 12, color: '#cccce8', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: 152 }}>{v.title}</div>
                 </div>
               </Link>
             ))}
 
             {/* Upload card */}
             <Link href="/videos/upload" style={{ textDecoration: 'none', flexShrink: 0 }}>
-              <div style={{ width: 128 }}>
+              <div style={{ width: 152 }}>
                 <div style={{
-                  width: 128, height: 86, borderRadius: 14, marginBottom: 7,
+                  width: 152, height: 102, borderRadius: 16, marginBottom: 8,
                   background: 'rgba(6,182,212,0.05)',
                   border: '1.5px dashed rgba(6,182,212,0.28)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}>
-                  <Plus size={22} color="#22d3ee" strokeWidth={2} />
-                  <span style={{ fontSize: 11, color: '#22d3ee', fontWeight: 700 }}>업로드</span>
+                  <Plus size={26} color="#22d3ee" strokeWidth={2} />
+                  <span style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700 }}>업로드</span>
                 </div>
                 <div style={{ fontSize: 12, color: '#444460', fontWeight: 600 }}>새 영상 추가</div>
               </div>
