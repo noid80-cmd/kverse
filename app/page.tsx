@@ -190,6 +190,9 @@ export default function LandingPage() {
   }, [langOpen])
 
   useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code')
+    if (code) { window.location.replace(`/auth/callback?code=${code}`); return }
+
     const supabase = createClient()
     supabase.auth.getSession().then(async ({ data }) => {
       const user = data.session?.user
