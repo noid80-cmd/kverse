@@ -61,7 +61,15 @@ export default function DashboardPage() {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
   })
   const [auditionIdx, setAuditionIdx] = useState(0)
+  const [langOpen, setLangOpen] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => {
+    if (!langOpen) return
+    const close = () => setLangOpen(false)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [langOpen])
 
   useEffect(() => {
     if (!data || data.recentAuditions.length <= 1) return
@@ -171,10 +179,24 @@ export default function DashboardPage() {
                 <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff', lineHeight: 1.2 }}>
                   {profile?.name ?? '...'}
                 </h1>
-                <select value={lang} onChange={e => setLang(e.target.value as Lang)}
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '5px 8px', fontSize: 12, color: '#8888aa', cursor: 'pointer', flexShrink: 0 }}>
-                  {LANGS.map(l => <option key={l} value={l}>{LANG_LABELS[l as Lang]}</option>)}
-                </select>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <button onClick={e => { e.stopPropagation(); setLangOpen(o => !o) }}
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '5px 8px', fontSize: 12, color: '#8888aa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 76, WebkitAppearance: 'none', appearance: 'none' }}>
+                    <span style={{ width: 12, flexShrink: 0 }} />
+                    <span>{LANG_LABELS[lang as Lang]}</span>
+                    <span style={{ width: 12, flexShrink: 0, fontSize: 9, opacity: 0.5, textAlign: 'right' }}>▼</span>
+                  </button>
+                  {langOpen && (
+                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, background: '#111118', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                      {LANGS.map(l => (
+                        <button key={l} onClick={e => { e.stopPropagation(); setLang(l as Lang); setLangOpen(false) }}
+                          style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 13, textAlign: 'center', cursor: 'pointer', background: l === lang ? 'rgba(6,182,212,0.15)' : 'none', color: l === lang ? '#22d3ee' : '#ccccdd', border: 'none', fontWeight: l === lang ? 700 : 400 }}>
+                          {LANG_LABELS[l as Lang]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               {profile?.bio
                 ? <p style={{ fontSize: 13, color: '#8888aa', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{profile.bio}</p>
