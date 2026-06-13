@@ -23,15 +23,12 @@ export default function LoginPage() {
     e.preventDefault()
     setError(''); setLoading(true)
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      if (!res.ok) { setError(tx.loginError); setLoading(false); return }
-      const { href, access_token, refresh_token } = await res.json()
       const supabase = createClient()
-      await supabase.auth.setSession({ access_token, refresh_token })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error || !data.user) { setError(tx.loginError); setLoading(false); return }
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+      const role = profile?.role ?? 'talent'
+      const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
       window.location.href = href
     } catch {
       setError(tx.loginError)
