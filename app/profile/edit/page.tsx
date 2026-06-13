@@ -85,6 +85,7 @@ export default function ProfileEditPage() {
       return
     }
     setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
+    try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
     setAvatarUploading(false)
   }
 
