@@ -22,11 +22,14 @@ export default function LoginPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError(''); setLoading(true)
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(tx.loginError); setLoading(false); return }
-
-    window.location.href = '/'
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    if (!res.ok) { setError(tx.loginError); setLoading(false); return }
+    const { href } = await res.json()
+    window.location.href = href
   }
 
   async function handleGoogle() {
