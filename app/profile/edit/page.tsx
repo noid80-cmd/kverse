@@ -83,8 +83,16 @@ export default function ProfileEditPage() {
       const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: file })
       if (!uploadRes.ok) throw new Error(`2단계 실패 (${uploadRes.status})`)
 
-      const { error: dbError, data: updatedRows } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId).select()
-      if (dbError) throw new Error('3단계 실패: ' + dbError.message)
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (!currentUser) throw new Error('세션 만료 - 다시 로그인해주세요')
+
+      const { error: dbError, data: updated } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', currentUser.id)
+        .select('id')
+      if (dbError) throw new Error('DB 오류: ' + dbError.message)
+      if (!updated || updated.length === 0) throw new Error('저장 실패: RLS 권한 오류 (0 rows)')
 
       setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
       try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
