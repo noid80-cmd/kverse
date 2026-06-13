@@ -71,7 +71,7 @@ export default function ProfileEditPage() {
     setSaveError('')
 
     try {
-      setSaveError('1단계: URL 요청 중...')
+      setSaveError('')
       const urlRes = await fetch('/api/r2-upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,18 +80,15 @@ export default function ProfileEditPage() {
       if (!urlRes.ok) throw new Error(`1단계 실패 (${urlRes.status})`)
       const { url: presignedUrl, publicUrl } = await urlRes.json()
 
-      setSaveError('2단계: 파일 업로드 중...')
       const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: file })
       if (!uploadRes.ok) throw new Error(`2단계 실패 (${uploadRes.status})`)
 
-      setSaveError('3단계: DB 저장 중...')
       const { error: dbError, data: updatedRows } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId).select()
       if (dbError) throw new Error('3단계 실패: ' + dbError.message)
 
-      const { data: verify } = await supabase.from('profiles').select('avatar_url').eq('id', form.userId).single()
-      setSaveError('DB확인: ' + (verify?.avatar_url?.slice(-25) ?? 'null'))
       setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
       try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
+      router.refresh()
     } catch (err: any) {
       setSaveError('오류: ' + (err.message ?? '알 수 없는 오류'))
     }
@@ -124,7 +121,7 @@ export default function ProfileEditPage() {
     }).eq('id', form.userId)
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
-    else { setSaved(true) }
+    else { setSaved(true); router.refresh() }
   }
 
   async function handleLogout() {
