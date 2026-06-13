@@ -69,23 +69,28 @@ export default function ProfileEditPage() {
     if (!file || !form?.userId) return
     setAvatarUploading(true)
     setSaveError('')
-    const ext = file.name.split('.').pop() ?? 'jpg'
-    const path = `${form.userId}/avatar_${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-    if (uploadError) {
-      setSaveError('사진 업로드 실패: ' + uploadError.message)
-      setAvatarUploading(false)
-      return
+
+    try {
+      const urlRes = await fetch('/api/r2-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: `avatar_${form.userId}_${Date.now()}.jpg`, contentType: file.type || 'image/jpeg' }),
+      })
+      if (!urlRes.ok) throw new Error('업로드 URL 요청 실패')
+      const { url: presignedUrl, publicUrl } = await urlRes.json()
+
+      const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': file.type || 'image/jpeg' }, body: file })
+      if (!uploadRes.ok) throw new Error('파일 업로드 실패')
+
+      const { error: dbError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId)
+      if (dbError) throw new Error('저장 실패: ' + dbError.message)
+
+      setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
+      try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
+    } catch (err: any) {
+      setSaveError(err.message ?? '사진 업로드 실패')
     }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    const { error: dbError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', form.userId)
-    if (dbError) {
-      setSaveError('사진 저장 실패: ' + dbError.message)
-      setAvatarUploading(false)
-      return
-    }
-    setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
-    try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
+
     setAvatarUploading(false)
   }
 
