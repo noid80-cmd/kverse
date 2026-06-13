@@ -111,6 +111,7 @@ export default function ProfileEditPage() {
       weight: form.weight ? parseInt(form.weight) : null,
       nationality: form.nationality.trim() || null,
       skills: form.skills,
+      avatar_url: form.avatarUrl,
     }).eq('id', form.userId)
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
