@@ -37,23 +37,12 @@ export default function ProfileEditPage() {
 
   type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
-  const [original, setOriginal] = useState<ProfileForm | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
   const supabase = createClient()
-
-  const isDirty = form && original && (
-    form.name !== original.name ||
-    form.bio !== original.bio ||
-    form.birthDate !== original.birthDate ||
-    form.gender !== original.gender ||
-    form.height !== original.height ||
-    form.weight !== original.weight ||
-    form.nationality !== original.nationality ||
-    JSON.stringify(form.skills) !== JSON.stringify(original.skills)
-  )
 
   useEffect(() => {
     async function load() {
@@ -73,7 +62,7 @@ export default function ProfileEditPage() {
         avatarUrl: data?.avatar_url ?? null,
       }
       setForm(loaded)
-      setOriginal(loaded)
+      setIsDirty(false)
     }
     load()
   }, [])
@@ -108,13 +97,10 @@ export default function ProfileEditPage() {
       if (dbError) throw new Error('DB 오류: ' + dbError.message)
       if (!updated || updated.length === 0) throw new Error('저장 실패: RLS (0 rows)')
 
-      const { data: check } = await supabase.from('profiles').select('avatar_url').eq('id', currentUser.id).single()
-      const saved = check?.avatar_url === publicUrl
-      setSaveError(saved ? '✓ 사진 저장 확인됨' : '✗ DB에 이전 사진 그대로 (' + (check?.avatar_url?.slice(-15) ?? 'null') + ')')
-
-      setForm(f => f ? { ...f, avatarUrl: check?.avatar_url ?? publicUrl } : f)
+      setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
       try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
-      router.refresh()
+      setSaveError('✓ 사진 변경 완료')
+      setTimeout(() => { window.location.href = '/dashboard' }, 1200)
     } catch (err: any) {
       setSaveError('오류: ' + (err.message ?? '알 수 없는 오류'))
     }
@@ -124,6 +110,7 @@ export default function ProfileEditPage() {
 
   function updateForm(updater: (f: ProfileForm) => ProfileForm) {
     setSaved(false)
+    setIsDirty(true)
     setForm(f => f ? updater(f) : f)
   }
 
@@ -147,7 +134,7 @@ export default function ProfileEditPage() {
     }).eq('id', form.userId)
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
-    else { setSaved(true); setOriginal(form); router.refresh() }
+    else { setSaved(true); setIsDirty(false); router.refresh() }
   }
 
   async function handleLogout() {
