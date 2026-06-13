@@ -28,6 +28,7 @@ function VideoCard({
   liked,
   likeCount,
   onLike,
+  talentFallback,
 }: {
   video: VideoItem
   muted: boolean
@@ -35,6 +36,7 @@ function VideoCard({
   liked: boolean
   likeCount: number
   onLike: () => void
+  talentFallback: string
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -136,7 +138,7 @@ function VideoCard({
                 : <span style={{ fontSize: 14 }}>🎤</span>
               }
             </div>
-            <span style={{ color: '#eeeeff', fontWeight: 700, fontSize: 14 }}>{video.talent.name ?? '지망생'}</span>
+            <span style={{ color: '#eeeeff', fontWeight: 700, fontSize: 14 }}>{video.talent.name ?? talentFallback}</span>
           </Link>
         )}
         {video.tags?.length > 0 && (
@@ -278,7 +280,7 @@ export default function ExplorePage() {
               border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)',
               background: 'rgba(0,0,0,0.5)', color: 'white',
             }}>
-            {sort === 'latest' ? '🕐 최신순' : '❤️ 좋아요순'}
+            {sort === 'latest' ? `🕐 ${tx.explore.sortLatest}` : `❤️ ${tx.explore.sortLikes}`}
           </button>
         </div>
       </div>
@@ -303,6 +305,7 @@ export default function ExplorePage() {
               liked={liked.has(v.id)}
               likeCount={likeCounts[v.id] ?? 0}
               onLike={() => toggleLike(v.id)}
+              talentFallback={tx.common.talent}
             />
           ))
         )}

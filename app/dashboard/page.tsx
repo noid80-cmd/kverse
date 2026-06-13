@@ -23,9 +23,6 @@ type PageData = {
 
 const CACHE_KEY = 'kpick-dashboard-v4'
 
-const categoryLabel: Record<string, string> = {
-  vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
-}
 
 
 function getAuditionDisplayTitle(a: RecentAudition, lang: string) {
@@ -34,19 +31,15 @@ function getAuditionDisplayTitle(a: RecentAudition, lang: string) {
   return a.translations?.[key]?.title || a.title
 }
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const h = Math.floor(diff / 3600000)
-  if (h < 1) return '방금'
-  if (h < 24) return `${h}시간 전`
-  const d = Math.floor(h / 24)
-  if (d < 7) return `${d}일 전`
-  return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
-}
 
 export default function DashboardPage() {
   const { lang, setLang } = useLang()
   const tx = useT(lang)
+
+  const categoryLabel: Record<string, string> = {
+    vocal: tx.videos.vocal, dance: tx.videos.dance, acting: tx.videos.acting, rap: tx.videos.rap, other: tx.videos.other
+  }
+
   const talentNav = [
     { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
     { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
@@ -226,7 +219,7 @@ export default function DashboardPage() {
               </div>
               {profile?.bio
                 ? null
-                : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>+ 자기소개 추가하기</span></Link>
+                : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>{tx.dashboard.addBio}</span></Link>
               }
             </div>
           </div>
@@ -241,7 +234,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{bookmarks}</div>
-                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>관심</div>
+                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>{tx.dashboard.bookmarks}</div>
                 </div>
                 {unread.bookmarks > 0 && (
                   <div style={{ position: 'absolute', top: 10, right: 12, background: '#22d3ee', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
@@ -257,7 +250,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{contacts}</div>
-                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>채팅</div>
+                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>{tx.dashboard.chats}</div>
                 </div>
                 {unread.messages > 0 && (
                   <div style={{ position: 'absolute', top: 10, right: 12, background: '#f87171', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
@@ -272,10 +265,10 @@ export default function DashboardPage() {
         {/* ── My Videos (horizontal scroll) ── */}
         <div style={{ marginBottom: 36 }}>
           <div className="max-w-lg mx-auto px-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>내 영상</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>{tx.dashboard.myVideos}</h2>
             {videoCount > 0 && (
               <Link href="/videos" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-                전체보기 <ChevronRight size={14} />
+                {tx.common.viewAll} <ChevronRight size={14} />
               </Link>
             )}
           </div>
@@ -312,9 +305,9 @@ export default function DashboardPage() {
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}>
                   <Plus size={26} color="#22d3ee" strokeWidth={2} />
-                  <span style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700 }}>업로드</span>
+                  <span style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700 }}>{tx.nav.upload}</span>
                 </div>
-                <div style={{ fontSize: 12, color: '#444460', fontWeight: 600 }}>새 영상 추가</div>
+                <div style={{ fontSize: 12, color: '#444460', fontWeight: 600 }}>{tx.dashboard.addVideo}</div>
               </div>
             </Link>
 
@@ -327,9 +320,9 @@ export default function DashboardPage() {
           {/* ── Auditions ── */}
           <div style={{ marginBottom: 28, background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.15)', borderRadius: 22, padding: '18px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>열린 오디션</h2>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>{tx.dashboard.openAuditions}</h2>
               <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-                전체보기 <ChevronRight size={14} />
+                {tx.common.viewAll} <ChevronRight size={14} />
               </Link>
             </div>
 
@@ -338,8 +331,8 @@ export default function DashboardPage() {
                 <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#22d3ee' }}>
                   <Megaphone size={20} strokeWidth={1.5} />
                 </div>
-                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>현재 열린 오디션이 없어요</div>
-                <div style={{ fontSize: 12, color: '#555570' }}>새 오디션이 열리면 알려드릴게요</div>
+                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>{tx.dashboard.noAuditions}</div>
+                <div style={{ fontSize: 12, color: '#555570' }}>{tx.dashboard.auditionDesc}</div>
               </div>
             ) : (() => {
               const a = recentAuditions[auditionIdx]
@@ -353,7 +346,7 @@ export default function DashboardPage() {
                             {getAuditionDisplayTitle(a, lang)}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 12, color: '#8888aa' }}>{a.agency?.name ?? '기획사'}</span>
+                            <span style={{ fontSize: 12, color: '#8888aa' }}>{a.agency?.name ?? tx.auditions.agencyLabel}</span>
                             {a.category.split(',').map(c => (
                               <span key={c} style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
                                 {categoryLabel[c.trim()] ?? c.trim()}
@@ -390,8 +383,8 @@ export default function DashboardPage() {
                   <User size={16} strokeWidth={1.8} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 13 }}>프로필을 완성해보세요</div>
-                  <div style={{ fontSize: 12, color: '#22d3ee', marginTop: 1 }}>자기소개를 추가하면 기획사에 더 잘 보여요</div>
+                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 13 }}>{tx.dashboard.completeProfile}</div>
+                  <div style={{ fontSize: 12, color: '#22d3ee', marginTop: 1 }}>{tx.dashboard.profileDesc}</div>
                 </div>
                 <ChevronRight size={16} color="#22d3ee" />
               </div>

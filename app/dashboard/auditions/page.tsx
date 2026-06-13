@@ -311,9 +311,9 @@ export default function TalentAuditionsPage() {
                 opacity: exp && !appInfo ? 0.65 : 1,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18 }}>{a.agency?.name ?? '기획사'}</div>
+                  <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18 }}>{a.agency?.name ?? tx.auditions.agencyLabel}</div>
                   {a.agency?.is_verified && (
-                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>인증</span>
+                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{tx.common.verified}</span>
                   )}
                   {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>{tx.dashboard.invited} 🎉</span>}
                 </div>

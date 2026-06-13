@@ -1,22 +1,12 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { Home, Compass, Plus, Bell, Megaphone } from 'lucide-react'
-
-const talentNav = [
-  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
-  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
-  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-]
-
-const categoryLabel: Record<string, string> = {
-  vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
-}
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 type Video = {
   id: string; title: string; description: string | null; video_url: string | null
@@ -27,6 +17,22 @@ type Video = {
 export default function VideoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const { lang } = useLang()
+  const tx = useT(lang)
+
+  const talentNav = [
+    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
+    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
+    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
+    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
+    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
+  ]
+
+  const categoryLabel: Record<string, string> = {
+    vocal: tx.videos.vocal, dance: tx.videos.dance, acting: tx.videos.acting,
+    rap: tx.videos.rap, other: tx.videos.other,
+  }
+
   const [video, setVideo] = useState<Video | null>(null)
   const [bookmarkCount, setBookmarkCount] = useState(0)
   const [isOwner, setIsOwner] = useState(false)
@@ -73,7 +79,7 @@ export default function VideoDetailPage() {
   }
 
   async function handleDelete() {
-    if (!confirm('영상을 삭제할까요?')) return
+    if (!confirm(tx.videos.deleteConfirm)) return
     await supabase.from('videos').delete().eq('id', id)
     router.push('/videos')
   }
@@ -100,7 +106,7 @@ export default function VideoDetailPage() {
               poster={video.thumbnail_url ?? undefined} />
           ) : (
             <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570', fontSize: 14 }}>
-              영상 준비 중...
+              {tx.videos.videoLoading}
             </div>
           )}
         </div>
@@ -110,9 +116,9 @@ export default function VideoDetailPage() {
             <span style={{ fontSize: 12, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
               {categoryLabel[video.category] ?? video.category}
             </span>
-            <span style={{ fontSize: 12, color: '#555570' }}>조회 {video.view_count}회</span>
+            <span style={{ fontSize: 12, color: '#555570' }}>{video.view_count} {tx.videos.views}</span>
             <span style={{ fontSize: 12, color: video.status === 'active' ? '#34d399' : '#fbbf24', fontWeight: 700 }}>
-              {video.status === 'active' ? '● 공개' : '● 검토중'}
+              ● {video.status === 'active' ? tx.videos.statusActive : tx.videos.statusReview}
             </span>
           </div>
           {video.description && <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.6, marginBottom: 12 }}>{video.description}</p>}
@@ -137,14 +143,14 @@ export default function VideoDetailPage() {
             <span style={{ fontSize: 28 }}>{liked ? '❤️' : '🤍'}</span>
             <div style={{ textAlign: 'left' }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: liked ? '#f43f5e' : '#eeeeff' }}>{likeCount}</div>
-              <div style={{ fontSize: 12, color: liked ? '#f43f5e' : '#555570', fontWeight: 600 }}>좋아요</div>
+              <div style={{ fontSize: 12, color: liked ? '#f43f5e' : '#555570', fontWeight: 600 }}>{tx.videos.likes}</div>
             </div>
           </button>
           <div style={{ background: 'rgba(6,182,212,0.1)', borderRadius: 20, padding: 20, border: '1px solid rgba(6,182,212,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 28 }}>⭐</span>
             <div>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#22d3ee' }}>{bookmarkCount}</div>
-              <div style={{ fontSize: 12, color: '#22d3ee', fontWeight: 600 }}>기획사 관심</div>
+              <div style={{ fontSize: 12, color: '#22d3ee', fontWeight: 600 }}>{tx.videos.agencyInterest}</div>
             </div>
           </div>
         </div>
@@ -152,7 +158,7 @@ export default function VideoDetailPage() {
         {isOwner && (
           <button onClick={handleDelete}
             style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontWeight: 700, fontSize: 15 }}>
-            영상 삭제
+            {tx.videos.deleteVideo}
           </button>
         )}
       </div>

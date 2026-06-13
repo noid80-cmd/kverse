@@ -32,6 +32,9 @@ const t = {
     search:     ['검색', 'Search', '検索', '搜索', '搜尋', 'ค้นหา', 'Cari', 'Tìm kiếm', 'Maghanap', 'Buscar'],
     close:      ['닫기', 'Close', '閉じる', '关闭', '關閉', 'ปิด', 'Tutup', 'Đóng', 'Isara', 'Cerrar'],
     viewAll:    ['전체 보기', 'View all', 'すべて見る', '查看全部', '查看全部', 'ดูทั้งหมด', 'Lihat semua', 'Xem tất cả', 'Tingnan lahat', 'Ver todo'],
+    verified:   ['인증', 'Verified', '認証済み', '已认证', '已認證', 'ยืนยันแล้ว', 'Terverifikasi', 'Đã xác minh', 'Verified', 'Verificado'],
+    talent:     ['지망생', 'Talent', '志望者', '选手', '選手', 'นักออดิชัน', 'Bakat', 'Thí sinh', 'Talento', 'Talento'],
+    uploadDone: ['업로드 완료 · 교체하기', 'Uploaded · Replace', 'アップロード完了 · 変更', '上传完成 · 更换', '上傳完成 · 更換', 'อัปโหลดเสร็จ · เปลี่ยน', 'Diunggah · Ganti', 'Đã tải lên · Thay thế', 'Na-upload · Palitan', 'Subido · Reemplazar'],
   },
 
   // ── Auth ─────────────────────────────────────────────
@@ -92,8 +95,10 @@ const t = {
     noAuditions:     ['현재 열린 오디션이 없어요', 'No open auditions right now', '現在開催中のオーディションはありません', '目前没有进行中的试镜', '目前沒有進行中的試鏡', 'ไม่มีออดิชันที่เปิดรับขณะนี้', 'Tidak ada audisi terbuka saat ini', 'Hiện không có buổi thử vai nào', 'Walang bukas na audisyon ngayon', 'No hay audiciones abiertas ahora'],
     auditionDesc:    ['새 오디션 공고가 올라오면 알림을 드릴게요', 'You\'ll be notified when new auditions open', '新しいオーディションが始まるとお知らせします', '有新试镜公告时将通知您', '有新試鏡公告時將通知您', 'คุณจะได้รับการแจ้งเตือนเมื่อมีออดิชันใหม่', 'Anda akan diberi tahu ketika ada audisi baru', 'Bạn sẽ được thông báo khi có buổi thử vai mới', 'Aabisuhan ka kapag may bagong audisyon', 'Te notificaremos cuando abran nuevas audiciones'],
     viewAuditions:   ['오디션 보러가기', 'View auditions', 'オーディションを見る', '查看试镜', '查看試鏡', 'ดูออดิชัน', 'Lihat audisi', 'Xem thử vai', 'Tingnan ang mga audisyon', 'Ver audiciones'],
-    completeProfile: ['프로필 완성하기', 'Complete your profile', 'プロフィールを完成させよう', '完善个人资料', '完善個人資料', 'กรอกโปรไฟล์ให้ครบ', 'Lengkapi profilmu', 'Hoàn thiện hồ sơ', 'Kumpletuhin ang iyong profile', 'Completa tu perfil'],
-    profileDesc:     ['자기소개를 추가하면 기획사의 관심을 받기 더 쉬워요', 'Adding a bio helps agencies notice you', '自己紹介を追加すると事務所に見つけてもらいやすくなります', '添加自我介绍有助于吸引经纪公司', '添加自我介紹有助於吸引經紀公司', 'การเพิ่มประวัติช่วยให้ค่ายเพลงสังเกตเห็นคุณ', 'Menambahkan bio membantu agensi memperhatikanmu', 'Thêm tiểu sử giúp các công ty chú ý đến bạn', 'Ang pagdaragdag ng bio ay nakakatulong sa mga ahensya na mapansin ka', 'Agregar una bio ayuda a las agencias a notarte'],
+    completeProfile: ['프로필 완성해보세요', 'Complete your profile', 'プロフィールを完成させよう', '完善个人资料', '完善個人資料', 'กรอกโปรไฟล์ให้ครบ', 'Lengkapi profilmu', 'Hoàn thiện hồ sơ', 'Kumpletuhin ang iyong profile', 'Completa tu perfil'],
+    profileDesc:     ['자기소개를 추가하면 기획사에 더 잘 보여요', 'Adding a bio helps agencies notice you', '自己紹介を追加すると事務所に見つけてもらいやすくなります', '添加自我介绍有助于吸引经纪公司', '添加自我介紹有助於吸引經紀公司', 'การเพิ่มประวัติช่วยให้ค่ายเพลงสังเกตเห็นคุณ', 'Menambahkan bio membantu agensi memperhatikanmu', 'Thêm tiểu sử giúp các công ty chú ý đến bạn', 'Ang pagdaragdag ng bio ay nakakatulong sa mga ahensya na mapansin ka', 'Agregar una bio ayuda a las agencias a notarte'],
+    addBio:          ['+ 자기소개 추가하기', '+ Add bio', '+ 自己紹介を追加', '+ 添加自我介绍', '+ 添加自我介紹', '+ เพิ่มประวัติ', '+ Tambah bio', '+ Thêm tiểu sử', '+ Magdagdag ng bio', '+ Agregar bio'],
+    addVideo:        ['새 영상 추가', 'Add video', '動画を追加', '添加视频', '添加影片', 'เพิ่มวิดีโอ', 'Tambah video', 'Thêm video', 'Magdagdag ng video', 'Agregar video'],
     chatWith:        ['채팅 확인하기', 'View chat', 'チャットを確認', '查看聊天', '查看聊天', 'ดูแชท', 'Lihat chat', 'Xem chat', 'Tingnan ang chat', 'Ver chat'],
     invited:         ['초대됨', 'Invited', '招待済み', '已邀请', '已邀請', 'ได้รับเชิญ', 'Diundang', 'Được mời', 'Inimbitahan', 'Invitado'],
   },
@@ -121,6 +126,14 @@ const t = {
     uploadBtn:       ['업로드', 'Upload', 'アップロード', '上传', '上傳', 'อัปโหลด', 'Unggah', 'Tải lên', 'I-upload', 'Subir'],
     selectVideoFile: ['영상 파일 선택', 'Select video file', '動画ファイルを選択', '选择视频文件', '選擇影片文件', 'เลือกไฟล์วิดีโอ', 'Pilih file video', 'Chọn tệp video', 'Pumili ng file ng video', 'Seleccionar archivo de video'],
     firstVideo:      ['첫 영상을 올리고 기획사에 노출되어 보세요', 'Upload your first video to get discovered', '最初の動画をアップして事務所に発見されよう', '上传你的第一个视频让经纪公司发现你', '上傳你的第一個影片讓經紀公司發現你', 'อัปโหลดวิดีโอแรกของคุณเพื่อให้ถูกค้นพบ', 'Upload video pertamamu untuk ditemukan', 'Tải video đầu tiên để được phát hiện', 'Mag-upload ng iyong unang video para matuklasan', 'Sube tu primer video para ser descubierto'],
+    views:           ['조회', 'views', '再生', '次播放', '次播放', 'ครั้ง', 'tayangan', 'lượt xem', 'views', 'vistas'],
+    likes:           ['좋아요', 'Likes', 'いいね', '点赞', '讚', 'ถูกใจ', 'Suka', 'Thích', 'Gusto', 'Me gusta'],
+    agencyInterest:  ['기획사 관심', 'Agency interest', '事務所の関心', '经纪公司关注', '經紀公司關注', 'ความสนใจจากค่ายเพลง', 'Minat agensi', 'Sự quan tâm của công ty', 'Interes ng ahensya', 'Interés de agencia'],
+    statusActive:    ['공개', 'Public', '公開', '已发布', '已發布', 'เผยแพร่', 'Publik', 'Công khai', 'Pampubliko', 'Público'],
+    statusReview:    ['검토중', 'Under review', '審査中', '审核中', '審核中', 'อยู่ระหว่างการตรวจสอบ', 'Sedang ditinjau', 'Đang xem xét', 'Sinusuri', 'En revisión'],
+    deleteVideo:     ['영상 삭제', 'Delete video', '動画を削除', '删除视频', '刪除影片', 'ลบวิดีโอ', 'Hapus video', 'Xóa video', 'I-delete ang video', 'Eliminar video'],
+    deleteConfirm:   ['영상을 삭제할까요?', 'Delete this video?', 'この動画を削除しますか？', '删除此视频？', '刪除此影片？', 'ลบวิดีโอนี้?', 'Hapus video ini?', 'Xóa video này?', 'I-delete ang video na ito?', '¿Eliminar este video?'],
+    videoLoading:    ['영상 준비 중...', 'Video loading...', '動画を読み込み中...', '视频加载中...', '影片載入中...', 'กำลังโหลดวิดีโอ...', 'Memuat video...', 'Đang tải video...', 'Naglo-load ang video...', 'Cargando video...'],
   },
 
   // ── Auditions ────────────────────────────────────────
@@ -162,6 +175,8 @@ const t = {
     noBookmarksYet:  ['아직 관심 표시가 없어요', 'No interest shown yet', 'まだ関心表示はありません', '还没有收到关注', '還沒有收到關注', 'ยังไม่มีการแสดงความสนใจ', 'Belum ada minat ditunjukkan', 'Chưa có sự quan tâm nào', 'Wala pang interes na ipinakita', 'Aún no hay interés mostrado'],
     newInterestToast:['새로운 관심 표시가 왔어요!', 'New interest received!', '新しい関心表示が届きました！', '收到新的关注！', '收到新的關注！', 'ได้รับความสนใจใหม่!', 'Minat baru diterima!', 'Có sự quan tâm mới!', 'May bagong interes na natanggap!', '¡Nuevo interés recibido!'],
     agencyChatToast: ['기획사에서 채팅을 시작했어요!', 'An agency started a chat!', '事務所からチャットが届きました！', '经纪公司开始了对话！', '經紀公司開始了對話！', 'ค่ายเพลงเริ่มแชทแล้ว!', 'Agensi memulai chat!', 'Công ty đã bắt đầu chat!', 'Nagsimulang mag-chat ang isang ahensya!', '¡Una agencia inició un chat!'],
+    deleteConfirm:   ['내 채팅 목록에서 삭제할까요?', 'Remove from your chat list?', 'チャットリストから削除しますか？', '从聊天列表中删除？', '從聊天列表中刪除？', 'ลบออกจากรายการแชทของคุณ?', 'Hapus dari daftar chat?', 'Xóa khỏi danh sách chat?', 'Alisin sa listahan ng chat?', '¿Eliminar de tu lista de chats?'],
+    startChat:       ['대화를 시작해보세요', 'Start a conversation', '会話を始めましょう', '开始对话吧', '開始對話吧', 'เริ่มบทสนทนา', 'Mulai percakapan', 'Bắt đầu cuộc trò chuyện', 'Magsimula ng pag-uusap', 'Inicia una conversación'],
   },
 
   // ── Explore ──────────────────────────────────────────
@@ -169,6 +184,8 @@ const t = {
     title:           ['탐색', 'Explore', '探索', '探索', '探索', 'สำรวจ', 'Jelajahi', 'Khám phá', 'I-explore', 'Explorar'],
     allCategories:   ['전체', 'All', 'すべて', '全部', '全部', 'ทั้งหมด', 'Semua', 'Tất cả', 'Lahat', 'Todo'],
     noVideos:        ['아직 영상이 없어요', 'No videos yet', 'まだ動画がありません', '还没有视频', '還沒有影片', 'ยังไม่มีวิดีโอ', 'Belum ada video', 'Chưa có video', 'Wala pang video', 'Sin videos aún'],
+    sortLatest:      ['최신순', 'Latest', '最新順', '最新', '最新', 'ล่าสุด', 'Terbaru', 'Mới nhất', 'Pinakabago', 'Recientes'],
+    sortLikes:       ['좋아요순', 'Most liked', '人気順', '最多点赞', '最多讚', 'ยอดนิยม', 'Terpopuler', 'Nhiều thích nhất', 'Pinakamaraming gusto', 'Más gustados'],
   },
 
   // ── Profile ──────────────────────────────────────────

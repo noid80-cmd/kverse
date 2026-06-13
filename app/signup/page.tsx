@@ -208,7 +208,7 @@ export default function SignupPage() {
                       <img src={bizRegUrl} alt="명함" style={{ width: '100%', maxHeight: 160, objectFit: 'contain', background: '#1a1a25', display: 'block' }} />
                       <button type="button" onClick={() => fileInputRef.current?.click()}
                         style={{ width: '100%', padding: '10px', background: 'none', border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', color: '#22d3ee', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                        <CheckCircle size={14} strokeWidth={2} /> 업로드 완료 · 교체하기
+                        <CheckCircle size={14} strokeWidth={2} /> {tx.common.uploadDone}
                       </button>
                     </div>
                   ) : (

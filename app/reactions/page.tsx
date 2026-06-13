@@ -92,7 +92,7 @@ export default function ReactionsPage() {
   }
 
   async function deleteConv(convId: string) {
-    if (!confirm('내 채팅 목록에서 삭제할까요?')) return
+    if (!confirm(tx.reactions.deleteConfirm)) return
     const { error } = await supabase.from('conversations').update({ deleted_by_talent: true }).eq('id', convId)
     if (error) { alert('삭제 실패: ' + error.message); return }
     setPageData(prev => {
@@ -218,13 +218,13 @@ export default function ReactionsPage() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 15 }}>{c.agency_member?.name ?? '기획사'}</span>
+                        <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 15 }}>{c.agency_member?.name ?? tx.auditions.agencyLabel}</span>
                         {verifiedIds.has(c.agency_member_id) && (
-                          <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                          <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>{tx.common.verified}</span>
                         )}
                       </div>
                       <div style={{ fontSize: 13, color: '#555570', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                        {c.lastMessage ?? '대화를 시작해보세요'}
+                        {c.lastMessage ?? tx.reactions.startChat}
                       </div>
                     </div>
                     <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#333350" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -252,7 +252,7 @@ export default function ReactionsPage() {
                   <div style={{ background: '#121018', borderRadius: 18, padding: '16px 20px', border: '1px solid rgba(168,85,247,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <Bookmark size={14} strokeWidth={2} color="#22d3ee" fill="#22d3ee" />
-                      <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{b.agency_member?.name ?? '담당자'}</span>
+                      <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{b.agency_member?.name ?? tx.auditions.agencyLabel}</span>
                       <span style={{ fontSize: 12, color: '#555570', marginLeft: 'auto' }}>{new Date(b.created_at).toLocaleDateString('ko-KR')}</span>
                     </div>
                     {b.video && (
