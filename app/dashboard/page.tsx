@@ -95,7 +95,29 @@ export default function DashboardPage() {
       setData(fresh)
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
     }
+
+    async function refreshProfile() {
+      const user = (await supabase.auth.getSession()).data.session?.user
+      if (!user) return
+      const { data: prof } = await supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single()
+      if (prof) setData(prev => {
+        if (!prev) return prev
+        const updated = { ...prev, profile: prof }
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(updated)) } catch {}
+        return updated
+      })
+    }
+
     load()
+
+    const onVisible = () => { if (document.visibilityState === 'visible') refreshProfile() }
+    const onPageShow = (e: PageTransitionEvent) => { if (e.persisted) refreshProfile() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('pageshow', onPageShow)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('pageshow', onPageShow)
+    }
   }, [])
 
   if (!data) return (

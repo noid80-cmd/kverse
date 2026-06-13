@@ -102,8 +102,16 @@ export default function ProfileEditPage() {
       if (dbError) throw new Error('DB 오류: ' + dbError.message)
 
       setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
-      try { localStorage.removeItem('kpick-dashboard-v4') } catch {}
-      showToast('✓ 사진 변경 완료 — 이동 중...', true)
+      try {
+        const raw = localStorage.getItem('kpick-dashboard-v4')
+        if (raw) {
+          const cached = JSON.parse(raw)
+          if (cached?.profile) { cached.profile.avatar_url = publicUrl; localStorage.setItem('kpick-dashboard-v4', JSON.stringify(cached)) }
+        } else {
+          localStorage.removeItem('kpick-dashboard-v4')
+        }
+      } catch {}
+      showToast('✓ 사진 변경 완료!', true)
       setTimeout(() => { window.location.href = '/dashboard' }, 1800)
     } catch (err: any) {
       showToast('오류: ' + (err.message ?? '알 수 없는 오류'), false)
