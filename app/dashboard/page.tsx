@@ -12,7 +12,6 @@ import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
 type RecentVideo = { id: string; title: string; thumbnail_url: string | null }
 type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string } | null; translations?: Record<string, { title: string; description: string }> | null }
-type RecentBookmark = { id: string; created_at: string; video: { id: string; title: string } | null; agency_member: { name: string } | null }
 type PageData = {
   profile: Profile | null
   recentVideos: RecentVideo[]
@@ -20,7 +19,6 @@ type PageData = {
   bookmarks: number
   contacts: number
   recentAuditions: RecentAudition[]
-  recentBookmarks: RecentBookmark[]
 }
 
 const CACHE_KEY = 'kpick-dashboard-v4'
@@ -62,6 +60,7 @@ export default function DashboardPage() {
   })
   const [auditionIdx, setAuditionIdx] = useState(0)
   const [langOpen, setLangOpen] = useState(false)
+  const [unread, setUnread] = useState({ bookmarks: 0, messages: 0 })
   const supabase = createClient()
 
   useEffect(() => {
@@ -82,13 +81,12 @@ export default function DashboardPage() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
 
-      const [{ data: prof }, { data: vids, count: vCount }, { count: bCount }, { count: cCount }, { data: auds }, { data: bms }] = await Promise.all([
+      const [{ data: prof }, { data: vids, count: vCount }, { count: bCount }, { data: convs, count: cCount }, { data: auds }] = await Promise.all([
         supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single(),
         supabase.from('videos').select('id, title, thumbnail_url', { count: 'exact' }).eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(6),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
-        supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('talent_id', user.id).eq('deleted_by_talent', false),
+        supabase.from('conversations').select('id', { count: 'exact' }).eq('talent_id', user.id).eq('deleted_by_talent', false),
         supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
-        supabase.from('bookmarks').select('id, created_at, video:videos(id, title), agency_member:profiles!agency_member_id(name)').eq('talent_id', user.id).order('created_at', { ascending: false }).limit(3),
       ])
 
       const fresh: PageData = {
@@ -98,10 +96,24 @@ export default function DashboardPage() {
         bookmarks: bCount ?? 0,
         contacts: cCount ?? 0,
         recentAuditions: (auds as unknown as RecentAudition[]) ?? [],
-        recentBookmarks: (bms as unknown as RecentBookmark[]) ?? [],
       }
       setData(fresh)
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
+
+      // 미확인 배지
+      const lastSeenBm = parseInt(localStorage.getItem('kpick-seen-bm') ?? '0')
+      const newBm = Math.max(0, (bCount ?? 0) - lastSeenBm)
+      let unreadMsg = 0
+      const convIds = (convs ?? []).map((c: { id: string }) => c.id)
+      if (convIds.length > 0) {
+        const { count: mc } = await supabase.from('messages')
+          .select('id', { count: 'exact', head: true })
+          .in('conversation_id', convIds)
+          .eq('is_read', false)
+          .neq('sender_id', user.id)
+        unreadMsg = mc ?? 0
+      }
+      setUnread({ bookmarks: newBm, messages: unreadMsg })
     }
 
     async function refreshProfile() {
@@ -136,7 +148,7 @@ export default function DashboardPage() {
     </div>
   )
 
-  const { profile, recentVideos, videoCount, bookmarks, contacts, recentAuditions, recentBookmarks } = data
+  const { profile, recentVideos, videoCount, bookmarks, contacts, recentAuditions } = data
 
   return (
     <div style={{ minHeight: '100vh', background: '#07070d', paddingBottom: 112, position: 'relative', overflow: 'hidden' }}>
@@ -207,22 +219,39 @@ export default function DashboardPage() {
 
           {/* Stats grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {[
-              { label: '관심', value: bookmarks, icon: <Bookmark size={16} strokeWidth={1.8} />, href: '/reactions?tab=bookmarks', accent: '#22d3ee', bg: 'rgba(6,182,212,0.1)' },
-              { label: '채팅', value: contacts, icon: <MessageCircle size={16} strokeWidth={1.8} />, href: '/reactions', accent: '#22d3ee', bg: 'rgba(6,182,212,0.1)' },
-            ].map(s => (
-              <Link key={s.label} href={s.href} style={{ textDecoration: 'none' }}>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 13, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.accent, flexShrink: 0 }}>
-                    {s.icon}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{s.value}</div>
-                    <div style={{ fontSize: 11, color: '#555570', marginTop: 4 }}>{s.label}</div>
-                  </div>
+            <Link href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}
+              onClick={() => { localStorage.setItem('kpick-seen-bm', String(bookmarks)); setUnread(u => ({ ...u, bookmarks: 0 })) }}>
+              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 13, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
+                  <Bookmark size={16} strokeWidth={1.8} />
                 </div>
-              </Link>
-            ))}
+                <div>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{bookmarks}</div>
+                  <div style={{ fontSize: 11, color: '#555570', marginTop: 4 }}>관심</div>
+                </div>
+                {unread.bookmarks > 0 && (
+                  <div style={{ position: 'absolute', top: 10, right: 12, background: '#22d3ee', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+                    +{unread.bookmarks}
+                  </div>
+                )}
+              </div>
+            </Link>
+            <Link href="/reactions" style={{ textDecoration: 'none' }}>
+              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 13, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
+                  <MessageCircle size={16} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{contacts}</div>
+                  <div style={{ fontSize: 11, color: '#555570', marginTop: 4 }}>채팅</div>
+                </div>
+                {unread.messages > 0 && (
+                  <div style={{ position: 'absolute', top: 10, right: 12, background: '#f87171', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+                    {unread.messages}
+                  </div>
+                )}
+              </div>
+            </Link>
           </div>
         </div>
 
@@ -280,53 +309,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="max-w-lg mx-auto px-4">
-
-          {/* ── Agency Interest ── */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>기획사 관심</h2>
-              <Link href="/reactions?tab=bookmarks" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-                전체보기 <ChevronRight size={14} />
-              </Link>
-            </div>
-
-            {recentBookmarks.length === 0 ? (
-              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 18, padding: '28px 20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#22d3ee' }}>
-                  <Bookmark size={20} strokeWidth={1.5} />
-                </div>
-                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>아직 관심 표시가 없어요</div>
-                <div style={{ fontSize: 12, color: '#555570' }}>영상을 올리면 기획사 담당자가 관심 표시를 할 수 있어요</div>
-              </div>
-            ) : (() => {
-              const bm = recentBookmarks[0]
-              return (
-                <Link href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '13px 14px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                      width: 44, height: 44, borderRadius: 15, flexShrink: 0,
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(8,145,178,0.12))',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#22d3ee', fontWeight: 900, fontSize: 18,
-                      border: '1px solid rgba(6,182,212,0.2)',
-                    }}>
-                      {bm.agency_member?.name?.[0] ?? 'A'}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{bm.agency_member?.name ?? '담당자'}</span>
-                        <span style={{ fontSize: 10, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>관심</span>
-                      </div>
-                      <div style={{ fontSize: 12, color: '#555570', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {bm.video?.title ?? '영상'}
-                      </div>
-                    </div>
-                    <span style={{ fontSize: 11, color: '#444460', flexShrink: 0 }}>{timeAgo(bm.created_at)}</span>
-                  </div>
-                </Link>
-              )
-            })()}
-          </div>
 
           {/* ── Auditions ── */}
           <div style={{ marginBottom: 28, background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.15)', borderRadius: 22, padding: '18px 16px' }}>
