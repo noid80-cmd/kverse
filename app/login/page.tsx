@@ -22,14 +22,19 @@ export default function LoginPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError(''); setLoading(true)
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-    if (!res.ok) { setError(tx.loginError); setLoading(false); return }
-    const { href } = await res.json()
-    window.location.href = href
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      if (!res.ok) { setError(tx.loginError); setLoading(false); return }
+      const { href } = await res.json()
+      window.location.href = href
+    } catch {
+      setError(tx.loginError)
+      setLoading(false)
+    }
   }
 
   async function handleGoogle() {
