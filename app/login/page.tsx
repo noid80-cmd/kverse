@@ -25,12 +25,17 @@ export default function LoginPage() {
     try {
       const supabase = createClient()
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      console.log('[login] signIn result:', { user: !!data.user, session: !!data.session, error: error?.message })
       if (error || !data.user) { setError(tx.loginError); setLoading(false); return }
+      const authCookies = document.cookie.split(';').filter(c => c.includes('auth-token'))
+      console.log('[login] auth cookies after signIn:', authCookies.length, authCookies.map(c => c.trim().substring(0, 40)))
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
       const role = profile?.role ?? 'talent'
       const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
+      console.log('[login] navigating to:', href)
       window.location.href = href
-    } catch {
+    } catch (err) {
+      console.error('[login] error:', err)
       setError(tx.loginError)
       setLoading(false)
     }
