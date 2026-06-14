@@ -15,8 +15,8 @@ type TxShape = {
 const t: Record<Lang, TxShape> = {
   ko: {
     tagline: '기획사가 직접 발굴하는 오디션 플랫폼',
-    hero: '당신의 재능,\n기획사에게 직접',
-    heroSub: '영상 하나로 전세계 기획사 담당자에게 노출되세요.\nKpick은 오디션의 새로운 방식입니다.',
+    hero: '당신의 재능\n기획사에게 직접',
+    heroSub: '영상 하나로 전세계 기획사 담당자에게 노출됩니다.\nKpick은 오디션의 새로운 방식입니다.',
     ctaTalent: '지망생으로 시작하기', ctaAgency: '기획사 문의', login: '로그인',
     forTalent: '지망생', forAgency: '기획사',
     talentTitle: '재능을 보여줄 무대가 생겼어요',
@@ -261,7 +261,7 @@ export default function LandingPage() {
           <h1 style={{ fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, whiteSpace: 'pre-line', background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.75) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {tx.hero}
           </h1>
-          <p style={{ fontSize: 'clamp(15px, 2.5vw, 18px)', color: '#8888aa', lineHeight: 1.7, marginBottom: 48, whiteSpace: 'pre-line', maxWidth: 560, margin: '0 auto 48px' }}>
+          <p style={{ fontSize: 'clamp(15px, 2.5vw, 18px)', color: '#8888aa', lineHeight: 1.7, marginBottom: 48, whiteSpace: 'pre-line', wordBreak: 'keep-all', maxWidth: 560, margin: '0 auto 48px' }}>
             {tx.heroSub}
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -314,7 +314,7 @@ export default function LandingPage() {
         {/* CTA banner */}
         <section style={{ maxWidth: 1080, margin: '0 auto', padding: '0 24px 100px' }}>
           <div style={{ background: 'linear-gradient(135deg, rgba(8,145,178,0.2), rgba(6,182,212,0.1))', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 28, padding: '64px 40px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: 36, fontWeight: 900, color: '#eeeeff', marginBottom: 12 }}>{tx.ctaTitle}</h2>
+            <h2 style={{ fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, color: '#eeeeff', marginBottom: 12, wordBreak: 'keep-all' }}>{tx.ctaTitle}</h2>
             <p style={{ fontSize: 16, color: '#22d3ee', marginBottom: 36, fontWeight: 600 }}>{tx.ctaSub}</p>
             <Link href="/signup" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 17, padding: '18px 48px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(6,182,212,0.45)', display: 'inline-block' }}>
               {tx.ctaStart}
@@ -324,7 +324,7 @@ export default function LandingPage() {
 
         {/* Footer */}
         <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 24px' }}>
-          <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(145deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ color: 'white', fontWeight: 900, fontSize: 14 }}>K</span>
