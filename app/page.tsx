@@ -281,14 +281,14 @@ export default function LandingPage() {
             ))}
           </div>
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 24, padding: '48px 40px' }}>
-            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 32, textAlign: 'center' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 32, textAlign: 'center', wordBreak: 'keep-all' }}>
               {tab === 'talent' ? tx.talentTitle : tx.agencyTitle}
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               {(tab === 'talent' ? tx.talentPoints : tx.agencyPoints).map((point, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '16px', background: 'rgba(6,182,212,0.05)', borderRadius: 14, border: '1px solid rgba(6,182,212,0.1)' }}>
                   <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 900, color: 'white' }}>{i + 1}</div>
-                  <span style={{ fontSize: 15, color: '#ccccdd', lineHeight: 1.5, fontWeight: 500 }}>{point}</span>
+                  <span style={{ fontSize: 15, color: '#ccccdd', lineHeight: 1.5, fontWeight: 500, wordBreak: 'keep-all' }}>{point}</span>
                 </div>
               ))}
             </div>
