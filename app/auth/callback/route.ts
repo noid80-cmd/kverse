@@ -31,7 +31,13 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error || !data.user) {
-    return NextResponse.redirect(`${origin}/login`)
+    const allCookies = request.cookies.getAll()
+    const hasVerifier = allCookies.some(c => c.name.includes('code-verifier'))
+    const errUrl = new URL(`${origin}/login`)
+    errUrl.searchParams.set('_e', error?.message ?? 'no_user')
+    errUrl.searchParams.set('_v', hasVerifier ? '1' : '0')
+    errUrl.searchParams.set('_nc', String(allCookies.length))
+    return NextResponse.redirect(errUrl.toString())
   }
 
   if (roleParam) {
