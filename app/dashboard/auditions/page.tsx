@@ -108,7 +108,12 @@ export default function TalentAuditionsPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [load])
 
   async function cancelApplication(auditionId: string) {
     if (!confirm('지원을 취소할까요?')) return

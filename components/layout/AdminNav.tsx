@@ -34,7 +34,7 @@ export default function AdminNav() {
         <span style={{ fontWeight: 900, fontSize: 16, color: '#eeeeff', flexShrink: 0, marginRight: 6 }}>관리자</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {previewNav.map(n => (
-            <Link key={n.href} href={n.href}
+            <a key={n.href} href={n.href}
               style={{
                 fontSize: 11, fontWeight: 700, textDecoration: 'none',
                 padding: '4px 9px', borderRadius: 8,
@@ -45,7 +45,7 @@ export default function AdminNav() {
               }}>
               <span>{n.emoji}</span>
               <span>{n.label}</span>
-            </Link>
+            </a>
           ))}
           <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.08)', margin: '0 4px' }} />
           {adminNav.map(n => {
