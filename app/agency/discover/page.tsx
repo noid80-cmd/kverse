@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
-import { Heart, Bookmark, Video } from 'lucide-react'
+import { Heart, Bookmark, Video as VideoIcon } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -167,7 +167,7 @@ export default function DiscoverPage() {
         ) : videos.length === 0 ? (
           <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
             <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
-              <Video size={22} strokeWidth={1.8} />
+              <VideoIcon size={22} strokeWidth={1.8} />
             </div>
             <div style={{ fontWeight: 700, color: '#eeeeff' }}>아직 영상이 없어요</div>
           </div>
@@ -183,7 +183,7 @@ export default function DiscoverPage() {
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
-                      : <Video size={40} strokeWidth={1.5} color="#555570" />
+                      : <VideoIcon size={40} strokeWidth={1.5} color="#555570" />
                     }
                     <div style={{
                       position: 'absolute', top: 10, left: 10,

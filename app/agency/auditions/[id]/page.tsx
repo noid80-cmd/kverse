@@ -59,6 +59,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
 
     if (status === 'invited') {
+      if (!talentId) { setUpdating(null); return }
       const user = (await supabase.auth.getSession()).data.session?.user
       if (user) {
         const { data: existing } = await supabase.from('conversations').select('id')
@@ -70,25 +71,28 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
             .insert({ agency_member_id: user.id, talent_id: talentId })
             .select('id').single()
           convId = newConv?.id
-        }
 
-        if (convId) {
-          const { data: agMember } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
-          const agencyDisplayName = agMember?.agency_id
-            ? (await supabase.from('agencies').select('name').eq('id', agMember.agency_id).single()).data?.name
-            : null
-          const greeting = `안녕하세요! 저희 ${agencyDisplayName ?? '기획사'}에서 "${audition?.title ?? '오디션'}"에 지원해 주신 영상을 인상 깊게 봤습니다 😊 편하게 말씀 나눠요!`
-          await supabase.from('messages').insert({ conversation_id: convId, sender_id: user.id, content: greeting })
+          if (convId) {
+            const { data: agMember } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
+            const agencyDisplayName = agMember?.agency_id
+              ? (await supabase.from('agencies').select('name').eq('id', agMember.agency_id).single()).data?.name
+              : null
+            const greeting = `안녕하세요! 저희 ${agencyDisplayName ?? '기획사'}에서 "${audition?.title ?? '오디션'}"에 지원해 주신 영상을 인상 깊게 봤습니다 😊 편하게 말씀 나눠요!`
+            await supabase.from('messages').insert({ conversation_id: convId, sender_id: user.id, content: greeting })
+          }
         }
       }
-      fetch('/api/push', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: talentId,
-          title: '오디션 초대 🎉',
-          body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요! 채팅을 확인해보세요.`,
-          url: '/dashboard/auditions',
-        }),
+      supabase.auth.getSession().then(({ data: s }) => {
+        const token = s.session?.access_token
+        fetch('/api/push', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({
+            userId: talentId,
+            title: '오디션 초대 🎉',
+            body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요! 채팅을 확인해보세요.`,
+            url: '/dashboard/auditions',
+          }),
+        })
       })
     }
     setUpdating(null)

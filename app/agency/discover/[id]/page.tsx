@@ -78,7 +78,7 @@ export default function AgencyVideoPage() {
     const { data: existing } = await supabase
       .from('conversations').select('id')
       .eq('agency_member_id', myId).eq('talent_id', video.talent.id).eq('deleted_by_agency', false).single()
-    if (existing) { router.push(`/chat/${existing.id}`); return }
+    if (existing) { setStarting(false); router.push(`/chat/${existing.id}`); return }
     const { data: newConv, error: convErr } = await supabase
       .from('conversations').insert({ agency_member_id: myId, talent_id: video.talent.id })
       .select('id').single()

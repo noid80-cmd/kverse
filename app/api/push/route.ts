@@ -70,6 +70,11 @@ async function sendToSubs(
 }
 
 export async function POST(req: NextRequest) {
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const { data: { user } } = await adminSupabase.auth.getUser(token)
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '').trim()
   const privateKey = (process.env.VAPID_PRIVATE_KEY || '').trim()
 

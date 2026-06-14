@@ -94,29 +94,32 @@ export default function AgencyAuditionsPage() {
     }).select('id').single()
     if (!error && inserted) {
       // auto-translate in background
-      fetch('/api/translate', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texts: [form.title.trim(), form.description.trim() || ''] }),
-      }).then(r => r.json()).then(async (results) => {
-        const translations: Record<string, { title: string; description: string }> = {}
-        Object.entries(results).forEach(([lang, texts]) => {
-          translations[lang] = { title: (texts as string[])[0], description: (texts as string[])[1] }
+      supabase.auth.getSession().then(({ data: s }) => s.session?.access_token).then(token => {
+        fetch('/api/translate', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ texts: [form.title.trim(), form.description.trim() || ''] }),
+        }).then(r => r.json()).then(async (results) => {
+          const translations: Record<string, { title: string; description: string }> = {}
+          Object.entries(results).forEach(([lang, texts]) => {
+            translations[lang] = { title: (texts as string[])[0], description: (texts as string[])[1] }
+          })
+          await supabase.from('auditions').update({ translations }).eq('id', inserted.id)
         })
-        await supabase.from('auditions').update({ translations }).eq('id', inserted.id)
+
+        fetch('/api/push', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({
+            broadcast: true,
+            title: '새 오디션 공고',
+            body: `${form.title.trim()} 오디션이 올라왔어요!`,
+            url: '/dashboard/auditions',
+          }),
+        })
       })
 
       setForm({ title: '', description: '', categories: ['vocal'], mode: 'both', deadline: '' })
       setShowCreate(false)
       load()
-      fetch('/api/push', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          broadcast: true,
-          title: '새 오디션 공고',
-          body: `${form.title.trim()} 오디션이 올라왔어요!`,
-          url: '/dashboard/auditions',
-        }),
-      })
     }
     setSaving(false)
   }

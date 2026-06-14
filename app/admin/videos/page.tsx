@@ -30,6 +30,9 @@ export default function AdminVideosPage() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
 
+      const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }
+
       const { data } = await supabase.from('videos').select(`
         id, title, status, view_count, is_featured, created_at, category,
         talent:profiles!talent_id(name)

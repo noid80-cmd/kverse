@@ -34,15 +34,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login`)
   }
 
-  if (roleParam) {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-    if (!profile || profile.role === 'talent') {
-      await supabase.from('profiles').update({ role: roleParam }).eq('id', data.user.id)
-    }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+
+  if (roleParam && (!profile || profile.role === 'talent')) {
+    await supabase.from('profiles').update({ role: roleParam }).eq('id', data.user.id)
   }
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-  const role = roleParam ?? profile?.role ?? 'talent'
+  const role = (roleParam && (!profile || profile.role === 'talent')) ? roleParam : (profile?.role ?? 'talent')
   const finalDest = role === 'admin' ? '/admin' : role === 'agency' ? '/agency/discover' : '/dashboard'
 
   response.headers.set('Location', `${origin}${finalDest}`)

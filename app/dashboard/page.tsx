@@ -335,7 +335,8 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 12, color: '#555570' }}>{tx.dashboard.auditionDesc}</div>
               </div>
             ) : (() => {
-              const a = recentAuditions[auditionIdx]
+              const safeIdx = auditionIdx < recentAuditions.length ? auditionIdx : 0
+              const a = recentAuditions[safeIdx]
               return (
                 <div>
                   <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>

@@ -68,7 +68,7 @@ export default function AgencyTalentsPage() {
             {bookmarks.map(b => (
               <div key={b.id} style={{ background: '#111118', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                  <Link href={`/agency/discover/${b.video?.id}`} style={{ width: 90, flexShrink: 0, textDecoration: 'none', background: b.video?.thumbnail_url ? 'transparent' : 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  <Link href={b.video?.id ? `/agency/discover/${b.video.id}` : '#'} style={{ width: 90, flexShrink: 0, textDecoration: 'none', background: b.video?.thumbnail_url ? 'transparent' : 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {b.video?.thumbnail_url
                       ? <img src={b.video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <span style={{ fontSize: 24 }}>🎬</span>
