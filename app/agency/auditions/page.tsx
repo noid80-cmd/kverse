@@ -51,7 +51,7 @@ export default function AgencyAuditionsPage() {
     if (ag?.name) setAgencyName(ag.name)
 
     const { data } = await supabase.from('auditions')
-      .select('id, title, description, category, deadline, status, created_at')
+      .select('id, title, description, category, mode, deadline, status, created_at')
       .eq('agency_id', am.agency_id)
       .order('created_at', { ascending: false })
 
