@@ -6,7 +6,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Home, Compass, Plus, Bell, Megaphone, MessageCircle, Bookmark, Trash2, Video } from 'lucide-react'
+import { Home, Compass, Plus, Bell, Megaphone, MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -42,6 +42,12 @@ export default function ReactionsPage() {
   const [verifiedIds, setVerifiedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'contacts' | 'bookmarks'>('contacts')
   const [toast, setToast] = useState<string | null>(null)
+  const [notifModal, setNotifModal] = useState(false)
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission | null>(null)
+
+  useEffect(() => {
+    if ('Notification' in window) setNotifPerm(Notification.permission)
+  }, [])
   const userIdRef = useRef<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
@@ -174,7 +180,14 @@ export default function ReactionsPage() {
           <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
           </button>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{tx.reactions.pageTitle}</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', flex: 1 }}>{tx.reactions.pageTitle}</h1>
+          <button onClick={() => setNotifModal(true)} style={{
+            width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: '#111118', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', flexShrink: 0,
+            color: notifPerm === 'granted' ? '#22d3ee' : notifPerm === 'denied' ? '#f87171' : '#555570',
+          }}>
+            {notifPerm === 'denied' ? <BellOff size={18} strokeWidth={1.8} /> : <BellRing size={18} strokeWidth={1.8} />}
+          </button>
         </div>
         <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>{tx.reactions.pageDesc}</p>
 
@@ -271,6 +284,81 @@ export default function ReactionsPage() {
       </div>
 
       <BottomNav items={talentNav} />
+
+      {notifModal && (
+        <>
+          <div onClick={() => setNotifModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }} />
+          <div style={{
+            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 201,
+            background: '#13131e', borderRadius: '24px 24px 0 0',
+            padding: '28px 24px 40px', boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+            border: '1px solid rgba(255,255,255,0.08)', maxWidth: 480, margin: '0 auto',
+          }}>
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 24px' }} />
+            <button onClick={() => setNotifModal(false)} style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#555570' }}>
+              <X size={16} strokeWidth={2} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+                background: notifPerm === 'granted' ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.15)' : '#1a1a25',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {notifPerm === 'denied'
+                  ? <BellOff size={24} strokeWidth={1.8} color="#f87171" />
+                  : <BellRing size={24} strokeWidth={1.8} color={notifPerm === 'granted' ? 'white' : '#555570'} />
+                }
+              </div>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#eeeeff', marginBottom: 3 }}>알림 설정</div>
+                <div style={{ fontSize: 13, color: notifPerm === 'granted' ? '#22d3ee' : notifPerm === 'denied' ? '#f87171' : '#555570' }}>
+                  {notifPerm === 'granted' ? '알림이 켜져 있어요' : notifPerm === 'denied' ? '알림이 차단되어 있어요' : '알림이 꺼져 있어요'}
+                </div>
+              </div>
+            </div>
+
+            {notifPerm === 'denied' ? (
+              <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
+                <p style={{ fontSize: 14, color: '#fca5a5', fontWeight: 700, marginBottom: 10 }}>브라우저 설정에서 직접 허용해주세요</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[
+                    { label: 'Chrome', desc: '주소창 왼쪽 자물쇠 🔒 → 알림 → 허용' },
+                    { label: 'Safari (iOS)', desc: '설정 앱 → Safari → kpick.app → 알림 허용' },
+                  ].map(item => (
+                    <div key={item.label}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#f87171' }}>{item.label}</span>
+                      <p style={{ fontSize: 12, color: '#8888aa', margin: '2px 0 0' }}>{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : notifPerm === 'granted' ? (
+              <div style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
+                <p style={{ fontSize: 14, color: '#22d3ee', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
+              </div>
+            ) : (
+              <div style={{ marginBottom: 20 }}>
+                <button onClick={async () => {
+                  const perm = await Notification.requestPermission()
+                  setNotifPerm(perm)
+                }} style={{
+                  width: '100%', padding: '15px',
+                  background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                  border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(6,182,212,0.35)',
+                }}>
+                  알림 켜기
+                </button>
+              </div>
+            )}
+
+            <button onClick={() => setNotifModal(false)} style={{ width: '100%', padding: '13px', background: 'none', border: 'none', color: '#555570', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+              닫기
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
