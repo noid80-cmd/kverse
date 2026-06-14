@@ -3,7 +3,7 @@ export default function IconPreviewPage() {
 
   const icons = [
     {
-      label: '① 마이크 (현재)',
+      label: '① 마이크',
       svg: (
         <svg viewBox="0 0 140 140" width="140" height="140">
           <defs>
@@ -13,11 +13,14 @@ export default function IconPreviewPage() {
             </linearGradient>
           </defs>
           <rect width="140" height="140" rx="32" fill="url(#g1)"/>
-          <rect x="51" y="18" width="38" height="62" rx="19" fill="white"/>
-          <path d="M 26,80 A 44,38 0 0,0 114,80" fill="none" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-          <rect x="67" y="118" width="6" height="6" rx="3" fill="white"/>
-          <rect x="67" y="114" width="6" height="18" rx="3" fill="white"/>
-          <rect x="49" y="129" width="42" height="6" rx="3" fill="white"/>
+          {/* 마이크 body - 더 크게, 위아래 여백 줄임 */}
+          <rect x="46" y="8" width="48" height="74" rx="24" fill="white"/>
+          {/* U bracket - sweep=1 로 아래 방향 U자 */}
+          <path d="M 20,86 A 50,38 0 0,1 120,86" fill="none" stroke="white" strokeWidth="8" strokeLinecap="round"/>
+          {/* stand */}
+          <rect x="66" y="124" width="8" height="10" rx="4" fill="white"/>
+          {/* base */}
+          <rect x="46" y="132" width="48" height="7" rx="3.5" fill="white"/>
         </svg>
       ),
     },
@@ -73,18 +76,17 @@ export default function IconPreviewPage() {
               <stop offset="100%" stopColor="#06b6d4"/>
             </linearGradient>
             <linearGradient id="beam" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.95)"/>
-              <stop offset="100%" stopColor="rgba(255,255,255,0.15)"/>
+              <stop offset="0%" stopColor="rgba(255,255,255,0.92)"/>
+              <stop offset="100%" stopColor="rgba(255,255,255,0.18)"/>
             </linearGradient>
           </defs>
           <rect width="140" height="140" rx="32" fill="url(#g4)"/>
-          {/* light body at top */}
-          <rect x="46" y="14" width="48" height="22" rx="8" fill="white"/>
-          {/* beam */}
-          <path d="M 52,36 L 16,118 L 124,118 L 88,36 Z" fill="url(#beam)"/>
-          {/* person silhouette */}
-          <circle cx="70" cy="96" r="9" fill="rgba(6,100,130,0.9)"/>
-          <path d="M 56,120 Q 56,106 70,106 Q 84,106 84,120" fill="rgba(6,100,130,0.9)"/>
+          {/* 조명 본체 */}
+          <rect x="44" y="12" width="52" height="22" rx="9" fill="white"/>
+          {/* 빔 - 더 넓게 */}
+          <path d="M 50,34 L 10,128 L 130,128 L 90,34 Z" fill="url(#beam)"/>
+          {/* 별 - 스타가 조명을 받는 느낌 */}
+          <polygon points="70,78 74,91 88,91 77,100 81,114 70,105 59,114 63,100 52,91 66,91" fill="white"/>
         </svg>
       ),
     },
