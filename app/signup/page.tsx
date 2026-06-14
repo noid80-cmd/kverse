@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -13,6 +14,7 @@ const inputStyle = {
 }
 
 export default function SignupPage() {
+  const router = useRouter()
   const { lang } = useLang()
   const tx = useT(lang)
   const [step, setStep] = useState<'role' | 'method' | 'form'>('role')
@@ -95,7 +97,8 @@ export default function SignupPage() {
     })
     setLoading(false)
     if (error) { setError(error.message); return }
-    setDone(true)
+    if (role === 'agency') { setDone(true); return }
+    router.push('/onboarding')
   }
 
   const agencyFormValid = role !== 'agency' || (agencyName.trim() && bizRegUrl)

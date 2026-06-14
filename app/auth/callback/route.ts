@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
   }
 
   const role = (roleParam && (!profile || profile.role === 'talent')) ? roleParam : (profile?.role ?? 'talent')
-  const finalDest = role === 'admin' ? '/admin' : role === 'agency' ? '/agency/discover' : '/dashboard'
+  const isNewUser = !profile
+  const finalDest = role === 'admin' ? '/admin' : role === 'agency' ? '/agency/discover' : isNewUser ? '/onboarding' : '/dashboard'
 
   response.headers.set('Location', `${origin}${finalDest}`)
   return response
