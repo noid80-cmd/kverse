@@ -129,6 +129,10 @@ const t = {
     views:           ['조회', 'views', '再生', '次播放', '次播放', 'ครั้ง', 'tayangan', 'lượt xem', 'views', 'vistas'],
     likes:           ['좋아요', 'Likes', 'いいね', '点赞', '讚', 'ถูกใจ', 'Suka', 'Thích', 'Gusto', 'Me gusta'],
     agencyInterest:  ['기획사 관심', 'Agency interest', '事務所の関心', '经纪公司关注', '經紀公司關注', 'ความสนใจจากค่ายเพลง', 'Minat agensi', 'Sự quan tâm của công ty', 'Interes ng ahensya', 'Interés de agencia'],
+    visibilityLabel:  ['공개범위', 'Visibility', '公開範囲', '可见性', '可見性', 'การมองเห็น', 'Visibilitas', 'Hiển thị', 'Visibility', 'Visibilidad'],
+    visibilityPublic: ['전체공개', 'Public', '全体公開', '全部公开', '全部公開', 'สาธารณะ', 'Publik', 'Công khai', 'Pampubliko', 'Público'],
+    visibilityAgency: ['기획사만', 'Agencies only', '事務所のみ', '仅经纪公司', '僅經紀公司', 'เฉพาะค่าย', 'Agensi saja', 'Chỉ công ty', 'Ahensya lang', 'Solo agencias'],
+    visibilityPrivate:['비공개', 'Private', '非公開', '私密', '私密', 'ส่วนตัว', 'Pribadi', 'Riêng tư', 'Pribado', 'Privado'],
     statusActive:    ['공개', 'Public', '公開', '已发布', '已發布', 'เผยแพร่', 'Publik', 'Công khai', 'Pampubliko', 'Público'],
     statusReview:    ['검토중', 'Under review', '審査中', '审核中', '審核中', 'อยู่ระหว่างการตรวจสอบ', 'Sedang ditinjau', 'Đang xem xét', 'Sinusuri', 'En revisión'],
     deleteVideo:     ['영상 삭제', 'Delete video', '動画を削除', '删除视频', '刪除影片', 'ลบวิดีโอ', 'Hapus video', 'Xóa video', 'I-delete ang video', 'Eliminar video'],
@@ -160,6 +164,10 @@ const t = {
     submitting:      ['지원 중...', 'Submitting...', '応募中...', '申请中...', '申請中...', 'กำลังส่ง...', 'Sedang melamar...', 'Đang gửi...', 'Nag-a-submit...', 'Enviando...'],
     checkChat:       ['채팅 확인하기 →', 'Check chat →', 'チャットを確認 →', '查看聊天 →', '查看聊天 →', 'ดูแชท →', 'Cek chat →', 'Xem chat →', 'Tingnan ang chat →', 'Ver chat →'],
     selectVideoError:['영상을 선택해주세요', 'Please select a video', '動画を選択してください', '请选择视频', '請選擇影片', 'โปรดเลือกวิดีโอ', 'Silakan pilih video', 'Vui lòng chọn video', 'Mangyaring pumili ng video', 'Por favor selecciona un video'],
+    modeLabel:       ['진행방식', 'Format', '形式', '方式', '方式', 'รูปแบบ', 'Format', 'Hình thức', 'Format', 'Formato'],
+    modeOnline:      ['온라인', 'Online', 'オンライン', '线上', '線上', 'ออนไลน์', 'Online', 'Online', 'Online', 'En línea'],
+    modeOffline:     ['오프라인', 'In-person', 'オフライン', '线下', '線下', 'ออฟไลน์', 'Offline', 'Offline', 'In-person', 'Presencial'],
+    modeBoth:        ['온+오프라인', 'Hybrid', 'ハイブリッド', '线上+线下', '線上+線下', 'ไฮบริด', 'Hybrid', 'Hybrid', 'Hybrid', 'Híbrido'],
   },
 
   // ── Reactions / Activity ─────────────────────────────

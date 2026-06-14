@@ -18,6 +18,7 @@ type Audition = {
   title: string
   description: string | null
   category: string
+  mode: 'online' | 'offline' | 'both' | null
   deadline: string | null
   created_at: string
   agency: { name: string; is_verified: boolean } | null
@@ -92,7 +93,7 @@ export default function TalentAuditionsPage() {
 
     const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
       supabase.from('auditions')
-        .select('id, title, description, category, deadline, created_at, translations, agency:agencies(name, is_verified)')
+        .select('id, title, description, category, mode, deadline, created_at, translations, agency:agencies(name, is_verified)')
         .eq('status', 'active')
         .order('created_at', { ascending: false }),
       supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
@@ -322,13 +323,18 @@ export default function TalentAuditionsPage() {
                   )}
                   {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>{tx.dashboard.invited} 🎉</span>}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                   <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{displayTitle}</div>
                   {a.category.split(',').map(c => (
                     <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                       {categoryLabels[c] ?? c}
                     </span>
                   ))}
+                  {a.mode && (
+                    <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                      {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
+                    </span>
+                  )}
                 </div>
                 {displayDesc && (
                   <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{displayDesc}</div>

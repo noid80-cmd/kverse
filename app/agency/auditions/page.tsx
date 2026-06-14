@@ -15,6 +15,7 @@ type Audition = {
   title: string
   description: string | null
   category: string
+  mode: 'online' | 'offline' | 'both' | null
   deadline: string | null
   status: string
   created_at: string
@@ -32,7 +33,7 @@ export default function AgencyAuditionsPage() {
   const [agencyId, setAgencyId] = useState<string | null>(null)
   const [agencyName, setAgencyName] = useState('')
   const [showCreate, setShowCreate] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], deadline: '' })
+  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'both' as 'online' | 'offline' | 'both', deadline: '' })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const supabase = createClient()
@@ -87,6 +88,7 @@ export default function AgencyAuditionsPage() {
       title: form.title.trim(),
       description: form.description.trim() || null,
       category: form.categories.join(','),
+      mode: form.mode,
       deadline: form.deadline || null,
       status: 'active',
     }).select('id').single()
@@ -103,7 +105,7 @@ export default function AgencyAuditionsPage() {
         await supabase.from('auditions').update({ translations }).eq('id', inserted.id)
       })
 
-      setForm({ title: '', description: '', categories: ['vocal'], deadline: '' })
+      setForm({ title: '', description: '', categories: ['vocal'], mode: 'both', deadline: '' })
       setShowCreate(false)
       load()
       fetch('/api/push', {
@@ -168,6 +170,23 @@ export default function AgencyAuditionsPage() {
                 })}
               </div>
               <div>
+                <div style={{ fontSize: 12, color: '#8888aa', marginBottom: 8, fontWeight: 600 }}>진행방식</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {([['online', '🖥️ 온라인'], ['offline', '📍 오프라인'], ['both', '🔀 온+오프라인']] as const).map(([val, label]) => {
+                    const selected = form.mode === val
+                    return (
+                      <button key={val} type="button" onClick={() => setForm(f => ({ ...f, mode: val }))} style={{
+                        flex: 1, padding: '8px 4px', borderRadius: 10, border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.1)',
+                        background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
+                        color: selected ? 'white' : '#555570', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                      }}>
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              <div>
                 <label style={{ fontSize: 12, color: '#f87171', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
                 <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
                   style={{ ...inputStyle, colorScheme: 'dark', border: `1px solid ${form.deadline ? 'rgba(255,255,255,0.1)' : 'rgba(248,113,113,0.5)'}` }} />
@@ -212,6 +231,11 @@ export default function AgencyAuditionsPage() {
                         {categoryLabel[c] ?? c}
                       </span>
                     ))}
+                    {a.mode && (
+                      <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                        {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
+                      </span>
+                    )}
                   </div>
                   {a.description && (
                     <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>

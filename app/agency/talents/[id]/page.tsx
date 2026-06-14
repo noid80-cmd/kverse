@@ -39,7 +39,7 @@ export default function TalentProfilePage() {
 
       const [{ data: t }, { data: v }, { data: conv }] = await Promise.all([
         supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
-        supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').order('created_at', { ascending: false }),
+        supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
       ])
 

@@ -25,6 +25,7 @@ export default function UploadPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('vocal')
   const [tags, setTags] = useState('')
+  const [visibility, setVisibility] = useState<'public' | 'agency_only' | 'private'>('public')
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -176,6 +177,7 @@ export default function UploadPage() {
       category,
       tags: tagArr,
       status: 'active',
+      visibility,
     })
 
     setProgress(100)
@@ -256,6 +258,28 @@ export default function UploadPage() {
 
           <input type="text" value={tags} onChange={e => setTags(e.target.value)}
             placeholder={tx.videos.tagsPlaceholder} style={inputStyle} />
+
+          <div>
+            <div style={{ fontSize: 12, color: '#8888aa', marginBottom: 8, fontWeight: 600 }}>{tx.videos.visibilityLabel}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['public', 'agency_only', 'private'] as const).map(v => {
+                const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
+                const icons = { public: '🌐', agency_only: '🏢', private: '🔒' }
+                const selected = visibility === v
+                return (
+                  <button key={v} type="button" onClick={() => setVisibility(v)} style={{
+                    flex: 1, padding: '10px 8px', borderRadius: 12, border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.1)',
+                    background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
+                    color: selected ? 'white' : '#555570', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  }}>
+                    <span style={{ fontSize: 16 }}>{icons[v]}</span>
+                    <span>{labels[v]}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {error && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{error}</p>}
 

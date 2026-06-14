@@ -51,7 +51,7 @@ export default function DiscoverPage() {
     let q = supabase.from('videos').select(`
       id, title, description, thumbnail_url, view_count, like_count, category, tags, created_at,
       talent:profiles!talent_id(id, name, avatar_url, birth_date, skills)
-    `).eq('status', 'active').limit(50)
+    `).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').limit(50)
 
     if (category !== 'all') q = q.eq('category', category)
     q = sort === 'likes'

@@ -214,7 +214,7 @@ export default function ExplorePage() {
     let q = supabase.from('videos').select(`
       id, title, thumbnail_url, video_url, view_count, like_count, category, tags, created_at,
       talent:profiles!talent_id(id, name, avatar_url)
-    `).eq('status', 'active').limit(30)
+    `).eq('status', 'active').or('visibility.eq.public,visibility.is.null').limit(30)
 
     if (category !== 'all') q = q.eq('category', category)
     q = sort === 'likes'
