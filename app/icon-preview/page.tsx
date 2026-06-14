@@ -14,9 +14,9 @@ export default function IconPreviewPage() {
           </defs>
           <rect width="140" height="140" rx="32" fill="url(#g1)"/>
           <rect x="51" y="18" width="38" height="62" rx="19" fill="white"/>
-          <path d="M 26,74 A 44,38 0 0,0 114,74" fill="none" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-          <rect x="67" y="112" width="6" height="16" rx="3" fill="white"/>
-          <rect x="49" y="125" width="42" height="6" rx="3" fill="white"/>
+          <path d="M 26,68 A 44,38 0 0,0 114,68" fill="none" stroke="white" strokeWidth="7" strokeLinecap="round"/>
+          <rect x="67" y="106" width="6" height="16" rx="3" fill="white"/>
+          <rect x="49" y="119" width="42" height="6" rx="3" fill="white"/>
         </svg>
       ),
     },
