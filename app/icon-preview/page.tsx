@@ -13,14 +13,10 @@ export default function IconPreviewPage() {
             </linearGradient>
           </defs>
           <rect width="140" height="140" rx="32" fill="url(#g1)"/>
-          {/* 마이크 body - 더 크게, 위아래 여백 줄임 */}
-          <rect x="46" y="8" width="48" height="74" rx="24" fill="white"/>
-          {/* U bracket - sweep=1 로 아래 방향 U자 */}
-          <path d="M 20,86 A 50,38 0 0,1 120,86" fill="none" stroke="white" strokeWidth="8" strokeLinecap="round"/>
-          {/* stand */}
-          <rect x="66" y="124" width="8" height="10" rx="4" fill="white"/>
-          {/* base */}
-          <rect x="46" y="132" width="48" height="7" rx="3.5" fill="white"/>
+          <rect x="51" y="18" width="38" height="62" rx="19" fill="white"/>
+          <path d="M 26,80 A 44,38 0 0,0 114,80" fill="none" stroke="white" strokeWidth="7" strokeLinecap="round"/>
+          <rect x="67" y="114" width="6" height="18" rx="3" fill="white"/>
+          <rect x="49" y="129" width="42" height="6" rx="3" fill="white"/>
         </svg>
       ),
     },
@@ -85,8 +81,9 @@ export default function IconPreviewPage() {
           <rect x="44" y="12" width="52" height="22" rx="9" fill="white"/>
           {/* 빔 - 더 넓게 */}
           <path d="M 50,34 L 10,128 L 130,128 L 90,34 Z" fill="url(#beam)"/>
-          {/* 별 - 스타가 조명을 받는 느낌 */}
-          <polygon points="70,78 74,91 88,91 77,100 81,114 70,105 59,114 63,100 52,91 66,91" fill="white"/>
+          {/* 사람 - 크게 */}
+          <circle cx="70" cy="84" r="14" fill="rgba(5,80,105,0.9)"/>
+          <path d="M 44,128 Q 44,106 70,106 Q 96,106 96,128" fill="rgba(5,80,105,0.9)"/>
         </svg>
       ),
     },
