@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     description: '영상 하나로 전세계 기획사 담당자에게 노출됩니다.',
     images: ['/og-image.png'],
   },
+  verification: {
+    google: 'H3LVu-byEF_skxSRUkHs49IR2wPYAdUY0whAPouAjpQ',
+  },
   themeColor: '#0891b2',
   viewport: { width: 'device-width', initialScale: 1, maximumScale: 1 },
 }
