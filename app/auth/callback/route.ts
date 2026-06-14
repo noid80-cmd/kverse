@@ -33,11 +33,14 @@ export async function GET(request: NextRequest) {
   if (error || !data.user) {
     const allCookies = request.cookies.getAll()
     const hasVerifier = allCookies.some(c => c.name.includes('code-verifier'))
-    const errUrl = new URL(`${origin}/login`)
-    errUrl.searchParams.set('_e', error?.message ?? 'no_user')
-    errUrl.searchParams.set('_v', hasVerifier ? '1' : '0')
-    errUrl.searchParams.set('_nc', String(allCookies.length))
-    return NextResponse.redirect(errUrl.toString())
+    const names = allCookies.map(c => c.name).join('<br>')
+    return new Response(`<!DOCTYPE html><html><body style="background:#07070d;color:#eee;font-family:monospace;padding:30px;font-size:14px">
+<h2 style="color:#f87171">Exchange 실패</h2>
+<p><b>Error:</b> ${error?.message ?? 'no user'}</p>
+<p><b>code-verifier 있음:</b> ${hasVerifier ? '✅ YES' : '❌ NO'}</p>
+<p><b>쿠키 수:</b> ${allCookies.length}</p>
+<p><b>쿠키 이름:</b><br>${names || '(없음)'}</p>
+</body></html>`, { status: 200, headers: { 'Content-Type': 'text/html' } })
   }
 
   if (roleParam) {
