@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
-import { Home, Compass, Plus, Bell, Megaphone } from 'lucide-react'
+import { Home, Compass, Plus, Bell, Megaphone, Heart, Bookmark } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -136,21 +136,20 @@ export default function VideoDetailPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
           <button onClick={toggleLike}
             style={{
-              background: liked ? 'rgba(244,63,94,0.12)' : '#111118',
-              border: liked ? '1px solid rgba(244,63,94,0.3)' : '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+              background: '#111118', border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 20, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left',
             }}>
-            <span style={{ fontSize: 28 }}>{liked ? '❤️' : '🤍'}</span>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: liked ? '#f43f5e' : '#eeeeff' }}>{likeCount}</div>
-              <div style={{ fontSize: 12, color: liked ? '#f43f5e' : '#555570', fontWeight: 600 }}>{tx.videos.likes}</div>
+            <Heart size={20} strokeWidth={1.8} color={liked ? '#f43f5e' : '#555570'} fill={liked ? '#f43f5e' : 'none'} />
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>{likeCount}</div>
+              <div style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>{tx.videos.likes}</div>
             </div>
           </button>
-          <div style={{ background: 'rgba(6,182,212,0.1)', borderRadius: 20, padding: 20, border: '1px solid rgba(6,182,212,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 28 }}>⭐</span>
+          <div style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Bookmark size={20} strokeWidth={1.8} color={bookmarkCount > 0 ? '#22d3ee' : '#555570'} fill={bookmarkCount > 0 ? '#22d3ee' : 'none'} />
             <div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#22d3ee' }}>{bookmarkCount}</div>
-              <div style={{ fontSize: 12, color: '#22d3ee', fontWeight: 600 }}>{tx.videos.agencyInterest}</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>{bookmarkCount}</div>
+              <div style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>{tx.videos.agencyInterest}</div>
             </div>
           </div>
         </div>
