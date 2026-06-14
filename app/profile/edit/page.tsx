@@ -305,7 +305,10 @@ export default function ProfileEditPage() {
           </div>
 
           <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.bodyInfo}</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', margin: 0 }}>{tx.profile.bodyInfo}</p>
+              <span style={{ fontSize: 11, color: '#0891b2', fontWeight: 600, background: 'rgba(6,182,212,0.1)', padding: '3px 8px', borderRadius: 6 }}>🏢 {tx.profile.bodyInfoNote}</span>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
                 placeholder={tx.profile.heightPlaceholder} style={inputStyle} />

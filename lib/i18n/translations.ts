@@ -207,6 +207,7 @@ const t = {
     myProfile:       ['내 프로필', 'My Profile', 'マイプロフィール', '我的资料', '我的資料', 'โปรไฟล์ของฉัน', 'Profil saya', 'Hồ sơ của tôi', 'Aking profile', 'Mi perfil'],
     basicInfo:       ['기본 정보', 'Basic Info', '基本情報', '基本信息', '基本資訊', 'ข้อมูลพื้นฐาน', 'Info dasar', 'Thông tin cơ bản', 'Basic na impormasyon', 'Información básica'],
     bodyInfo:        ['신체 정보', 'Physical Info', '身体情報', '身体信息', '身體資訊', 'ข้อมูลร่างกาย', 'Info fisik', 'Thông tin thể chất', 'Pisikal na impormasyon', 'Información física'],
+    bodyInfoNote:    ['이 정보는 기획사 담당자에게만 공개됩니다', 'Only visible to agency staff', '事務所担当者のみに公開されます', '仅对经纪公司可见', '僅對經紀公司可見', 'เห็นได้เฉพาะเจ้าหน้าที่ค่าย', 'Hanya terlihat oleh staf agensi', 'Chỉ nhân viên công ty mới thấy', 'Nakikita lang ng kawani ng ahensya', 'Solo visible para el personal de agencias'],
     skillsLabel:     ['특기', 'Skills', 'スキル', '特长', '特長', 'ทักษะ', 'Keahlian', 'Kỹ năng', 'Mga kasanayan', 'Habilidades'],
     aboutMe:         ['자기소개', 'About me', '自己紹介', '自我介绍', '自我介紹', 'เกี่ยวกับฉัน', 'Tentang saya', 'Về tôi', 'Tungkol sa akin', 'Sobre mí'],
     nameRequired:    ['이름 *', 'Name *', '名前 *', '姓名 *', '姓名 *', 'ชื่อ *', 'Nama *', 'Tên *', 'Pangalan *', 'Nombre *'],
