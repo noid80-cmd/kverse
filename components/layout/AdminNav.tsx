@@ -29,9 +29,9 @@ export default function AdminNav() {
   }
 
   return (
-    <div style={{ background: 'rgba(9,9,15,0.97)', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 30, backdropFilter: 'blur(16px)' }}>
-      <div className="max-w-2xl mx-auto px-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
-        <span style={{ fontWeight: 900, fontSize: 16, color: '#eeeeff', flexShrink: 0 }}>관리자</span>
+    <div style={{ background: 'rgba(9,9,15,0.97)', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 30, backdropFilter: 'blur(16px)', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 56, padding: '0 16px', minWidth: 'max-content' }}>
+        <span style={{ fontWeight: 900, fontSize: 16, color: '#eeeeff', flexShrink: 0, marginRight: 6 }}>관리자</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {previewNav.map(n => (
             <Link key={n.href} href={n.href}
