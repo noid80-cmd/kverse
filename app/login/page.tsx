@@ -52,10 +52,9 @@ export default function LoginPage() {
       },
     })
     if (!data?.url) return
-    const allCookies = document.cookie.split(';').map(c => c.trim())
-    const hasVerifier = allCookies.some(c => c.includes('code-verifier'))
-    const names = allCookies.map(c => c.split('=')[0]).join('\n')
-    alert(`code-verifier 쿠키: ${hasVerifier ? 'YES ✅' : 'NO ❌'}\n\n쿠키 목록:\n${names}`)
+    const serverCheck = await fetch('/api/debug-cookies').then(r => r.json())
+    const clientCookies = document.cookie.split(';').map(c => c.trim().split('=')[0]).join(', ')
+    alert(`[클라이언트 document.cookie]\n${clientCookies}\n\n[서버 request.cookies]\n수: ${serverCheck.count}, verifier: ${serverCheck.hasVerifier ? 'YES ✅' : 'NO ❌'}\n이름: ${serverCheck.names.join(', ')}`)
     window.location.href = data.url
   }
 
