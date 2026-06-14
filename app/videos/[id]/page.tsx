@@ -112,20 +112,20 @@ export default function VideoDetailPage() {
         </div>
 
         <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 12, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, background: 'rgba(255,255,255,0.07)', color: '#aaaacc', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
               {categoryLabel[video.category] ?? video.category}
             </span>
             <span style={{ fontSize: 12, color: '#555570' }}>{video.view_count} {tx.videos.views}</span>
-            <span style={{ fontSize: 12, color: video.status === 'active' ? '#34d399' : '#fbbf24', fontWeight: 700 }}>
-              ● {video.status === 'active' ? tx.videos.statusActive : tx.videos.statusReview}
+            <span style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>
+              {video.status === 'active' ? tx.videos.statusActive : tx.videos.statusReview}
             </span>
           </div>
           {video.description && <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.6, marginBottom: 12 }}>{video.description}</p>}
           {video.tags.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {video.tags.map(t => (
-                <span key={t} style={{ fontSize: 12, background: 'rgba(8,145,178,0.12)', color: '#a78bfa', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
+                <span key={t} style={{ fontSize: 12, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
                   #{t}
                 </span>
               ))}
@@ -146,7 +146,7 @@ export default function VideoDetailPage() {
             </div>
           </button>
           <div style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Bookmark size={20} strokeWidth={1.8} color={bookmarkCount > 0 ? '#22d3ee' : '#555570'} fill={bookmarkCount > 0 ? '#22d3ee' : 'none'} />
+            <Bookmark size={20} strokeWidth={1.8} color={bookmarkCount > 0 ? '#eeeeff' : '#555570'} fill={bookmarkCount > 0 ? '#eeeeff' : 'none'} />
             <div>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>{bookmarkCount}</div>
               <div style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>{tx.videos.agencyInterest}</div>
