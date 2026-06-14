@@ -25,14 +25,10 @@ export default function LoginPage() {
     try {
       const supabase = createClient()
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      console.log('[login] signIn result:', { user: !!data.user, session: !!data.session, error: error?.message })
       if (error || !data.user) { setError(tx.loginError); setLoading(false); return }
-      const authCookies = document.cookie.split(';').filter(c => c.includes('auth-token'))
-      console.log('[login] auth cookies after signIn:', authCookies.length, authCookies.map(c => c.trim().substring(0, 40)))
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
       const role = profile?.role ?? 'talent'
       const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
-      console.log('[login] navigating to:', href)
       window.location.href = href
     } catch (err) {
       console.error('[login] error:', err)
@@ -43,7 +39,7 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
@@ -52,9 +48,19 @@ export default function LoginPage() {
       },
     })
     if (!data?.url) return
-    const serverCheck = await fetch('/api/debug-cookies').then(r => r.json())
-    const clientCookies = document.cookie.split(';').map(c => c.trim().split('=')[0]).join(', ')
-    alert(`[클라이언트 document.cookie]\n${clientCookies}\n\n[서버 request.cookies]\n수: ${serverCheck.count}, verifier: ${serverCheck.hasVerifier ? 'YES ✅' : 'NO ❌'}\n이름: ${serverCheck.names.join(', ')}`)
+
+    const verifierCookie = document.cookie.split(';').map(c => c.trim()).find(c => c.includes('-code-verifier'))
+    if (verifierCookie) {
+      const eqIdx = verifierCookie.indexOf('=')
+      const name = verifierCookie.substring(0, eqIdx)
+      const value = verifierCookie.substring(eqIdx + 1)
+      await fetch('/api/set-code-verifier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, value }),
+      })
+    }
+
     window.location.href = data.url
   }
 
