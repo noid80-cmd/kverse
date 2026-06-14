@@ -46,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={jakarta.className}>
       <head>
+        <meta name="google-site-verification" content="H3LVu-byEF_skxSRUkHs49IR2wPYAdUY0whAPouAjpQ" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
