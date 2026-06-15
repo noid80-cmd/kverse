@@ -3,8 +3,8 @@
 export default function IconPreview() {
   const icons = [
     {
-      label: '① ✦ 심볼 (수정)',
-      bg: 'linear-gradient(145deg, #1a0533, #7c1fa8)',
+      label: '① 시안 버전',
+      bg: 'linear-gradient(145deg, #001a20, #0a3d4a)',
       content: (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="130" height="130" viewBox="0 0 100 100">
@@ -26,10 +26,10 @@ export default function IconPreview() {
               </filter>
             </defs>
             {/* main star */}
-            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#f9a8d4" filter="url(#glow)" />
+            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" filter="url(#glow)" />
             {/* small sparkles */}
-            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(249,168,212,0.75)" filter="url(#glowSm)" />
-            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(249,168,212,0.6)" filter="url(#glowSm)" />
+            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.75)" filter="url(#glowSm)" />
+            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.6)" filter="url(#glowSm)" />
           </svg>
         </div>
       ),
