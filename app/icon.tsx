@@ -13,20 +13,18 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+          background: 'linear-gradient(145deg, #001a20, #0a3d4a)',
           borderRadius: 8,
         }}
       >
         <span
           style={{
-            color: 'white',
-            fontSize: 20,
-            fontWeight: 900,
-            letterSpacing: -1,
+            color: '#22d3ee',
+            fontSize: 22,
             lineHeight: 1,
           }}
         >
-          K
+          ✦
         </span>
       </div>
     ),

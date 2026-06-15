@@ -9,45 +9,31 @@ export default function AppleIcon() {
       <div style={{
         width: '100%', height: '100%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+        background: 'linear-gradient(145deg, #001a20, #0a3d4a)',
         position: 'relative',
       }}>
-        {/* shine */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, width: '100%', height: '55%',
-          background: 'linear-gradient(160deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%)',
-          display: 'flex',
-        }} />
+        {/* glow layer 1 - wide */}
+        <div style={{ position: 'absolute', display: 'flex', filter: 'blur(14px)' }}>
+          <span style={{ color: '#06b6d4', fontSize: 110, lineHeight: 1 }}>✦</span>
+        </div>
+        {/* glow layer 2 - tight */}
+        <div style={{ position: 'absolute', display: 'flex', filter: 'blur(5px)' }}>
+          <span style={{ color: '#22d3ee', fontSize: 110, lineHeight: 1 }}>✦</span>
+        </div>
+        {/* main star */}
+        <span style={{ color: '#cffafe', fontSize: 110, lineHeight: 1 }}>✦</span>
 
-        {/* 마이크 body */}
-        <div style={{
-          position: 'absolute', top: 23, left: 65,
-          width: 50, height: 80, borderRadius: 25,
-          background: 'white', display: 'flex',
-        }} />
+        {/* small sparkle top-right */}
+        <div style={{ position: 'absolute', top: 22, right: 24, display: 'flex', filter: 'blur(2px)' }}>
+          <span style={{ color: '#06b6d4', fontSize: 26, lineHeight: 1 }}>✦</span>
+        </div>
+        <span style={{ position: 'absolute', top: 22, right: 24, color: '#a5f3fc', fontSize: 26, lineHeight: 1 }}>✦</span>
 
-        {/* U-bracket */}
-        <div style={{
-          position: 'absolute', top: 87, left: 34,
-          width: 112, height: 50,
-          border: '9px solid white', borderTop: 'none',
-          borderRadius: '0 0 58px 58px',
-          background: 'transparent', display: 'flex',
-        }} />
-
-        {/* stand */}
-        <div style={{
-          position: 'absolute', top: 136, left: 85,
-          width: 10, height: 21, borderRadius: 5,
-          background: 'white', display: 'flex',
-        }} />
-
-        {/* base */}
-        <div style={{
-          position: 'absolute', top: 155, left: 62,
-          width: 56, height: 9, borderRadius: 4.5,
-          background: 'white', display: 'flex',
-        }} />
+        {/* tiny sparkle bottom-left */}
+        <div style={{ position: 'absolute', bottom: 28, left: 22, display: 'flex', filter: 'blur(1.5px)' }}>
+          <span style={{ color: '#06b6d4', fontSize: 16, lineHeight: 1 }}>✦</span>
+        </div>
+        <span style={{ position: 'absolute', bottom: 28, left: 22, color: '#a5f3fc', fontSize: 16, lineHeight: 1 }}>✦</span>
       </div>
     ),
     { ...size }
