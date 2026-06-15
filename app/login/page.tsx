@@ -124,10 +124,10 @@ export default function LoginPage() {
               boxShadow: '0 0 0 1px rgba(6,182,212,0.2), 0 8px 32px rgba(6,182,212,0.3), 0 0 60px rgba(6,182,212,0.1)',
               position: 'relative', zIndex: 1,
             }}>
-              <svg width="54" height="54" viewBox="0 0 100 100" style={{ position: 'relative' }}>
+              <svg width="63" height="63" viewBox="0 0 100 100" style={{ position: 'relative' }}>
                 <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
-                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.75)" />
-                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.6)" />
+                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#06b6d4" />
+                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.8)" />
               </svg>
             </div>
           </div>
