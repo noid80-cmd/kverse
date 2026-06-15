@@ -98,7 +98,9 @@ export default function DashboardPage() {
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
 
       // 미확인 배지
-      const lastSeenBm = parseInt(localStorage.getItem('kpick-seen-bm') ?? '0')
+      const lastSeenBmRaw = localStorage.getItem('kpick-seen-bm')
+      if (lastSeenBmRaw === null) localStorage.setItem('kpick-seen-bm', String(bCount ?? 0))
+      const lastSeenBm = lastSeenBmRaw !== null ? parseInt(lastSeenBmRaw) : (bCount ?? 0)
       const newBm = Math.max(0, (bCount ?? 0) - lastSeenBm)
       let unreadMsg = 0
       const convIds = (convs ?? []).map((c: { id: string }) => c.id)
