@@ -221,8 +221,10 @@ export default function LandingClient() {
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(7,7,13,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 24px' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(145deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontWeight: 900, fontSize: 16 }}>K</span>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(145deg, #001a20, #0a3d4a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="20" height="20" viewBox="0 0 100 100">
+                <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
+              </svg>
             </div>
             <span style={{ fontWeight: 900, fontSize: 18, color: '#eeeeff' }}>Kpick</span>
           </div>
@@ -326,8 +328,10 @@ export default function LandingClient() {
         <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 24px' }}>
           <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(145deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: 'white', fontWeight: 900, fontSize: 14 }}>K</span>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(145deg, #001a20, #0a3d4a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="17" height="17" viewBox="0 0 100 100">
+                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
+                </svg>
               </div>
               <div>
                 <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>Kpick</div>

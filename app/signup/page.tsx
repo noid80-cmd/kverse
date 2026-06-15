@@ -123,11 +123,13 @@ export default function SignupPage() {
         <div className="flex flex-col items-center mb-8">
           <div style={{
             width: 64, height: 64, borderRadius: 20, marginBottom: 14,
-            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+            background: 'linear-gradient(145deg, #001a20, #0a3d4a)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 8px 32px rgba(6,182,212,0.3)',
           }}>
-            <span style={{ color: 'white', fontSize: 24, fontWeight: 900 }}>K</span>
+            <svg width="38" height="38" viewBox="0 0 100 100">
+              <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
+            </svg>
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>{tx.auth.signupTitle}</h1>
           <p style={{ fontSize: 13, color: '#8888aa' }}>

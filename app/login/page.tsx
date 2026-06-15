@@ -119,13 +119,16 @@ export default function LoginPage() {
             }} />
             <div style={{
               width: 88, height: 88, borderRadius: 30,
-              background: 'linear-gradient(145deg, #0891b2 0%, #06b6d4 100%)',
+              background: 'linear-gradient(145deg, #001a20, #0a3d4a)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px rgba(6,182,212,0.4), 0 0 60px rgba(6,182,212,0.12)',
+              boxShadow: '0 0 0 1px rgba(6,182,212,0.2), 0 8px 32px rgba(6,182,212,0.3), 0 0 60px rgba(6,182,212,0.1)',
               position: 'relative', zIndex: 1,
             }}>
-              <div style={{ position: 'absolute', inset: 0, borderRadius: 30, background: 'linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 55%)' }} />
-              <span style={{ color: 'white', fontSize: 36, fontWeight: 800, letterSpacing: -1, position: 'relative' }}>K</span>
+              <svg width="54" height="54" viewBox="0 0 100 100" style={{ position: 'relative' }}>
+                <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
+                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.75)" />
+                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.6)" />
+              </svg>
             </div>
           </div>
           <h1 style={{
