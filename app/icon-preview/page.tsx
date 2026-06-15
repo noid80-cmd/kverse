@@ -3,18 +3,34 @@
 export default function IconPreview() {
   const icons = [
     {
-      label: '① ✦ 심볼 (아이돌 앨범)',
+      label: '① ✦ 심볼 (수정)',
       bg: 'linear-gradient(145deg, #1a0533, #7c1fa8)',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <svg width="100" height="100" viewBox="0 0 100 100">
-            {/* 4-pointed star */}
-            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#f9a8d4" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="130" height="130" viewBox="0 0 100 100">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glowSm" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="1.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            {/* main star */}
+            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#f9a8d4" filter="url(#glow)" />
             {/* small sparkles */}
-            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(249,168,212,0.6)" />
-            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(249,168,212,0.5)" />
+            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(249,168,212,0.75)" filter="url(#glowSm)" />
+            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(249,168,212,0.6)" filter="url(#glowSm)" />
           </svg>
-          <span style={{ color: 'rgba(249,168,212,0.9)', fontSize: 18, fontWeight: 800, letterSpacing: 5 }}>KPICK</span>
         </div>
       ),
     },
