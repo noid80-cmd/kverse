@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const publicPaths = ['/login', '/signup', '/auth', '/api', '/color-preview']
+  const publicPaths = ['/login', '/signup', '/auth', '/api', '/color-preview', '/apple-icon', '/icon']
 
   // Return early for public paths — skips Supabase client creation entirely.
   // This prevents _recoverAndRefresh() from running and sending Set-Cookie
