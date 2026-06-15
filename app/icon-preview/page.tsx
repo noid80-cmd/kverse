@@ -3,73 +3,79 @@
 export default function IconPreview() {
   const icons = [
     {
-      label: '① K 레터',
-      bg: 'linear-gradient(145deg, #7c3aed, #ec4899)',
+      label: '① ✦ 심볼 (아이돌 앨범)',
+      bg: 'linear-gradient(145deg, #1a0533, #7c1fa8)',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-          <span style={{ color: 'white', fontSize: 90, fontWeight: 900, letterSpacing: -4, lineHeight: 1, fontFamily: 'Arial Black, sans-serif' }}>K</span>
-          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 22, fontWeight: 700, letterSpacing: 6 }}>pick</span>
-        </div>
-      ),
-    },
-    {
-      label: '② 별/스파클',
-      bg: 'linear-gradient(145deg, #0f0a1e, #2d1b69)',
-      content: (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <svg width="90" height="90" viewBox="0 0 24 24">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="#facc15" />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            {/* 4-pointed star */}
+            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#f9a8d4" />
+            {/* small sparkles */}
+            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(249,168,212,0.6)" />
+            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(249,168,212,0.5)" />
           </svg>
-          <span style={{ color: 'rgba(250,204,21,0.85)', fontSize: 20, fontWeight: 800, letterSpacing: 5 }}>KPICK</span>
+          <span style={{ color: 'rgba(249,168,212,0.9)', fontSize: 18, fontWeight: 800, letterSpacing: 5 }}>KPICK</span>
         </div>
       ),
     },
     {
-      label: '③ 카메라+필름',
-      bg: 'linear-gradient(145deg, #0c0a00, #78350f)',
+      label: '② 네온 K (콘서트)',
+      bg: '#06000f',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <svg width="90" height="80" viewBox="0 0 80 70">
-            <rect x="4" y="20" width="72" height="46" rx="10" fill="white" fillOpacity="0.9" />
-            <circle cx="40" cy="43" r="18" fill="#78350f" />
-            <circle cx="40" cy="43" r="12" fill="#0c0a00" />
-            <circle cx="40" cy="43" r="5" fill="white" fillOpacity="0.3" />
-            <rect x="26" y="10" width="28" height="14" rx="6" fill="white" fillOpacity="0.9" />
-            <circle cx="64" cy="29" r="5" fill="#ef4444" />
-          </svg>
-          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18, fontWeight: 700, letterSpacing: 4 }}>KPICK</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, position: 'relative' }}>
+          {/* outer glow */}
+          <span style={{
+            position: 'absolute',
+            color: 'transparent',
+            fontSize: 110, fontWeight: 900, lineHeight: 1,
+            textShadow: '0 0 30px #39ff14, 0 0 60px #39ff14, 0 0 100px #39ff14',
+            fontFamily: 'Arial Black, sans-serif',
+            userSelect: 'none',
+          }}>K</span>
+          <span style={{
+            color: '#39ff14',
+            fontSize: 110, fontWeight: 900, lineHeight: 1,
+            textShadow: '0 0 8px #39ff14, 0 0 20px #39ff14',
+            fontFamily: 'Arial Black, sans-serif',
+          }}>K</span>
+          <span style={{ color: 'rgba(57,255,20,0.7)', fontSize: 16, fontWeight: 700, letterSpacing: 7, marginTop: -6 }}>PICK</span>
         </div>
       ),
     },
     {
-      label: '④ 왕관/크라운',
-      bg: 'linear-gradient(145deg, #1e1b4b, #4c1d95)',
+      label: '③ 하트+K (팬덤)',
+      bg: 'linear-gradient(145deg, #1a0020, #8b0040)',
       content: (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-          <svg width="100" height="76" viewBox="0 0 100 76">
-            <path d="M10 65 L10 45 L25 20 L50 45 L75 20 L90 45 L90 65 Z" fill="#facc15" />
-            <circle cx="25" cy="20" r="7" fill="#f472b6" />
-            <circle cx="50" cy="10" r="9" fill="#f472b6" />
-            <circle cx="75" cy="20" r="7" fill="#f472b6" />
-            <rect x="10" y="57" width="80" height="10" rx="4" fill="#eab308" />
-          </svg>
-          <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 22, fontWeight: 900, letterSpacing: 4 }}>KPICK</span>
+          <div style={{ position: 'relative', width: 110, height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="110" height="100" viewBox="0 0 110 100" style={{ position: 'absolute' }}>
+              <path d="M55 88 C55 88 8 58 8 30 C8 14 20 4 36 4 C45 4 52 9 55 14 C58 9 65 4 74 4 C90 4 102 14 102 30 C102 58 55 88 55 88 Z" fill="#f472b6" />
+            </svg>
+            <span style={{
+              position: 'relative', zIndex: 1,
+              color: 'white', fontSize: 62, fontWeight: 900, lineHeight: 1,
+              fontFamily: 'Arial Black, sans-serif',
+              textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              marginTop: -8,
+            }}>K</span>
+          </div>
+          <span style={{ color: 'rgba(244,114,182,0.85)', fontSize: 18, fontWeight: 800, letterSpacing: 5 }}>PICK</span>
         </div>
       ),
     },
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 40 }}>
-      <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>Kpick 아이콘 비교</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 40 }}>
+      <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>Kpick 아이콘 2차</h1>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         {icons.map(({ label, bg, content }) => (
           <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
             <div style={{
               width: 180, height: 180, borderRadius: 40,
               background: bg,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
               overflow: 'hidden',
             }}>
               {content}
