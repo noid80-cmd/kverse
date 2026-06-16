@@ -61,7 +61,7 @@ export default function ReactionsPage() {
     const [{ data: convData }, { data: b }] = await Promise.all([
       supabase.from('conversations')
         .select('id, created_at, agency_member_id, agency_member:profiles!agency_member_id(name, avatar_url)')
-        .eq('talent_id', userId).neq('deleted_by_talent', true).order('created_at', { ascending: false }),
+        .eq('talent_id', userId).eq('deleted_by_talent', false).order('created_at', { ascending: false }),
       supabase.from('bookmarks').select('id, created_at, note, video:videos(id, title), agency_member:profiles!agency_member_id(name)')
         .eq('talent_id', userId).order('created_at', { ascending: false }),
     ])
@@ -79,6 +79,7 @@ export default function ReactionsPage() {
     const fresh = { convs: list, bookmarks: (b as unknown as Bookmark[]) ?? [] }
     setPageData(fresh)
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(fresh)) } catch {}
+    try { localStorage.setItem('kpick-seen-bm', String(fresh.bookmarks.length)) } catch {}
 
     if (list.length > 0) {
       const profileIds = list.map(c => c.agency_member_id)

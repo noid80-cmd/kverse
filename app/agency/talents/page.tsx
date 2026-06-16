@@ -75,7 +75,7 @@ export default function AgencyTalentsPage() {
                     }
                   </Link>
                   <div style={{ flex: 1, padding: '14px 14px 14px 16px', minWidth: 0 }}>
-                    <Link href={`/agency/talents/${b.talent?.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <Link href={b.talent?.id ? `/agency/talents/${b.talent.id}` : '#'} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <div style={{
                         width: 28, height: 28, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
                         background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
@@ -94,7 +94,7 @@ export default function AgencyTalentsPage() {
                         </span>
                       )}
                     </Link>
-                    <Link href={`/agency/discover/${b.video?.id}`} style={{ textDecoration: 'none' }}>
+                    <Link href={b.video?.id ? `/agency/discover/${b.video.id}` : '#'} style={{ textDecoration: 'none' }}>
                       <div style={{ fontSize: 13, color: '#8888aa', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 4 }}>
                         {b.video?.title ?? '영상'}
                       </div>
