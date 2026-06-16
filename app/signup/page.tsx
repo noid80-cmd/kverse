@@ -97,6 +97,13 @@ export default function SignupPage() {
     })
     setLoading(false)
     if (error) { setError(error.message); return }
+
+    fetch('/api/notify-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, role, agency_name: agencyName.trim() || undefined }),
+    }).catch(() => {})
+
     if (role === 'agency') { setDone(true); return }
     router.push('/onboarding')
   }

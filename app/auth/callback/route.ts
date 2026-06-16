@@ -42,7 +42,22 @@ export async function GET(request: NextRequest) {
 
   const role = (roleParam && (!profile || profile.role === 'talent')) ? roleParam : (profile?.role ?? 'talent')
   const isNewUser = !profile
-  const finalDest = role === 'admin' ? '/admin' : role === 'agency' ? '/agency/discover' : isNewUser ? '/onboarding' : '/dashboard'
+
+  if (isNewUser) {
+    const userName = data.user.user_metadata?.full_name ?? data.user.email ?? ''
+    const userEmail = data.user.email ?? ''
+    fetch(`${origin}/api/notify-signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: userName, email: userEmail, role }),
+    }).catch(() => {})
+  }
+
+  const finalDest = role === 'admin' ? '/admin'
+    : isNewUser && role === 'agency' ? '/onboarding?next=/agency/discover'
+    : role === 'agency' ? '/agency/discover'
+    : isNewUser ? '/onboarding'
+    : '/dashboard'
 
   response.headers.set('Location', `${origin}${finalDest}`)
   return response
