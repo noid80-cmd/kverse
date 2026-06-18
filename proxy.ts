@@ -3,13 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const publicPaths = ['/login', '/signup', '/auth', '/api', '/color-preview', '/apple-icon', '/icon']
 
-  // Return early for public paths — skips Supabase client creation entirely.
-  // This prevents _recoverAndRefresh() from running and sending Set-Cookie
-  // delete headers that would wipe the PKCE code verifier before the
-  // /auth/confirm page can call exchangeCodeForSession.
-  if (publicPaths.some(p => pathname.startsWith(p)) || pathname === '/') {
+  // Skip Supabase client for auth callback paths — prevents Set-Cookie headers
+  // from wiping the PKCE code verifier before exchangeCodeForSession runs.
+  if (pathname.startsWith('/auth')) {
     return NextResponse.next()
   }
 
@@ -32,11 +29,9 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
+  // Refresh session on every request so expired tokens get renewed.
+  // Individual pages handle their own auth-based redirects.
+  await supabase.auth.getUser()
 
   return supabaseResponse
 }
