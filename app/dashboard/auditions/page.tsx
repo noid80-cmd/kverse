@@ -290,25 +290,24 @@ export default function TalentAuditionsPage() {
         </div>
         <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 16 }}>{tx.auditions.pageDesc}</p>
 
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-          {([['all', tx.explore.allCategories], ['online', tx.auditions.modeOnline], ['offline', tx.auditions.modeOffline]] as const).map(([val, label]) => (
-            <button key={val} onClick={() => setFilterMode(val)} style={{
-              padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(255,255,255,0.08)',
-              fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              background: filterMode === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#111118',
-              color: filterMode === val ? 'white' : '#555570',
-            }}>{label}</button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          {([['recent', tx.auditions.sortLatest], ['deadline', tx.auditions.sortDeadline]] as const).map(([val, label]) => (
-            <button key={val} onClick={() => setSortBy(val)} style={{
-              padding: '7px 14px', borderRadius: 10, border: 'none', fontSize: 12, fontWeight: 700,
-              cursor: 'pointer',
-              background: sortBy === val ? 'rgba(6,182,212,0.18)' : 'transparent',
-              color: sortBy === val ? '#22d3ee' : '#555570',
-            }}>{label}</button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {([['all', tx.explore.allCategories], ['online', tx.auditions.modeOnline], ['offline', tx.auditions.modeOffline]] as const).map(([val, label]) => (
+              <button key={val} onClick={() => setFilterMode(val)} style={{
+                padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                background: filterMode === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#111118',
+                color: filterMode === val ? 'white' : '#555570',
+              }}>{label}</button>
+            ))}
+          </div>
+          <button onClick={() => setSortBy(s => s === 'recent' ? 'deadline' : 'recent')} style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 12, fontWeight: 700, color: '#22d3ee', flexShrink: 0,
+          }}>
+            ↕ {sortBy === 'recent' ? tx.auditions.sortLatest : tx.auditions.sortDeadline}
+          </button>
         </div>
 
         {loading ? (
