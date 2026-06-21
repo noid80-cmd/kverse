@@ -13,6 +13,7 @@ type Audition = {
   id: string; title: string; description: string | null; category: string
   mode: 'online' | 'offline' | 'both' | null
   deadline: string | null; status: string; created_at: string; applicant_count: number
+  agency_id: string | null
   agency: { name: string } | null
 }
 
@@ -39,10 +40,11 @@ export default function AdminAuditionsPage() {
     const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }
 
-    const [{ data: ags }, { data: auds }] = await Promise.all([
+    const [{ data: ags }, { data: auds, error: audsErr }] = await Promise.all([
       supabase.from('agencies').select('id, name').order('name'),
-      supabase.from('auditions').select('id, title, description, category, mode, deadline, status, created_at, agency:agencies(name)').order('created_at', { ascending: false }),
+      supabase.from('auditions').select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name)').order('created_at', { ascending: false }),
     ])
+    if (audsErr) { alert('오류: ' + audsErr.message); setLoading(false); return }
 
     setAgencies(ags ?? [])
 
@@ -63,7 +65,7 @@ export default function AdminAuditionsPage() {
   async function createAudition() {
     if (!form.title.trim() || !form.agencyId || form.categories.length === 0 || !form.deadline) return
     setSaving(true)
-    await supabase.from('auditions').insert({
+    const { error } = await supabase.from('auditions').insert({
       agency_id: form.agencyId === 'ADMIN' ? null : form.agencyId,
       title: form.title.trim(),
       description: form.description.trim() || null,
@@ -72,9 +74,10 @@ export default function AdminAuditionsPage() {
       deadline: form.deadline,
       status: 'active',
     })
+    setSaving(false)
+    if (error) { alert('저장 실패: ' + error.message); return }
     setForm({ title: '', description: '', categories: ['vocal'], mode: 'offline', deadline: '', agencyId: '' })
     setShowCreate(false)
-    setSaving(false)
     load()
   }
 
