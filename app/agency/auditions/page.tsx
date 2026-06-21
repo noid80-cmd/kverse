@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -20,6 +20,8 @@ type Audition = {
   status: string
   created_at: string
   applicant_count: number
+  agency_id: string | null
+  agency: { name: string; is_verified: boolean } | null
 }
 
 const inputStyle = {
@@ -28,10 +30,12 @@ const inputStyle = {
 }
 
 export default function AgencyAuditionsPage() {
-  const [auditions, setAuditions] = useState<Audition[]>([])
+  const [myAuditions, setMyAuditions] = useState<Audition[]>([])
+  const [allAuditions, setAllAuditions] = useState<Audition[]>([])
   const [loading, setLoading] = useState(true)
   const [agencyId, setAgencyId] = useState<string | null>(null)
   const [agencyName, setAgencyName] = useState('')
+  const [tab, setTab] = useState<'mine' | 'all'>('mine')
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'both' as 'online' | 'offline' | 'both', deadline: '' })
   const [saving, setSaving] = useState(false)
@@ -50,18 +54,32 @@ export default function AgencyAuditionsPage() {
     const { data: ag } = await supabase.from('agencies').select('name').eq('id', am.agency_id).single()
     if (ag?.name) setAgencyName(ag.name)
 
-    const { data } = await supabase.from('auditions')
-      .select('id, title, description, category, mode, deadline, status, created_at')
-      .eq('agency_id', am.agency_id)
-      .order('created_at', { ascending: false })
+    const [myRes, allRes] = await Promise.all([
+      supabase.from('auditions')
+        .select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name, is_verified)')
+        .eq('agency_id', am.agency_id)
+        .order('created_at', { ascending: false }),
+      supabase.from('auditions')
+        .select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name, is_verified)')
+        .neq('agency_id', am.agency_id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false }),
+    ])
 
-    const withCount = await Promise.all((data ?? []).map(async a => {
-      const { count } = await supabase.from('audition_applications')
-        .select('*', { count: 'exact', head: true }).eq('audition_id', a.id)
-      return { ...a, applicant_count: count ?? 0 }
-    }))
+    const addCount = async (list: Omit<Audition, 'applicant_count'>[]) =>
+      Promise.all(list.map(async a => {
+        const { count } = await supabase.from('audition_applications')
+          .select('*', { count: 'exact', head: true }).eq('audition_id', a.id)
+        return { ...a, applicant_count: count ?? 0 }
+      }))
 
-    setAuditions(withCount)
+    const [mine, all] = await Promise.all([
+      addCount((myRes.data ?? []) as unknown as Omit<Audition, 'applicant_count'>[]),
+      addCount((allRes.data ?? []) as unknown as Omit<Audition, 'applicant_count'>[]),
+    ])
+
+    setMyAuditions(mine)
+    setAllAuditions(all)
     setLoading(false)
   }, [])
 
@@ -71,7 +89,7 @@ export default function AgencyAuditionsPage() {
     if (!confirm('공고를 삭제할까요?')) return
     setDeleting(id)
     await supabase.from('auditions').delete().eq('id', id)
-    setAuditions(prev => prev.filter(a => a.id !== id))
+    setMyAuditions(prev => prev.filter(a => a.id !== id))
     setDeleting(null)
   }
 
@@ -93,7 +111,6 @@ export default function AgencyAuditionsPage() {
       status: 'active',
     }).select('id').single()
     if (!error && inserted) {
-      // auto-translate in background
       supabase.auth.getSession().then(({ data: s }) => s.session?.access_token).then(token => {
         fetch('/api/translate', {
           method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -124,11 +141,110 @@ export default function AgencyAuditionsPage() {
     setSaving(false)
   }
 
+  const MyCard = ({ a }: { a: Audition }) => (
+    <div style={{ position: 'relative' }}>
+      <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
+        <div style={{ background: isExpired(a.deadline) ? 'rgba(255,255,255,0.02)' : '#111118', borderRadius: 20, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.07)', opacity: isExpired(a.deadline) ? 0.7 : 1 }}>
+          <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18, marginBottom: 4 }}>{agencyName}</div>
+          <div style={{ fontWeight: 600, color: '#22d3ee', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            {a.category.split(',').map(c => (
+              <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+            ))}
+            {a.mode && (
+              <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
+              </span>
+            )}
+          </div>
+          {a.description && (
+            <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#22d3ee', fontSize: 13, fontWeight: 700 }}>
+              <Users size={14} strokeWidth={2} /> {a.applicant_count}명 지원
+            </div>
+            {a.deadline && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: isExpired(a.deadline) ? '#f87171' : '#555570', fontSize: 12, fontWeight: isExpired(a.deadline) ? 700 : 400 }}>
+                <Calendar size={13} strokeWidth={2} /> {isExpired(a.deadline) ? '마감 ' : '~'}{a.deadline}
+              </div>
+            )}
+          </div>
+        </div>
+      </Link>
+      <button onClick={() => deleteAudition(a.id)} disabled={deleting === a.id}
+        style={{ position: 'absolute', top: 14, right: 14, background: '#1a1a25', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#555570', zIndex: 1 }}>
+        <Trash2 size={14} strokeWidth={2} />
+      </button>
+    </div>
+  )
+
+  const OtherCard = ({ a }: { a: Audition }) => (
+    <div style={{ background: '#111118', borderRadius: 20, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+        <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 16 }}>{a.agency?.name ?? '관리자 공지'}</div>
+        {a.agency?.is_verified && (
+          <span style={{ fontSize: 10, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>인증</span>
+        )}
+      </div>
+      <div style={{ fontWeight: 600, color: '#22d3ee', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        {a.category.split(',').map(c => (
+          <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+        ))}
+        {a.mode && (
+          <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+            {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
+          </span>
+        )}
+      </div>
+      {a.description && (
+        <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
+      )}
+      {a.deadline && (
+        <div style={{ fontSize: 12, color: '#555570' }}>
+          <Calendar size={12} strokeWidth={2} style={{ display: 'inline', marginRight: 4 }} />~{a.deadline}
+        </div>
+      )}
+    </div>
+  )
+
+  const renderList = (list: Audition[], isMine: boolean) => {
+    const active = list.filter(a => !isExpired(a.deadline))
+    const expired = list.filter(a => isExpired(a.deadline))
+    if (list.length === 0) return (
+      <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
+          <Megaphone size={22} strokeWidth={1.8} />
+        </div>
+        <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>{isMine ? '아직 공고가 없어요' : '다른 공고가 없어요'}</div>
+        <div style={{ fontSize: 13, color: '#555570' }}>{isMine ? '공고를 올려 지망생들의 지원을 받아보세요' : '다른 기획사의 공고가 올라오면 여기에 표시돼요'}</div>
+      </div>
+    )
+    return (
+      <>
+        {active.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: expired.length > 0 ? 28 : 0 }}>
+            {active.map(a => isMine ? <MyCard key={a.id} a={a} /> : <OtherCard key={a.id} a={a} />)}
+          </div>
+        )}
+        {expired.length > 0 && (
+          <>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#555570', marginBottom: 12 }}>마감된 공고</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {expired.map(a => isMine ? <MyCard key={a.id} a={a} /> : <OtherCard key={a.id} a={a} />)}
+            </div>
+          </>
+        )}
+      </>
+    )
+  }
+
   return (
     <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>오디션 공고</h1>
           <button onClick={() => setShowCreate(v => !v)} style={{
             display: 'flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer',
@@ -137,6 +253,17 @@ export default function AgencyAuditionsPage() {
           }}>
             <Plus size={16} strokeWidth={2.5} /> 공고 올리기
           </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: 0, marginBottom: 20, background: '#111118', borderRadius: 14, padding: 4 }}>
+          {([['mine', `내 공고 ${myAuditions.length > 0 ? `(${myAuditions.length})` : ''}`], ['all', `전체 공고 ${allAuditions.length > 0 ? `(${allAuditions.length})` : ''}`]] as const).map(([val, label]) => (
+            <button key={val} onClick={() => setTab(val)} style={{
+              flex: 1, padding: '9px', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer',
+              background: tab === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'transparent',
+              color: tab === val ? 'white' : '#555570',
+            }}>{label}</button>
+          ))}
         </div>
 
         {showCreate && (
@@ -158,9 +285,7 @@ export default function AgencyAuditionsPage() {
                   return (
                     <button key={cat} type="button" onClick={() => setForm(f => ({
                       ...f,
-                      categories: selected
-                        ? f.categories.filter(c => c !== cat)
-                        : [...f.categories, cat],
+                      categories: selected ? f.categories.filter(c => c !== cat) : [...f.categories, cat],
                     }))} style={{
                       padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                       cursor: 'pointer', border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.1)',
@@ -211,79 +336,7 @@ export default function AgencyAuditionsPage() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>불러오는 중...</div>
-        ) : auditions.length === 0 ? (
-          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
-              <Megaphone size={22} strokeWidth={1.8} />
-            </div>
-            <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 4 }}>아직 공고가 없어요</div>
-            <div style={{ fontSize: 13, color: '#555570' }}>공고를 올려 지망생들의 지원을 받아보세요</div>
-          </div>
-        ) : (() => {
-          const active = auditions.filter(a => !isExpired(a.deadline))
-          const expired = auditions.filter(a => isExpired(a.deadline))
-          const AuditionCard = ({ a }: { a: Audition }) => (
-            <div key={a.id} style={{ position: 'relative' }}>
-              <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: isExpired(a.deadline) ? 'rgba(255,255,255,0.02)' : '#111118', borderRadius: 20, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.07)', opacity: isExpired(a.deadline) ? 0.7 : 1 }}>
-                  <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18, marginBottom: 4 }}>{agencyName}</div>
-                  <div style={{ fontWeight: 600, color: '#22d3ee', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-                    {a.category.split(',').map(c => (
-                      <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                        {categoryLabel[c] ?? c}
-                      </span>
-                    ))}
-                    {a.mode && (
-                      <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                        {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
-                      </span>
-                    )}
-                  </div>
-                  {a.description && (
-                    <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#22d3ee', fontSize: 13, fontWeight: 700 }}>
-                      <Users size={14} strokeWidth={2} /> {a.applicant_count}명 지원
-                    </div>
-                    {a.deadline && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: isExpired(a.deadline) ? '#f87171' : '#555570', fontSize: 12, fontWeight: isExpired(a.deadline) ? 700 : 400 }}>
-                        <Calendar size={13} strokeWidth={2} /> {isExpired(a.deadline) ? '마감 ' : '~'}{a.deadline}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Link>
-              <button onClick={() => deleteAudition(a.id)} disabled={deleting === a.id}
-                style={{
-                  position: 'absolute', top: 14, right: 14,
-                  background: '#1a1a25', border: 'none', borderRadius: 10,
-                  width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', color: '#555570', zIndex: 1,
-                }}>
-                <Trash2 size={14} strokeWidth={2} />
-              </button>
-            </div>
-          )
-          return (
-            <>
-              {active.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: expired.length > 0 ? 28 : 0 }}>
-                  {active.map(a => <AuditionCard key={a.id} a={a} />)}
-                </div>
-              )}
-              {expired.length > 0 && (
-                <>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#555570', marginBottom: 12 }}>마감된 공고</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {expired.map(a => <AuditionCard key={a.id} a={a} />)}
-                  </div>
-                </>
-              )}
-            </>
-          )
-        })()}
+        ) : renderList(tab === 'mine' ? myAuditions : allAuditions, tab === 'mine')}
       </div>
       <AgencyNav />
     </div>
