@@ -290,7 +290,7 @@ export default function TalentAuditionsPage() {
         <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 16 }}>{tx.auditions.pageDesc}</p>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          {([['recent', '최신순'], ['deadline', '마감임박순']] as const).map(([val, label]) => (
+          {([['recent', tx.auditions.sortLatest], ['deadline', tx.auditions.sortDeadline]] as const).map(([val, label]) => (
             <button key={val} onClick={() => setSortBy(val)} style={{
               padding: '7px 14px', borderRadius: 10, border: 'none', fontSize: 12, fontWeight: 700,
               cursor: 'pointer',
@@ -341,7 +341,7 @@ export default function TalentAuditionsPage() {
                 opacity: exp && !appInfo ? 0.65 : 1,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18 }}>{a.agency?.name ?? '관리자 공지'}</div>
+                  <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18 }}>{a.agency?.name ?? tx.auditions.adminNotice}</div>
                   {a.agency?.is_verified && (
                     <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{tx.common.verified}</span>
                   )}
@@ -418,7 +418,7 @@ export default function TalentAuditionsPage() {
                     borderRadius: 14, padding: '12px 14px', fontSize: 13, color: '#fbbf24',
                     fontWeight: 600, lineHeight: 1.5,
                   }}>
-                    📍 오프라인 현장 지원만 가능한 오디션이에요. 영상 지원은 받지 않아요.
+                    {tx.auditions.offlineOnlyNotice}
                   </div>
                 ) : (
                   <>

@@ -168,6 +168,10 @@ const t = {
     modeOnline:      ['온라인', 'Online', 'オンライン', '线上', '線上', 'ออนไลน์', 'Online', 'Online', 'Online', 'En línea'],
     modeOffline:     ['오프라인', 'In-person', 'オフライン', '线下', '線下', 'ออฟไลน์', 'Offline', 'Offline', 'In-person', 'Presencial'],
     modeBoth:        ['온+오프라인', 'Hybrid', 'ハイブリッド', '线上+线下', '線上+線下', 'ไฮบริด', 'Hybrid', 'Hybrid', 'Hybrid', 'Híbrido'],
+    adminNotice:     ['관리자 공지', 'Admin Notice', '管理者公告', '管理员公告', '管理員公告', 'ประกาศแอดมิน', 'Pengumuman Admin', 'Thông báo Admin', 'Abiso ng Admin', 'Aviso del Admin'],
+    sortLatest:      ['최신순', 'Latest', '最新順', '最新', '最新', 'ล่าสุด', 'Terbaru', 'Mới nhất', 'Pinakabago', 'Recientes'],
+    sortDeadline:    ['마감임박순', 'Deadline Soon', '締切が近い順', '即将截止', '即將截止', 'ใกล้หมดเวลา', 'Tenggat Waktu', 'Sắp hết hạn', 'Malapit nang mag-expire', 'Próximo a vencer'],
+    offlineOnlyNotice: ['📍 오프라인 현장 지원만 가능한 오디션이에요. 영상 지원은 받지 않아요.', '📍 This is an in-person audition only. Video applications are not accepted.', '📍 このオーディションは現地参加のみです。動画での応募は受け付けていません。', '📍 此次试镜仅限现场参加，不接受视频申请。', '📍 此次試鏡僅限現場參加，不接受影片申請。', '📍 ออดิชันนี้เปิดรับเฉพาะการเข้าร่วมสด ไม่รับใบสมัครวิดีโอ', '📍 Audisi ini hanya untuk peserta langsung. Lamaran video tidak diterima.', '📍 Buổi thử vai này chỉ dành cho tham dự trực tiếp. Không nhận ứng tuyển bằng video.', '📍 Ang audisyon na ito ay para sa personal na pagdalo lamang. Hindi tinatanggap ang mga video application.', '📍 Esta audición es solo presencial. No se aceptan solicitudes en video.'],
   },
 
   // ── Reactions / Activity ─────────────────────────────
