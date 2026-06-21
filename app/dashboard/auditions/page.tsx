@@ -74,6 +74,7 @@ export default function TalentAuditionsPage() {
   const [myId, setMyId] = useState('')
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
 
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
   const [tab, setTab] = useState<'existing' | 'new'>('existing')
   const [selectedVideo, setSelectedVideo] = useState<MyVideo | null>(null)
@@ -337,7 +338,13 @@ export default function TalentAuditionsPage() {
                   )}
                 </div>
                 {displayDesc && (
-                  <div style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{displayDesc}</div>
+                  <div onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}
+                    style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, cursor: 'pointer',
+                      ...(expandedId === a.id ? { whiteSpace: 'pre-wrap' } : { overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }),
+                    }}>
+                    {displayDesc}
+                    {expandedId !== a.id && <span style={{ color: '#555570' }}> 더보기</span>}
+                  </div>
                 )}
                 {a.deadline && (
                   <div style={{ fontSize: 12, color: exp ? '#f87171' : '#555570', fontWeight: exp ? 700 : 400, marginBottom: 12 }}>

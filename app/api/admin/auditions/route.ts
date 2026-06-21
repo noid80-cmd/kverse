@@ -56,6 +56,18 @@ export async function POST(request: NextRequest) {
   })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  fetch(`${new URL(request.url).origin}/api/push`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      broadcast: true,
+      title: '새 오디션 공고',
+      body: `${body.title} 오디션이 올라왔어요!`,
+      url: '/dashboard/auditions',
+    }),
+  }).catch(() => {})
+
   return NextResponse.json({ ok: true })
 }
 

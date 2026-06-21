@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
-import { Trash2, Plus, Calendar, Users } from 'lucide-react'
+import { Trash2, Plus, Calendar, Users, X } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -31,6 +31,7 @@ export default function AdminAuditionsPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'offline' as 'online' | 'offline' | 'both', deadline: '', agencyId: '' })
   const [saving, setSaving] = useState(false)
+  const [detail, setDetail] = useState<Audition | null>(null)
   const supabase = createClient()
 
   const load = useCallback(async () => {
@@ -95,6 +96,7 @@ export default function AdminAuditionsPage() {
   const expired = auditions.filter(a => isExpired(a.deadline))
 
   return (
+    <>
     <div className="min-h-screen pb-10" style={{ background: '#f0f0f8' }}>
       <AdminNav />
 
@@ -187,7 +189,7 @@ export default function AdminAuditionsPage() {
             {active.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: expired.length > 0 ? 28 : 0 }}>
                 {active.map(a => (
-                  <div key={a.id} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', position: 'relative' }}>
+                  <div key={a.id} onClick={() => setDetail(a)} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', position: 'relative', cursor: 'pointer' }}>
                     <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
                     <div style={{ fontWeight: 600, color: '#0891b2', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -202,7 +204,7 @@ export default function AdminAuditionsPage() {
                       <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       {a.deadline && <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
                     </div>
-                    <button onClick={() => deleteAudition(a.id)} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+                    <button onClick={e => { e.stopPropagation(); deleteAudition(a.id) }} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
                       <Trash2 size={16} strokeWidth={2} />
                     </button>
                   </div>
@@ -214,14 +216,14 @@ export default function AdminAuditionsPage() {
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 10 }}>마감된 공고</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {expired.map(a => (
-                    <div key={a.id} style={{ background: '#f8f8fc', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', opacity: 0.7, position: 'relative' }}>
+                    <div key={a.id} onClick={() => setDetail(a)} style={{ background: '#f8f8fc', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', opacity: 0.7, position: 'relative', cursor: 'pointer' }}>
                       <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
                       <div style={{ fontWeight: 600, color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>마감 {a.deadline}</span>
                         <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       </div>
-                      <button onClick={() => deleteAudition(a.id)} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+                      <button onClick={e => { e.stopPropagation(); deleteAudition(a.id) }} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
                         <Trash2 size={16} strokeWidth={2} />
                       </button>
                     </div>
@@ -236,5 +238,43 @@ export default function AdminAuditionsPage() {
         )}
       </div>
     </div>
+
+    {detail && (
+      <div onClick={() => setDetail(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, padding: 24, width: '100%', maxWidth: 520, maxHeight: '80vh', overflow: 'auto', position: 'relative' }}>
+          <button onClick={() => setDetail(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+            <X size={20} strokeWidth={2} />
+          </button>
+          <div style={{ fontSize: 13, color: '#8b8baa', marginBottom: 4 }}>{detail.agency?.name ?? '관리자 공지'}</div>
+          <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18, marginBottom: 12 }}>{detail.title}</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
+            {detail.category.split(',').map(c => (
+              <span key={c} style={{ fontSize: 12, background: '#eef2ff', color: '#0891b2', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+            ))}
+            {detail.mode && (
+              <span style={{ fontSize: 12, background: '#f0f0f8', color: '#8b8baa', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>
+                {detail.mode === 'online' ? '🖥️ 온라인' : detail.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
+              </span>
+            )}
+            {detail.deadline && (
+              <span style={{ fontSize: 12, color: isExpired(detail.deadline) ? '#ef4444' : '#8b8baa', fontWeight: isExpired(detail.deadline) ? 700 : 400 }}>
+                {isExpired(detail.deadline) ? '마감 ' : '~'}{detail.deadline}
+              </span>
+            )}
+          </div>
+          {detail.description ? (
+            <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, whiteSpace: 'pre-wrap', background: '#f8f8fc', borderRadius: 12, padding: '14px 16px' }}>
+              {detail.description}
+            </div>
+          ) : (
+            <div style={{ fontSize: 14, color: '#94a3b8', textAlign: 'center', padding: 20 }}>상세 내용 없음</div>
+          )}
+          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 6, color: '#8b8baa', fontSize: 13 }}>
+            <Users size={14} /> {detail.applicant_count}명 지원
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
