@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   }
 
   const role = (roleParam && (!profile || profile.role === 'talent')) ? roleParam : (profile?.role ?? 'talent')
-  const isNewUser = !profile
+  const isNewUser = Date.now() - new Date(data.user.created_at).getTime() < 60_000
 
   if (isNewUser) {
     const userName = data.user.user_metadata?.full_name ?? data.user.email ?? ''
