@@ -75,6 +75,7 @@ export default function TalentAuditionsPage() {
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
 
   const [sortBy, setSortBy] = useState<'recent' | 'deadline'>('recent')
+  const [filterMode, setFilterMode] = useState<'all' | 'online' | 'offline'>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
   const [tab, setTab] = useState<'existing' | 'new'>('existing')
@@ -289,12 +290,22 @@ export default function TalentAuditionsPage() {
         </div>
         <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 16 }}>{tx.auditions.pageDesc}</p>
 
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+          {([['all', tx.explore.allCategories], ['online', tx.auditions.modeOnline], ['offline', tx.auditions.modeOffline]] as const).map(([val, label]) => (
+            <button key={val} onClick={() => setFilterMode(val)} style={{
+              padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              background: filterMode === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#111118',
+              color: filterMode === val ? 'white' : '#555570',
+            }}>{label}</button>
+          ))}
+        </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
           {([['recent', tx.auditions.sortLatest], ['deadline', tx.auditions.sortDeadline]] as const).map(([val, label]) => (
             <button key={val} onClick={() => setSortBy(val)} style={{
               padding: '7px 14px', borderRadius: 10, border: 'none', fontSize: 12, fontWeight: 700,
               cursor: 'pointer',
-              background: sortBy === val ? 'rgba(6,182,212,0.18)' : '#111118',
+              background: sortBy === val ? 'rgba(6,182,212,0.18)' : 'transparent',
               color: sortBy === val ? '#22d3ee' : '#555570',
             }}>{label}</button>
           ))}
@@ -321,8 +332,14 @@ export default function TalentAuditionsPage() {
             }
             return list
           }
-          const active = sortAuditions(auditions.filter(a => !isExpired(a.deadline)))
-          const expired = sortAuditions(auditions.filter(a => isExpired(a.deadline)))
+          const matchesMode = (a: Audition) => {
+            if (filterMode === 'all') return true
+            if (filterMode === 'online') return a.mode === 'online' || a.mode === 'both'
+            return a.mode === 'offline' || a.mode === 'both'
+          }
+          const filtered = auditions.filter(matchesMode)
+          const active = sortAuditions(filtered.filter(a => !isExpired(a.deadline)))
+          const expired = sortAuditions(filtered.filter(a => isExpired(a.deadline)))
 
           const AuditionCard = ({ a }: { a: Audition }) => {
             const exp = isExpired(a.deadline)
