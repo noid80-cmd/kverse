@@ -74,6 +74,7 @@ export default function TalentAuditionsPage() {
   const [myId, setMyId] = useState('')
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
 
+  const [sortBy, setSortBy] = useState<'recent' | 'deadline'>('recent')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
   const [tab, setTab] = useState<'existing' | 'new'>('existing')
@@ -286,7 +287,18 @@ export default function TalentAuditionsPage() {
           </button>
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{tx.auditions.title}</h1>
         </div>
-        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 24 }}>{tx.auditions.pageDesc}</p>
+        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 16 }}>{tx.auditions.pageDesc}</p>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+          {([['recent', '최신순'], ['deadline', '마감임박순']] as const).map(([val, label]) => (
+            <button key={val} onClick={() => setSortBy(val)} style={{
+              padding: '7px 14px', borderRadius: 10, border: 'none', fontSize: 12, fontWeight: 700,
+              cursor: 'pointer',
+              background: sortBy === val ? 'rgba(6,182,212,0.18)' : '#111118',
+              color: sortBy === val ? '#22d3ee' : '#555570',
+            }}>{label}</button>
+          ))}
+        </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>{tx.common.loading}</div>
@@ -298,8 +310,19 @@ export default function TalentAuditionsPage() {
             <div style={{ fontWeight: 700, color: '#eeeeff' }}>{tx.auditions.noAuditions}</div>
           </div>
         ) : (() => {
-          const active = auditions.filter(a => !isExpired(a.deadline))
-          const expired = auditions.filter(a => isExpired(a.deadline))
+          const sortAuditions = (list: Audition[]) => {
+            if (sortBy === 'deadline') {
+              return [...list].sort((a, b) => {
+                if (!a.deadline && !b.deadline) return 0
+                if (!a.deadline) return 1
+                if (!b.deadline) return -1
+                return a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0
+              })
+            }
+            return list
+          }
+          const active = sortAuditions(auditions.filter(a => !isExpired(a.deadline)))
+          const expired = sortAuditions(auditions.filter(a => isExpired(a.deadline)))
 
           const AuditionCard = ({ a }: { a: Audition }) => {
             const exp = isExpired(a.deadline)
