@@ -11,6 +11,7 @@ const categoryLabel: Record<string, string> = {
 
 type Audition = {
   id: string; title: string; description: string | null; category: string
+  mode: 'online' | 'offline' | 'both' | null
   deadline: string | null; status: string; created_at: string; applicant_count: number
   agency: { name: string } | null
 }
@@ -27,7 +28,7 @@ export default function AdminAuditionsPage() {
   const [agencies, setAgencies] = useState<Agency[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], deadline: '', agencyId: '' })
+  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'offline' as 'online' | 'offline' | 'both', deadline: '', agencyId: '' })
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
@@ -40,7 +41,7 @@ export default function AdminAuditionsPage() {
 
     const [{ data: ags }, { data: auds }] = await Promise.all([
       supabase.from('agencies').select('id, name').order('name'),
-      supabase.from('auditions').select('id, title, description, category, deadline, status, created_at, agency:agencies(name)').order('created_at', { ascending: false }),
+      supabase.from('auditions').select('id, title, description, category, mode, deadline, status, created_at, agency:agencies(name)').order('created_at', { ascending: false }),
     ])
 
     setAgencies(ags ?? [])
@@ -63,14 +64,15 @@ export default function AdminAuditionsPage() {
     if (!form.title.trim() || !form.agencyId || form.categories.length === 0 || !form.deadline) return
     setSaving(true)
     await supabase.from('auditions').insert({
-      agency_id: form.agencyId,
+      agency_id: form.agencyId === 'ADMIN' ? null : form.agencyId,
       title: form.title.trim(),
       description: form.description.trim() || null,
       category: form.categories.join(','),
+      mode: form.mode,
       deadline: form.deadline,
       status: 'active',
     })
-    setForm({ title: '', description: '', categories: ['vocal'], deadline: '', agencyId: '' })
+    setForm({ title: '', description: '', categories: ['vocal'], mode: 'offline', deadline: '', agencyId: '' })
     setShowCreate(false)
     setSaving(false)
     load()
@@ -107,7 +109,8 @@ export default function AdminAuditionsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <select value={form.agencyId} onChange={e => setForm(f => ({ ...f, agencyId: e.target.value }))}
                 style={{ ...inputStyle, border: `1px solid ${form.agencyId ? '#e0e0f0' : '#fca5a5'}` }}>
-                <option value="">기획사 선택 *</option>
+                <option value="">공고 주체 선택 *</option>
+                <option value="ADMIN">📌 관리자 공고</option>
                 {agencies.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
               <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
@@ -132,6 +135,23 @@ export default function AdminAuditionsPage() {
                     </button>
                   )
                 })}
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8, fontWeight: 600 }}>진행방식</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {([['online', '🖥️ 온라인'], ['offline', '📍 오프라인'], ['both', '🔀 온+오프라인']] as const).map(([val, label]) => {
+                    const selected = form.mode === val
+                    return (
+                      <button key={val} type="button" onClick={() => setForm(f => ({ ...f, mode: val }))} style={{
+                        flex: 1, padding: '8px 4px', borderRadius: 10, border: selected ? 'none' : '1.5px solid #e0e0f0',
+                        background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#f8f8fc',
+                        color: selected ? 'white' : '#94a3b8', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                      }}>
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
               <div>
                 <label style={{ fontSize: 12, color: '#ef4444', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
@@ -161,12 +181,17 @@ export default function AdminAuditionsPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: expired.length > 0 ? 28 : 0 }}>
                 {active.map(a => (
                   <div key={a.id} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', position: 'relative' }}>
-                    <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '?'}</div>
+                    <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
                     <div style={{ fontWeight: 600, color: '#0891b2', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       {a.category.split(',').map(c => (
                         <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#0891b2', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
                       ))}
+                      {a.mode && (
+                        <span style={{ fontSize: 11, background: '#f0f0f8', color: '#8b8baa', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
+                          {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
+                        </span>
+                      )}
                       <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       {a.deadline && <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
                     </div>
@@ -183,7 +208,7 @@ export default function AdminAuditionsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {expired.map(a => (
                     <div key={a.id} style={{ background: '#f8f8fc', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', opacity: 0.7, position: 'relative' }}>
-                      <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '?'}</div>
+                      <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
                       <div style={{ fontWeight: 600, color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>마감 {a.deadline}</span>
