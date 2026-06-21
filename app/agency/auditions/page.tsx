@@ -61,7 +61,7 @@ export default function AgencyAuditionsPage() {
         .order('created_at', { ascending: false }),
       supabase.from('auditions')
         .select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name, is_verified)')
-        .neq('agency_id', am.agency_id)
+        .or(`agency_id.neq.${am.agency_id},agency_id.is.null`)
         .eq('status', 'active')
         .order('created_at', { ascending: false }),
     ])
