@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Bell, BellOff } from 'lucide-react'
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -34,6 +34,8 @@ async function subscribeNotif() {
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath = searchParams.get('next') ?? '/dashboard'
   const [step, setStep] = useState<1 | 2 | null>(null)
   const [isIOS, setIsIOS] = useState(false)
   const [isAndroid, setIsAndroid] = useState(false)
@@ -43,7 +45,7 @@ export default function OnboardingPage() {
   const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
-    if (localStorage.getItem('kpick-onboarded')) { router.replace('/dashboard'); return }
+    if (localStorage.getItem('kpick-onboarded')) { router.replace(nextPath); return }
 
     const ua = navigator.userAgent
     const ios = /iPhone|iPad|iPod/.test(ua) && !(window as any).MSStream
@@ -81,7 +83,7 @@ export default function OnboardingPage() {
 
   function finish() {
     localStorage.setItem('kpick-onboarded', '1')
-    router.replace('/dashboard')
+    router.replace(nextPath)
   }
 
   async function handleAndroidInstall() {

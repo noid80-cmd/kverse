@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Upload, Building2 } from 'lucide-react'
+import { CheckCircle, Upload, Building2, Bell, BellOff, BellRing, X } from 'lucide-react'
 
 type Agency = {
   id: string
@@ -27,8 +27,14 @@ export default function AgencySettingsPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState({ name: '', description: '', website: '', business_registration_number: '' })
+  const [notifModal, setNotifModal] = useState(false)
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission>('default')
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    if ('Notification' in window) setNotifPerm(Notification.permission)
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -196,7 +202,71 @@ export default function AgencySettingsPage() {
         </div>
 
       </div>
+        {/* 알림 설정 */}
+        <div style={{ marginTop: 16, background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15, marginBottom: 16 }}>알림 설정</div>
+          <button onClick={() => setNotifModal(true)} style={{
+            width: '100%', padding: '14px 18px', borderRadius: 14,
+            background: notifPerm === 'granted' ? 'rgba(6,182,212,0.08)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.08)' : '#1a1a25',
+            border: `1px solid ${notifPerm === 'granted' ? 'rgba(6,182,212,0.25)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.08)'}`,
+            display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+          }}>
+            {notifPerm === 'granted' ? <BellRing size={20} color="#22d3ee" strokeWidth={2} /> : notifPerm === 'denied' ? <BellOff size={20} color="#f87171" strokeWidth={2} /> : <Bell size={20} color="#555570" strokeWidth={2} />}
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: notifPerm === 'granted' ? '#22d3ee' : notifPerm === 'denied' ? '#f87171' : '#8888aa' }}>
+                {notifPerm === 'granted' ? '알림 켜짐' : notifPerm === 'denied' ? '알림 차단됨' : '알림 꺼짐'}
+              </div>
+              <div style={{ fontSize: 12, color: '#555570', marginTop: 1 }}>탭해서 설정 변경</div>
+            </div>
+          </button>
+        </div>
+
+      </div>
       <AgencyNav />
+
+      {notifModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={() => setNotifModal(false)}>
+          <div style={{ background: '#111118', borderRadius: '24px 24px 0 0', padding: '28px 24px 40px', width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#eeeeff', margin: 0 }}>알림 설정</h3>
+              <button onClick={() => setNotifModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555570', padding: 4 }}><X size={20} /></button>
+            </div>
+            {notifPerm === 'granted' && (
+              <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
+                <BellRing size={32} color="#22d3ee" style={{ margin: '0 auto 12px' }} />
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>알림이 켜져 있어요</p>
+                <p style={{ fontSize: 13, color: '#8888aa' }}>새 지원자, 채팅 알림을 받고 있습니다</p>
+              </div>
+            )}
+            {notifPerm === 'denied' && (
+              <>
+                <div style={{ textAlign: 'center', padding: '12px 0 16px' }}>
+                  <BellOff size={32} color="#f87171" style={{ margin: '0 auto 12px' }} />
+                  <p style={{ fontSize: 15, fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>알림이 차단되어 있어요</p>
+                </div>
+                <div style={{ background: '#1a1a25', borderRadius: 14, padding: '16px', fontSize: 13, color: '#8888aa', lineHeight: 1.7 }}>
+                  <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#eeeeff' }}>Chrome (Android)</p>
+                  <p style={{ margin: 0 }}>주소창 자물쇠 아이콘 → 알림 → 허용</p>
+                  <p style={{ margin: '12px 0 8px', fontWeight: 700, color: '#eeeeff' }}>Safari (iPhone)</p>
+                  <p style={{ margin: 0 }}>설정 앱 → Safari → 알림 허용</p>
+                </div>
+              </>
+            )}
+            {notifPerm === 'default' && (
+              <>
+                <p style={{ fontSize: 14, color: '#8888aa', marginBottom: 20, lineHeight: 1.6 }}>새 지원자가 오디션에 지원하거나 채팅이 오면 알림을 받을 수 있어요</p>
+                <button onClick={async () => {
+                  const perm = await Notification.requestPermission()
+                  setNotifPerm(perm)
+                  setNotifModal(false)
+                }} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #0891b2, #06b6d4)', border: 'none', borderRadius: 14, color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                  알림 허용하기
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
