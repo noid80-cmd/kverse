@@ -12,6 +12,7 @@ type Video = {
   id: string; title: string; description: string | null; video_url: string | null
   thumbnail_url: string | null; view_count: number; like_count: number; status: string
   category: string; tags: string[]; created_at: string; talent_id: string
+  visibility: 'public' | 'agency_only' | 'private'
 }
 
 export default function VideoDetailPage() {
@@ -39,6 +40,8 @@ export default function VideoDetailPage() {
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const [myId, setMyId] = useState('')
+  const [visibility, setVisibility] = useState<'public' | 'agency_only' | 'private'>('public')
+  const [savingVisibility, setSavingVisibility] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export default function VideoDetailPage() {
       if (!v) { router.push('/videos'); return }
       setVideo(v)
       setLikeCount(v.like_count ?? 0)
+      setVisibility(v.visibility ?? 'public')
       if (user) {
         setMyId(user.id)
         setIsOwner(user.id === v.talent_id)
@@ -76,6 +80,14 @@ export default function VideoDetailPage() {
       setLiked(true)
       setLikeCount(c => c + 1)
     }
+  }
+
+  async function handleVisibilityChange(v: 'public' | 'agency_only' | 'private') {
+    if (v === visibility || savingVisibility) return
+    setSavingVisibility(true)
+    setVisibility(v)
+    await supabase.from('videos').update({ visibility: v }).eq('id', id)
+    setSavingVisibility(false)
   }
 
   async function handleDelete() {
@@ -153,6 +165,33 @@ export default function VideoDetailPage() {
             </div>
           </div>
         </div>
+
+        {isOwner && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+            <div style={{ fontSize: 12, color: '#8888aa', fontWeight: 600 }}>{tx.videos.visibilityLabel}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['public', 'agency_only', 'private'] as const).map(v => {
+                const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
+                const icons = { public: '🌐', agency_only: '🏢', private: '🔒' }
+                const selected = visibility === v
+                return (
+                  <button key={v} type="button" onClick={() => handleVisibilityChange(v)} disabled={savingVisibility}
+                    style={{
+                      flex: 1, padding: '10px 8px', borderRadius: 12,
+                      border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.1)',
+                      background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
+                      color: selected ? 'white' : '#555570', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                      opacity: savingVisibility ? 0.6 : 1,
+                    }}>
+                    <span style={{ fontSize: 16 }}>{icons[v]}</span>
+                    <span>{labels[v]}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {isOwner && (
           <button onClick={handleDelete}
