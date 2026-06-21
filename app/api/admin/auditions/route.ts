@@ -25,6 +25,53 @@ async function verifyAdmin(request: NextRequest) {
   return { user: session.user, token: session.access_token }
 }
 
+async function autoTranslate(title: string, description: string | null) {
+  const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY
+  if (!apiKey) return null
+
+  // app translation keys → Google Translate target codes
+  const targets: Array<[string, string]> = [
+    ['ja', 'ja'],
+    ['en', 'en'],
+    ['zh-CN', 'zh-CN'],
+    ['th', 'th'],
+  ]
+
+  const results = await Promise.allSettled(
+    targets.map(async ([storeKey, googleTarget]) => {
+      const res = await fetch(
+        `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            q: [title, description ?? ''],
+            source: 'ko',
+            target: googleTarget,
+            format: 'text',
+          }),
+        }
+      )
+      if (!res.ok) throw new Error(`translate failed for ${googleTarget}`)
+      const data = await res.json()
+      const translated = data.data.translations as { translatedText: string }[]
+      return {
+        key: storeKey,
+        title: translated[0].translatedText,
+        description: translated[1]?.translatedText ?? '',
+      }
+    })
+  )
+
+  const translations: Record<string, { title: string; description: string }> = {}
+  for (const r of results) {
+    if (r.status === 'fulfilled') {
+      translations[r.value.key] = { title: r.value.title, description: r.value.description }
+    }
+  }
+  return Object.keys(translations).length > 0 ? translations : null
+}
+
 export async function GET(request: NextRequest) {
   const admin = await verifyAdmin(request)
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -45,6 +92,9 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
   const sb = serviceClient()
+
+  const translations = await autoTranslate(body.title, body.description ?? null)
+
   const { error } = await sb.from('auditions').insert({
     agency_id: body.agency_id ?? null,
     title: body.title,
@@ -53,6 +103,7 @@ export async function POST(request: NextRequest) {
     mode: body.mode,
     deadline: body.deadline,
     status: 'active',
+    ...(translations ? { translations } : {}),
   })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -80,6 +131,9 @@ export async function PATCH(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
   const sb = serviceClient()
+
+  const translations = await autoTranslate(fields.title, fields.description ?? null)
+
   const { error } = await sb.from('auditions').update({
     agency_id: fields.agency_id ?? null,
     title: fields.title,
@@ -87,6 +141,7 @@ export async function PATCH(request: NextRequest) {
     category: fields.category,
     mode: fields.mode,
     deadline: fields.deadline,
+    ...(translations ? { translations } : {}),
   }).eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
