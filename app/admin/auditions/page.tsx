@@ -40,16 +40,17 @@ export default function AdminAuditionsPage() {
     const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }
 
-    const [{ data: ags }, { data: auds, error: audsErr }] = await Promise.all([
+    const [agsRes, audsRes] = await Promise.all([
       supabase.from('agencies').select('id, name').order('name'),
-      supabase.from('auditions').select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name)').order('created_at', { ascending: false }),
+      fetch('/api/admin/auditions'),
     ])
-    if (audsErr) { alert('오류: ' + audsErr.message); setLoading(false); return }
 
-    setAgencies(ags ?? [])
+    setAgencies(agsRes.data ?? [])
 
-    const withCount = await Promise.all((auds ?? []).map(async (a: unknown) => {
-      const aud = a as Omit<Audition, 'applicant_count'>
+    if (!audsRes.ok) { alert('오류: ' + await audsRes.text()); setLoading(false); return }
+    const auds: Omit<Audition, 'applicant_count'>[] = await audsRes.json()
+
+    const withCount = await Promise.all(auds.map(async (aud) => {
       const { count } = await supabase.from('audition_applications').select('*', { count: 'exact', head: true }).eq('audition_id', aud.id)
       return { ...aud, applicant_count: count ?? 0 }
     }))
@@ -65,17 +66,20 @@ export default function AdminAuditionsPage() {
   async function createAudition() {
     if (!form.title.trim() || !form.agencyId || form.categories.length === 0 || !form.deadline) return
     setSaving(true)
-    const { error } = await supabase.from('auditions').insert({
-      agency_id: form.agencyId === 'ADMIN' ? null : form.agencyId,
-      title: form.title.trim(),
-      description: form.description.trim() || null,
-      category: form.categories.join(','),
-      mode: form.mode,
-      deadline: form.deadline,
-      status: 'active',
+    const res = await fetch('/api/admin/auditions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agency_id: form.agencyId === 'ADMIN' ? null : form.agencyId,
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        category: form.categories.join(','),
+        mode: form.mode,
+        deadline: form.deadline,
+      }),
     })
     setSaving(false)
-    if (error) { alert('저장 실패: ' + error.message); return }
+    if (!res.ok) { const e = await res.json(); alert('저장 실패: ' + e.error); return }
     setForm({ title: '', description: '', categories: ['vocal'], mode: 'offline', deadline: '', agencyId: '' })
     setShowCreate(false)
     load()
@@ -83,7 +87,7 @@ export default function AdminAuditionsPage() {
 
   async function deleteAudition(id: string) {
     if (!confirm('공고를 완전히 삭제할까요?')) return
-    await supabase.from('auditions').delete().eq('id', id)
+    await fetch('/api/admin/auditions', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
     setAuditions(prev => prev.filter(a => a.id !== id))
   }
 
