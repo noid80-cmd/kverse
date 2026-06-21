@@ -22,12 +22,12 @@ async function verifyAdmin(request: NextRequest) {
   if (!session) return null
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
   if (profile?.role !== 'admin') return null
-  return session.user
+  return { user: session.user, token: session.access_token }
 }
 
 export async function GET(request: NextRequest) {
-  const user = await verifyAdmin(request)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const admin = await verifyAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const sb = serviceClient()
   const { data, error } = await sb
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await verifyAdmin(request)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const admin = await verifyAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
   const sb = serviceClient()
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
   fetch(`${new URL(request.url).origin}/api/push`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${admin.token}` },
     body: JSON.stringify({
       broadcast: true,
       title: '새 오디션 공고',
@@ -71,9 +71,31 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ ok: true })
 }
 
+export async function PATCH(request: NextRequest) {
+  const admin = await verifyAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  const { id, ...fields } = body
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  const sb = serviceClient()
+  const { error } = await sb.from('auditions').update({
+    agency_id: fields.agency_id ?? null,
+    title: fields.title,
+    description: fields.description ?? null,
+    category: fields.category,
+    mode: fields.mode,
+    deadline: fields.deadline,
+  }).eq('id', id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
+
 export async function DELETE(request: NextRequest) {
-  const user = await verifyAdmin(request)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const admin = await verifyAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await request.json()
   const sb = serviceClient()
