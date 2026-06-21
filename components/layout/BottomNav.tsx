@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -8,6 +8,10 @@ type NavItem = { href: string; label: string; icon: ReactNode }
 
 export default function BottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
+  const activeHref = items
+    .filter(item => pathname === item.href || pathname.startsWith(item.href + '/'))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href
+
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
@@ -16,7 +20,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
       {items.map(item => {
-        const active = pathname === item.href || pathname.startsWith(item.href + '/')
+        const active = item.href === activeHref
         return (
           <Link key={item.href} href={item.href}
             style={{
