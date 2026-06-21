@@ -221,7 +221,6 @@ export default function AgencySettingsPage() {
           </button>
         </div>
 
-      </div>
       <AgencyNav />
 
       {notifModal && (
