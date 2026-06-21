@@ -202,6 +202,8 @@ export default function AgencySettingsPage() {
         </div>
 
       </div>
+
+      <div className="max-w-lg mx-auto px-4">
         {/* 알림 설정 */}
         <div style={{ marginTop: 16, background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15, marginBottom: 16 }}>알림 설정</div>
@@ -220,6 +222,7 @@ export default function AgencySettingsPage() {
             </div>
           </button>
         </div>
+      </div>
 
       <AgencyNav />
 

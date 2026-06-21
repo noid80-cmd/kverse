@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Home, Compass, Plus, Bell, Megaphone, MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -25,8 +25,17 @@ type Bookmark = {
 const CACHE_KEY = 'kpick-reactions'
 
 export default function ReactionsPage() {
+  return (
+    <Suspense>
+      <ReactionsContent />
+    </Suspense>
+  )
+}
+
+function ReactionsContent() {
   const { lang } = useLang()
   const tx = useT(lang)
+  const searchParams = useSearchParams()
 
   const talentNav = [
     { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
@@ -40,7 +49,9 @@ export default function ReactionsPage() {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
   })
   const [verifiedIds, setVerifiedIds] = useState<Set<string>>(new Set())
-  const [tab, setTab] = useState<'contacts' | 'bookmarks'>('contacts')
+  const [tab, setTab] = useState<'contacts' | 'bookmarks'>(
+    searchParams.get('tab') === 'bookmarks' ? 'bookmarks' : 'contacts'
+  )
   const [toast, setToast] = useState<string | null>(null)
   const [notifModal, setNotifModal] = useState(false)
   const [notifPerm, setNotifPerm] = useState<NotificationPermission | null>(null)
