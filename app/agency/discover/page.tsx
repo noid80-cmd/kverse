@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
-import { Heart, Bookmark, Video as VideoIcon } from 'lucide-react'
+import { Heart, Video as VideoIcon } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -22,7 +22,6 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
   const [sort, setSort] = useState<'latest' | 'likes'>('latest')
-  const [bookmarked, setBookmarked] = useState<Set<string>>(new Set())
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState<string>('')
@@ -64,9 +63,6 @@ export default function DiscoverPage() {
     vids.forEach(v => { counts[v.id] = v.like_count })
     setLikeCounts(counts)
 
-    const { data: bm } = await supabase.from('bookmarks').select('talent_id').eq('agency_member_id', user.id)
-    setBookmarked(new Set(bm?.map(b => b.talent_id).filter(Boolean) as string[]))
-
     const { data: lk } = await supabase.from('likes').select('video_id').eq('user_id', user.id)
     setLiked(new Set(lk?.map(l => l.video_id).filter(Boolean) as string[]))
 
@@ -88,18 +84,7 @@ export default function DiscoverPage() {
     }
   }
 
-  async function toggleBookmark(talentId: string, videoId: string) {
-    if (bookmarked.has(talentId)) {
-      await supabase.from('bookmarks').delete().eq('agency_member_id', myId).eq('talent_id', talentId)
-      setBookmarked(prev => { const s = new Set(prev); s.delete(talentId); return s })
-    } else {
-      await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: talentId, video_id: videoId })
-      setBookmarked(prev => new Set([...prev, talentId]))
-      const agName = agencyName ?? '기획사'
-      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: talentId, title: '관심 기획사 +1', body: `${agName}이(가) 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' }) })
-    }
-  }
+
 
   function getAge(birth: string | null) {
     if (!birth) return null
@@ -216,21 +201,7 @@ export default function DiscoverPage() {
                         }
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{v.talent?.name ?? '이름 없음'}</span>
-                          {v.talent && (
-                            <button
-                              onClick={e => { e.preventDefault(); e.stopPropagation(); toggleBookmark(v.talent!.id, v.id) }}
-                              style={{
-                                width: 26, height: 26, borderRadius: 8, border: 'none', cursor: 'pointer', flexShrink: 0,
-                                background: bookmarked.has(v.talent.id) ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.05)',
-                                color: bookmarked.has(v.talent.id) ? '#fbbf24' : '#444460',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              }}>
-                              <Bookmark size={13} strokeWidth={2} fill={bookmarked.has(v.talent.id) ? 'currentColor' : 'none'} />
-                            </button>
-                          )}
-                        </div>
+                        <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14 }}>{v.talent?.name ?? '이름 없음'}</div>
                         {getAge(v.talent?.birth_date ?? null) && (
                           <div style={{ fontSize: 12, color: '#555570' }}>{getAge(v.talent?.birth_date ?? null)}세</div>
                         )}
