@@ -77,6 +77,12 @@ export default function AdminAgenciesPage() {
     setAgencies(prev => prev.map(a => a.id === id ? { ...a, is_verified: !current } : a))
   }
 
+  async function deleteAgency(id: string, name: string) {
+    if (!confirm(`"${name}"을(를) 삭제할까요?\n관련 계정 및 데이터도 함께 삭제됩니다.`)) return
+    await supabase.from('agencies').delete().eq('id', id)
+    setAgencies(prev => prev.filter(a => a.id !== id))
+  }
+
   const pending = agencies.filter(a => a.business_registration_url && !a.is_verified)
   const displayed = tab === 'pending' ? pending : agencies
 
@@ -213,15 +219,24 @@ export default function AdminAgenciesPage() {
                     </div>
                     {a.description && <div style={{ fontSize: 12, color: '#555570', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{a.description}</div>}
                   </div>
-                  <button onClick={() => toggleVerified(a.id, a.is_verified)}
-                    style={{
-                      fontSize: 12, padding: '8px 14px', borderRadius: 10, border: 'none', fontWeight: 700, flexShrink: 0, cursor: 'pointer',
-                      background: a.is_verified ? '#1a1a25' : 'linear-gradient(135deg, #22c55e, #16a34a)',
-                      color: a.is_verified ? '#555570' : 'white',
-                      boxShadow: a.is_verified ? 'none' : '0 2px 8px rgba(34,197,94,0.3)',
-                    }}>
-                    {a.is_verified ? '인증해제' : '인증'}
-                  </button>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    <button onClick={() => toggleVerified(a.id, a.is_verified)}
+                      style={{
+                        fontSize: 12, padding: '8px 14px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer',
+                        background: a.is_verified ? '#1a1a25' : 'linear-gradient(135deg, #22c55e, #16a34a)',
+                        color: a.is_verified ? '#555570' : 'white',
+                        boxShadow: a.is_verified ? 'none' : '0 2px 8px rgba(34,197,94,0.3)',
+                      }}>
+                      {a.is_verified ? '인증해제' : '인증'}
+                    </button>
+                    <button onClick={() => deleteAgency(a.id, a.name)}
+                      style={{
+                        fontSize: 12, padding: '8px 10px', borderRadius: 10, border: '1px solid rgba(248,113,113,0.2)',
+                        background: 'rgba(248,113,113,0.06)', color: '#f87171', fontWeight: 700, cursor: 'pointer',
+                      }}>
+                      삭제
+                    </button>
+                  </div>
                 </div>
 
                 {a.business_registration_url && (
