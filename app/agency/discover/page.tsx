@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
-import PushSubscribe from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { Heart, Video as VideoIcon } from 'lucide-react'
 
@@ -104,7 +103,6 @@ export default function DiscoverPage() {
           display: 'flex', alignItems: 'center', gap: 6,
         }}>⚙️ 관리자</a>
       )}
-      <PushSubscribe />
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
