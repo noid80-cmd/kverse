@@ -26,6 +26,8 @@ export default function AdminAgenciesPage() {
   const [saving, setSaving] = useState(false)
   const [viewingImg, setViewingImg] = useState<string | null>(null)
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
+  const [inviteLink, setInviteLink] = useState<{ url: string; agencyName: string } | null>(null)
+  const [copied, setCopied] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -51,8 +53,27 @@ export default function AdminAgenciesPage() {
       description: description.trim() || null,
       website: website.trim() || null,
     }).select().single()
-    if (data) setAgencies(prev => [data as Agency, ...prev])
+    if (data) {
+      setAgencies(prev => [data as Agency, ...prev])
+      // 초대 토큰 생성
+      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2,'0')).join('')
+      await supabase.from('agency_invites').insert({ agency_id: data.id, token })
+      const url = `${window.location.origin}/invite?token=${token}`
+      setInviteLink({ url, agencyName: data.name })
+    }
     setName(''); setDescription(''); setWebsite(''); setShowForm(false); setSaving(false)
+  }
+
+  async function shareInvite() {
+    if (!inviteLink) return
+    const text = `안녕하세요! Kpick에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (7일 유효):\n${inviteLink.url}`
+    if (navigator.share) {
+      await navigator.share({ title: `Kpick — ${inviteLink.agencyName} 초대`, text, url: inviteLink.url })
+    } else {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   async function toggleVerified(id: string, current: boolean) {
@@ -95,6 +116,54 @@ export default function AdminAgenciesPage() {
             전체
           </button>
         </div>
+
+        {inviteLink && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.04))',
+            border: '1px solid rgba(6,182,212,0.25)',
+            borderRadius: 18, padding: '18px 20px', marginBottom: 20,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 18 }}>🎉</span>
+              <span style={{ fontWeight: 700, color: '#06b6d4', fontSize: 14 }}>{inviteLink.agencyName} 초대 링크가 생성됐어요</span>
+              <button onClick={() => setInviteLink(null)}
+                style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{
+              background: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: '10px 14px',
+              fontSize: 11, color: 'rgba(255,255,255,0.5)', wordBreak: 'break-all', marginBottom: 12, fontFamily: 'monospace',
+            }}>
+              {inviteLink.url}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={async () => {
+                  await navigator.clipboard.writeText(inviteLink.url)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                style={{
+                  flex: 1, padding: '11px', borderRadius: 12, border: '1px solid rgba(6,182,212,0.3)',
+                  background: copied ? 'rgba(34,197,94,0.12)' : 'rgba(6,182,212,0.08)',
+                  color: copied ? '#34d399' : '#06b6d4', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                }}>
+                {copied ? '✓ 복사됨' : '링크 복사'}
+              </button>
+              <button
+                onClick={shareInvite}
+                style={{
+                  flex: 1, padding: '11px', borderRadius: 12, border: 'none',
+                  background: 'linear-gradient(135deg, #fee500, #ffd900)',
+                  color: '#1a1a00', fontWeight: 800, fontSize: 13, cursor: 'pointer',
+                }}>
+                카카오톡으로 보내기
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 10 }}>
+              7일 후 만료 · 1회만 사용 가능
+            </div>
+          </div>
+        )}
 
         {showForm && (
           <form onSubmit={handleAdd} style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 20 }}>
