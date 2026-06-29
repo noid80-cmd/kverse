@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
-import { MessageCircle, Video, Heart } from 'lucide-react'
+import { MessageCircle, Video, Heart, Bookmark } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -25,6 +25,7 @@ export default function TalentProfilePage() {
   const [myId, setMyId] = useState('')
   const [convId, setConvId] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
+  const [bookmarked, setBookmarked] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -37,18 +38,30 @@ export default function TalentProfilePage() {
 
       setMyId(user.id)
 
-      const [{ data: t }, { data: v }, { data: conv }] = await Promise.all([
+      const [{ data: t }, { data: v }, { data: conv }, { data: bm }] = await Promise.all([
         supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
+        supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('talent_id', id).limit(1).maybeSingle(),
       ])
 
       setTalent(t as unknown as Talent)
       setVideos((v as unknown as Video[]) ?? [])
       if (conv) setConvId(conv.id)
+      setBookmarked(!!bm)
     }
     load()
   }, [id])
+
+  async function toggleBookmark() {
+    if (bookmarked) {
+      await supabase.from('bookmarks').delete().eq('agency_member_id', myId).eq('talent_id', id)
+      setBookmarked(false)
+    } else {
+      await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: id })
+      setBookmarked(true)
+    }
+  }
 
   async function handleChat() {
     if (convId) { router.push(`/chat/${convId}`); return }
@@ -99,8 +112,18 @@ export default function TalentProfilePage() {
                 : <span style={{ color: 'white', fontWeight: 900, fontSize: 26 }}>{talent.name[0]}</span>
               }
             </div>
-            <div>
-              <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 22, marginBottom: 4 }}>{talent.name}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 22 }}>{talent.name}</span>
+                <button onClick={toggleBookmark} style={{
+                  width: 32, height: 32, borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
+                  background: bookmarked ? 'rgba(251,191,36,0.15)' : '#f0f0f8',
+                  color: bookmarked ? '#d97706' : '#b0b0cc',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Bookmark size={15} strokeWidth={2} fill={bookmarked ? 'currentColor' : 'none'} />
+                </button>
+              </div>
               <div style={{ fontSize: 14, color: '#8b8baa' }}>
                 {[
                   getAge(talent.birth_date) && `${getAge(talent.birth_date)}세`,
