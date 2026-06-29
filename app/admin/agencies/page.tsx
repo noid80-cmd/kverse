@@ -21,8 +21,6 @@ export default function AdminAgenciesPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [website, setWebsite] = useState('')
   const [saving, setSaving] = useState(false)
   const [viewingImg, setViewingImg] = useState<string | null>(null)
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
@@ -50,8 +48,6 @@ export default function AdminAgenciesPage() {
     setSaving(true)
     const { data } = await supabase.from('agencies').insert({
       name: name.trim(),
-      description: description.trim() || null,
-      website: website.trim() || null,
     }).select().single()
     if (data) {
       setAgencies(prev => [data as Agency, ...prev])
@@ -61,7 +57,7 @@ export default function AdminAgenciesPage() {
       const url = `${window.location.origin}/invite?token=${token}`
       setInviteLink({ url, agencyName: data.name })
     }
-    setName(''); setDescription(''); setWebsite(''); setShowForm(false); setSaving(false)
+    setName(''); setShowForm(false); setSaving(false)
   }
 
   async function shareInvite() {
@@ -170,8 +166,6 @@ export default function AdminAgenciesPage() {
             <p style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 14, fontSize: 15 }}>새 기획사 등록</p>
             <div className="flex flex-col gap-3">
               <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="기획사명 *" required style={inputStyle} />
-              <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="소개 (선택)" style={inputStyle} />
-              <input type="url" value={website} onChange={e => setWebsite(e.target.value)} placeholder="웹사이트 (선택)" style={inputStyle} />
               <div style={{ display: 'flex', gap: 10 }}>
                 <button type="button" onClick={() => setShowForm(false)}
                   style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'none', color: '#555570', fontWeight: 700 }}>취소</button>
