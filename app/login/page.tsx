@@ -39,29 +39,13 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
-    const { data } = await supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         queryParams: { prompt: 'select_account' },
-        skipBrowserRedirect: true,
       },
     })
-    if (!data?.url) return
-
-    const verifierCookie = document.cookie.split(';').map(c => c.trim()).find(c => c.includes('-code-verifier'))
-    if (verifierCookie) {
-      const eqIdx = verifierCookie.indexOf('=')
-      const name = verifierCookie.substring(0, eqIdx)
-      const value = verifierCookie.substring(eqIdx + 1)
-      await fetch('/api/set-code-verifier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, value }),
-      })
-    }
-
-    window.location.href = data.url
   }
 
   return (
