@@ -31,7 +31,7 @@ export default function AgencyContactsPage() {
       if (!user) { window.location.href = '/login'; return }
 
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (profile?.role !== 'agency') { window.location.href = '/dashboard'; return }
+      if (profile?.role !== 'agency' && profile?.role !== 'admin') { window.location.href = '/dashboard'; return }
 
       const { data } = await supabase
         .from('conversations')
