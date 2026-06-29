@@ -26,6 +26,7 @@ export default function TalentProfilePage() {
   const [convId, setConvId] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const [bookmarked, setBookmarked] = useState(false)
+  const [agencyName, setAgencyName] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -38,17 +39,19 @@ export default function TalentProfilePage() {
 
       setMyId(user.id)
 
-      const [{ data: t }, { data: v }, { data: conv }, { data: bm }] = await Promise.all([
+      const [{ data: t }, { data: v }, { data: conv }, { data: bm }, { data: ag }] = await Promise.all([
         supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
         supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('talent_id', id).limit(1).maybeSingle(),
+        supabase.from('agency_members').select('agencies(name)').eq('profile_id', user.id).single(),
       ])
 
       setTalent(t as unknown as Talent)
       setVideos((v as unknown as Video[]) ?? [])
       if (conv) setConvId(conv.id)
       setBookmarked(!!bm)
+      setAgencyName((ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사')
     }
     load()
   }, [id])
@@ -60,6 +63,11 @@ export default function TalentProfilePage() {
     } else {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: id })
       setBookmarked(true)
+      fetch('/api/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: id, title: '관심 기획사 +1', body: `${agencyName}이(가) 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' }),
+      })
     }
   }
 

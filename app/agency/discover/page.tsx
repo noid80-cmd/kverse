@@ -97,7 +97,7 @@ export default function DiscoverPage() {
       setBookmarked(prev => new Set([...prev, talentId]))
       const agName = agencyName ?? '기획사'
       fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: talentId, title: '관심 표시', body: `${agName}이 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' }) })
+        body: JSON.stringify({ userId: talentId, title: '관심 기획사 +1', body: `${agName}이(가) 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' }) })
     }
   }
 
