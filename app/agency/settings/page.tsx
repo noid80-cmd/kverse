@@ -273,8 +273,32 @@ export default function AgencySettingsPage() {
               <>
                 <p style={{ fontSize: 14, color: '#8888aa', marginBottom: 20, lineHeight: 1.6 }}>새 지원자가 오디션에 지원하거나 채팅이 오면 알림을 받을 수 있어요</p>
                 <button onClick={async () => {
-                  const perm = await Notification.requestPermission()
-                  setNotifPerm(perm)
+                  if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    alert('이 브라우저는 알림을 지원하지 않아요.\niOS는 홈 화면에 추가(PWA) 후 사용해주세요.')
+                    setNotifModal(false)
+                    return
+                  }
+                  try {
+                    const perm = await Notification.requestPermission()
+                    setNotifPerm(perm)
+                    if (perm === 'granted') {
+                      const keyRes = await fetch('/api/push/vapid-key')
+                      const { publicKey } = await keyRes.json()
+                      const reg = await navigator.serviceWorker.register('/sw.js')
+                      await navigator.serviceWorker.ready
+                      const existing = await reg.pushManager.getSubscription()
+                      if (existing) await existing.unsubscribe()
+                      const padding = '='.repeat((4 - (publicKey.length % 4)) % 4)
+                      const base64 = (publicKey + padding).replace(/-/g, '+').replace(/_/g, '/')
+                      const raw = window.atob(base64)
+                      const key = new Uint8Array(raw.length)
+                      for (let i = 0; i < raw.length; i++) key[i] = raw.charCodeAt(i)
+                      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key })
+                      await fetch('/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub }) })
+                    }
+                  } catch {
+                    alert('알림 설정 중 오류가 발생했어요.')
+                  }
                   setNotifModal(false)
                 }} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #0891b2, #06b6d4)', border: 'none', borderRadius: 14, color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
                   알림 허용하기
