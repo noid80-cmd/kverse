@@ -3,25 +3,18 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Compass, Bookmark, MessageCircle, LogOut, Megaphone, Settings } from 'lucide-react'
+import { Compass, Bookmark, MessageCircle, Megaphone, Settings } from 'lucide-react'
 
 const agencyNav = [
   { href: '/agency/discover', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
   { href: '/agency/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
   { href: '/agency/talents', label: '관심', icon: <Bookmark size={22} strokeWidth={1.8} /> },
-  { href: '/agency/contacts', label: '연락', icon: <MessageCircle size={22} strokeWidth={1.8} /> },
+  { href: '/agency/contacts', label: '채팅', icon: <MessageCircle size={22} strokeWidth={1.8} /> },
   { href: '/agency/settings', label: '설정', icon: <Settings size={22} strokeWidth={1.8} /> },
 ]
 
 export default function AgencyNav() {
   const pathname = usePathname()
-  const router = useRouter()
-
-  async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
 
   return (
     <nav style={{
@@ -43,14 +36,6 @@ export default function AgencyNav() {
           </Link>
         )
       })}
-      <button onClick={handleLogout} style={{
-        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', padding: '10px 0 8px', gap: 4,
-        background: 'none', border: 'none', cursor: 'pointer', color: '#3a3a5c',
-      }}>
-        <LogOut size={22} strokeWidth={1.8} />
-        <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: 0.3 }}>로그아웃</span>
-      </button>
     </nav>
   )
 }

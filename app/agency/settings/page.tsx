@@ -224,6 +224,21 @@ export default function AgencySettingsPage() {
         </div>
       </div>
 
+      <div className="max-w-lg mx-auto px-4">
+        <div style={{ marginTop: 16, marginBottom: 100 }}>
+          <button onClick={async () => {
+            const supabase = createClient()
+            await supabase.auth.signOut()
+            window.location.href = '/login'
+          }} style={{
+            width: '100%', padding: '14px', borderRadius: 14, border: '1px solid rgba(248,113,113,0.2)',
+            background: 'rgba(248,113,113,0.06)', color: '#f87171', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+          }}>
+            로그아웃
+          </button>
+        </div>
+      </div>
+
       <AgencyNav />
 
       {notifModal && (
