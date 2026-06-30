@@ -36,11 +36,18 @@ export async function GET(request: NextRequest) {
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
 
+  const ADMIN_EMAIL = 'noid80@hanmail.net'
+  if (data.user.email === ADMIN_EMAIL && (!profile || profile.role !== 'admin')) {
+    await supabase.from('profiles').upsert({ id: data.user.id, role: 'admin' })
+  }
+
   if (roleParam && (!profile || profile.role === 'talent')) {
     await supabase.from('profiles').update({ role: roleParam }).eq('id', data.user.id)
   }
 
-  const role = (roleParam && (!profile || profile.role === 'talent')) ? roleParam : (profile?.role ?? 'talent')
+  const role = data.user.email === ADMIN_EMAIL ? 'admin'
+    : (roleParam && (!profile || profile.role === 'talent')) ? roleParam
+    : (profile?.role ?? 'talent')
   const isNewUser = Date.now() - new Date(data.user.created_at).getTime() < 60_000
 
   if (isNewUser) {
