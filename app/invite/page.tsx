@@ -23,6 +23,7 @@ function InviteContent() {
     fetch(`/api/agency-invite?token=${token}`)
       .then(r => r.json())
       .then(data => {
+        if (data.alreadyUsed) { window.location.href = '/login'; return }
         if (data.error) { setPageError(data.error); return }
         setAgency(data.agency)
       })

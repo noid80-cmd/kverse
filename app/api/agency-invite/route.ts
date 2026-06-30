@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     .single()
 
   if (!data) return NextResponse.json({ error: '유효하지 않은 초대예요' }, { status: 404 })
-  if (data.used_at) return NextResponse.json({ error: '이미 사용된 초대예요' }, { status: 400 })
+  if (data.used_at) return NextResponse.json({ error: '이미 사용된 초대예요', alreadyUsed: true }, { status: 400 })
   if (new Date(data.expires_at) < new Date()) return NextResponse.json({ error: '만료된 초대예요 (7일 경과)' }, { status: 400 })
 
   return NextResponse.json({ agency: (data as any).agencies })
