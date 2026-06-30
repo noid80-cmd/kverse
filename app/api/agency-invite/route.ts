@@ -51,7 +51,10 @@ export async function POST(req: NextRequest) {
 
   const userId = authData.user.id
 
-  await admin.from('profiles').upsert({ id: userId, role: 'agency' })
+  const { error: upsertError } = await admin.from('profiles').upsert({ id: userId, role: 'agency' })
+  if (upsertError) {
+    await admin.from('profiles').update({ role: 'agency' }).eq('id', userId)
+  }
   await admin.from('agency_members').insert({ profile_id: userId, agency_id: invite.agency_id })
   await admin.from('agencies').update({ is_verified: true }).eq('id', invite.agency_id)
   await admin.from('agency_invites').update({ used_at: new Date().toISOString() }).eq('id', invite.id)
