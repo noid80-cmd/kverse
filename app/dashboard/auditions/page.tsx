@@ -555,7 +555,25 @@ export default function TalentAuditionsPage() {
                 }}>
                   <input type="file" accept="video/*" onChange={e => {
                     const f = e.target.files?.[0] ?? null
-                    setNewFile(f); setError('')
+                    if (!f) { setNewFile(null); setError(''); return }
+                    if (f.size > 500 * 1024 * 1024) {
+                      setError('파일 크기는 500MB 이하여야 합니다')
+                      e.target.value = ''
+                      return
+                    }
+                    const url = URL.createObjectURL(f)
+                    const vid = document.createElement('video')
+                    vid.src = url
+                    vid.onloadedmetadata = () => {
+                      URL.revokeObjectURL(url)
+                      if (vid.duration > 300) {
+                        setError('영상 길이는 5분 이하여야 합니다')
+                        e.target.value = ''
+                        return
+                      }
+                      setNewFile(f); setError('')
+                    }
+                    vid.onerror = () => { URL.revokeObjectURL(url); setNewFile(f); setError('') }
                   }} style={{ display: 'none' }} />
                   <div style={{ color: newFile ? '#22d3ee' : '#555570', marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
                     {newFile ? <CheckCircle size={28} strokeWidth={1.5} /> : <Video size={28} strokeWidth={1.5} />}

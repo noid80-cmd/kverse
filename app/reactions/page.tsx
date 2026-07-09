@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
-import PushSubscribe from '@/components/PushSubscribe'
+import PushSubscribe, { doSubscribe } from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Home, Compass, Plus, Bell, Megaphone, MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
@@ -354,6 +354,7 @@ function ReactionsContent() {
                 <button onClick={async () => {
                   const perm = await Notification.requestPermission()
                   setNotifPerm(perm)
+                  if (perm === 'granted') doSubscribe().catch(() => {})
                 }} style={{
                   width: '100%', padding: '15px',
                   background: 'linear-gradient(135deg, #0891b2, #06b6d4)',

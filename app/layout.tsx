@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { LangProvider } from '@/lib/i18n/context'
@@ -39,8 +39,13 @@ export const metadata: Metadata = {
   verification: {
     google: 'H3LVu-byEF_skxSRUkHs49IR2wPYAdUY0whAPouAjpQ',
   },
+}
+
+export const viewport: Viewport = {
   themeColor: '#0891b2',
-  viewport: { width: 'device-width', initialScale: 1, maximumScale: 1 },
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

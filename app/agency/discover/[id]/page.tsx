@@ -100,7 +100,7 @@ export default function AgencyVideoPage() {
   }
 
   if (!video) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f8', color: '#8b8baa' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f', color: '#555570' }}>
       불러오는 중...
     </div>
   )
@@ -109,41 +109,41 @@ export default function AgencyVideoPage() {
 
   return (
     <>
-      <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
+      <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
         <div className="max-w-lg mx-auto px-4 pt-10">
 
           <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0 }}>←</button>
-            <span style={{ fontSize: 18, fontWeight: 900, color: '#1e1b4b', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</span>
+            <button onClick={() => router.back()} style={{ fontSize: 22, color: '#555570', background: 'none', border: 'none', padding: 0 }}>←</button>
+            <span style={{ fontSize: 18, fontWeight: 900, color: '#eeeeff', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</span>
             <button onClick={toggleBookmark}
-              style={{ width: 40, height: 40, borderRadius: 12, background: bookmarked ? '#fef9c3' : '#fff', border: '1px solid #e0e0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: bookmarked ? '#ca8a04' : '#94a3b8' }}>
+              style={{ width: 40, height: 40, borderRadius: 12, background: bookmarked ? 'rgba(251,191,36,0.15)' : '#111118', border: `1px solid ${bookmarked ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: bookmarked ? '#fbbf24' : '#555570' }}>
               <Bookmark size={18} strokeWidth={2} fill={bookmarked ? 'currentColor' : 'none'} />
             </button>
           </div>
 
           {/* 영상 */}
-          <div style={{ borderRadius: 20, overflow: 'hidden', background: '#000', marginBottom: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+          <div style={{ borderRadius: 20, overflow: 'hidden', background: '#000', marginBottom: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
             {video.video_url ? (
               <video src={video.video_url} controls style={{ width: '100%', maxHeight: 300, display: 'block' }}
                 poster={video.thumbnail_url ?? undefined} />
             ) : (
-              <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>영상 준비 중...</div>
+              <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}>영상 준비 중...</div>
             )}
           </div>
 
           {/* 태그/카테고리 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-            <span style={{ fontSize: 12, background: '#e0e7ff', color: '#4f46e5', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
+            <span style={{ fontSize: 12, background: 'rgba(6,182,212,0.15)', color: '#22d3ee', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
               {categoryLabel[video.category]}
             </span>
             {video.tags.map(tag => (
-              <span key={tag} style={{ fontSize: 12, background: '#f5f3ff', color: '#7c3aed', padding: '4px 10px', borderRadius: 20, fontWeight: 600 }}>#{tag}</span>
+              <span key={tag} style={{ fontSize: 12, background: 'rgba(168,85,247,0.12)', color: '#a78bfa', padding: '4px 10px', borderRadius: 20, fontWeight: 600 }}>#{tag}</span>
             ))}
           </div>
 
           {/* 지망생 프로필 카드 */}
           {t && (
-            <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+            <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
                 <div style={{
                   width: 56, height: 56, borderRadius: 18, flexShrink: 0, overflow: 'hidden',
@@ -156,8 +156,8 @@ export default function AgencyVideoPage() {
                   }
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 18 }}>{t.name}</div>
-                  <div style={{ fontSize: 13, color: '#8b8baa' }}>
+                  <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 18 }}>{t.name}</div>
+                  <div style={{ fontSize: 13, color: '#8888aa' }}>
                     {[getAge(t.birth_date) && `${getAge(t.birth_date)}세`, t.gender === 'male' ? '남' : t.gender === 'female' ? '여' : null, t.nationality].filter(Boolean).join(' · ')}
                   </div>
                 </div>
@@ -165,20 +165,20 @@ export default function AgencyVideoPage() {
 
               {(t.height || t.weight) && (
                 <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  {t.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>키 {t.height}cm</span>}
-                  {t.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>몸무게 {t.weight}kg</span>}
+                  {t.height && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.1)', color: '#22d3ee', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>키 {t.height}cm</span>}
+                  {t.weight && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.1)', color: '#22d3ee', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>몸무게 {t.weight}kg</span>}
                 </div>
               )}
 
               {t.skills.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: t.bio ? 12 : 0 }}>
                   {t.skills.map(s => (
-                    <span key={s} style={{ fontSize: 12, background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed', padding: '4px 10px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
+                    <span key={s} style={{ fontSize: 12, background: 'rgba(168,85,247,0.15)', color: '#a78bfa', padding: '4px 10px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
                   ))}
                 </div>
               )}
 
-              {t.bio && <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.6, background: '#f8f7ff', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>}
+              {t.bio && <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.6, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>}
             </div>
           )}
 

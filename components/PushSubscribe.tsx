@@ -12,7 +12,7 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
-async function doSubscribe() {
+export async function doSubscribe() {
   const keyRes = await fetch('/api/push/vapid-key')
   if (!keyRes.ok) return
   const { publicKey } = await keyRes.json()
