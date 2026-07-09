@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { LangProvider } from '@/lib/i18n/context'
 import KakaoGuard from '@/components/KakaoGuard'
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -58,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Kpick" />
       </head>
-      <body><LangProvider><KakaoGuard />{children}</LangProvider></body>
+      <body><LangProvider><ServiceWorkerRegister /><KakaoGuard />{children}</LangProvider></body>
     </html>
   )
 }
