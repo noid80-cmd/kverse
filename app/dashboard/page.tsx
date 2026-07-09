@@ -272,7 +272,7 @@ export default function DashboardPage() {
               <span style={{ fontSize: 11, fontWeight: 900, color: '#fbbf24', letterSpacing: '0.05em' }}>LIVE</span>
             </div>
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-              <div style={{ display: 'flex', animation: 'ticker 18s linear infinite', whiteSpace: 'nowrap' }}>
+              <div style={{ display: 'flex', animation: 'ticker 10s linear infinite', whiteSpace: 'nowrap' }}>
                 {[
                   { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
                   { dot: false, text: '16개 기획사 참여 중' },
