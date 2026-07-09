@@ -258,6 +258,7 @@ export default function LandingClient() {
 
         {/* Hero */}
         <section style={{ maxWidth: 1080, margin: '0 auto', padding: '100px 24px 80px', textAlign: 'center' }}>
+
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 20, padding: '6px 16px', marginBottom: 32 }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
             <span style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600 }}>{tx.tagline}</span>
@@ -273,6 +274,19 @@ export default function LandingClient() {
               {tx.ctaStart}
             </Link>
           </div>
+
+          {/* 소셜 프루프 */}
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 40 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '8px 18px' }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 6px #22d3ee' }} />
+              <span style={{ fontSize: 13, color: '#aaaacc', fontWeight: 600 }}>16개 기획사 참여 중</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 20, padding: '8px 18px' }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 6px #fbbf24', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              <span style={{ fontSize: 13, color: '#fbbf24', fontWeight: 700 }}>FNC엔터테인먼트 최종 오디션 <strong>2명</strong> 진행 중</span>
+            </div>
+          </div>
+          <style>{`@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }`}</style>
         </section>
 
         {/* Value props */}
