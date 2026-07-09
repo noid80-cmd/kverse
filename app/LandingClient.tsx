@@ -275,18 +275,34 @@ export default function LandingClient() {
             </Link>
           </div>
 
-          {/* 소셜 프루프 */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 40 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '8px 18px' }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 6px #22d3ee' }} />
-              <span style={{ fontSize: 13, color: '#aaaacc', fontWeight: 600 }}>16개 기획사 참여 중</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 20, padding: '8px 18px' }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 6px #fbbf24', animation: 'pulse 1.5s ease-in-out infinite' }} />
-              <span style={{ fontSize: 13, color: '#fbbf24', fontWeight: 700 }}>FNC엔터테인먼트 최종 오디션 <strong>2명</strong> 진행 중</span>
+          {/* 소셜 프루프 티커 */}
+          <div style={{ marginTop: 48, overflow: 'hidden', borderTop: '1px solid rgba(251,191,36,0.15)', borderBottom: '1px solid rgba(251,191,36,0.15)', background: 'rgba(251,191,36,0.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', height: 44 }}>
+              <div style={{ flexShrink: 0, padding: '0 16px', borderRight: '1px solid rgba(251,191,36,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#fbbf24', letterSpacing: '0.05em' }}>LIVE</span>
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', animation: 'ticker 18s linear infinite', whiteSpace: 'nowrap' }}>
+                  {[
+                    { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
+                    { dot: false, text: '16개 기획사 참여 중' },
+                    { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
+                    { dot: false, text: '16개 기획사 참여 중' },
+                  ].map((item, i) => (
+                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>
+                      {item.dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 6px #fbbf24', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} />}
+                      {!item.dot && <span style={{ fontSize: 11, color: 'rgba(251,191,36,0.5)' }}>✦</span>}
+                      {item.text}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          <style>{`@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }`}</style>
+          <style>{`
+            @keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+            @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
+          `}</style>
         </section>
 
         {/* Value props */}
