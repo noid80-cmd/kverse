@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.kpick.twa",
+        "sha256_cert_fingerprints": ["5A:6B:BA:3F:32:C4:C9:B0:01:BC:75:C5:51:04:D2:F0:DB:4D:74:D8:90:5F:88:FB:BA:B5:F0:D7:06:9B:43:B8"]
+      }
+    }]
