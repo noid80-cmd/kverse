@@ -265,6 +265,20 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── 소셜 프루프 ── */}
+        <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '7px 14px' }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 6px #22d3ee' }} />
+              <span style={{ fontSize: 12, color: '#aaaacc', fontWeight: 600 }}>16개 기획사 참여 중</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 20, padding: '7px 14px' }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 6px #fbbf24', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              <span style={{ fontSize: 12, color: '#fbbf24', fontWeight: 700 }}>FNC엔터테인먼트 최종 오디션 <strong>2명</strong> 진행 중</span>
+            </div>
+          </div>
+        </div>
+
         {/* ── My Videos (horizontal scroll) ── */}
         <div style={{ marginBottom: 36 }}>
           <div className="max-w-lg mx-auto px-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
