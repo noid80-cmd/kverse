@@ -59,7 +59,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Kpick" />
       </head>
-      <body><LangProvider><ServiceWorkerRegister /><KakaoGuard />{children}</LangProvider></body>
+      <body><LangProvider><ServiceWorkerRegister /><KakaoGuard />{children}</LangProvider>
+        <a href="https://www.khmusic.co.kr" target="_blank" rel="noopener noreferrer"
+          style={{ position: 'fixed', bottom: 0, left: 0, right: 0, textAlign: 'center',
+            padding: '8px 0 10px', background: 'rgba(7,7,13,0.88)', backdropFilter: 'blur(8px)',
+            fontSize: 11, fontWeight: 600, color: 'rgba(8,145,178,0.7)', letterSpacing: '0.15em',
+            textDecoration: 'none', zIndex: 9999, whiteSpace: 'nowrap' }}>
+          by KHMUSIC
+        </a>
+      </body>
     </html>
   )
 }
