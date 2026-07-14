@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
@@ -142,7 +142,11 @@ export default function ExplorePage() {
   const [muted, setMuted] = useState(true)
   const [swipeIdx, setSwipeIdx] = useState<number | null>(null)
   const swipeVideoRefs = useRef<(HTMLDivElement | null)[]>([])
+  const swipeContainerRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
+
+  // 3배 복제 — 끝에서 처음으로 루프
+  const loopedVideos = useMemo(() => [...videos, ...videos, ...videos], [videos])
 
   const talentNav = [
     { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
@@ -188,14 +192,37 @@ export default function ExplorePage() {
 
   useEffect(() => { load() }, [load])
 
-  // Scroll to selected video when entering swipe mode
+  // When entering swipe mode, scroll to middle copy of selected video
   useEffect(() => {
     if (swipeIdx !== null) {
       requestAnimationFrame(() => {
-        swipeVideoRefs.current[swipeIdx]?.scrollIntoView({ behavior: 'instant' })
+        const middleIdx = videos.length + swipeIdx
+        swipeVideoRefs.current[middleIdx]?.scrollIntoView({ behavior: 'instant' })
       })
     }
-  }, [swipeIdx])
+  }, [swipeIdx, videos.length])
+
+  // Loop: when near first/last copy, teleport to middle copy equivalent
+  useEffect(() => {
+    const container = swipeContainerRef.current
+    if (!container || swipeIdx === null || videos.length === 0) return
+    let timeout: ReturnType<typeof setTimeout>
+    function handleScroll() {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        if (!container) return
+        const itemH = container.clientHeight
+        const idx = Math.round(container.scrollTop / itemH)
+        if (idx < videos.length) {
+          container.scrollTop = (idx + videos.length) * itemH
+        } else if (idx >= 2 * videos.length) {
+          container.scrollTop = (idx - videos.length) * itemH
+        }
+      }, 150)
+    }
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => { container.removeEventListener('scroll', handleScroll); clearTimeout(timeout) }
+  }, [swipeIdx, videos.length])
 
   // Lock body scroll when swipe mode is active
   useEffect(() => {
@@ -330,7 +357,7 @@ export default function ExplorePage() {
 
       {/* ── Swipe overlay ── */}
       {swipeIdx !== null && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
+        <div ref={swipeContainerRef} style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
           {/* Back button */}
           <button
             onClick={() => setSwipeIdx(null)}
@@ -347,8 +374,8 @@ export default function ExplorePage() {
             ))}
           </div>
 
-          {videos.map((v, i) => (
-            <div key={v.id} ref={el => { swipeVideoRefs.current[i] = el }}>
+          {loopedVideos.map((v, i) => (
+            <div key={`${i}-${v.id}`} ref={el => { swipeVideoRefs.current[i] = el }}>
               <SwipeCard
                 video={v}
                 muted={muted}
