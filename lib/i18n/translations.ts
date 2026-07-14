@@ -101,6 +101,8 @@ const t = {
     addVideo:        ['새 영상 추가', 'Add video', '動画を追加', '添加视频', '添加影片', 'เพิ่มวิดีโอ', 'Tambah video', 'Thêm video', 'Magdagdag ng video', 'Agregar video'],
     chatWith:        ['채팅 확인하기', 'View chat', 'チャットを確認', '查看聊天', '查看聊天', 'ดูแชท', 'Lihat chat', 'Xem chat', 'Tingnan ang chat', 'Ver chat'],
     invited:         ['초대됨', 'Invited', '招待済み', '已邀请', '已邀請', 'ได้รับเชิญ', 'Diundang', 'Được mời', 'Inimbitahan', 'Invitado'],
+    tickerAudition:  ['최종 오디션 진행 중', 'Final audition in progress', '最終オーディション進行中', '决赛审核进行中', '決賽審核進行中', 'ออดิชันสุดท้ายกำลังดำเนินการ', 'Audisi final sedang berlangsung', 'Buổi thử vai cuối đang diễn ra', 'Pinal na audisyon ay nagaganap', 'Audición final en curso'],
+    tickerAgencies:  ['개 기획사 참여 중', ' agencies participating', '社参加中', '家公司参与中', '家公司參與中', 'บริษัทกำลังเข้าร่วม', 'agensi berpartisipasi', 'công ty đang tham gia', 'ahensyang lumalahok', 'agencias participando'],
   },
 
   // ── Videos ───────────────────────────────────────────

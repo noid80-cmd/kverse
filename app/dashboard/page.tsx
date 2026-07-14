@@ -274,10 +274,10 @@ export default function DashboardPage() {
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <div style={{ display: 'flex', animation: 'ticker 10s linear infinite', whiteSpace: 'nowrap' }}>
                 {[
-                  { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
-                  { dot: false, text: '16개 기획사 참여 중' },
-                  { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
-                  { dot: false, text: '16개 기획사 참여 중' },
+                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
+                  { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
+                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
+                  { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
                 ].map((item, i) => (
                   <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>
                     {item.dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 6px #fbbf24', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} />}
