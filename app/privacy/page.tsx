@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'sans-serif', lineHeight: 1.7, color: '#1a1a2e' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'sans-serif', lineHeight: 1.7, color: '#eeeeff', background: '#050e1a', minHeight: '100vh' }}>
       <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>개인정보처리방침</h1>
       <p style={{ color: '#666', marginBottom: 40 }}>Privacy Policy — Last updated: 2026-07-14</p>
 
