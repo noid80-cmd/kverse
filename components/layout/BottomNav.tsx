@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 
-type NavItem = { href: string; label: string; icon: ReactNode }
+type NavItem = { href: string; label: string; icon: ReactNode; fab?: boolean }
 
 export default function BottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
@@ -21,6 +21,24 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
     }}>
       {items.map(item => {
         const active = item.href === activeHref
+        if (item.fab) {
+          return (
+            <Link key={item.href} href={item.href}
+              style={{
+                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', padding: '6px 0 8px', textDecoration: 'none', outline: 'none',
+              }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: '50%',
+                background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 20px rgba(6,182,212,0.45)',
+              }}>
+                {item.icon}
+              </div>
+            </Link>
+          )
+        }
         return (
           <Link key={item.href} href={item.href}
             style={{

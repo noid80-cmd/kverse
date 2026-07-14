@@ -10,7 +10,7 @@ import { Home, Compass, Plus, Bell, Megaphone, Heart, Video, MessageCircle } fro
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
   { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={22} strokeWidth={1.8} /> },
+  { href: '/videos/upload', label: '올리기', icon: <Plus size={24} strokeWidth={2.5} color="white" />, fab: true },
   { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
   { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
 ]

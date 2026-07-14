@@ -57,7 +57,7 @@ export default function TalentAuditionsPage() {
   const talentNav = [
     { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
     { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
-    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
+    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={24} strokeWidth={2.5} color="white" />, fab: true },
     { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
     { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
   ]
@@ -280,15 +280,87 @@ export default function TalentAuditionsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#050e1a' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
-          <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
           </button>
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{tx.auditions.title}</h1>
         </div>
-        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 16 }}>{tx.auditions.pageDesc}</p>
+        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>{tx.auditions.pageDesc}</p>
+      </div>
+
+      {/* Featured audition card */}
+      {!loading && (() => {
+        const firstActive = auditions.find(a => !isExpired(a.deadline))
+        if (!firstActive) return null
+        const appInfo = applicationMap[firstActive.id]
+        const appStatus = appInfo?.status
+        const canApply = !appStatus && firstActive.mode !== 'offline'
+        const agencyInitials = (firstActive.agency?.name ?? '??').slice(0, 2).toUpperCase()
+        return (
+          <div style={{ padding: '0 16px 24px' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #003a5a 0%, #001828 100%)',
+              borderRadius: 24, padding: '22px 20px', position: 'relative', overflow: 'hidden',
+              border: '1px solid rgba(6,182,212,0.15)',
+            }}>
+              {/* Glow decorations */}
+              <div style={{ position: 'absolute', right: -30, top: -30, width: 200, height: 200, borderRadius: '50%', background: 'rgba(6,182,212,0.06)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', right: 40, top: 20, opacity: 0.18, pointerEvents: 'none' }}>
+                <svg width="80" height="80" viewBox="0 0 100 100">
+                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4"/>
+                </svg>
+              </div>
+              {/* FEATURED badge */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#06b6d4', borderRadius: 20, padding: '5px 12px', marginBottom: 16, fontSize: 11, fontWeight: 800, color: 'white', letterSpacing: 0.5 }}>
+                ✦ FEATURED
+              </div>
+              {/* Agency + title */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{agencyInitials}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 2 }}>{firstActive.agency?.name ?? tx.auditions.adminNotice}</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, color: 'white', lineHeight: 1.2 }}>{getAuditionTitle(firstActive, lang)}</div>
+                </div>
+              </div>
+              {/* Tags + deadline */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+                {firstActive.category.split(',').map(c => (
+                  <span key={c} style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', color: '#22d3ee', fontSize: 12, fontWeight: 700 }}>
+                    {categoryLabels[c] ?? c}
+                  </span>
+                ))}
+                {firstActive.deadline && (
+                  <span style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600 }}>
+                    {tx.auditions.deadline} {firstActive.deadline}
+                  </span>
+                )}
+              </div>
+              {/* Apply button */}
+              <button
+                onClick={() => canApply && openModal(firstActive)}
+                style={{
+                  width: '100%', padding: '13px', borderRadius: 16, border: 'none', fontSize: 15, fontWeight: 700, cursor: canApply ? 'pointer' : 'default',
+                  background: appStatus === 'pending' ? 'rgba(251,191,36,0.15)' : appStatus === 'invited' ? 'linear-gradient(135deg,#22c55e,#16a34a)' : canApply ? 'linear-gradient(135deg,#0891b2,#06b6d4)' : 'rgba(255,255,255,0.06)',
+                  color: appStatus === 'pending' ? '#fbbf24' : appStatus ? 'white' : canApply ? 'white' : '#555570',
+                  boxShadow: canApply && !appStatus ? '0 4px 16px rgba(6,182,212,0.3)' : 'none',
+                }}>
+                {appStatus === 'pending' ? tx.auditions.review : appStatus === 'invited' ? tx.auditions.checkChat : canApply ? `${tx.auditions.apply} →` : firstActive.mode === 'offline' ? '📍 오프라인 오디션' : tx.auditions.expiredPost}
+              </button>
+            </div>
+          </div>
+        )
+      })()}
+
+      <div className="max-w-lg mx-auto px-4">
+        {/* More opportunities header */}
+        {!loading && auditions.filter(a => !isExpired(a.deadline)).length > 1 && (
+          <div style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff', marginBottom: 16 }}>More Opportunities</div>
+        )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -296,7 +368,7 @@ export default function TalentAuditionsPage() {
               <button key={val} onClick={() => setFilterMode(val)} style={{
                 padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(255,255,255,0.08)',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                background: filterMode === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#111118',
+                background: filterMode === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'rgba(255,255,255,0.05)',
                 color: filterMode === val ? 'white' : '#555570',
               }}>{label}</button>
             ))}
@@ -313,13 +385,14 @@ export default function TalentAuditionsPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>{tx.common.loading}</div>
         ) : auditions.length === 0 ? (
-          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
             <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
               <Megaphone size={22} strokeWidth={1.8} />
             </div>
             <div style={{ fontWeight: 700, color: '#eeeeff' }}>{tx.auditions.noAuditions}</div>
           </div>
         ) : (() => {
+          const firstActiveId = auditions.find(a => !isExpired(a.deadline))?.id
           const sortAuditions = (list: Audition[]) => {
             if (sortBy === 'deadline') {
               return [...list].sort((a, b) => {
@@ -337,7 +410,7 @@ export default function TalentAuditionsPage() {
             return a.mode === 'offline' || a.mode === 'both'
           }
           const filtered = auditions.filter(matchesMode)
-          const active = sortAuditions(filtered.filter(a => !isExpired(a.deadline)))
+          const active = sortAuditions(filtered.filter(a => !isExpired(a.deadline) && a.id !== firstActiveId))
           const expired = sortAuditions(filtered.filter(a => isExpired(a.deadline)))
 
           const AuditionCard = ({ a }: { a: Audition }) => {
