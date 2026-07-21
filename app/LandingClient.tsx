@@ -284,9 +284,11 @@ export default function LandingClient() {
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <div style={{ display: 'flex', animation: 'ticker 10s linear infinite', whiteSpace: 'nowrap' }}>
                   {[
-                    { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
+                    { dot: true, text: 'FNC엔터테인먼트 최종 오디션 1명 진행 중' },
+                    { dot: true, text: 'FNC엔터테인먼트 최종 합격자 배출' },
                     { dot: false, text: '16개 기획사 참여 중' },
-                    { dot: true, text: 'FNC엔터테인먼트 최종 오디션 2명 진행 중' },
+                    { dot: true, text: 'FNC엔터테인먼트 최종 오디션 1명 진행 중' },
+                    { dot: true, text: 'FNC엔터테인먼트 최종 합격자 배출' },
                     { dot: false, text: '16개 기획사 참여 중' },
                   ].map((item, i) => (
                     <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>
