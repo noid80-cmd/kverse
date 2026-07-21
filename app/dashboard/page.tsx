@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import PushSubscribe from '@/components/PushSubscribe'
+import LiveTicker from '@/components/LiveTicker'
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Video, Bookmark, MessageCircle, User, ChevronRight, Play } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
@@ -272,27 +273,13 @@ export default function DashboardPage() {
               <span style={{ fontSize: 11, fontWeight: 900, color: '#fbbf24', letterSpacing: '0.05em' }}>LIVE</span>
             </div>
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-              <div style={{ display: 'flex', animation: 'ticker 10s linear infinite', whiteSpace: 'nowrap' }}>
-                {[
-                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
-                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerFinalPass}` },
-                  { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
-                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
-                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerFinalPass}` },
-                  { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
-                ].map((item, i) => (
-                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>
-                    {item.dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 6px #fbbf24', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} />}
-                    {!item.dot && <span style={{ fontSize: 11, color: 'rgba(251,191,36,0.5)' }}>✦</span>}
-                    {item.text}
-                  </span>
-                ))}
-              </div>
+              <LiveTicker items={[
+                { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
+                { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerFinalPass}` },
+                { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
+              ]} />
             </div>
           </div>
-          <style>{`
-            @keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-          `}</style>
         </div>
 
         {/* ── My Videos (horizontal scroll) ── */}

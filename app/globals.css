@@ -12,3 +12,14 @@ button { cursor: pointer; }
 
 input::placeholder, textarea::placeholder { color: #555570; }
 select option { background: #1a1a25; color: #eeeeff; }
+
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
+
+.kv-live-ticker {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.kv-live-ticker::-webkit-scrollbar { display: none; }
