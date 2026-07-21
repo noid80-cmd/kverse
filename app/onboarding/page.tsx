@@ -45,6 +45,7 @@ function OnboardingContent() {
   const searchParams = useSearchParams()
   const nextPath = searchParams.get('next') ?? '/dashboard'
   const isAgency = nextPath.includes('agency')
+  const isPreview = searchParams.get('preview') === '1'
   const [step, setStep] = useState<0 | 1 | 2 | null>(null)
   const [isIOS, setIsIOS] = useState(false)
   const [isAndroid, setIsAndroid] = useState(false)
@@ -54,7 +55,7 @@ function OnboardingContent() {
   const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
-    if (localStorage.getItem('kpick-onboarded')) { router.replace(nextPath); return }
+    if (!isPreview && localStorage.getItem('kpick-onboarded')) { router.replace(nextPath); return }
 
     const ua = navigator.userAgent
     const ios = /iPhone|iPad|iPod/.test(ua) && !(window as any).MSStream
@@ -86,7 +87,7 @@ function OnboardingContent() {
   }, [step, notifPerm])
 
   function finish() {
-    localStorage.setItem('kpick-onboarded', '1')
+    if (!isPreview) localStorage.setItem('kpick-onboarded', '1')
     router.replace(nextPath)
   }
 
