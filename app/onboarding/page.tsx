@@ -44,7 +44,8 @@ function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nextPath = searchParams.get('next') ?? '/dashboard'
-  const [step, setStep] = useState<1 | 2 | null>(null)
+  const isAgency = nextPath.includes('agency')
+  const [step, setStep] = useState<0 | 1 | 2 | null>(null)
   const [isIOS, setIsIOS] = useState(false)
   const [isAndroid, setIsAndroid] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
@@ -67,12 +68,7 @@ function OnboardingContent() {
 
     if ('Notification' in window) setNotifPerm(Notification.permission)
 
-    // 이미 설치됐거나 데스크탑이면 step 1 스킵
-    if (standalone || !isMobile) {
-      setStep(2)
-    } else {
-      setStep(1)
-    }
+    setStep(0)
 
     const handler = (e: Event) => {
       e.preventDefault()
@@ -105,6 +101,12 @@ function OnboardingContent() {
 
   function goToStep2() { setStep(2) }
 
+  // 이미 설치됐거나 데스크탑이면 '홈 화면에 추가' 단계는 건너뜀
+  function goFromIntro() {
+    const isMobile = isIOS || isAndroid
+    setStep(isStandalone || !isMobile ? 2 : 1)
+  }
+
   async function handleNotif() {
     if (!('Notification' in window)) { finish(); return }
     const perm = await Notification.requestPermission()
@@ -125,12 +127,56 @@ function OnboardingContent() {
 
       {/* 진행 표시 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 48 }}>
-        {[1, 2].map(s => (
+        {[0, 1, 2].map(s => (
           <div key={s} style={{ width: s === step ? 20 : 6, height: 6, borderRadius: 3, background: s === step ? '#0891b2' : 'rgba(255,255,255,0.12)', transition: 'all 0.3s' }} />
         ))}
       </div>
 
       <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+        {step === 0 && (
+          <>
+            <div style={{ width: 80, height: 80, borderRadius: 24, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28, boxShadow: '0 8px 32px rgba(6,182,212,0.3)' }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.5 9l5 3-5 3V9z" fill="white" stroke="none" />
+              </svg>
+            </div>
+
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center' }}>
+              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : 'K-pop 커버로 시작하는 데뷔의 문'}
+            </h1>
+            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+              {isAgency
+                ? <>전세계 K-pop 팬들의 커버 영상에서<br />다음 스타를 찾아보세요</>
+                : <>커버 영상을 올리면 전세계 기획사가<br />직접 찾아와요</>}
+            </p>
+
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
+              {(isAgency
+                ? [
+                    { emoji: '🔍', text: '커버 영상 탐색 — 실력있는 지망생들을 둘러보세요' },
+                    { emoji: '⭐', text: '관심 표시·오디션 제안 — 마음에 들면 바로 연락' },
+                    { emoji: '💬', text: '채팅으로 소통 — 오디션까지 매끄럽게' },
+                  ]
+                : [
+                    { emoji: '🎬', text: '커버 영상 올리기 — 원하는 곡으로 자유롭게' },
+                    { emoji: '⭐', text: '기획사가 발견해요 — 관심 있으면 북마크·오디션 제안' },
+                    { emoji: '💬', text: '채팅으로 소통 — 오디션까지 이어져요' },
+                  ]
+              ).map(item => (
+                <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#111118', borderRadius: 14, border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <span style={{ fontSize: 18, flexShrink: 0 }}>{item.emoji}</span>
+                  <span style={{ fontSize: 14, color: '#8888aa' }}>{item.text}</span>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={goFromIntro} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #0891b2, #06b6d4)', border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
+              다음 →
+            </button>
+          </>
+        )}
 
         {step === 1 && (
           <>
