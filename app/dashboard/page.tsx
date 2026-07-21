@@ -275,8 +275,10 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', animation: 'ticker 10s linear infinite', whiteSpace: 'nowrap' }}>
                 {[
                   { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
+                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerFinalPass}` },
                   { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
                   { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
+                  { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerFinalPass}` },
                   { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
                 ].map((item, i) => (
                   <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>

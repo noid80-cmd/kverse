@@ -101,7 +101,8 @@ const t = {
     addVideo:        ['새 영상 추가', 'Add video', '動画を追加', '添加视频', '添加影片', 'เพิ่มวิดีโอ', 'Tambah video', 'Thêm video', 'Magdagdag ng video', 'Agregar video'],
     chatWith:        ['채팅 확인하기', 'View chat', 'チャットを確認', '查看聊天', '查看聊天', 'ดูแชท', 'Lihat chat', 'Xem chat', 'Tingnan ang chat', 'Ver chat'],
     invited:         ['초대됨', 'Invited', '招待済み', '已邀请', '已邀請', 'ได้รับเชิญ', 'Diundang', 'Được mời', 'Inimbitahan', 'Invitado'],
-    tickerAudition:  ['최종 오디션 진행 중', 'Final audition in progress', '最終オーディション進行中', '决赛审核进行中', '決賽審核進行中', 'ออดิชันสุดท้ายกำลังดำเนินการ', 'Audisi final sedang berlangsung', 'Buổi thử vai cuối đang diễn ra', 'Pinal na audisyon ay nagaganap', 'Audición final en curso'],
+    tickerAudition:  ['최종 오디션 1명 진행 중', 'Final audition in progress (1 talent)', '最終オーディション1名進行中', '1人正在进行决赛审核', '1人正在進行決賽審核', 'ออดิชันสุดท้ายกำลังดำเนินการ (1 คน)', '1 talenta sedang audisi final', '1 thí sinh đang thử vai vòng chung kết', '1 talent na nasa final audition', 'Audición final en curso (1 talento)'],
+    tickerFinalPass: ['최종 합격자 배출', 'Final round winner announced', '最終合格者を輩出', '决赛胜出者诞生', '決賽勝出者誕生', 'มีผู้ผ่านรอบสุดท้ายแล้ว', 'Pemenang final telah lahir', 'Đã có người vượt qua vòng chung kết', 'May nakapasa na sa final round', 'Ganador de la ronda final anunciado'],
     tickerAgencies:  ['개 기획사 참여 중', ' agencies participating', '社参加中', '家公司参与中', '家公司參與中', 'บริษัทกำลังเข้าร่วม', 'agensi berpartisipasi', 'công ty đang tham gia', 'ahensyang lumalahok', 'agencias participando'],
   },
 
