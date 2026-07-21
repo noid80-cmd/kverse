@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Bell, BellOff } from 'lucide-react'
+import { Bell, BellOff, Video, Star, MessageCircle, Search, ClipboardList } from 'lucide-react'
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -156,18 +156,18 @@ function OnboardingContent() {
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
               {(isAgency
                 ? [
-                    { emoji: '🔍', text: '커버 영상 탐색 — 실력있는 지망생들을 둘러보세요' },
-                    { emoji: '⭐', text: '관심 표시·오디션 제안 — 마음에 들면 바로 연락' },
-                    { emoji: '💬', text: '채팅으로 소통 — 오디션까지 매끄럽게' },
+                    { Icon: Search, text: '커버 영상 탐색 — 실력있는 지망생들을 둘러보세요' },
+                    { Icon: Star, text: '관심 표시·오디션 제안 — 마음에 들면 바로 연락' },
+                    { Icon: MessageCircle, text: '채팅으로 소통 — 오디션까지 매끄럽게' },
                   ]
                 : [
-                    { emoji: '🎬', text: '커버 영상 올리기 — 원하는 곡으로 자유롭게' },
-                    { emoji: '⭐', text: '기획사가 발견해요 — 관심 있으면 북마크·오디션 제안' },
-                    { emoji: '💬', text: '채팅으로 소통 — 오디션까지 이어져요' },
+                    { Icon: Video, text: '커버 영상 올리기 — 원하는 곡으로 자유롭게' },
+                    { Icon: Star, text: '기획사가 발견해요 — 관심 있으면 북마크·오디션 제안' },
+                    { Icon: MessageCircle, text: '채팅으로 소통 — 오디션까지 이어져요' },
                   ]
               ).map(item => (
                 <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#111118', borderRadius: 14, border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{item.emoji}</span>
+                  <item.Icon size={18} color="#22d3ee" strokeWidth={1.8} style={{ flexShrink: 0 }} />
                   <span style={{ fontSize: 14, color: '#8888aa' }}>{item.text}</span>
                 </div>
               ))}
@@ -259,12 +259,12 @@ function OnboardingContent() {
 
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
               {[
-                { emoji: '⭐', text: '기획사가 내 영상에 관심을 표시했을 때' },
-                { emoji: '💬', text: '기획사 담당자가 채팅을 보냈을 때' },
-                { emoji: '📋', text: '새 오디션 공고가 올라왔을 때' },
+                { Icon: Star, text: '기획사가 내 영상에 관심을 표시했을 때' },
+                { Icon: MessageCircle, text: '기획사 담당자가 채팅을 보냈을 때' },
+                { Icon: ClipboardList, text: '새 오디션 공고가 올라왔을 때' },
               ].map(item => (
                 <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#111118', borderRadius: 14, border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{item.emoji}</span>
+                  <item.Icon size={18} color="#22d3ee" strokeWidth={1.8} style={{ flexShrink: 0 }} />
                   <span style={{ fontSize: 14, color: '#8888aa' }}>{item.text}</span>
                 </div>
               ))}
