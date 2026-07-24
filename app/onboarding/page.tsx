@@ -157,8 +157,8 @@ function OnboardingContent() {
               {(isAgency
                 ? [
                     { Icon: Search, text: '커버 영상 탐색 — 실력있는 지망생들을 둘러보세요' },
-                    { Icon: Star, text: '관심 표시·오디션 제안 — 마음에 들면 바로 연락' },
-                    { Icon: MessageCircle, text: '채팅으로 소통 — 오디션까지 매끄럽게' },
+                    { Icon: ClipboardList, text: '온라인 오디션 개설 — 직접 오디션을 열고 지망생 영상을 받아보세요' },
+                    { Icon: MessageCircle, text: '채팅으로 소통 — 마음에 든 지망생과 바로 연락' },
                   ]
                 : [
                     { Icon: Video, text: '커버 영상 올리기 — 원하는 곡으로 자유롭게' },
@@ -254,15 +254,24 @@ function OnboardingContent() {
 
             <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center' }}>알림을 켜두세요</h1>
             <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
-              기획사가 관심을 보이거나<br />채팅을 보내면 바로 알려드려요
+              {isAgency
+                ? <>지망생이 지원하거나<br />답장을 보내면 바로 알려드려요</>
+                : <>기획사가 관심을 보이거나<br />채팅을 보내면 바로 알려드려요</>}
             </p>
 
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
-              {[
-                { Icon: Star, text: '기획사가 내 영상에 관심을 표시했을 때' },
-                { Icon: MessageCircle, text: '기획사 담당자가 채팅을 보냈을 때' },
-                { Icon: ClipboardList, text: '새 오디션 공고가 올라왔을 때' },
-              ].map(item => (
+              {(isAgency
+                ? [
+                    { Icon: ClipboardList, text: '지망생이 내 오디션에 지원했을 때' },
+                    { Icon: MessageCircle, text: '관심 표시한 지망생이 답장했을 때' },
+                    { Icon: Video, text: '북마크한 지망생이 새 영상을 올렸을 때' },
+                  ]
+                : [
+                    { Icon: Star, text: '기획사가 내 영상에 관심을 표시했을 때' },
+                    { Icon: MessageCircle, text: '기획사 담당자가 채팅을 보냈을 때' },
+                    { Icon: ClipboardList, text: '새 오디션 공고가 올라왔을 때' },
+                  ]
+              ).map(item => (
                 <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#111118', borderRadius: 14, border: '1px solid rgba(255,255,255,0.07)' }}>
                   <item.Icon size={18} color="#22d3ee" strokeWidth={1.8} style={{ flexShrink: 0 }} />
                   <span style={{ fontSize: 14, color: '#8888aa' }}>{item.text}</span>
