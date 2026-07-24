@@ -194,10 +194,17 @@ export default function LandingClient() {
     const code = new URLSearchParams(window.location.search).get('code')
     if (code) { window.location.replace(`/auth/callback?code=${code}`); return }
 
+    const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as unknown as { standalone?: boolean }).standalone === true
+      || document.referrer.startsWith('android-app://')
+
     const supabase = createClient()
     supabase.auth.getSession().then(async ({ data }) => {
       const user = data.session?.user
-      if (!user) { setReady(true); return }
+      if (!user) {
+        if (isStandaloneApp) { window.location.href = '/signup'; return }
+        setReady(true); return
+      }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       const role = profile?.role ?? 'talent'
       if (role === 'admin') window.location.href = '/admin/users'
