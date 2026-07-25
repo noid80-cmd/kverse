@@ -267,10 +267,10 @@ export default function DashboardPage() {
         </div>
 
         {/* ── 뉴스 티커 ── */}
-        <div style={{ marginBottom: 28, overflow: 'hidden', borderTop: '1px solid rgba(16,185,129,0.2)', borderBottom: '1px solid rgba(16,185,129,0.2)', background: 'rgba(16,185,129,0.06)' }}>
+        <div style={{ marginBottom: 28, overflow: 'hidden', borderTop: '1px solid rgba(236,72,153,0.2)', borderBottom: '1px solid rgba(236,72,153,0.2)', background: 'rgba(236,72,153,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: 40 }}>
-            <div style={{ flexShrink: 0, padding: '0 14px', borderRight: '1px solid rgba(16,185,129,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 900, color: '#34d399', letterSpacing: '0.05em' }}>LIVE</span>
+            <div style={{ flexShrink: 0, padding: '0 14px', borderRight: '1px solid rgba(236,72,153,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#f472b6', letterSpacing: '0.05em' }}>LIVE</span>
             </div>
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <LiveTicker items={[
