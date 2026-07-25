@@ -284,10 +284,10 @@ export default function LandingClient() {
           </div>
 
           {/* 소셜 프루프 티커 */}
-          <div style={{ marginTop: 48, overflow: 'hidden', borderTop: '1px solid rgba(251,191,36,0.15)', borderBottom: '1px solid rgba(251,191,36,0.15)', background: 'rgba(251,191,36,0.04)' }}>
+          <div style={{ marginTop: 48, overflow: 'hidden', borderTop: '1px solid rgba(16,185,129,0.2)', borderBottom: '1px solid rgba(16,185,129,0.2)', background: 'rgba(16,185,129,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'center', height: 44 }}>
-              <div style={{ flexShrink: 0, padding: '0 16px', borderRight: '1px solid rgba(251,191,36,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, fontWeight: 900, color: '#fbbf24', letterSpacing: '0.05em' }}>LIVE</span>
+              <div style={{ flexShrink: 0, padding: '0 16px', borderRight: '1px solid rgba(16,185,129,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#34d399', letterSpacing: '0.05em' }}>LIVE</span>
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <LiveTicker items={[
