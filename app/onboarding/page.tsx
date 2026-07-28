@@ -144,10 +144,10 @@ function OnboardingContent() {
               </svg>
             </div>
 
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center' }}>
-              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : 'K-pop 커버로 시작하는 데뷔의 문'}
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>
+              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : <>K-pop 커버로 시작하는<br />데뷔의 문</>}
             </h1>
-            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
               {isAgency
                 ? <>전세계 K-pop 팬들의 커버 영상에서<br />다음 스타를 찾아보세요</>
                 : <>커버 영상을 올리면 전세계 기획사가<br />직접 찾아와요</>}
@@ -189,8 +189,8 @@ function OnboardingContent() {
               </svg>
             </div>
 
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center' }}>홈 화면에 추가하세요</h1>
-            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>홈 화면에 추가하세요</h1>
+            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
               앱처럼 빠르게 열고<br />기획사 알림도 바로 받을 수 있어요
             </p>
 
@@ -252,8 +252,8 @@ function OnboardingContent() {
               <Bell size={36} strokeWidth={1.6} color="white" />
             </div>
 
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center' }}>알림을 켜두세요</h1>
-            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>알림을 켜두세요</h1>
+            <p style={{ fontSize: 15, color: '#8888aa', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
               {isAgency
                 ? <>지망생이 지원하거나<br />답장을 보내면 바로 알려드려요</>
                 : <>기획사가 관심을 보이거나<br />채팅을 보내면 바로 알려드려요</>}

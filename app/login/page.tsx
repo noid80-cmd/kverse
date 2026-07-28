@@ -117,10 +117,9 @@ export default function LoginPage() {
           </div>
           <h1 style={{
             fontSize: 42, fontWeight: 800, letterSpacing: -1.5, lineHeight: 1, marginBottom: 12,
-            background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            color: '#ffffff',
           }}>Kpick</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.32)', fontWeight: 500, letterSpacing: 0.3 }}>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500, letterSpacing: 0.3 }}>
             {tx.tagline}
           </p>
         </div>
@@ -157,7 +156,7 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 600, letterSpacing: 0.5 }}>{tx.loginEmail}</span>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: 0.5 }}>{tx.loginEmail}</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
           </div>
 
@@ -191,7 +190,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.25)', marginTop: 24, fontWeight: 500 }}>
+        <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.45)', marginTop: 24, fontWeight: 500 }}>
           {tx.noAccount}{' '}
           <Link href="/signup" style={{ color: '#06b6d4', fontWeight: 700, textDecoration: 'none' }}>{tx.signupLink}</Link>
         </p>
