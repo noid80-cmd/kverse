@@ -46,13 +46,33 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
+    const { data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         queryParams: { prompt: 'select_account' },
+        skipBrowserRedirect: true,
       },
     })
+    if (!data?.url) return
+
+    // signInWithOAuth가 PKCE code_verifier를 JS document.cookie로만 저장하는데,
+    // 네이티브 앱(WKWebView)에서는 구글 로그인 화면을 거쳐 돌아올 때 이 쿠키가
+    // 유실되는 경우가 있어("2~3번 시도해야 로그인됨") /api/set-code-verifier로
+    // 한 번 더 실제 Set-Cookie 응답 헤더로 심어서 안정성을 높인다.
+    const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
+    if (verifierCookie) {
+      const eqIdx = verifierCookie.indexOf('=')
+      const name = verifierCookie.slice(0, eqIdx)
+      const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
+      await fetch('/api/set-code-verifier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, value }),
+      }).catch(() => {})
+    }
+
+    window.location.href = data.url
   }
 
   return (
