@@ -199,9 +199,19 @@ export default function LandingClient() {
       || document.referrer.startsWith('android-app://')
 
     const supabase = createClient()
-    supabase.auth.getSession().then(async ({ data }) => {
+
+    // 네이티브 앱(WKWebView)은 콜드 스타트 직후 쿠키 저장소가 아직 다
+    // 로드되지 않은 상태에서 getSession()이 먼저 호출되는 경우가 있어,
+    // 실제로는 로그인되어 있는데도 "세션 없음"으로 읽혀 /signup으로
+    // 튕기는 문제(체감상 "로그인이 자꾸 풀림")가 있었음. 재시도로 완화.
+    async function resolveSession(retriesLeft: number): Promise<void> {
+      const { data } = await supabase.auth.getSession()
       const user = data.session?.user
       if (!user) {
+        if (isStandaloneApp && retriesLeft > 0) {
+          await new Promise(r => setTimeout(r, 400))
+          return resolveSession(retriesLeft - 1)
+        }
         if (isStandaloneApp) { window.location.href = '/signup'; return }
         setReady(true); return
       }
@@ -210,7 +220,9 @@ export default function LandingClient() {
       if (role === 'admin') window.location.href = '/admin/users'
       else if (role === 'agency') window.location.href = '/agency/discover'
       else window.location.href = '/dashboard'
-    })
+    }
+
+    resolveSession(2)
   }, [])
 
   if (!ready) return <div style={{ minHeight: '100vh', background: '#07070d' }} />

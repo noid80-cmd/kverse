@@ -23,13 +23,20 @@ export default function LoginPage() {
     e.preventDefault()
     setError(''); setLoading(true)
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error || !data.user) { setError(tx.loginError); setLoading(false); return }
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-      const role = profile?.role ?? 'talent'
-      const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
-      window.location.href = href
+      // 서버 라우트를 거쳐 로그인한다 — 클라이언트에서 직접
+      // signInWithPassword를 호출하면 세션 쿠키가 JS document.cookie로
+      // 쓰이는데, 네이티브 앱(WKWebView)에서는 이게 다음 네비게이션의
+      // 요청에 곧바로 반영되지 않아 로그인 페이지로 튕기는 경우가 있었음
+      // ("2~3번 시도해야 로그인됨"). 서버 라우트는 실제 Set-Cookie 응답
+      // 헤더로 쿠키를 심어서 훨씬 안정적으로 반영된다.
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const result = await res.json()
+      if (!res.ok || result.error) { setError(tx.loginError); setLoading(false); return }
+      window.location.href = result.href
     } catch (err) {
       console.error('[login] error:', err)
       setError(tx.loginError)
