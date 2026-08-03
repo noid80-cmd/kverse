@@ -23,7 +23,8 @@ export default function NativeSessionSync() {
   }
 
   useEffect(() => {
-    log(`mount, cookie has sb token? ${document.cookie.includes('-auth-token')}`)
+    const authCookies = document.cookie.split('; ').filter(c => c.includes('-auth-token'))
+    log(`mount, auth cookies: ${authCookies.map(c => c.slice(0, c.indexOf('=')) + `(len=${c.length})`).join(', ') || 'none'}`)
     const supabase = createClient()
 
     async function restoreIfNeeded() {
