@@ -9,18 +9,39 @@ const REFRESH_KEY = 'kpick-native-refresh-token'
 // 유실되는 경우가 있어("로그인이 자꾸 풀림"), 로그인 성공 시 refresh_token을
 // 기기 자체 저장소(Capacitor Preferences)에도 따로 저장해두고, 콜드
 // 스타트 때 쿠키 세션이 비어있으면 이걸로 복구를 시도한다.
+const DEBUG_HISTORY_KEY = 'kpick-nss-debug-history'
+
 export default function NativeSessionSync() {
-  const [debugLines, setDebugLines] = useState<string[]>([])
+  // 리로드(워밍업) 직전에 찍은 로그는 화면이 곧바로 날아가서 못 보고
+  // 지나칠 수 있어, localStorage에도 남겨서 재시작 후에도 "직전에 무슨
+  // 일이 있었는지" 확인 가능하게 함. 원인 확정되면 이 디버그 전체 제거.
+  const [debugLines, setDebugLines] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(DEBUG_HISTORY_KEY)
+      return raw ? JSON.parse(raw) : []
+    } catch { return [] }
+  })
   // 임시 디버그 오버레이(맥 없이 폰 화면만으로 확인용). window.Capacitor
   // 존재 여부로 게이트해서 일반 웹 방문자에겐 안 보임. 원인 확정되면 제거.
   const showDebug = typeof window !== 'undefined' && typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined'
 
   function log(line: string) {
     console.log('[NSS]', line)
-    setDebugLines(prev => [...prev, line])
+    const stamped = `${new Date().toTimeString().slice(0, 8)} ${line}`
+    setDebugLines(prev => {
+      const next = [...prev, stamped].slice(-60)
+      try { localStorage.setItem(DEBUG_HISTORY_KEY, JSON.stringify(next)) } catch { /* non-critical */ }
+      return next
+    })
+  }
+
+  function clearDebugHistory() {
+    try { localStorage.removeItem(DEBUG_HISTORY_KEY) } catch { /* non-critical */ }
+    setDebugLines([])
   }
 
   useEffect(() => {
+    log('--- app start ---')
     // 콜드 스타트 직후엔 Preferences 플러그인이 구조적으로 안 되다가, 구글
     // 로그인처럼 실제 브라우저급 이동(왕복 네비게이션)을 한 번 거치고 나면
     // 정상 작동하는 게 실측 확인됨(10초 재시도로도 안 풀림 — 시간 문제
@@ -30,9 +51,11 @@ export default function NativeSessionSync() {
     if (isNative) {
       let warmed = true
       try { warmed = sessionStorage.getItem('kpick-bridge-warmed') === '1' } catch { /* sessionStorage 자체가 막히면 반복 리로드 위험 있어 워밍업 건너뜀 */ }
+      log(`warmup check: already warmed=${warmed}`)
       if (!warmed) {
         try {
           sessionStorage.setItem('kpick-bridge-warmed', '1')
+          log('warmup: reloading now')
           window.location.reload()
           return
         } catch { /* non-critical, 그냥 진행 */ }
@@ -88,10 +111,13 @@ export default function NativeSessionSync() {
   if (!showDebug) return null
   return (
     <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, maxHeight: '30vh', overflowY: 'auto',
+      position: 'fixed', bottom: 0, left: 0, right: 0, maxHeight: '35vh', overflowY: 'auto',
       background: 'rgba(0,0,0,0.9)', color: '#0f0', fontSize: 10, fontFamily: 'monospace',
       padding: '8px', zIndex: 999999, whiteSpace: 'pre-wrap', wordBreak: 'break-all',
     }}>
+      <button onClick={clearDebugHistory} style={{ marginBottom: 6, fontSize: 10, background: '#222', color: '#0f0', border: '1px solid #0f0', borderRadius: 4, padding: '2px 6px' }}>
+        clear log
+      </button>
       {debugLines.map((l, i) => <div key={i}>{l}</div>)}
     </div>
   )
