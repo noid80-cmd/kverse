@@ -23,6 +23,13 @@ function AuthRecoverContent() {
     async function run() {
       let verifier: string | null = null
       try { verifier = sessionStorage.getItem('kpick-oauth-verifier') } catch { /* non-critical */ }
+      if (!verifier) {
+        try {
+          const { Preferences } = await import('@capacitor/preferences')
+          const { value } = await Preferences.get({ key: 'kpick-oauth-verifier' })
+          verifier = value
+        } catch { /* not native, ignore */ }
+      }
 
       if (!code || !verifier) {
         setMessage('로그인에 실패했어요. 다시 시도해주세요.')

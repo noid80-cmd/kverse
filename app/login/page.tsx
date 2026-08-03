@@ -74,13 +74,18 @@ export default function LoginPage() {
     // signInWithOAuth가 PKCE code_verifier를 JS document.cookie로만 저장하는데,
     // 네이티브 앱(WKWebView)에서는 구글 로그인 화면을 거쳐 돌아올 때 이 쿠키가
     // 실제로 유실되는 게 서버 로그로 확인됨("PKCE 코드 검증기를 찾을 수 없음").
-    // 쿠키에 의존하지 않고 sessionStorage에 백업해서, 콜백에서 쿠키를 못 찾으면
-    // /auth/recover에서 이 값을 이용해 수동으로 교환을 완료한다.
+    // 쿠키에 의존하지 않고 sessionStorage + Capacitor Preferences(네이티브
+    // 저장소, 이 세션에서 가장 안정적으로 확인됨) 양쪽에 백업해서, 콜백에서
+    // 쿠키를 못 찾으면 /auth/recover에서 이 값으로 수동 교환을 완료한다.
     const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
     if (verifierCookie) {
       const eqIdx = verifierCookie.indexOf('=')
       const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
       try { sessionStorage.setItem('kpick-oauth-verifier', value) } catch { /* non-critical */ }
+      try {
+        const { Preferences } = await import('@capacitor/preferences')
+        await Preferences.set({ key: 'kpick-oauth-verifier', value })
+      } catch { /* not native, ignore */ }
     }
 
     window.location.href = data.url

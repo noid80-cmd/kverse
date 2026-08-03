@@ -32,18 +32,25 @@ export async function GET(request: NextRequest) {
   )
 
   const hasVerifierCookie = request.cookies.getAll().some(c => c.name.includes('-code-verifier'))
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-  if (error || !data.user) {
-    console.error('[auth/callback] exchangeCodeForSession failed.', 'error=', error?.message, 'status=', error?.status, 'hadVerifierCookie=', hasVerifierCookie, 'cookieNames=', request.cookies.getAll().map(c => c.name).join(','))
-    // code_verifier 쿠키가 구글 왕복 사이에 유실되는 게 실측 확인됨(네이티브
-    // 앱 WKWebView). 바로 로그인 화면으로 보내지 말고, 클라이언트가
-    // sessionStorage에 백업해둔 검증기로 수동 교환을 시도할 수 있는 복구
-    // 페이지로 보낸다.
+  // 인가 코드는 한 번만 쓸 수 있다(OAuth 표준) — 검증기 쿠키가 없는 걸 미리
+  // 알면서도 exchangeCodeForSession을 먼저 시도하면, 실패하더라도 코드가
+  // 이미 소모되어(무효화되어) 뒤이은 /auth/recover의 재시도가 항상 실패하게
+  // 됨(실측 확인). 그래서 쿠키가 없으면 아예 시도하지 않고 바로 복구
+  // 페이지로 보내서, 코드가 살아있는 상태로 한 번만 쓰이게 한다.
+  if (!hasVerifierCookie) {
+    console.error('[auth/callback] no verifier cookie, skipping exchange and going straight to recover.', 'cookieNames=', request.cookies.getAll().map(c => c.name).join(','))
     const recover = new URL(`${origin}/auth/recover`)
     recover.searchParams.set('code', code)
     if (roleParam) recover.searchParams.set('role', roleParam)
     return NextResponse.redirect(recover)
+  }
+
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+  if (error || !data.user) {
+    console.error('[auth/callback] exchangeCodeForSession failed even with verifier cookie present.', 'error=', error?.message, 'status=', error?.status)
+    return NextResponse.redirect(`${origin}/login`)
   }
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
