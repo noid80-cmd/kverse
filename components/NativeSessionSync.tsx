@@ -23,11 +23,27 @@ export default function NativeSessionSync() {
   useEffect(() => {
     const supabase = createClient()
 
+    // 콜드 스타트 직후엔 Capacitor의 네이티브 플러그인 브릿지가 아직 다
+    // 준비되기 전이라 Preferences 호출이 "not implemented on ios"로 실패하는
+    // 게 실측 확인됨(시간이 좀 지나면 정상화됨). 준비될 때까지 짧게 재시도.
+    async function withRetry<T>(fn: () => Promise<T>, label: string, retries = 6, delayMs = 300): Promise<T | null> {
+      for (let i = 0; i < retries; i++) {
+        try {
+          return await fn()
+        } catch (e) {
+          if (i === retries - 1) { log(`${label} gave up after ${retries} tries: ${String(e)}`); return null }
+          await new Promise(r => setTimeout(r, delayMs))
+        }
+      }
+      return null
+    }
+
     async function restoreIfNeeded() {
       const { data } = await supabase.auth.getSession()
       log(`getSession session? ${!!data.session}`)
       if (data.session) return
-      const { value: refreshToken } = await Preferences.get({ key: REFRESH_KEY }).catch(e => { log(`Preferences.get threw ${String(e)}`); return { value: null } })
+      const result = await withRetry(() => Preferences.get({ key: REFRESH_KEY }), 'Preferences.get')
+      const refreshToken = result?.value ?? null
       log(`stored refreshToken? ${!!refreshToken}`)
       if (!refreshToken) return
       const r = await supabase.auth.refreshSession({ refresh_token: refreshToken }).catch(e => ({ error: e }))
@@ -38,9 +54,8 @@ export default function NativeSessionSync() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       log(`onAuthStateChange ${event} hasSession=${!!session}`)
       if (session?.refresh_token) {
-        Preferences.set({ key: REFRESH_KEY, value: session.refresh_token })
-          .then(() => log('Preferences.set OK'))
-          .catch(e => log(`Preferences.set FAILED ${String(e)}`))
+        withRetry(() => Preferences.set({ key: REFRESH_KEY, value: session.refresh_token }), 'Preferences.set')
+          .then(r => log(r !== null ? 'Preferences.set OK' : 'Preferences.set FAILED (see above)'))
         try { localStorage.setItem('kpick-has-logged-in', '1') } catch { /* non-critical */ }
       } else if (event === 'SIGNED_OUT') {
         Preferences.remove({ key: REFRESH_KEY }).catch(() => {})
