@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isNativeApp } from '@/lib/capacitor'
 import Link from 'next/link'
 import { LANGS, LANG_LABELS, type Lang } from '@/lib/i18n/translations'
 import LiveTicker from '@/components/LiveTicker'
@@ -194,7 +195,8 @@ export default function LandingClient() {
     const code = new URLSearchParams(window.location.search).get('code')
     if (code) { window.location.replace(`/auth/callback?code=${code}`); return }
 
-    const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches
+    const isStandaloneApp = isNativeApp()
+      || window.matchMedia('(display-mode: standalone)').matches
       || (window.navigator as unknown as { standalone?: boolean }).standalone === true
       || document.referrer.startsWith('android-app://')
 

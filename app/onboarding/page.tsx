@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Bell, BellOff, Video, Star, MessageCircle, Search, ClipboardList } from 'lucide-react'
+import { isNativeApp } from '@/lib/capacitor'
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -60,7 +61,7 @@ function OnboardingContent() {
     const ua = navigator.userAgent
     const ios = /iPhone|iPad|iPod/.test(ua) && !(window as any).MSStream
     const android = /Android/.test(ua)
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
+    const standalone = isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
     const isMobile = ios || android
 
     setIsIOS(ios)
