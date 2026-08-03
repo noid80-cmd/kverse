@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Preferences } from '@capacitor/preferences'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
@@ -62,31 +61,16 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
-    const { data } = await supabase.auth.signInWithOAuth({
+    // /auth/callback이 클라이언트 컴포넌트라 SDK가 알아서 리다이렉트하게 둠
+    // (skipBrowserRedirect 불필요 — 서버가 code_verifier 쿠키를 못 읽는
+    // 문제를 피하려고 콜백을 클라이언트에서 처리하도록 바꿨음).
+    await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         queryParams: { prompt: 'select_account' },
-        skipBrowserRedirect: true,
       },
     })
-    if (!data?.url) return
-
-    // signInWithOAuth가 PKCE code_verifier를 JS document.cookie로만 저장하는데,
-    // 네이티브 앱(WKWebView)에서는 구글 로그인 화면을 거쳐 돌아올 때 이 쿠키가
-    // 실제로 유실되는 게 서버 로그로 확인됨("PKCE 코드 검증기를 찾을 수 없음").
-    // 쿠키에 의존하지 않고 sessionStorage + Capacitor Preferences(네이티브
-    // 저장소, 이 세션에서 가장 안정적으로 확인됨) 양쪽에 백업해서, 콜백에서
-    // 쿠키를 못 찾으면 /auth/recover에서 이 값으로 수동 교환을 완료한다.
-    const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
-    if (verifierCookie) {
-      const eqIdx = verifierCookie.indexOf('=')
-      const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
-      try { sessionStorage.setItem('kpick-oauth-verifier', value) } catch { /* non-critical */ }
-      await Preferences.set({ key: 'kpick-oauth-verifier', value }).catch(() => {})
-    }
-
-    window.location.href = data.url
   }
 
   return (
