@@ -26,14 +26,16 @@ export default function NativeSessionSync() {
     // 콜드 스타트 직후엔 Capacitor의 네이티브 플러그인 브릿지가 아직 다
     // 준비되기 전이라 Preferences 호출이 "not implemented on ios"로 실패하는
     // 게 실측 확인됨(시간이 좀 지나면 정상화됨). 준비될 때까지 짧게 재시도.
-    async function withRetry<T>(fn: () => Promise<T>, label: string, retries = 6, delayMs = 300): Promise<T | null> {
+    async function withRetry<T>(fn: () => Promise<T>, label: string, retries = 20, delayMs = 500): Promise<T | null> {
       for (let i = 0; i < retries; i++) {
         try {
-          return await fn()
+          const r = await fn()
+          if (i > 0) log(`${label} succeeded on try ${i + 1}`)
+          return r
         } catch (e) {
-          if (i === retries - 1) { log(`${label} gave up after ${retries} tries: ${String(e)}`); return null }
-          await new Promise(r => setTimeout(r, delayMs))
+          if (i === retries - 1) { log(`${label} gave up after ${retries} tries (${(retries * delayMs / 1000).toFixed(0)}s): ${String(e)}`); return null }
         }
+        await new Promise(r => setTimeout(r, delayMs))
       }
       return null
     }
