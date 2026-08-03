@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Preferences } from '@capacitor/preferences'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
@@ -78,18 +79,11 @@ export default function LoginPage() {
     // 저장소, 이 세션에서 가장 안정적으로 확인됨) 양쪽에 백업해서, 콜백에서
     // 쿠키를 못 찾으면 /auth/recover에서 이 값으로 수동 교환을 완료한다.
     const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
-    // 임시 진단: 구글로 넘어가기 직전 시점에 검증기 쿠키를 실제로 찾았는지
-    // 바로 눈으로 확인하기 위함. 원인 확정되면 제거할 것.
-    alert('verifier cookie found? ' + !!verifierCookie + ' | all cookies: ' + document.cookie.slice(0, 300))
     if (verifierCookie) {
       const eqIdx = verifierCookie.indexOf('=')
       const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
       try { sessionStorage.setItem('kpick-oauth-verifier', value) } catch { /* non-critical */ }
-      try {
-        const { Preferences } = await import('@capacitor/preferences')
-        await Preferences.set({ key: 'kpick-oauth-verifier', value })
-        alert('Preferences.set done, value length=' + value.length)
-      } catch (e) { alert('Preferences save failed: ' + String(e)) }
+      await Preferences.set({ key: 'kpick-oauth-verifier', value }).catch(() => {})
     }
 
     window.location.href = data.url

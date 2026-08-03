@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Preferences } from '@capacitor/preferences'
 
 export default function AuthRecover() {
   return (
@@ -24,15 +25,9 @@ function AuthRecoverContent() {
       let verifier: string | null = null
       try { verifier = sessionStorage.getItem('kpick-oauth-verifier') } catch { /* non-critical */ }
       if (!verifier) {
-        try {
-          const { Preferences } = await import('@capacitor/preferences')
-          const { value } = await Preferences.get({ key: 'kpick-oauth-verifier' })
-          verifier = value
-        } catch { /* not native, ignore */ }
+        const { value } = await Preferences.get({ key: 'kpick-oauth-verifier' }).catch(() => ({ value: null }))
+        verifier = value
       }
-
-      // 임시 진단: 원인 확정되면 제거할 것.
-      alert('recover page: code? ' + !!code + ' verifier? ' + !!verifier)
 
       if (!code || !verifier) {
         setMessage('로그인에 실패했어요. 다시 시도해주세요.')
