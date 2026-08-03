@@ -83,15 +83,7 @@ export default function LoginPage() {
       const eqIdx = verifierCookie.indexOf('=')
       const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
       try { sessionStorage.setItem('kpick-oauth-verifier', value) } catch { /* non-critical */ }
-      try {
-        await Preferences.set({ key: 'kpick-oauth-verifier', value })
-        const check = await Preferences.get({ key: 'kpick-oauth-verifier' })
-        alert('SAVE: cookie found, value len=' + value.length + ' | readback len=' + (check.value?.length ?? 'null'))
-      } catch (e) {
-        alert('SAVE FAILED: ' + String(e))
-      }
-    } else {
-      alert('SAVE: no verifier cookie found at all. cookies=' + document.cookie.slice(0, 200))
+      await Preferences.set({ key: 'kpick-oauth-verifier', value }).catch(() => {})
     }
 
     window.location.href = data.url
