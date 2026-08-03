@@ -75,16 +75,24 @@ export default function LoginPage() {
     // 네이티브 앱(WKWebView)에서는 구글 로그인 화면을 거쳐 돌아올 때 이 쿠키가
     // 유실되는 경우가 있어("2~3번 시도해야 로그인됨") /api/set-code-verifier로
     // 한 번 더 실제 Set-Cookie 응답 헤더로 심어서 안정성을 높인다.
+    // 이 fetch 자체가 네이티브 앱 안에서 가끔 조용히 실패하는 게 확인되어
+    // (WKWebView 네트워킹 불안정), 성공할 때까지 짧게 재시도한다.
     const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
     if (verifierCookie) {
       const eqIdx = verifierCookie.indexOf('=')
       const name = verifierCookie.slice(0, eqIdx)
       const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
-      await fetch('/api/set-code-verifier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, value }),
-      }).catch(() => {})
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const res = await fetch('/api/set-code-verifier', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, value }),
+          })
+          if (res.ok) break
+        } catch { /* retry */ }
+        if (attempt < 3) await new Promise(r => setTimeout(r, 300))
+      }
     }
 
     window.location.href = data.url
