@@ -21,9 +21,11 @@ export default function NativeSessionSync() {
       return raw ? JSON.parse(raw) : []
     } catch { return [] }
   })
-  // 임시 디버그 오버레이(맥 없이 폰 화면만으로 확인용). window.Capacitor
-  // 존재 여부로 게이트해서 일반 웹 방문자에겐 안 보임. 원인 확정되면 제거.
-  const showDebug = typeof window !== 'undefined' && typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined'
+  // 화면 오버레이는 꺼둠 — window.Capacitor 존재 여부로만 게이트했었는데
+  // 이는 개발자 기기가 아니라 "앱을 설치한 모든 사용자"에게 뜨는 조건이라
+  // 배포 중엔 위험함. 로그 자체는 localStorage에 계속 쌓이니 필요하면
+  // 이 값만 true로 바꿔 확인.
+  const showDebug = false
 
   function log(line: string) {
     console.log('[NSS]', line)
