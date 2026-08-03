@@ -212,11 +212,14 @@ export default function LandingClient() {
           return resolveSession(isStandaloneApp, retriesLeft - 1)
         }
         if (isStandaloneApp) {
-          // 예전에 로그인한 적 있는 기기면(세션만 풀린 상태일 가능성이
-          // 높음) 매번 헷갈리는 가입 화면 대신 로그인 화면으로 보낸다.
-          let hasLoggedInBefore = false
-          try { hasLoggedInBefore = localStorage.getItem('kpick-has-logged-in') === '1' } catch { /* non-critical */ }
-          router.push(hasLoggedInBefore ? '/login' : '/signup')
+          // 홈 화면에 설치된 스탠드얼론 앱을 실행할 수 있다는 건 이미 웹에서
+          // 가입+온보딩을 거쳤다는 뜻 — "세션 없음"은 거의 항상 진짜 신규
+          // 유저가 아니라 기기 저장소(쿠키/localStorage)가 리셋된 기존
+          // 유저다. localStorage 플래그로 구분하려 했었지만 그 저장소 자체가
+          // 같이 날아가는 게 문제라 신뢰할 수 없음(admin 계정이 /signup으로
+          // 튕긴 사례로 확인) — 항상 로그인 화면으로 보낸다. 진짜 신규
+          // 유저는 로그인 화면의 "가입하기" 링크로 이동 가능.
+          router.push('/login')
           return
         }
         setReady(true); return
