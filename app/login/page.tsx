@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
 export default function LoginPage() {
+  const router = useRouter()
   const { lang } = useLang()
   const tx = useT(lang).auth
   const [email, setEmail] = useState('')
@@ -36,7 +38,14 @@ export default function LoginPage() {
       })
       const result = await res.json()
       if (!res.ok || result.error) { setError(tx.loginError); setLoading(false); return }
-      window.location.href = result.href
+      // 전체 새로고침(window.location.href) 대신 앱 내 화면 전환으로 이동.
+      // 네이티브 앱(WKWebView)에서 로그인 직후 하드 리로드를 하면 그 순간
+      // 쿠키 반영 타이밍 문제로 로그인 페이지로 되튕기는 경우가 잦았음
+      // ("여러 번 시도해야 로그인됨"). router.push는 같은 JS 컨텍스트를
+      // 유지해서 이 문제를 피하고, RSC 페치가 실패해도 Next.js가 자동으로
+      // 브라우저 네비게이션으로 대체한다.
+      router.push(result.href)
+      router.refresh()
     } catch (err) {
       console.error('[login] error:', err)
       setError(tx.loginError)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { isNativeAppAsync } from '@/lib/capacitor'
 import Link from 'next/link'
@@ -168,6 +169,7 @@ const t: Record<Lang, TxShape> = {
 }
 
 export default function LandingClient() {
+  const router = useRouter()
   const [lang, setLang] = useState<Lang>(() => {
     try {
       const saved = localStorage.getItem('kpick-lang')
@@ -209,14 +211,14 @@ export default function LandingClient() {
           await new Promise(r => setTimeout(r, 400))
           return resolveSession(isStandaloneApp, retriesLeft - 1)
         }
-        if (isStandaloneApp) { window.location.href = '/signup'; return }
+        if (isStandaloneApp) { router.push('/signup'); return }
         setReady(true); return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       const role = profile?.role ?? 'talent'
-      if (role === 'admin') window.location.href = '/admin/users'
-      else if (role === 'agency') window.location.href = '/agency/discover'
-      else window.location.href = '/dashboard'
+      if (role === 'admin') router.push('/admin/users')
+      else if (role === 'agency') router.push('/agency/discover')
+      else router.push('/dashboard')
     }
 
     // window.Capacitor 브릿지가 아직 안 붙어있는 순간에 체크하면 false로
