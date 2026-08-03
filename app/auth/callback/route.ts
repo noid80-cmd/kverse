@@ -7,6 +7,9 @@ export async function GET(request: NextRequest) {
   const roleParam = searchParams.get('role') as 'talent' | 'agency' | null
 
   if (!code) {
+    const oauthError = searchParams.get('error')
+    const oauthErrorDesc = searchParams.get('error_description')
+    console.error('[auth/callback] no code param.', 'error=', oauthError, 'error_description=', oauthErrorDesc, 'full url=', request.url)
     return NextResponse.redirect(`${origin}/login`)
   }
 
@@ -28,9 +31,11 @@ export async function GET(request: NextRequest) {
     }
   )
 
+  const hasVerifierCookie = request.cookies.getAll().some(c => c.name.includes('-code-verifier'))
   const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error || !data.user) {
+    console.error('[auth/callback] exchangeCodeForSession failed.', 'error=', error?.message, 'status=', error?.status, 'hadVerifierCookie=', hasVerifierCookie, 'cookieNames=', request.cookies.getAll().map(c => c.name).join(','))
     return NextResponse.redirect(`${origin}/login`)
   }
 
