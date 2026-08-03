@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
 
   if (error || !data.user) {
     console.error('[auth/callback] exchangeCodeForSession failed.', 'error=', error?.message, 'status=', error?.status, 'hadVerifierCookie=', hasVerifierCookie, 'cookieNames=', request.cookies.getAll().map(c => c.name).join(','))
-    return NextResponse.redirect(`${origin}/login`)
+    // code_verifier 쿠키가 구글 왕복 사이에 유실되는 게 실측 확인됨(네이티브
+    // 앱 WKWebView). 바로 로그인 화면으로 보내지 말고, 클라이언트가
+    // sessionStorage에 백업해둔 검증기로 수동 교환을 시도할 수 있는 복구
+    // 페이지로 보낸다.
+    const recover = new URL(`${origin}/auth/recover`)
+    recover.searchParams.set('code', code)
+    if (roleParam) recover.searchParams.set('role', roleParam)
+    return NextResponse.redirect(recover)
   }
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()

@@ -73,26 +73,14 @@ export default function LoginPage() {
 
     // signInWithOAuth가 PKCE code_verifier를 JS document.cookie로만 저장하는데,
     // 네이티브 앱(WKWebView)에서는 구글 로그인 화면을 거쳐 돌아올 때 이 쿠키가
-    // 유실되는 경우가 있어("2~3번 시도해야 로그인됨") /api/set-code-verifier로
-    // 한 번 더 실제 Set-Cookie 응답 헤더로 심어서 안정성을 높인다.
-    // 이 fetch 자체가 네이티브 앱 안에서 가끔 조용히 실패하는 게 확인되어
-    // (WKWebView 네트워킹 불안정), 성공할 때까지 짧게 재시도한다.
+    // 실제로 유실되는 게 서버 로그로 확인됨("PKCE 코드 검증기를 찾을 수 없음").
+    // 쿠키에 의존하지 않고 sessionStorage에 백업해서, 콜백에서 쿠키를 못 찾으면
+    // /auth/recover에서 이 값을 이용해 수동으로 교환을 완료한다.
     const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
     if (verifierCookie) {
       const eqIdx = verifierCookie.indexOf('=')
-      const name = verifierCookie.slice(0, eqIdx)
       const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          const res = await fetch('/api/set-code-verifier', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, value }),
-          })
-          if (res.ok) break
-        } catch { /* retry */ }
-        if (attempt < 3) await new Promise(r => setTimeout(r, 300))
-      }
+      try { sessionStorage.setItem('kpick-oauth-verifier', value) } catch { /* non-critical */ }
     }
 
     window.location.href = data.url
