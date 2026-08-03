@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Preferences } from '@capacitor/preferences'
 import { createClient } from '@/lib/supabase/client'
 
@@ -9,38 +9,41 @@ const REFRESH_KEY = 'kpick-native-refresh-token'
 // 유실되는 경우가 있어("로그인이 자꾸 풀림"), 로그인 성공 시 refresh_token을
 // 기기 자체 저장소(Capacitor Preferences)에도 따로 저장해두고, 콜드
 // 스타트 때 쿠키 세션이 비어있으면 이걸로 복구를 시도한다.
-//
-// 주의: window.Capacitor.isNativePlatform()/getPlatform()으로 "네이티브
-// 여부"를 먼저 확인한 뒤에만 이 로직을 태우려 했었는데, 실기기(Safari
-// 원격 디버깅)로 확인해보니 이 플랫폼 판정 자체가 하드 네비게이션(로그인
-// 리다이렉트 등) 이후 페이지에서 신뢰할 수 없게 나옴("web"으로 잘못 나옴).
-// 반면 Preferences 플러그인 자체(네이티브 브릿지 호출)는 그런 상황에서도
-// 계속 정상 동작하는 게 확인됐음. 그래서 플랫폼 판정으로 게이트하지 않고
-// 항상 시도한다 — 진짜 웹 브라우저에서는 Capacitor의 web fallback(localStorage
-// 기반)으로 조용히 동작하므로 해가 없다.
 export default function NativeSessionSync() {
+  const [debugLines, setDebugLines] = useState<string[]>([])
+  // 임시 디버그 오버레이 — 네이티브 앱 로그인 세션 유지 문제 진단용.
+  // window.Capacitor 객체 존재 여부로만 게이트(isNativePlatform()은 이미
+  // 신뢰 못 한다고 확인됨) — 일반 웹 방문자에게는 안 보임. 원인 확정되면
+  // 이 오버레이는 제거할 것.
+  const showDebug = typeof window !== 'undefined' && typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined'
+
+  function log(line: string) {
+    console.log('[NSS]', line)
+    setDebugLines(prev => [...prev, line])
+  }
+
   useEffect(() => {
-    console.log('[NSS] mount, cookie has sb token?', document.cookie.includes('-auth-token'))
+    log(`mount, cookie has sb token? ${document.cookie.includes('-auth-token')}`)
     const supabase = createClient()
 
     async function restoreIfNeeded() {
       const { data, error } = await supabase.auth.getSession()
-      console.log('[NSS] getSession session?', !!data.session, 'error?', error ? String(error) : null)
+      log(`getSession session? ${!!data.session} error? ${error ? String(error) : 'null'}`)
       if (data.session) return
-      const { value: refreshToken } = await Preferences.get({ key: REFRESH_KEY }).catch(e => { console.log('[NSS] Preferences.get threw', String(e)); return { value: null } })
-      console.log('[NSS] stored refreshToken?', !!refreshToken)
+      const { value: refreshToken } = await Preferences.get({ key: REFRESH_KEY }).catch(e => { log(`Preferences.get threw ${String(e)}`); return { value: null } })
+      log(`stored refreshToken? ${!!refreshToken}`)
       if (!refreshToken) return
       const r = await supabase.auth.refreshSession({ refresh_token: refreshToken }).catch(e => ({ error: e }))
-      console.log('[NSS] refreshSession result', JSON.stringify(r))
+      log(`refreshSession result: ${JSON.stringify(r).slice(0, 200)}`)
     }
     restoreIfNeeded()
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[NSS] onAuthStateChange', event, 'hasSession=', !!session, 'hasRefreshToken=', !!session?.refresh_token)
+      log(`onAuthStateChange ${event} hasSession=${!!session} hasRefreshToken=${!!session?.refresh_token}`)
       if (session?.refresh_token) {
         Preferences.set({ key: REFRESH_KEY, value: session.refresh_token })
-          .then(() => console.log('[NSS] Preferences.set OK'))
-          .catch(e => console.log('[NSS] Preferences.set FAILED', String(e)))
+          .then(() => log('Preferences.set OK'))
+          .catch(e => log(`Preferences.set FAILED ${String(e)}`))
       } else if (event === 'SIGNED_OUT') {
         Preferences.remove({ key: REFRESH_KEY }).catch(() => {})
       }
@@ -49,5 +52,14 @@ export default function NativeSessionSync() {
     return () => sub.subscription.unsubscribe()
   }, [])
 
-  return null
+  if (!showDebug) return null
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, maxHeight: '40vh', overflowY: 'auto',
+      background: 'rgba(0,0,0,0.9)', color: '#0f0', fontSize: 10, fontFamily: 'monospace',
+      padding: '8px', zIndex: 999999, whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+    }}>
+      {debugLines.map((l, i) => <div key={i}>{l}</div>)}
+    </div>
+  )
 }
