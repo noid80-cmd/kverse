@@ -20,20 +20,27 @@ const REFRESH_KEY = 'kpick-native-refresh-token'
 // 기반)으로 조용히 동작하므로 해가 없다.
 export default function NativeSessionSync() {
   useEffect(() => {
+    console.log('[NSS] mount, cookie has sb token?', document.cookie.includes('-auth-token'))
     const supabase = createClient()
 
     async function restoreIfNeeded() {
-      const { data } = await supabase.auth.getSession()
+      const { data, error } = await supabase.auth.getSession()
+      console.log('[NSS] getSession session?', !!data.session, 'error?', error ? String(error) : null)
       if (data.session) return
-      const { value: refreshToken } = await Preferences.get({ key: REFRESH_KEY }).catch(() => ({ value: null }))
+      const { value: refreshToken } = await Preferences.get({ key: REFRESH_KEY }).catch(e => { console.log('[NSS] Preferences.get threw', String(e)); return { value: null } })
+      console.log('[NSS] stored refreshToken?', !!refreshToken)
       if (!refreshToken) return
-      await supabase.auth.refreshSession({ refresh_token: refreshToken }).catch(() => {})
+      const r = await supabase.auth.refreshSession({ refresh_token: refreshToken }).catch(e => ({ error: e }))
+      console.log('[NSS] refreshSession result', JSON.stringify(r))
     }
     restoreIfNeeded()
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[NSS] onAuthStateChange', event, 'hasSession=', !!session, 'hasRefreshToken=', !!session?.refresh_token)
       if (session?.refresh_token) {
-        Preferences.set({ key: REFRESH_KEY, value: session.refresh_token }).catch(() => {})
+        Preferences.set({ key: REFRESH_KEY, value: session.refresh_token })
+          .then(() => console.log('[NSS] Preferences.set OK'))
+          .catch(e => console.log('[NSS] Preferences.set FAILED', String(e)))
       } else if (event === 'SIGNED_OUT') {
         Preferences.remove({ key: REFRESH_KEY }).catch(() => {})
       }
