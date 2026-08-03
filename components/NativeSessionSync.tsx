@@ -42,26 +42,11 @@ export default function NativeSessionSync() {
 
   useEffect(() => {
     log('--- app start ---')
-    // 콜드 스타트 직후엔 Preferences 플러그인이 구조적으로 안 되다가, 구글
-    // 로그인처럼 실제 브라우저급 이동(왕복 네비게이션)을 한 번 거치고 나면
-    // 정상 작동하는 게 실측 확인됨(10초 재시도로도 안 풀림 — 시간 문제
-    // 아님). 그 "진짜 이동"을 앱 켜자마자 인위적으로 한 번 만들어서 브릿지를
-    // 미리 워밍업한다. 세션당 한 번만(sessionStorage로 표시).
-    const isNative = typeof window !== 'undefined' && typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined'
-    if (isNative) {
-      let warmed = true
-      try { warmed = sessionStorage.getItem('kpick-bridge-warmed') === '1' } catch { /* sessionStorage 자체가 막히면 반복 리로드 위험 있어 워밍업 건너뜀 */ }
-      log(`warmup check: already warmed=${warmed}`)
-      if (!warmed) {
-        try {
-          sessionStorage.setItem('kpick-bridge-warmed', '1')
-          log('warmup: reloading now')
-          window.location.reload()
-          return
-        } catch { /* non-critical, 그냥 진행 */ }
-      }
-    }
-
+    // 콜드 스타트 직후 인위적 리로드로 브릿지를 "워밍업"하는 시도를 했었으나,
+    // 실측 결과 리로드가 정상 발동해도 Preferences는 여전히 실패함이 확인돼
+    // (구글 로그인 왕복 후에만 성공, 단순 reload()로는 재현 안 됨) 제거함.
+    // 원인은 iOS 네이티브 셸(WKWebView 구성) 쪽으로 좁혀짐 — 이 저장소엔
+    // 해당 코드가 없어 여기서 더 진행 불가.
     const supabase = createClient()
 
     // 콜드 스타트 직후엔 Capacitor의 네이티브 플러그인 브릿지가 아직 다
