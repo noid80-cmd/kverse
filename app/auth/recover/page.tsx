@@ -31,6 +31,9 @@ function AuthRecoverContent() {
         } catch { /* not native, ignore */ }
       }
 
+      // 임시 진단: 원인 확정되면 제거할 것.
+      alert('recover page: code? ' + !!code + ' verifier? ' + !!verifier)
+
       if (!code || !verifier) {
         setMessage('로그인에 실패했어요. 다시 시도해주세요.')
         setTimeout(() => router.push('/login'), 1200)
