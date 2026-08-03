@@ -13,21 +13,28 @@ const REFRESH_KEY = 'kpick-native-refresh-token'
 // 세션이 비어있으면 이걸로 복구를 시도한다.
 export default function NativeSessionSync() {
   useEffect(() => {
+    console.log('[NativeSessionSync] mount, isNativeApp=', isNativeApp())
     if (!isNativeApp()) return
     const supabase = createClient()
 
     async function restoreIfNeeded() {
       const { data } = await supabase.auth.getSession()
+      console.log('[NativeSessionSync] restoreIfNeeded getSession session?', !!data.session)
       if (data.session) return
       const { value: refreshToken } = await Preferences.get({ key: REFRESH_KEY })
+      console.log('[NativeSessionSync] restoreIfNeeded stored refreshToken?', !!refreshToken)
       if (!refreshToken) return
-      await supabase.auth.refreshSession({ refresh_token: refreshToken }).catch(() => {})
+      const result = await supabase.auth.refreshSession({ refresh_token: refreshToken }).catch(e => ({ error: e }))
+      console.log('[NativeSessionSync] restoreSession result', JSON.stringify(result))
     }
     restoreIfNeeded()
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[NativeSessionSync] onAuthStateChange event=', event, 'hasSession=', !!session, 'hasRefreshToken=', !!session?.refresh_token)
       if (session?.refresh_token) {
-        Preferences.set({ key: REFRESH_KEY, value: session.refresh_token }).catch(() => {})
+        Preferences.set({ key: REFRESH_KEY, value: session.refresh_token })
+          .then(() => console.log('[NativeSessionSync] Preferences.set OK'))
+          .catch(e => console.log('[NativeSessionSync] Preferences.set FAILED', String(e)))
       } else if (event === 'SIGNED_OUT') {
         Preferences.remove({ key: REFRESH_KEY }).catch(() => {})
       }
