@@ -211,7 +211,14 @@ export default function LandingClient() {
           await new Promise(r => setTimeout(r, 400))
           return resolveSession(isStandaloneApp, retriesLeft - 1)
         }
-        if (isStandaloneApp) { router.push('/signup'); return }
+        if (isStandaloneApp) {
+          // 예전에 로그인한 적 있는 기기면(세션만 풀린 상태일 가능성이
+          // 높음) 매번 헷갈리는 가입 화면 대신 로그인 화면으로 보낸다.
+          let hasLoggedInBefore = false
+          try { hasLoggedInBefore = localStorage.getItem('kpick-has-logged-in') === '1' } catch { /* non-critical */ }
+          router.push(hasLoggedInBefore ? '/login' : '/signup')
+          return
+        }
         setReady(true); return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()

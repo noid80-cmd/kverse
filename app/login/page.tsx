@@ -19,6 +19,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     setIsKakao(/KAKAOTALK/i.test(navigator.userAgent))
+    try {
+      const remembered = localStorage.getItem('kpick-last-email')
+      if (remembered) setEmail(remembered)
+    } catch { /* non-critical */ }
   }, [])
 
   async function handleLogin(e: React.FormEvent) {
@@ -38,6 +42,8 @@ export default function LoginPage() {
       })
       const result = await res.json()
       if (!res.ok || result.error) { setError(tx.loginError); setLoading(false); return }
+      try { localStorage.setItem('kpick-last-email', email) } catch { /* non-critical */ }
+      try { localStorage.setItem('kpick-has-logged-in', '1') } catch { /* non-critical */ }
       // 전체 새로고침(window.location.href) 대신 앱 내 화면 전환으로 이동.
       // 네이티브 앱(WKWebView)에서 로그인 직후 하드 리로드를 하면 그 순간
       // 쿠키 반영 타이밍 문제로 로그인 페이지로 되튕기는 경우가 잦았음
