@@ -29,7 +29,7 @@ export default function AdminNav() {
   }
 
   return (
-    <div style={{ background: 'rgba(9,9,15,0.97)', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 30, backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', height: 56 }}>
+    <div style={{ background: 'rgba(9,9,15,0.97)', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 30, backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', minHeight: 56, paddingTop: 'env(safe-area-inset-top)' }}>
       <div style={{ flex: 1, overflowX: 'auto', display: 'flex', alignItems: 'center', gap: 2, height: '100%', padding: '0 0 0 16px' }}>
         <span style={{ fontWeight: 900, fontSize: 16, color: '#eeeeff', flexShrink: 0, marginRight: 6 }}>관리자</span>
         {previewNav.map(n => (
