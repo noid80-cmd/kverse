@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
@@ -8,6 +9,7 @@ import { useT } from '@/lib/i18n/translations'
 import { isNativeApp } from '@/lib/capacitor'
 
 export default function LoginPage() {
+  const router = useRouter()
   const { lang } = useLang()
   const tx = useT(lang).auth
   const [email, setEmail] = useState('')
@@ -18,6 +20,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     setIsKakao(/KAKAOTALK/i.test(navigator.userAgent))
+    try {
+      const remembered = localStorage.getItem('kpick-last-email')
+      if (remembered) setEmail(remembered)
+    } catch { /* non-critical */ }
   }, [])
 
   async function handleLogin(e: React.FormEvent) {
@@ -37,7 +43,16 @@ export default function LoginPage() {
       })
       const result = await res.json()
       if (!res.ok || result.error) { setError(tx.loginError); setLoading(false); return }
-      window.location.href = result.href
+      try { localStorage.setItem('kpick-last-email', email) } catch { /* non-critical */ }
+      try { localStorage.setItem('kpick-has-logged-in', '1') } catch { /* non-critical */ }
+      // 전체 새로고침(window.location.href) 대신 앱 내 화면 전환으로 이동.
+      // 네이티브 앱(WKWebView)에서 로그인 직후 하드 리로드를 하면 그 순간
+      // 쿠키 반영 타이밍 문제로 로그인 페이지로 되튕기는 경우가 잦았음
+      // ("여러 번 시도해야 로그인됨"). router.push는 같은 JS 컨텍스트를
+      // 유지해서 이 문제를 피하고, RSC 페치가 실패해도 Next.js가 자동으로
+      // 브라우저 네비게이션으로 대체한다.
+      router.push(result.href)
+      router.refresh()
     } catch (err) {
       console.error('[login] error:', err)
       setError(tx.loginError)
@@ -52,36 +67,19 @@ export default function LoginPage() {
     // Safari로 튕기지 않고 시스템 인증 세션 안에서 구글 로그인을 처리한 뒤,
     // 완료되면 이 콜백을 https://kpick.app/auth/callback으로 변환해 웹뷰에
     // 다시 로드해준다(자세한 내용은 ios/App/App/GoogleAuthInterceptorPlugin.swift).
+    // /auth/callback이 클라이언트 컴포넌트라 SDK가 알아서 리다이렉트하게 둠
+    // (skipBrowserRedirect 불필요 — 서버가 code_verifier 쿠키를 못 읽는
+    // 문제를 피하려고 콜백을 클라이언트에서 처리하도록 바꿨음).
     const redirectTo = isNativeApp()
       ? 'kpick://auth-callback'
       : `${window.location.origin}/auth/callback`
-    const { data } = await supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo,
         queryParams: { prompt: 'select_account' },
-        skipBrowserRedirect: true,
       },
     })
-    if (!data?.url) return
-
-    // signInWithOAuth가 PKCE code_verifier를 JS document.cookie로만 저장하는데,
-    // 네이티브 앱(WKWebView)에서는 구글 로그인 화면을 거쳐 돌아올 때 이 쿠키가
-    // 유실되는 경우가 있어("2~3번 시도해야 로그인됨") /api/set-code-verifier로
-    // 한 번 더 실제 Set-Cookie 응답 헤더로 심어서 안정성을 높인다.
-    const verifierCookie = document.cookie.split('; ').find(c => c.includes('-code-verifier='))
-    if (verifierCookie) {
-      const eqIdx = verifierCookie.indexOf('=')
-      const name = verifierCookie.slice(0, eqIdx)
-      const value = decodeURIComponent(verifierCookie.slice(eqIdx + 1))
-      await fetch('/api/set-code-verifier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, value }),
-      }).catch(() => {})
-    }
-
-    window.location.href = data.url
   }
 
   return (

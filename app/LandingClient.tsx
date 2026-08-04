@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { isNativeApp } from '@/lib/capacitor'
+import { isNativeAppAsync } from '@/lib/capacitor'
 import Link from 'next/link'
 import { LANGS, LANG_LABELS, type Lang } from '@/lib/i18n/translations'
 import LiveTicker from '@/components/LiveTicker'
@@ -168,6 +169,7 @@ const t: Record<Lang, TxShape> = {
 }
 
 export default function LandingClient() {
+  const router = useRouter()
   const [lang, setLang] = useState<Lang>(() => {
     try {
       const saved = localStorage.getItem('kpick-lang')
@@ -195,36 +197,49 @@ export default function LandingClient() {
     const code = new URLSearchParams(window.location.search).get('code')
     if (code) { window.location.replace(`/auth/callback?code=${code}`); return }
 
-    const isStandaloneApp = isNativeApp()
-      || window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as unknown as { standalone?: boolean }).standalone === true
-      || document.referrer.startsWith('android-app://')
-
     const supabase = createClient()
 
     // 네이티브 앱(WKWebView)은 콜드 스타트 직후 쿠키 저장소가 아직 다
     // 로드되지 않은 상태에서 getSession()이 먼저 호출되는 경우가 있어,
     // 실제로는 로그인되어 있는데도 "세션 없음"으로 읽혀 /signup으로
     // 튕기는 문제(체감상 "로그인이 자꾸 풀림")가 있었음. 재시도로 완화.
-    async function resolveSession(retriesLeft: number): Promise<void> {
+    async function resolveSession(isStandaloneApp: boolean, retriesLeft: number): Promise<void> {
       const { data } = await supabase.auth.getSession()
       const user = data.session?.user
       if (!user) {
         if (isStandaloneApp && retriesLeft > 0) {
           await new Promise(r => setTimeout(r, 400))
-          return resolveSession(retriesLeft - 1)
+          return resolveSession(isStandaloneApp, retriesLeft - 1)
         }
-        if (isStandaloneApp) { window.location.href = '/signup'; return }
+        if (isStandaloneApp) {
+          // 홈 화면에 설치된 스탠드얼론 앱을 실행할 수 있다는 건 이미 웹에서
+          // 가입+온보딩을 거쳤다는 뜻 — "세션 없음"은 거의 항상 진짜 신규
+          // 유저가 아니라 기기 저장소(쿠키/localStorage)가 리셋된 기존
+          // 유저다. localStorage 플래그로 구분하려 했었지만 그 저장소 자체가
+          // 같이 날아가는 게 문제라 신뢰할 수 없음(admin 계정이 /signup으로
+          // 튕긴 사례로 확인) — 항상 로그인 화면으로 보낸다. 진짜 신규
+          // 유저는 로그인 화면의 "가입하기" 링크로 이동 가능.
+          router.push('/login')
+          return
+        }
         setReady(true); return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       const role = profile?.role ?? 'talent'
-      if (role === 'admin') window.location.href = '/admin/users'
-      else if (role === 'agency') window.location.href = '/agency/discover'
-      else window.location.href = '/dashboard'
+      if (role === 'admin') router.push('/admin/users')
+      else if (role === 'agency') router.push('/agency/discover')
+      else router.push('/dashboard')
     }
 
-    resolveSession(2)
+    // window.Capacitor 브릿지가 아직 안 붙어있는 순간에 체크하면 false로
+    // 잘못 나올 수 있어(실측 확인됨) 비동기 재시도 버전으로 한 번만 판정
+    isNativeAppAsync().then(isNative => {
+      const isStandaloneApp = isNative
+        || window.matchMedia('(display-mode: standalone)').matches
+        || (window.navigator as unknown as { standalone?: boolean }).standalone === true
+        || document.referrer.startsWith('android-app://')
+      resolveSession(isStandaloneApp, 2)
+    })
   }, [])
 
   if (!ready) return <div style={{ minHeight: '100vh', background: '#07070d' }} />
