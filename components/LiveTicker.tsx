@@ -12,7 +12,12 @@ export default function LiveTicker({ items, durationSeconds = 12 }: { items: Tic
   const lastXRef = useRef(0)
   const [dragging, setDragging] = useState(false)
 
-  const doubled = [...items, ...items]
+  // 항목 개수가 적으면(예: 2개) 2배로 복제해도 화면 너비보다 짧아져서
+  // 스크롤할 게 없어 애니메이션이 멈춰버림 — 짝수 배수로 충분히 반복해서
+  // 항목 개수와 무관하게 항상 화면보다 길게 만든다(반복 카피 수가 짝수면
+  // 절반 지점에서 자연스럽게 루프됨).
+  const REPEAT = 6
+  const doubled = Array.from({ length: REPEAT }, () => items).flat()
 
   useEffect(() => {
     let raf: number
