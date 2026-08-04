@@ -7,6 +7,7 @@ import { isNativeAppAsync } from '@/lib/capacitor'
 import Link from 'next/link'
 import { LANGS, LANG_LABELS, type Lang } from '@/lib/i18n/translations'
 import LiveTicker from '@/components/LiveTicker'
+import WelcomeCarousel from '@/components/WelcomeCarousel'
 
 type TxShape = {
   tagline: string; hero: string; heroSub: string; ctaTalent: string; ctaAgency: string
@@ -178,6 +179,7 @@ export default function LandingClient() {
   })
   const [tab, setTab] = useState<'talent' | 'agency'>('talent')
   const [ready, setReady] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const tx = t[lang]
 
@@ -224,13 +226,13 @@ export default function LandingClient() {
           if (hasLoggedInBefore) { router.push('/login'); return }
 
           // 진짜 처음 실행하는 신규 유저에게는 지망생/기획사 선택 화면으로
-          // 바로 보내기 전에, 이 랜딩 페이지(소개)를 한 번은 보여준다.
+          // 바로 보내기 전에, 스와이프형 소개 슬라이드를 한 번은 보여준다.
           // 이미 한 번 봤으면 이후로는 바로 가입 화면으로.
           let seenLanding = false
           try { seenLanding = localStorage.getItem('kpick-seen-landing') === '1' } catch { /* non-critical */ }
           if (seenLanding) { router.push('/signup'); return }
           try { localStorage.setItem('kpick-seen-landing', '1') } catch { /* non-critical */ }
-          setReady(true)
+          setShowWelcome(true)
           return
         }
         setReady(true); return
@@ -253,6 +255,7 @@ export default function LandingClient() {
     })
   }, [])
 
+  if (showWelcome) return <WelcomeCarousel />
   if (!ready) return <div style={{ minHeight: '100vh', background: '#07070d' }} />
 
   return (
@@ -331,8 +334,7 @@ export default function LandingClient() {
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <LiveTicker items={[
-                  { dot: true, text: 'FNC엔터테인먼트 최종 오디션 1명 진행 중' },
-                  { dot: true, text: 'FNC엔터테인먼트 최종 합격자 배출' },
+                  { dot: true, text: 'FNC엔터테인먼트 최종 합격자 2명 배출' },
                   { dot: false, text: '16개 기획사 참여 중' },
                 ]} />
               </div>

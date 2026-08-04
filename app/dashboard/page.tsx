@@ -274,7 +274,6 @@ export default function DashboardPage() {
             </div>
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <LiveTicker items={[
-                { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerAudition}` },
                 { dot: true, text: `FNC Entertainment ${tx.dashboard.tickerFinalPass}` },
                 { dot: false, text: `16${tx.dashboard.tickerAgencies}` },
               ]} />
