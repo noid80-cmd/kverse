@@ -103,7 +103,7 @@ export default function DiscoverPage() {
           display: 'flex', alignItems: 'center', gap: 6,
         }}>⚙️ 관리자</a>
       )}
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 40px)' }}>
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>

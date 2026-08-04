@@ -288,7 +288,7 @@ export default function ExplorePage() {
           )}
 
           {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
               {[...Array(6)].map((_, i) => (
                 <div key={i} style={{ borderRadius: 18, aspectRatio: '9/14', background: 'rgba(255,255,255,0.05)' }} />
               ))}
@@ -299,7 +299,7 @@ export default function ExplorePage() {
               <div style={{ fontWeight: 700, color: '#eeeeff' }}>{tx.explore.noVideos}</div>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
               {videos.map((v, i) => {
                 const grad = CATEGORY_GRADIENTS[v.category] ?? FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length]
                 const isLiked = liked.has(v.id)

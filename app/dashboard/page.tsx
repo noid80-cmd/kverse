@@ -180,7 +180,7 @@ export default function DashboardPage() {
       <div style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ── Profile header ── */}
-        <div className="max-w-lg mx-auto px-4 pt-10" style={{ marginBottom: 28 }}>
+        <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 28, paddingTop: 'max(env(safe-area-inset-top, 0px), 40px)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 20 }}>
             <Link href="/profile/edit" style={{ textDecoration: 'none', flexShrink: 0 }}>
               <div style={{
