@@ -226,7 +226,7 @@ export default function LandingClient() {
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       const role = profile?.role ?? 'talent'
-      if (role === 'admin') router.push('/admin/users')
+      if (role === 'admin') router.push('/admin')
       else if (role === 'agency') router.push('/agency/discover')
       else router.push('/dashboard')
     }
