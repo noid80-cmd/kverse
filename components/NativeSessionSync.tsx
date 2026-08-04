@@ -1,9 +1,22 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { Preferences } from '@capacitor/preferences'
 import { createClient } from '@/lib/supabase/client'
 
 const REFRESH_KEY = 'kpick-native-refresh-token'
+
+// 완전 종료 후 재실행(콜드 스타트)했을 때 WKWebView가 마지막으로 보던
+// 페이지를 그대로 이어서 보여주는 바람에, 관리자가 예: /admin/users에
+// 있다가 앱을 껐다 켜면 대시보드가 아니라 계속 /admin/users로 들어가지는
+// 문제가 있었음. 콜드 스타트(세션당 1회)에만 각 섹션의 메인 화면으로
+// 되돌리고, 단순 백그라운드 복귀는 마지막 화면 그대로 유지한다.
+function sectionHome(pathname: string): string | null {
+  if (pathname.startsWith('/admin/') && pathname !== '/admin') return '/admin'
+  if (pathname.startsWith('/agency/') && pathname !== '/agency/discover') return '/agency/discover'
+  if (pathname.startsWith('/dashboard/') && pathname !== '/dashboard') return '/dashboard'
+  return null
+}
 
 // 네이티브 앱(Capacitor/WKWebView)에서는 쿠키 기반 세션이 앱 재실행 후
 // 유실되는 경우가 있어("로그인이 자꾸 풀림"), 로그인 성공 시 refresh_token을
@@ -12,6 +25,8 @@ const REFRESH_KEY = 'kpick-native-refresh-token'
 const DEBUG_HISTORY_KEY = 'kpick-nss-debug-history'
 
 export default function NativeSessionSync() {
+  const router = useRouter()
+  const pathname = usePathname()
   // 리로드(워밍업) 직전에 찍은 로그는 화면이 곧바로 날아가서 못 보고
   // 지나칠 수 있어, localStorage에도 남겨서 재시작 후에도 "직전에 무슨
   // 일이 있었는지" 확인 가능하게 함. 원인 확정되면 이 디버그 전체 제거.
@@ -44,6 +59,18 @@ export default function NativeSessionSync() {
 
   useEffect(() => {
     log('--- app start ---')
+
+    const isNative = typeof window !== 'undefined' && typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined'
+    if (isNative) {
+      let alreadyChecked = true
+      try { alreadyChecked = sessionStorage.getItem('kpick-cold-start-nav-checked') === '1' } catch { /* non-critical */ }
+      if (!alreadyChecked) {
+        try { sessionStorage.setItem('kpick-cold-start-nav-checked', '1') } catch { /* non-critical */ }
+        const home = sectionHome(pathname)
+        if (home) router.replace(home)
+      }
+    }
+
     // 콜드 스타트 직후 인위적 리로드로 브릿지를 "워밍업"하는 시도를 했었으나,
     // 실측 결과 리로드가 정상 발동해도 Preferences는 여전히 실패함이 확인돼
     // (구글 로그인 왕복 후에만 성공, 단순 reload()로는 재현 안 됨) 제거함.
