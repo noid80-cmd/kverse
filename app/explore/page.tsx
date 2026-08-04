@@ -251,13 +251,13 @@ export default function ExplorePage() {
         {/* Sticky header */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(5,14,26,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: 'max(env(safe-area-inset-top, 0px), 12px) 16px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
               <svg width="26" height="26" viewBox="0 0 100 100">
                 <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
                 <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.6)" />
               </svg>
               <span style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff', letterSpacing: -0.5 }}>Kpick</span>
-            </div>
+            </Link>
             <button onClick={() => setSort(s => s === 'latest' ? 'likes' : 'latest')} style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', color: '#9494b0' }}>
               {sort === 'latest' ? `🕐 ${tx.explore.sortLatest}` : `❤️ ${tx.explore.sortLikes}`}
             </button>
