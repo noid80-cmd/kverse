@@ -217,9 +217,20 @@ export default function LandingClient() {
           // 유저가 아니라 기기 저장소(쿠키/localStorage)가 리셋된 기존
           // 유저다. localStorage 플래그로 구분하려 했었지만 그 저장소 자체가
           // 같이 날아가는 게 문제라 신뢰할 수 없음(admin 계정이 /signup으로
-          // 튕긴 사례로 확인) — 항상 로그인 화면으로 보낸다. 진짜 신규
-          // 유저는 로그인 화면의 "가입하기" 링크로 이동 가능.
-          router.push('/login')
+          // 튕긴 사례로 확인) — 한 번이라도 로그인한 적 있으면 항상 로그인
+          // 화면으로 보낸다.
+          let hasLoggedInBefore = false
+          try { hasLoggedInBefore = localStorage.getItem('kpick-has-logged-in') === '1' } catch { /* non-critical */ }
+          if (hasLoggedInBefore) { router.push('/login'); return }
+
+          // 진짜 처음 실행하는 신규 유저에게는 지망생/기획사 선택 화면으로
+          // 바로 보내기 전에, 이 랜딩 페이지(소개)를 한 번은 보여준다.
+          // 이미 한 번 봤으면 이후로는 바로 가입 화면으로.
+          let seenLanding = false
+          try { seenLanding = localStorage.getItem('kpick-seen-landing') === '1' } catch { /* non-critical */ }
+          if (seenLanding) { router.push('/signup'); return }
+          try { localStorage.setItem('kpick-seen-landing', '1') } catch { /* non-critical */ }
+          setReady(true)
           return
         }
         setReady(true); return
