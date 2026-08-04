@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { isNativeApp } from '@/lib/capacitor'
 import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -38,10 +39,17 @@ export default function SignupPage() {
 
   async function handleSocialLogin(provider: 'kakao' | 'google') {
     const supabase = createClient()
+    // 네이티브 앱 + 구글 로그인일 때만 커스텀 스킴 콜백을 쓴다 — iOS 쪽
+    // GoogleAuthInterceptorPlugin이 이 이동을 ASWebAuthenticationSession으로
+    // 가로채 처리한 뒤 https://kpick.app/auth/callback?role=...&code=... 로
+    // 변환해 웹뷰에 다시 로드해준다.
+    const redirectTo = provider === 'google' && isNativeApp()
+      ? `kpick://auth-callback?role=${role}`
+      : `${window.location.origin}/auth/callback?role=${role}`
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
+        redirectTo,
         ...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}),
       },
     })

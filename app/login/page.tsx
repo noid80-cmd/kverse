@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
+import { isNativeApp } from '@/lib/capacitor'
 
 export default function LoginPage() {
   const { lang } = useLang()
@@ -46,10 +47,18 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
+    // 네이티브 앱에서는 https 콜백 대신 커스텀 스킴(kpick://auth-callback)으로
+    // 받는다 — iOS 쪽에서 이 이동을 ASWebAuthenticationSession으로 가로채
+    // Safari로 튕기지 않고 시스템 인증 세션 안에서 구글 로그인을 처리한 뒤,
+    // 완료되면 이 콜백을 https://kpick.app/auth/callback으로 변환해 웹뷰에
+    // 다시 로드해준다(자세한 내용은 ios/App/App/GoogleAuthInterceptorPlugin.swift).
+    const redirectTo = isNativeApp()
+      ? 'kpick://auth-callback'
+      : `${window.location.origin}/auth/callback`
     const { data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
         queryParams: { prompt: 'select_account' },
         skipBrowserRedirect: true,
       },

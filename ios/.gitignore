@@ -1,0 +1,14 @@
+App/build
+App/Pods
+App/output
+App/App/public
+DerivedData
+xcuserdata
+
+# Cordova plugins for Capacitor
+capacitor-cordova-ios-plugins
+
+# Generated Config files
+# capacitor.config.json은 packageClassList에 커스텀 플러그인(GoogleAuthInterceptorPlugin 등)
+# 등록이 수동으로 들어있어서 추적한다 — cap sync가 이 값을 통째로 덮어쓸 수 있으니 주의.
+App/App/config.xml
