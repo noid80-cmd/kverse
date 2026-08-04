@@ -179,8 +179,17 @@ export default function DashboardPage() {
 
       <div style={{ position: 'relative', zIndex: 1 }}>
 
+        {/* ── Kpick 로고 ── */}
+        <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 20px)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+          <svg width="24" height="24" viewBox="0 0 100 100">
+            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
+            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.6)" />
+          </svg>
+          <span style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', letterSpacing: -0.5 }}>Kpick</span>
+        </div>
+
         {/* ── Profile header ── */}
-        <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 28, paddingTop: 'max(env(safe-area-inset-top, 0px), 40px)' }}>
+        <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 20 }}>
             <Link href="/profile/edit" style={{ textDecoration: 'none', flexShrink: 0 }}>
               <div style={{
