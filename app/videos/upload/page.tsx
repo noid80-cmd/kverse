@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle, Video, ArrowLeft, Camera, RotateCcw, Upload } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
+import { compressVideoIfNeeded } from '@/lib/compressVideo'
 
 const inputStyle = {
   width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
@@ -30,6 +31,7 @@ export default function UploadPage() {
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [stage, setStage] = useState<'compressing' | 'uploading'>('uploading')
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -208,8 +210,12 @@ export default function UploadPage() {
     const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) { router.push('/login'); return }
 
+    setStage('compressing')
+    const fileToUpload = await compressVideoIfNeeded(file, pct => setProgress(Math.round(pct * 0.1)))
+
+    setStage('uploading')
     setProgress(10)
-    const videoPublicUrl = await uploadMultipart(file)
+    const videoPublicUrl = await uploadMultipart(fileToUpload)
     if (!videoPublicUrl) { setUploading(false); return }
 
     setProgress(80)
@@ -435,7 +441,9 @@ export default function UploadPage() {
               <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', transition: 'width 0.3s', borderRadius: 3 }} />
               </div>
-              <p style={{ fontSize: 12, color: '#8888aa', marginTop: 6, textAlign: 'center' }}>{tx.videos.uploading} {progress}%</p>
+              <p style={{ fontSize: 12, color: '#8888aa', marginTop: 6, textAlign: 'center' }}>
+                {stage === 'compressing' ? '영상 최적화 중...' : `${tx.videos.uploading} ${progress}%`}
+              </p>
             </div>
           )}
 
