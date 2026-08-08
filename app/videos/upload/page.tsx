@@ -121,31 +121,68 @@ export default function UploadPage() {
     } catch {}
   }
 
+  // 페이드인/인트로 자막처럼 영상 시작 부분이 까만 화면인 경우가 많아서,
+  // 예전엔 항상 1초 지점만 캡처하다 보니 썸네일 자체가 완전히 까맣게
+  // 저장되는 경우가 실사용 중 확인됨. 여러 시점을 시도해서 완전히 까만
+  // 프레임이면 다음 후보로 넘어가도록 함.
   async function generateThumbnail(videoFile: File): Promise<Blob | null> {
-    return new Promise((resolve) => {
-      const video = document.createElement('video')
-      let settled = false
-      const done = (blob: Blob | null) => {
-        if (settled) return
-        settled = true
-        URL.revokeObjectURL(video.src)
-        resolve(blob)
-      }
-      const timer = setTimeout(() => done(null), 8000)
-      video.preload = 'metadata'
-      video.muted = true
-      video.src = URL.createObjectURL(videoFile)
-      video.onloadedmetadata = () => { video.currentTime = Math.min(1, video.duration * 0.1) }
-      video.onseeked = () => {
-        clearTimeout(timer)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.muted = true
+    video.playsInline = true
+    video.src = URL.createObjectURL(videoFile)
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('metadata timeout')), 8000)
+        video.onloadedmetadata = () => { clearTimeout(timer); resolve() }
+        video.onerror = () => { clearTimeout(timer); reject(new Error('video load error')) }
+      })
+
+      async function seekAndCapture(time: number): Promise<{ blob: Blob | null, isBlack: boolean }> {
+        await new Promise<void>((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('seek timeout')), 5000)
+          video.onseeked = () => { clearTimeout(timer); resolve() }
+          video.currentTime = Math.min(time, Math.max(video.duration - 0.1, 0))
+        })
+        // 시크 직후엔 아직 디코딩된 프레임이 캔버스에 그려지기 전인 경우가
+        // 있어(브라우저별 타이밍 차이), 한 프레임 더 기다린 뒤 캡처한다.
+        await new Promise(r => requestAnimationFrame(r))
+
         const canvas = document.createElement('canvas')
         canvas.width = video.videoWidth || 640
         canvas.height = video.videoHeight || 360
-        canvas.getContext('2d')?.drawImage(video, 0, 0)
-        canvas.toBlob(blob => done(blob), 'image/jpeg', 0.8)
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(video, 0, 0)
+
+        let isBlack = true
+        if (ctx) {
+          const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          for (let i = 0; i < data.length; i += 400) {
+            if (data[i] > 20 || data[i + 1] > 20 || data[i + 2] > 20) { isBlack = false; break }
+          }
+        }
+        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', 0.8))
+        return { blob, isBlack }
       }
-      video.onerror = () => { clearTimeout(timer); done(null) }
-    })
+
+      const candidates = [
+        Math.min(2, video.duration * 0.15),
+        Math.min(4, video.duration * 0.4),
+        Math.min(6, video.duration * 0.6),
+      ]
+      let fallback: Blob | null = null
+      for (const t of candidates) {
+        const { blob, isBlack } = await seekAndCapture(t)
+        if (!isBlack) return blob
+        if (!fallback) fallback = blob
+      }
+      return fallback
+    } catch {
+      return null
+    } finally {
+      URL.revokeObjectURL(video.src)
+    }
   }
 
   async function uploadMultipart(videoFile: File): Promise<string | null> {
