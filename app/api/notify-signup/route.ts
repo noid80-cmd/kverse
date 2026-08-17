@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const roleLabel = role === 'agency' ? '기획사' : '탤런트'
 
   const text = [
-    '🔔 새 회원가입 - Kpick',
+    '🔔 새 회원가입 - Krookie',
     `이름: ${name}`,
     `이메일: ${email}`,
     `역할: ${roleLabel}`,

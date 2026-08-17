@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Kpick",
-  "short_name": "Kpick",
+  "name": "Krookie",
+  "short_name": "Krookie",
   "description": "기획사가 직접 발굴하는 오디션 플랫폼",
   "start_url": "/dashboard",
   "display": "standalone",

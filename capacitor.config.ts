@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.kpick.ios',
-  appName: 'Kpick',
+  appName: 'Krookie',
   webDir: 'out',
   server: {
     url: 'https://kpick.app',

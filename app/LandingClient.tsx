@@ -20,7 +20,7 @@ const t: Record<Lang, TxShape> = {
   ko: {
     tagline: '기획사가 직접 발굴하는 오디션 플랫폼',
     hero: '당신의 재능\n기획사에게 직접',
-    heroSub: '영상 하나로 전세계 기획사 담당자에게 노출됩니다.\nKpick은 오디션의 새로운 방식입니다.',
+    heroSub: '영상 하나로 전세계 기획사 담당자에게 노출됩니다.\nKrookie는 오디션의 새로운 방식입니다.',
     ctaTalent: '지망생으로 시작하기', ctaAgency: '기획사 문의', login: '로그인',
     forTalent: '지망생', forAgency: '기획사',
     talentTitle: '재능을 보여줄 무대가 생겼어요',
@@ -35,7 +35,7 @@ const t: Record<Lang, TxShape> = {
   en: {
     tagline: 'The audition platform where agencies find you',
     hero: 'Your talent,\ndirectly to agencies',
-    heroSub: 'Upload one video and get discovered by agencies across Korea.\nKpick is a new way to audition.',
+    heroSub: 'Upload one video and get discovered by agencies across Korea.\nKrookie is a new way to audition.',
     ctaTalent: 'Start as a talent', ctaAgency: 'For agencies', login: 'Log in',
     forTalent: 'Talents', forAgency: 'Agencies',
     talentTitle: 'A stage to show your talent',
@@ -50,7 +50,7 @@ const t: Record<Lang, TxShape> = {
   ja: {
     tagline: '芸能事務所が直接スカウトするオーディションプラットフォーム',
     hero: 'あなたの才能を\n事務所へ直接届ける',
-    heroSub: '動画1本で全国の芸能事務所にアピール。\nKpickは新しいオーディションのかたちです。',
+    heroSub: '動画1本で全国の芸能事務所にアピール。\nKrookieは新しいオーディションのかたちです。',
     ctaTalent: 'タレントとして始める', ctaAgency: '事務所の方はこちら', login: 'ログイン',
     forTalent: 'タレント', forAgency: '事務所',
     talentTitle: '才能を見せる舞台が生まれた',
@@ -65,7 +65,7 @@ const t: Record<Lang, TxShape> = {
   zh: {
     tagline: '经纪公司直接发掘人才的试镜平台',
     hero: '你的才华\n直达经纪公司',
-    heroSub: '上传一个视频，让全国经纪公司发现你。\nKpick是全新的试镜方式。',
+    heroSub: '上传一个视频，让全国经纪公司发现你。\nKrookie是全新的试镜方式。',
     ctaTalent: '以艺人身份开始', ctaAgency: '经纪公司咨询', login: '登录',
     forTalent: '艺人', forAgency: '经纪公司',
     talentTitle: '展示才华的舞台',
@@ -80,7 +80,7 @@ const t: Record<Lang, TxShape> = {
   'zh-TW': {
     tagline: '經紀公司直接發掘人才的試鏡平台',
     hero: '你的才華\n直達經紀公司',
-    heroSub: '上傳一個影片，讓全國經紀公司發現你。\nKpick是全新的試鏡方式。',
+    heroSub: '上傳一個影片，讓全國經紀公司發現你。\nKrookie是全新的試鏡方式。',
     ctaTalent: '以藝人身份開始', ctaAgency: '經紀公司諮詢', login: '登入',
     forTalent: '藝人', forAgency: '經紀公司',
     talentTitle: '展示才華的舞台',
@@ -95,7 +95,7 @@ const t: Record<Lang, TxShape> = {
   th: {
     tagline: 'แพลตฟอร์มออดิชันที่ค่ายเพลงค้นหาคุณเอง',
     hero: 'พรสวรรค์ของคุณ\nถึงมือค่ายเพลงโดยตรง',
-    heroSub: 'อัปโหลดวิดีโอเดียว แล้วให้ค่ายเพลงทั่วประเทศค้นพบคุณ\nKpick คือวิธีออดิชันแบบใหม่',
+    heroSub: 'อัปโหลดวิดีโอเดียว แล้วให้ค่ายเพลงทั่วประเทศค้นพบคุณ\nKrookie คือวิธีออดิชันแบบใหม่',
     ctaTalent: 'เริ่มต้นในฐานะศิลปิน', ctaAgency: 'สำหรับค่ายเพลง', login: 'เข้าสู่ระบบ',
     forTalent: 'ศิลปิน', forAgency: 'ค่ายเพลง',
     talentTitle: 'เวทีแสดงพรสวรรค์ของคุณ',
@@ -110,7 +110,7 @@ const t: Record<Lang, TxShape> = {
   id: {
     tagline: 'Platform audisi tempat agensi menemukan kamu',
     hero: 'Bakatmu,\nlangsung ke agensi',
-    heroSub: 'Upload satu video dan ditemukan oleh agensi di seluruh dunia.\nKpick adalah cara baru untuk audisi.',
+    heroSub: 'Upload satu video dan ditemukan oleh agensi di seluruh dunia.\nKrookie adalah cara baru untuk audisi.',
     ctaTalent: 'Mulai sebagai bakat', ctaAgency: 'Untuk agensi', login: 'Masuk',
     forTalent: 'Bakat', forAgency: 'Agensi',
     talentTitle: 'Panggung untuk bakatmu',
@@ -125,7 +125,7 @@ const t: Record<Lang, TxShape> = {
   vi: {
     tagline: 'Nền tảng thử vai nơi các công ty phát hiện bạn',
     hero: 'Tài năng của bạn,\ntrực tiếp đến công ty',
-    heroSub: 'Tải lên một video và được các công ty phát hiện.\nKpick là cách thử vai mới.',
+    heroSub: 'Tải lên một video và được các công ty phát hiện.\nKrookie là cách thử vai mới.',
     ctaTalent: 'Bắt đầu với tư cách nghệ sĩ', ctaAgency: 'Dành cho công ty', login: 'Đăng nhập',
     forTalent: 'Nghệ sĩ', forAgency: 'Công ty',
     talentTitle: 'Sân khấu để thể hiện tài năng',
@@ -140,7 +140,7 @@ const t: Record<Lang, TxShape> = {
   tl: {
     tagline: 'Ang platform ng audisyon kung saan hinahanap ka ng mga ahensya',
     hero: 'Ang iyong talento,\ndiretso sa mga ahensya',
-    heroSub: 'Mag-upload ng isang video at matuklasan ng mga ahensya sa buong mundo.\nAng Kpick ay isang bagong paraan ng audisyon.',
+    heroSub: 'Mag-upload ng isang video at matuklasan ng mga ahensya sa buong mundo.\nAng Krookie ay isang bagong paraan ng audisyon.',
     ctaTalent: 'Magsimula bilang artista', ctaAgency: 'Para sa mga ahensya', login: 'Mag-login',
     forTalent: 'Mga Artista', forAgency: 'Mga Ahensya',
     talentTitle: 'Isang entablado para ipakita ang iyong talento',
@@ -155,7 +155,7 @@ const t: Record<Lang, TxShape> = {
   es: {
     tagline: 'La plataforma de audiciones donde las agencias te encuentran',
     hero: 'Tu talento,\ndirectamente a las agencias',
-    heroSub: 'Sube un video y deja que las agencias de todo el mundo te descubran.\nKpick es una nueva forma de hacer audiciones.',
+    heroSub: 'Sube un video y deja que las agencias de todo el mundo te descubran.\nKrookie es una nueva forma de hacer audiciones.',
     ctaTalent: 'Empezar como talento', ctaAgency: 'Para agencias', login: 'Iniciar sesión',
     forTalent: 'Artistas', forAgency: 'Agencias',
     talentTitle: 'Un escenario para mostrar tu talento',
@@ -279,7 +279,7 @@ export default function LandingClient() {
                 <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.8)" />
               </svg>
             </div>
-            <span style={{ fontWeight: 900, fontSize: 18, color: '#eeeeff' }}>Kpick</span>
+            <span style={{ fontWeight: 900, fontSize: 18, color: '#eeeeff' }}>Krookie</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ position: 'relative' }}>
@@ -405,7 +405,7 @@ export default function LandingClient() {
                 </svg>
               </div>
               <div>
-                <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>Kpick</div>
+                <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>Krookie</div>
                 <div style={{ fontSize: 12, color: '#444460' }}>{tx.footerDesc}</div>
               </div>
             </div>

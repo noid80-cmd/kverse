@@ -110,7 +110,7 @@ export default function DiscoverPage() {
             <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
             <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.6)" />
           </svg>
-          <span style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', letterSpacing: -0.5 }}>Kpick</span>
+          <span style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', letterSpacing: -0.5 }}>Krookie</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>

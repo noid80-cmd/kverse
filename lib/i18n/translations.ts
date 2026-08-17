@@ -55,7 +55,7 @@ const t = {
     kakaoBlock:      ['카카오톡에서는 구글 로그인이 차단돼요.\n이메일로 로그인하세요.', 'Google login is blocked in KakaoTalk.\nPlease log in with email.', 'カカオトークではGoogleログインが制限されています。\nメールでログインしてください。', '在KakaoTalk中Google登录被阻止。\n请使用邮箱登录。', '在KakaoTalk中Google登入被阻止。\n請使用郵箱登入。', 'Google login ถูกบล็อกใน KakaoTalk\nโปรดเข้าสู่ระบบด้วยอีเมล', 'Login Google diblokir di KakaoTalk.\nSilakan login dengan email.', 'Đăng nhập Google bị chặn trong KakaoTalk.\nVui lòng đăng nhập bằng email.', 'Naka-block ang Google login sa KakaoTalk.\nMag-login gamit ang email.', 'El login de Google está bloqueado en KakaoTalk.\nInicia sesión con email.'],
 
     // Signup
-    signupTitle:     ['Kpick 가입', 'Join Kpick', 'Kpickに登録', '注册Kpick', '註冊Kpick', 'สมัคร Kpick', 'Daftar Kpick', 'Đăng ký Kpick', 'Sumali sa Kpick', 'Únete a Kpick'],
+    signupTitle:     ['Krookie 가입', 'Join Krookie', 'Krookieに登録', '注册Krookie', '註冊Krookie', 'สมัคร Krookie', 'Daftar Krookie', 'Đăng ký Krookie', 'Sumali sa Krookie', 'Únete a Krookie'],
     signupStepRole:  ['어떤 계정으로 가입할까요?', 'What type of account?', 'どのアカウントで登録しますか?', '选择账号类型', '選擇帳號類型', 'เลือกประเภทบัญชี', 'Pilih jenis akun', 'Chọn loại tài khoản', 'Pumili ng uri ng account', '¿Qué tipo de cuenta?'],
     signupStepMethod:['가입 방법을 선택해주세요', 'Choose a sign-up method', '登録方法を選択してください', '选择注册方式', '選擇註冊方式', 'เลือกวิธีสมัคร', 'Pilih metode daftar', 'Chọn phương thức đăng ký', 'Pumili ng paraan ng pag-sign up', 'Elige un método de registro'],
     signupStepForm:  ['기본 정보를 입력해주세요', 'Enter your basic info', '基本情報を入力してください', '填写基本信息', '填寫基本資訊', 'กรอกข้อมูลพื้นฐาน', 'Masukkan info dasar', 'Nhập thông tin cơ bản', 'Ilagay ang basic na impormasyon', 'Ingresa tu información básica'],
@@ -73,7 +73,7 @@ const t = {
     passwordMinPlaceholder: ['비밀번호 (6자 이상)', 'Password (min. 6 chars)', 'パスワード（6文字以上）', '密码（至少6位）', '密碼（至少6位）', 'รหัสผ่าน (อย่างน้อย 6 ตัว)', 'Kata sandi (min. 6 karakter)', 'Mật khẩu (tối thiểu 6 ký tự)', 'Password (min. 6 na karakter)', 'Contraseña (mín. 6 caracteres)'],
     signingUp:       ['가입 중...', 'Signing up...', '登録中...', '注册中...', '註冊中...', 'กำลังสมัคร...', 'Mendaftar...', 'Đang đăng ký...', 'Nagsasign up...', 'Registrando...'],
     signupBtn:       ['가입하기', 'Sign up', '登録する', '注册', '註冊', 'สมัครสมาชิก', 'Daftar', 'Đăng ký', 'Mag-sign up', 'Registrarse'],
-    signupDone:      ['가입 완료! 이제 Kpick을 시작해보세요 🎉', 'Welcome to Kpick! 🎉', 'Kpickへようこそ！🎉', '注册成功！欢迎来到Kpick 🎉', '註冊成功！歡迎來到Kpick 🎉', 'ยินดีต้อนรับสู่ Kpick! 🎉', 'Selamat datang di Kpick! 🎉', 'Chào mừng đến với Kpick! 🎉', 'Maligayang pagdating sa Kpick! 🎉', '¡Bienvenido a Kpick! 🎉'],
+    signupDone:      ['가입 완료! 이제 Krookie를 시작해보세요 🎉', 'Welcome to Krookie! 🎉', 'Krookieへようこそ！🎉', '注册成功！欢迎来到Krookie 🎉', '註冊成功！歡迎來到Krookie 🎉', 'ยินดีต้อนรับสู่ Krookie! 🎉', 'Selamat datang di Krookie! 🎉', 'Chào mừng đến với Krookie! 🎉', 'Maligayang pagdating sa Krookie! 🎉', '¡Bienvenido a Krookie! 🎉'],
     goToDashboard:   ['시작하기', 'Get started', 'スタート', '开始', '開始', 'เริ่มต้น', 'Mulai', 'Bắt đầu', 'Magsimula', 'Comenzar'],
   },
 

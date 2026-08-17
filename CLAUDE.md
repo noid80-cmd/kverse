@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# Kpick (kverse) 프로젝트
+# Krookie (kverse) 프로젝트
 
 ## 배포 & 저장소
 - **URL**: kpick.app

@@ -107,7 +107,7 @@ function InviteContent() {
               <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
             </svg>
           </div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>Kpick이 초대합니다</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>Krookie가 초대합니다</div>
           <div style={{ fontSize: 26, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>{agency?.name}</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>기획사 계정을 만들어주세요</div>
         </div>

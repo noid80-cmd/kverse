@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       const kst = new Date(Date.now() + 9 * 60 * 60 * 1000)
       const time = kst.toISOString().replace('T', ' ').slice(0, 16)
       const roleLabel = role === 'agency' ? '기획사' : '탤런트'
-      const text = ['🔔 새 회원가입 - Kpick', `이름: ${userName}`, `이메일: ${userEmail}`, `역할: ${roleLabel}`, `시간: ${time} KST`].filter(Boolean).join('\n')
+      const text = ['🔔 새 회원가입 - Krookie', `이름: ${userName}`, `이메일: ${userEmail}`, `역할: ${roleLabel}`, `시간: ${time} KST`].filter(Boolean).join('\n')
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

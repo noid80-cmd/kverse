@@ -6,7 +6,7 @@ export default function PrivacyPage() {
 
       <section style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. 수집하는 정보 / Information We Collect</h2>
-        <p>Kpick은 서비스 제공을 위해 다음 정보를 수집합니다:</p>
+        <p>Krookie는 서비스 제공을 위해 다음 정보를 수집합니다:</p>
         <ul style={{ paddingLeft: 20, marginTop: 8 }}>
           <li>이메일 주소 및 계정 정보 (Email address and account information)</li>
           <li>프로필 이름 및 사진 (Profile name and photo)</li>
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
 
       <section style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>3. 정보 공유 / Information Sharing</h2>
-        <p>Kpick은 다음의 경우를 제외하고 개인정보를 제3자와 공유하지 않습니다:</p>
+        <p>Krookie는 다음의 경우를 제외하고 개인정보를 제3자와 공유하지 않습니다:</p>
         <ul style={{ paddingLeft: 20, marginTop: 8 }}>
           <li>사용자의 동의가 있는 경우 (With your consent)</li>
           <li>법적 의무 이행이 필요한 경우 (When required by law)</li>
@@ -49,8 +49,8 @@ export default function PrivacyPage() {
 
       <section style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>6. 미성년자 / Children</h2>
-        <p>Kpick은 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.<br />
-        Kpick does not knowingly collect personal information from children under 14.</p>
+        <p>Krookie는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.<br />
+        Krookie does not knowingly collect personal information from children under 14.</p>
       </section>
 
       <section style={{ marginBottom: 40 }}>

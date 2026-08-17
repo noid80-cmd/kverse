@@ -152,7 +152,7 @@ export default function LoginPage() {
           <h1 style={{
             fontSize: 42, fontWeight: 800, letterSpacing: -1.5, lineHeight: 1, marginBottom: 12,
             color: '#ffffff',
-          }}>Kpick</h1>
+          }}>Krookie</h1>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500, letterSpacing: 0.3 }}>
             {tx.tagline}
           </p>

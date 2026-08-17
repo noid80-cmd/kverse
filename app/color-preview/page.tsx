@@ -72,7 +72,7 @@ function MiniLogin({ font, titleWeight, letterSpacing }: { font: string; titleWe
             fontFamily: font,
             background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>Kpick</div>
+          }}>Krookie</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 500, fontFamily: font }}>
             기획사가 직접 발굴하는 오디션 플랫폼
           </div>

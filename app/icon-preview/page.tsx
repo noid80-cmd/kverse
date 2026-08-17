@@ -85,7 +85,7 @@ export default function IconPreview() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 40 }}>
-      <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>Kpick 아이콘 2차</h1>
+      <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>Krookie 아이콘 2차</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         {icons.map(({ label, bg, content }) => (
           <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>

@@ -62,9 +62,9 @@ export default function AdminAgenciesPage() {
 
   async function shareInvite() {
     if (!inviteLink) return
-    const text = `안녕하세요! Kpick에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (7일 유효):\n${inviteLink.url}`
+    const text = `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (7일 유효):\n${inviteLink.url}`
     if (navigator.share) {
-      await navigator.share({ title: `Kpick — ${inviteLink.agencyName} 초대`, text, url: inviteLink.url })
+      await navigator.share({ title: `Krookie — ${inviteLink.agencyName} 초대`, text, url: inviteLink.url })
     } else {
       await navigator.clipboard.writeText(text)
       setCopied(true)
