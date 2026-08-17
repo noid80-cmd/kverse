@@ -83,41 +83,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', overflow: 'hidden', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', overflow: 'hidden', position: 'relative' }}>
 
       {/* Background atmosphere */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', top: '-25%', left: '50%', transform: 'translateX(-50%)',
           width: 1000, height: 800,
-          background: 'radial-gradient(ellipse at center top, rgba(6,182,212,0.13) 0%, rgba(8,145,178,0.05) 35%, transparent 65%)',
+          background: 'radial-gradient(ellipse at center top, rgba(255,111,60,0.16) 0%, rgba(216,74,30,0.06) 35%, transparent 65%)',
         }} />
         <div style={{
           position: 'absolute', bottom: '-20%', right: '-15%', width: 700, height: 700,
-          background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 55%)',
+          background: 'radial-gradient(circle, rgba(255,111,60,0.08) 0%, transparent 55%)',
         }} />
         <div style={{
           position: 'absolute', bottom: '10%', left: '-15%', width: 500, height: 500,
-          background: 'radial-gradient(circle, rgba(8,145,178,0.05) 0%, transparent 60%)',
+          background: 'radial-gradient(circle, rgba(216,74,30,0.06) 0%, transparent 60%)',
         }} />
         <div style={{
           position: 'absolute', width: 280, height: 280, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.07), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,111,60,0.08), transparent 70%)',
           top: '12%', left: '8%', animation: 'floatA 10s ease-in-out infinite',
         }} />
         <div style={{
           position: 'absolute', width: 220, height: 220, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(8,145,178,0.07), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(216,74,30,0.08), transparent 70%)',
           top: '50%', right: '10%', animation: 'floatB 13s ease-in-out infinite',
         }} />
         <div style={{
           position: 'absolute', width: 160, height: 160, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.05), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,111,60,0.06), transparent 70%)',
           top: '30%', right: '6%', animation: 'floatC 8s ease-in-out infinite',
         }} />
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(6,182,212,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.015) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(216,74,30,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(216,74,30,0.02) 1px, transparent 1px)',
           backgroundSize: '80px 80px',
         }} />
       </div>
@@ -132,46 +132,46 @@ export default function LoginPage() {
             <div style={{
               position: 'absolute', bottom: -24, left: '50%', transform: 'translateX(-50%)',
               width: 140, height: 70,
-              background: 'radial-gradient(ellipse at top, rgba(6,182,212,0.3) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse at top, rgba(255,111,60,0.35) 0%, transparent 70%)',
               filter: 'blur(10px)', zIndex: 0,
             }} />
             <div style={{
               width: 88, height: 88, borderRadius: 30,
-              background: 'linear-gradient(145deg, #001a20, #0a3d4a)',
+              background: 'linear-gradient(145deg, #FFEDE0, #FFD9BC)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 0 1px rgba(6,182,212,0.2), 0 8px 32px rgba(6,182,212,0.3), 0 0 60px rgba(6,182,212,0.1)',
+              boxShadow: '0 0 0 1px rgba(255,111,60,0.25), 0 8px 32px rgba(216,74,30,0.2), 0 0 60px rgba(255,111,60,0.12)',
               position: 'relative', zIndex: 1,
             }}>
               <svg width="63" height="63" viewBox="0 0 100 100" style={{ position: 'relative' }}>
-                <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
-                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#06b6d4" />
-                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.8)" />
+                <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" />
+                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#FF6F3C" />
+                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(216,74,30,0.8)" />
               </svg>
             </div>
           </div>
           <h1 style={{
             fontSize: 42, fontWeight: 800, letterSpacing: -1.5, lineHeight: 1, marginBottom: 12,
-            color: '#ffffff',
+            color: '#241C15',
           }}>Krookie</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500, letterSpacing: 0.3 }}>
+          <p style={{ fontSize: 13, color: 'rgba(36,28,21,0.55)', fontWeight: 500, letterSpacing: 0.3 }}>
             {tx.tagline}
           </p>
         </div>
 
         {/* Card */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)', borderRadius: 28, padding: '32px 28px',
-          border: '1px solid rgba(255,255,255,0.07)',
+          background: 'rgba(255,255,255,0.78)', borderRadius: 28, padding: '32px 28px',
+          border: '1px solid rgba(36,28,21,0.08)',
           backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-          boxShadow: '0 0 0 1px rgba(0,212,255,0.08), 0 40px 80px rgba(0,0,0,0.55)',
+          boxShadow: '0 0 0 1px rgba(255,111,60,0.08), 0 40px 80px rgba(36,28,21,0.12)',
         }}>
 
           {!isKakao && (
             <button onClick={handleGoogle} className="google-btn" style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               padding: '14px 20px', borderRadius: 16, marginBottom: 20,
-              background: 'rgba(255,255,255,0.05)', color: '#eeeeff', fontSize: 15, fontWeight: 600,
-              border: '1px solid rgba(255,255,255,0.09)', cursor: 'pointer', transition: 'all 0.2s',
+              background: 'rgba(36,28,21,0.03)', color: '#241C15', fontSize: 15, fontWeight: 600,
+              border: '1px solid rgba(36,28,21,0.1)', cursor: 'pointer', transition: 'all 0.2s',
             }}>
               <svg width="20" height="20" viewBox="0 0 48 48">
                 <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z" />
@@ -183,40 +183,40 @@ export default function LoginPage() {
             </button>
           )}
           {isKakao && (
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginBottom: 20, lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+            <p style={{ fontSize: 12, color: 'rgba(36,28,21,0.4)', textAlign: 'center', marginBottom: 20, lineHeight: 1.7, whiteSpace: 'pre-line' }}>
               {tx.kakaoBlock}
             </p>
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: 0.5 }}>{tx.loginEmail}</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+            <div style={{ flex: 1, height: 1, background: 'rgba(36,28,21,0.1)' }} />
+            <span style={{ fontSize: 11, color: 'rgba(36,28,21,0.45)', fontWeight: 600, letterSpacing: 0.5 }}>{tx.loginEmail}</span>
+            <div style={{ flex: 1, height: 1, background: 'rgba(36,28,21,0.1)' }} />
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder={tx.emailPlaceholder} required className="kpick-input"
               style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
+                width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)',
+                borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
                 outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
               }} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder={tx.passwordPlaceholder} required className="kpick-input"
               style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
+                width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)',
+                borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
                 outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
               }} />
-            {error && <p style={{ color: '#f87171', fontSize: 13, textAlign: 'center', margin: 0 }}>{error}</p>}
+            {error && <p style={{ color: '#DC2626', fontSize: 13, textAlign: 'center', margin: 0 }}>{error}</p>}
             <button type="submit" disabled={loading} className="submit-btn"
               style={{
                 width: '100%', padding: '15px', borderRadius: 16, border: 'none',
-                background: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
+                background: 'linear-gradient(135deg, #D84A1E 0%, #FF6F3C 100%)',
                 color: 'white', fontSize: 16, fontWeight: 700,
                 cursor: loading ? 'default' : 'pointer',
-                boxShadow: '0 4px 20px rgba(6,182,212,0.35)',
+                boxShadow: '0 4px 20px rgba(216,74,30,0.3)',
                 marginTop: 4, opacity: loading ? 0.7 : 1, transition: 'all 0.2s',
               }}>
               {loading ? tx.loggingIn : tx.loginBtn}
@@ -224,9 +224,9 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.45)', marginTop: 24, fontWeight: 500 }}>
+        <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(36,28,21,0.5)', marginTop: 24, fontWeight: 500 }}>
           {tx.noAccount}{' '}
-          <Link href="/signup" style={{ color: '#06b6d4', fontWeight: 700, textDecoration: 'none' }}>{tx.signupLink}</Link>
+          <Link href="/signup" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'none' }}>{tx.signupLink}</Link>
         </p>
       </div>
 
@@ -245,17 +245,17 @@ export default function LoginPage() {
           0%, 100% { transform: translate(0px, 0px); }
           50% { transform: translate(-28px, 22px); }
         }
-        .kpick-input::placeholder { color: rgba(255,255,255,0.2); }
+        .kpick-input::placeholder { color: rgba(36,28,21,0.32); }
         .kpick-input:focus {
-          border-color: rgba(6,182,212,0.4) !important;
-          background: rgba(6,182,212,0.05) !important;
-          box-shadow: 0 0 0 3px rgba(6,182,212,0.08);
+          border-color: rgba(255,111,60,0.45) !important;
+          background: rgba(255,111,60,0.04) !important;
+          box-shadow: 0 0 0 3px rgba(255,111,60,0.1);
         }
-        .google-btn:hover { background: rgba(255,255,255,0.09) !important; border-color: rgba(255,255,255,0.16) !important; }
+        .google-btn:hover { background: rgba(36,28,21,0.06) !important; border-color: rgba(36,28,21,0.16) !important; }
         .google-btn:active { transform: scale(0.98); }
         .submit-btn:not(:disabled):hover {
           transform: translateY(-2px);
-          box-shadow: 0 10px 28px rgba(6,182,212,0.4) !important;
+          box-shadow: 0 10px 28px rgba(216,74,30,0.35) !important;
         }
         .submit-btn:not(:disabled):active { transform: scale(0.98); }
       `}</style>

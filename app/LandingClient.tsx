@@ -256,51 +256,51 @@ export default function LandingClient() {
   }, [])
 
   if (showWelcome) return <WelcomeCarousel />
-  if (!ready) return <div style={{ minHeight: '100vh', background: '#07070d' }} />
+  if (!ready) return <div style={{ minHeight: '100vh', background: '#FFF8E7' }} />
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07070d', color: '#eeeeff', fontFamily: 'inherit', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', color: '#241C15', fontFamily: 'inherit', overflowX: 'hidden' }}>
 
       {/* Atmospheric bg */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse at center top, rgba(6,182,212,0.13) 0%, rgba(8,145,178,0.05) 40%, transparent 65%)' }} />
-        <div style={{ position: 'absolute', bottom: '20%', right: '-10%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 60%)' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(6,182,212,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.012) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+        <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse at center top, rgba(255,111,60,0.14) 0%, rgba(216,74,30,0.05) 40%, transparent 65%)' }} />
+        <div style={{ position: 'absolute', bottom: '20%', right: '-10%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(255,111,60,0.06) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(216,74,30,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(216,74,30,0.02) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
       </div>
 
       {/* Nav */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(7,7,13,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 24px', paddingTop: 'env(safe-area-inset-top)' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,248,231,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: '0 24px', paddingTop: 'env(safe-area-inset-top)' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(145deg, #001a20, #0a3d4a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(145deg, #FFEDE0, #FFD9BC)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="23" height="23" viewBox="0 0 100 100">
-                <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
-                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#06b6d4" />
-                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.8)" />
+                <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" />
+                <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#FF6F3C" />
+                <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(216,74,30,0.8)" />
               </svg>
             </div>
-            <span style={{ fontWeight: 900, fontSize: 18, color: '#eeeeff' }}>Krookie</span>
+            <span style={{ fontWeight: 900, fontSize: 18, color: '#241C15' }}>Krookie</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(o => !o)}
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#eeeeff', fontSize: 13, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 88, WebkitAppearance: 'none', appearance: 'none' }}>
+                style={{ background: 'rgba(36,28,21,0.05)', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 8, color: '#241C15', fontSize: 13, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 88, WebkitAppearance: 'none', appearance: 'none' }}>
                 <span style={{ width: 14, flexShrink: 0 }} />
                 <span>{LANG_LABELS[lang]}</span>
                 <span style={{ width: 14, flexShrink: 0, fontSize: 10, opacity: 0.5, textAlign: 'right' }}>▼</span>
               </button>
               {langOpen && (
-                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: '#111118', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 140, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 140, boxShadow: '0 8px 24px rgba(36,28,21,0.15)' }}>
                   {LANGS.map(l => (
                     <button key={l} onClick={() => { changeLang(l); setLangOpen(false) }}
-                      style={{ display: 'block', width: '100%', padding: '10px 16px', fontSize: 13, textAlign: 'center', cursor: 'pointer', background: l === lang ? 'rgba(6,182,212,0.15)' : 'none', color: l === lang ? '#22d3ee' : '#ccccdd', border: 'none', fontWeight: l === lang ? 700 : 400 }}>
+                      style={{ display: 'block', width: '100%', padding: '10px 16px', fontSize: 13, textAlign: 'center', cursor: 'pointer', background: l === lang ? 'rgba(255,111,60,0.12)' : 'none', color: l === lang ? '#D84A1E' : '#5B5346', border: 'none', fontWeight: l === lang ? 700 : 400 }}>
                       {LANG_LABELS[l]}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            <Link href="/login" style={{ fontSize: 14, color: '#8888aa', fontWeight: 600, textDecoration: 'none' }}>{tx.login}</Link>
+            <Link href="/login" style={{ fontSize: 14, color: '#8A7F6E', fontWeight: 600, textDecoration: 'none' }}>{tx.login}</Link>
           </div>
         </div>
       </nav>
@@ -310,27 +310,27 @@ export default function LandingClient() {
         {/* Hero */}
         <section style={{ maxWidth: 1080, margin: '0 auto', padding: '100px 24px 80px', textAlign: 'center' }}>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 20, padding: '6px 16px', marginBottom: 32 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
-            <span style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600 }}>{tx.tagline}</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,111,60,0.1)', border: '1px solid rgba(255,111,60,0.25)', borderRadius: 20, padding: '6px 16px', marginBottom: 32 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#D84A1E', boxShadow: '0 0 8px rgba(216,74,30,0.6)' }} />
+            <span style={{ fontSize: 13, color: '#D84A1E', fontWeight: 600 }}>{tx.tagline}</span>
           </div>
-          <h1 style={{ fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, whiteSpace: 'pre-line', background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.75) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h1 style={{ fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, whiteSpace: 'pre-line', background: 'linear-gradient(135deg, #241C15 0%, rgba(36,28,21,0.75) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {tx.hero}
           </h1>
-          <p style={{ fontSize: 'clamp(15px, 2.5vw, 18px)', color: '#8888aa', lineHeight: 1.7, marginBottom: 48, whiteSpace: 'pre-line', wordBreak: 'keep-all', maxWidth: 560, margin: '0 auto 48px' }}>
+          <p style={{ fontSize: 'clamp(15px, 2.5vw, 18px)', color: '#8A7F6E', lineHeight: 1.7, marginBottom: 48, whiteSpace: 'pre-line', wordBreak: 'keep-all', maxWidth: 560, margin: '0 auto 48px' }}>
             {tx.heroSub}
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/signup" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
+            <Link href="/signup" style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 20px rgba(216,74,30,0.35)' }}>
               {tx.ctaStart}
             </Link>
           </div>
 
           {/* 소셜 프루프 티커 */}
-          <div style={{ marginTop: 48, overflow: 'hidden', borderTop: '1px solid rgba(236,72,153,0.2)', borderBottom: '1px solid rgba(236,72,153,0.2)', background: 'rgba(236,72,153,0.06)' }}>
+          <div style={{ marginTop: 48, overflow: 'hidden', borderTop: '1px solid rgba(219,39,119,0.25)', borderBottom: '1px solid rgba(219,39,119,0.25)', background: 'rgba(219,39,119,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'center', height: 44 }}>
-              <div style={{ flexShrink: 0, padding: '0 16px', borderRight: '1px solid rgba(236,72,153,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, fontWeight: 900, color: '#f472b6', letterSpacing: '0.05em' }}>LIVE</span>
+              <div style={{ flexShrink: 0, padding: '0 16px', borderRight: '1px solid rgba(219,39,119,0.25)', height: '100%', display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#DB2777', letterSpacing: '0.05em' }}>LIVE</span>
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <LiveTicker items={[
@@ -346,20 +346,20 @@ export default function LandingClient() {
         <section style={{ maxWidth: 1080, margin: '0 auto', padding: '0 24px 100px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 48 }}>
             {(['talent', 'agency'] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)} style={{ padding: '10px 28px', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: 'pointer', border: 'none', transition: 'all 0.2s', background: tab === t ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'rgba(255,255,255,0.05)', color: tab === t ? 'white' : '#555570' }}>
+              <button key={t} onClick={() => setTab(t)} style={{ padding: '10px 28px', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: 'pointer', border: 'none', transition: 'all 0.2s', background: tab === t ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : 'rgba(36,28,21,0.05)', color: tab === t ? 'white' : '#6B6355' }}>
                 {t === 'talent' ? tx.forTalent : tx.forAgency}
               </button>
             ))}
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 24, padding: '48px 40px' }}>
-            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 32, textAlign: 'center', wordBreak: 'keep-all' }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.08)', borderRadius: 24, padding: '48px 40px' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#241C15', marginBottom: 32, textAlign: 'center', wordBreak: 'keep-all' }}>
               {tab === 'talent' ? tx.talentTitle : tx.agencyTitle}
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               {(tab === 'talent' ? tx.talentPoints : tx.agencyPoints).map((point, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '16px', background: 'rgba(6,182,212,0.05)', borderRadius: 14, border: '1px solid rgba(6,182,212,0.1)' }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 900, color: 'white' }}>{i + 1}</div>
-                  <span style={{ fontSize: 15, color: '#ccccdd', lineHeight: 1.5, fontWeight: 500, wordBreak: 'keep-all' }}>{point}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '16px', background: 'rgba(255,111,60,0.06)', borderRadius: 14, border: '1px solid rgba(255,111,60,0.15)' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 900, color: 'white' }}>{i + 1}</div>
+                  <span style={{ fontSize: 15, color: '#5B5346', lineHeight: 1.5, fontWeight: 500, wordBreak: 'keep-all' }}>{point}</span>
                 </div>
               ))}
             </div>
@@ -368,14 +368,14 @@ export default function LandingClient() {
 
         {/* How it works */}
         <section style={{ maxWidth: 1080, margin: '0 auto', padding: '0 24px 100px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', marginBottom: 56 }}>{tx.howTitle}</h2>
+          <h2 style={{ fontSize: 32, fontWeight: 900, color: '#241C15', marginBottom: 56 }}>{tx.howTitle}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
             {tx.steps.map((step, i) => (
               <div key={i} style={{ position: 'relative' }}>
-                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '32px 24px', height: '100%' }}>
-                  <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 22, fontWeight: 900, color: 'white', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>{i + 1}</div>
-                  <h3 style={{ fontSize: 18, fontWeight: 800, color: '#eeeeff', marginBottom: 10 }}>{step.title}</h3>
-                  <p style={{ fontSize: 14, color: '#666680', lineHeight: 1.6 }}>{step.desc}</p>
+                <div style={{ background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.08)', borderRadius: 20, padding: '32px 24px', height: '100%' }}>
+                  <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 22, fontWeight: 900, color: 'white', boxShadow: '0 4px 16px rgba(216,74,30,0.3)' }}>{i + 1}</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: '#241C15', marginBottom: 10 }}>{step.title}</h3>
+                  <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -384,34 +384,34 @@ export default function LandingClient() {
 
         {/* CTA banner */}
         <section style={{ maxWidth: 1080, margin: '0 auto', padding: '0 24px 100px' }}>
-          <div style={{ background: 'linear-gradient(135deg, rgba(8,145,178,0.2), rgba(6,182,212,0.1))', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 28, padding: '64px 40px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, color: '#eeeeff', marginBottom: 12, wordBreak: 'keep-all' }}>{tx.ctaTitle}</h2>
-            <p style={{ fontSize: 16, color: '#22d3ee', marginBottom: 36, fontWeight: 600 }}>{tx.ctaSub}</p>
-            <Link href="/signup" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 17, padding: '18px 48px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(6,182,212,0.45)', display: 'inline-block' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(216,74,30,0.14), rgba(255,111,60,0.08))', border: '1px solid rgba(255,111,60,0.25)', borderRadius: 28, padding: '64px 40px', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, color: '#241C15', marginBottom: 12, wordBreak: 'keep-all' }}>{tx.ctaTitle}</h2>
+            <p style={{ fontSize: 16, color: '#D84A1E', marginBottom: 36, fontWeight: 600 }}>{tx.ctaSub}</p>
+            <Link href="/signup" style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontWeight: 700, fontSize: 17, padding: '18px 48px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(216,74,30,0.35)', display: 'inline-block' }}>
               {tx.ctaStart}
             </Link>
           </div>
         </section>
 
         {/* Footer */}
-        <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 24px' }}>
+        <footer style={{ borderTop: '1px solid rgba(36,28,21,0.08)', padding: '40px 24px' }}>
           <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(145deg, #001a20, #0a3d4a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(145deg, #FFEDE0, #FFD9BC)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="20" height="20" viewBox="0 0 100 100">
-                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
-                  <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#06b6d4" />
-                  <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.8)" />
+                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" />
+                  <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#FF6F3C" />
+                  <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(216,74,30,0.8)" />
                 </svg>
               </div>
               <div>
-                <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>Krookie</div>
-                <div style={{ fontSize: 12, color: '#444460' }}>{tx.footerDesc}</div>
+                <div style={{ fontWeight: 800, color: '#241C15', fontSize: 15 }}>Krookie</div>
+                <div style={{ fontSize: 12, color: '#8A7F6E' }}>{tx.footerDesc}</div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 24 }}>
-              <Link href="/login" style={{ fontSize: 13, color: '#444460', textDecoration: 'none' }}>{tx.login}</Link>
-              <Link href="/signup" style={{ fontSize: 13, color: '#444460', textDecoration: 'none' }}>{tx.ctaTalent}</Link>
+              <Link href="/login" style={{ fontSize: 13, color: '#8A7F6E', textDecoration: 'none' }}>{tx.login}</Link>
+              <Link href="/signup" style={{ fontSize: 13, color: '#8A7F6E', textDecoration: 'none' }}>{tx.ctaTalent}</Link>
             </div>
           </div>
         </footer>
