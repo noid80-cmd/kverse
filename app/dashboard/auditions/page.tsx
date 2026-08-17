@@ -280,7 +280,7 @@ export default function TalentAuditionsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#050e1a' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
           <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(36,28,21,0.09)', border: '1px solid rgba(36,28,21,0.1)', color: '#241C15', cursor: 'pointer', flexShrink: 0 }}>
@@ -302,7 +302,7 @@ export default function TalentAuditionsPage() {
         return (
           <div style={{ padding: '0 16px 24px' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #003a5a 0%, #001828 100%)',
+              background: 'linear-gradient(135deg, #FFEDE0 0%, #FFD9BC 100%)',
               borderRadius: 24, padding: '22px 20px', position: 'relative', overflow: 'hidden',
               border: '1px solid rgba(255,111,60,0.15)',
             }}>

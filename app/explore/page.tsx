@@ -22,17 +22,17 @@ type VideoItem = {
 }
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
-  vocal:  'linear-gradient(135deg, #0c3a6a, #0a1a4a)',
-  dance:  'linear-gradient(135deg, #3a0c5a, #1a0a3a)',
-  acting: 'linear-gradient(135deg, #0c5a3a, #0a2a1a)',
-  rap:    'linear-gradient(135deg, #5a2a0c, #2a0c0a)',
-  other:  'linear-gradient(135deg, #1a3a5a, #0a1a2a)',
+  vocal:  'linear-gradient(135deg, #6BA8E0, #3D6EB8)',
+  dance:  'linear-gradient(135deg, #C58EE0, #8B4FC4)',
+  acting: 'linear-gradient(135deg, #6BCC96, #2FA362)',
+  rap:    'linear-gradient(135deg, #FF9A5C, #E06A2E)',
+  other:  'linear-gradient(135deg, #7FA0C4, #4E6E96)',
 }
 const FALLBACK_GRADIENTS = [
-  'linear-gradient(135deg, #0c3a6a, #0a1a4a)',
-  'linear-gradient(135deg, #3a0c5a, #1a0a3a)',
-  'linear-gradient(135deg, #0c5a3a, #0a2a1a)',
-  'linear-gradient(135deg, #5a2a0c, #2a0c0a)',
+  'linear-gradient(135deg, #6BA8E0, #3D6EB8)',
+  'linear-gradient(135deg, #C58EE0, #8B4FC4)',
+  'linear-gradient(135deg, #6BCC96, #2FA362)',
+  'linear-gradient(135deg, #FF9A5C, #E06A2E)',
 ]
 
 function SwipeCard({
@@ -225,10 +225,10 @@ export default function ExplorePage() {
   return (
     <>
       {/* ── Grid view ── */}
-      <div style={{ background: '#050e1a', minHeight: '100dvh', paddingBottom: 88 }}>
+      <div style={{ background: '#FFF8E7', minHeight: '100dvh', paddingBottom: 88 }}>
 
         {/* Sticky header */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(5,14,26,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: 'max(env(safe-area-inset-top, 0px), 12px) 16px 12px' }}>
+        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: 'max(env(safe-area-inset-top, 0px), 12px) 16px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
               <svg width="26" height="26" viewBox="0 0 100 100">
