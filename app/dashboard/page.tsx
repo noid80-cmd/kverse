@@ -142,9 +142,9 @@ export default function DashboardPage() {
   }, [])
 
   if (!data) return (
-    <div style={{ minHeight: '100vh', background: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <PushSubscribe />
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(36,28,21,0.1)', borderTop: '3px solid #D84A1E', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -152,14 +152,14 @@ export default function DashboardPage() {
   const { profile, recentVideos, videoCount, bookmarks, contacts, recentAuditions } = data
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07070d', paddingBottom: 112, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', paddingBottom: 112, position: 'relative', overflow: 'hidden' }}>
       {isAdmin && (
         <a href="/admin" style={{
           position: 'fixed', bottom: 24, right: 16, zIndex: 999,
           background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
           color: 'white', fontSize: 12, fontWeight: 800,
           padding: '8px 14px', borderRadius: 20,
-          textDecoration: 'none', boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
+          textDecoration: 'none', boxShadow: '0 4px 16px rgba(109,40,217,0.35)',
           display: 'flex', alignItems: 'center', gap: 6,
         }}>⚙️ 관리자</a>
       )}
@@ -172,9 +172,9 @@ export default function DashboardPage() {
 
       {/* Atmospheric background */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse at center top, rgba(6,182,212,0.10) 0%, rgba(8,145,178,0.04) 40%, transparent 65%)' }} />
-        <div style={{ position: 'absolute', top: '30%', right: '-20%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 60%)' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(6,182,212,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.012) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse at center top, rgba(255,111,60,0.12) 0%, rgba(216,74,30,0.04) 40%, transparent 65%)' }} />
+        <div style={{ position: 'absolute', top: '30%', right: '-20%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(255,111,60,0.06) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(216,74,30,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(216,74,30,0.02) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
       </div>
 
       <div style={{ position: 'relative', zIndex: 1 }}>
@@ -182,10 +182,10 @@ export default function DashboardPage() {
         {/* ── Krookie 로고 ── */}
         <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 20px)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <svg width="24" height="24" viewBox="0 0 100 100">
-            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
-            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.6)" />
+            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" />
+            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(216,74,30,0.7)" />
           </svg>
-          <span style={{ fontSize: 20, fontWeight: 900, color: '#eeeeff', letterSpacing: -0.5 }}>Krookie</span>
+          <span style={{ fontSize: 20, fontWeight: 900, color: '#241C15', letterSpacing: -0.5 }}>Krookie</span>
         </div>
 
         {/* ── Profile header ── */}
@@ -194,11 +194,11 @@ export default function DashboardPage() {
             <Link href="/profile/edit" style={{ textDecoration: 'none', flexShrink: 0 }}>
               <div style={{
                 width: 80, height: 80, borderRadius: 26,
-                background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 overflow: 'hidden',
-                border: '2px solid rgba(6,182,212,0.4)',
-                boxShadow: '0 0 0 4px rgba(6,182,212,0.1), 0 0 24px rgba(6,182,212,0.18)',
+                border: '2px solid rgba(255,111,60,0.4)',
+                boxShadow: '0 0 0 4px rgba(255,111,60,0.1), 0 0 24px rgba(255,111,60,0.15)',
               }}>
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -208,21 +208,21 @@ export default function DashboardPage() {
             </Link>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff', lineHeight: 1.2 }}>
+                <h1 style={{ fontSize: 22, fontWeight: 900, color: '#241C15', lineHeight: 1.2 }}>
                   {profile?.name ?? '...'}
                 </h1>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button onClick={e => { e.stopPropagation(); setLangOpen(o => !o) }}
-                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '5px 8px', fontSize: 12, color: '#8888aa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 76, WebkitAppearance: 'none', appearance: 'none' }}>
+                    style={{ background: 'rgba(36,28,21,0.05)', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 10, padding: '5px 8px', fontSize: 12, color: '#8A7F6E', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 76, WebkitAppearance: 'none', appearance: 'none' }}>
                     <span style={{ width: 12, flexShrink: 0 }} />
                     <span>{LANG_LABELS[lang as Lang]}</span>
                     <span style={{ width: 12, flexShrink: 0, fontSize: 9, opacity: 0.5, textAlign: 'right' }}>▼</span>
                   </button>
                   {langOpen && (
-                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, background: '#111118', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 10, overflow: 'hidden', zIndex: 200, minWidth: 100, boxShadow: '0 8px 24px rgba(36,28,21,0.15)' }}>
                       {LANGS.map(l => (
                         <button key={l} onClick={e => { e.stopPropagation(); setLang(l as Lang); setLangOpen(false) }}
-                          style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 13, textAlign: 'center', cursor: 'pointer', background: l === lang ? 'rgba(6,182,212,0.15)' : 'none', color: l === lang ? '#22d3ee' : '#ccccdd', border: 'none', fontWeight: l === lang ? 700 : 400 }}>
+                          style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 13, textAlign: 'center', cursor: 'pointer', background: l === lang ? 'rgba(255,111,60,0.12)' : 'none', color: l === lang ? '#D84A1E' : '#5B5346', border: 'none', fontWeight: l === lang ? 700 : 400 }}>
                           {LANG_LABELS[l as Lang]}
                         </button>
                       ))}
@@ -232,7 +232,7 @@ export default function DashboardPage() {
               </div>
               {profile?.bio
                 ? null
-                : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#0891b2', fontWeight: 600 }}>{tx.dashboard.addBio}</span></Link>
+                : <Link href="/profile/edit" style={{ textDecoration: 'none' }}><span style={{ fontSize: 12, color: '#D84A1E', fontWeight: 600 }}>{tx.dashboard.addBio}</span></Link>
               }
             </div>
           </div>
@@ -241,32 +241,32 @@ export default function DashboardPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Link href="/reactions?tab=bookmarks" style={{ textDecoration: 'none' }}
               onClick={() => { localStorage.setItem('kpick-seen-bm', String(bookmarks)); setUnread(u => ({ ...u, bookmarks: 0 })) }}>
-              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '20px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
+              <div style={{ position: 'relative', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.07)', borderRadius: 20, padding: '20px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D84A1E', flexShrink: 0 }}>
                   <Bookmark size={20} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{bookmarks}</div>
-                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>{tx.dashboard.bookmarks}</div>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: '#241C15', lineHeight: 1 }}>{bookmarks}</div>
+                  <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 5 }}>{tx.dashboard.bookmarks}</div>
                 </div>
                 {unread.bookmarks > 0 && (
-                  <div style={{ position: 'absolute', top: 10, right: 12, background: '#22d3ee', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+                  <div style={{ position: 'absolute', top: 10, right: 12, background: '#FF6F3C', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
                     +{unread.bookmarks}
                   </div>
                 )}
               </div>
             </Link>
             <Link href="/reactions" style={{ textDecoration: 'none' }}>
-              <div style={{ position: 'relative', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '20px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', flexShrink: 0 }}>
+              <div style={{ position: 'relative', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.07)', borderRadius: 20, padding: '20px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D84A1E', flexShrink: 0 }}>
                   <MessageCircle size={20} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 32, fontWeight: 900, color: '#eeeeff', lineHeight: 1 }}>{contacts}</div>
-                  <div style={{ fontSize: 12, color: '#555570', marginTop: 5 }}>{tx.dashboard.chats}</div>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: '#241C15', lineHeight: 1 }}>{contacts}</div>
+                  <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 5 }}>{tx.dashboard.chats}</div>
                 </div>
                 {unread.messages > 0 && (
-                  <div style={{ position: 'absolute', top: 10, right: 12, background: '#f87171', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+                  <div style={{ position: 'absolute', top: 10, right: 12, background: '#DC2626', borderRadius: 10, minWidth: 18, height: 18, fontSize: 10, fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
                     {unread.messages}
                   </div>
                 )}
@@ -276,10 +276,10 @@ export default function DashboardPage() {
         </div>
 
         {/* ── 뉴스 티커 ── */}
-        <div style={{ marginBottom: 28, overflow: 'hidden', borderTop: '1px solid rgba(236,72,153,0.2)', borderBottom: '1px solid rgba(236,72,153,0.2)', background: 'rgba(236,72,153,0.06)' }}>
+        <div style={{ marginBottom: 28, overflow: 'hidden', borderTop: '1px solid rgba(219,39,119,0.25)', borderBottom: '1px solid rgba(219,39,119,0.25)', background: 'rgba(219,39,119,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: 40 }}>
-            <div style={{ flexShrink: 0, padding: '0 14px', borderRight: '1px solid rgba(236,72,153,0.2)', height: '100%', display: 'flex', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 900, color: '#f472b6', letterSpacing: '0.05em' }}>LIVE</span>
+            <div style={{ flexShrink: 0, padding: '0 14px', borderRight: '1px solid rgba(219,39,119,0.25)', height: '100%', display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#DB2777', letterSpacing: '0.05em' }}>LIVE</span>
             </div>
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <LiveTicker items={[
@@ -293,9 +293,9 @@ export default function DashboardPage() {
         {/* ── My Videos (horizontal scroll) ── */}
         <div style={{ marginBottom: 36 }}>
           <div className="max-w-lg mx-auto px-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>{tx.dashboard.myVideos}</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#241C15' }}>{tx.dashboard.myVideos}</h2>
             {videoCount > 0 && (
-              <Link href="/videos" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Link href="/videos" style={{ fontSize: 13, color: '#D84A1E', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
                 {tx.common.viewAll} <ChevronRight size={14} />
               </Link>
             )}
@@ -307,18 +307,18 @@ export default function DashboardPage() {
                 <div style={{ width: 152 }}>
                   <div style={{
                     width: 152, height: 102, borderRadius: 16, overflow: 'hidden', marginBottom: 8,
-                    background: 'linear-gradient(135deg, #111825, #0d1520)',
-                    border: '1px solid rgba(255,255,255,0.07)',
+                    background: 'linear-gradient(135deg, #F5EADB, #EFDFC9)',
+                    border: '1px solid rgba(36,28,21,0.07)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     position: 'relative',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Play size={26} color="#333350" strokeWidth={1.5} />
+                      : <Play size={26} color="#C9B79E" strokeWidth={1.5} />
                     }
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(36,28,21,0.35) 0%, transparent 55%)' }} />
                   </div>
-                  <div style={{ fontSize: 12, color: '#cccce8', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: 152 }}>{v.title}</div>
+                  <div style={{ fontSize: 12, color: '#4A4438', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: 152 }}>{v.title}</div>
                 </div>
               </Link>
             ))}
@@ -328,14 +328,14 @@ export default function DashboardPage() {
               <div style={{ width: 152 }}>
                 <div style={{
                   width: 152, height: 102, borderRadius: 16, marginBottom: 8,
-                  background: 'rgba(6,182,212,0.05)',
-                  border: '1.5px dashed rgba(6,182,212,0.28)',
+                  background: 'rgba(255,111,60,0.05)',
+                  border: '1.5px dashed rgba(255,111,60,0.32)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}>
-                  <Plus size={26} color="#22d3ee" strokeWidth={2} />
-                  <span style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700 }}>{tx.nav.upload}</span>
+                  <Plus size={26} color="#D84A1E" strokeWidth={2} />
+                  <span style={{ fontSize: 12, color: '#D84A1E', fontWeight: 700 }}>{tx.nav.upload}</span>
                 </div>
-                <div style={{ fontSize: 12, color: '#444460', fontWeight: 600 }}>{tx.dashboard.addVideo}</div>
+                <div style={{ fontSize: 12, color: '#6B6355', fontWeight: 600 }}>{tx.dashboard.addVideo}</div>
               </div>
             </Link>
 
@@ -346,21 +346,21 @@ export default function DashboardPage() {
         <div className="max-w-lg mx-auto px-4">
 
           {/* ── Auditions ── */}
-          <div style={{ marginBottom: 28, background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.15)', borderRadius: 22, padding: '18px 16px' }}>
+          <div style={{ marginBottom: 28, background: 'rgba(255,111,60,0.05)', border: '1px solid rgba(255,111,60,0.18)', borderRadius: 22, padding: '18px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff' }}>{tx.dashboard.openAuditions}</h2>
-              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#22d3ee', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#241C15' }}>{tx.dashboard.openAuditions}</h2>
+              <Link href="/dashboard/auditions" style={{ fontSize: 13, color: '#D84A1E', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
                 {tx.common.viewAll} <ChevronRight size={14} />
               </Link>
             </div>
 
             {recentAuditions.length === 0 ? (
-              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 18, padding: '24px 20px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(6,182,212,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#22d3ee' }}>
+              <div style={{ background: '#FFFFFF', borderRadius: 18, padding: '24px 20px', textAlign: 'center', border: '1px solid rgba(36,28,21,0.06)' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#D84A1E' }}>
                   <Megaphone size={20} strokeWidth={1.5} />
                 </div>
-                <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4 }}>{tx.dashboard.noAuditions}</div>
-                <div style={{ fontSize: 12, color: '#555570' }}>{tx.dashboard.auditionDesc}</div>
+                <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 4 }}>{tx.dashboard.noAuditions}</div>
+                <div style={{ fontSize: 12, color: '#8A7F6E' }}>{tx.dashboard.auditionDesc}</div>
               </div>
             ) : (() => {
               const safeIdx = auditionIdx < recentAuditions.length ? auditionIdx : 0
@@ -368,23 +368,23 @@ export default function DashboardPage() {
               return (
                 <div>
                   <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
-                    <div key={auditionIdx} style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', animation: 'fadeSlide 0.4s ease' }}>
+                    <div key={auditionIdx} style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(36,28,21,0.07)', background: '#FFFFFF', animation: 'fadeSlide 0.4s ease' }}>
                       <div style={{ padding: '16px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {getAuditionDisplayTitle(a, lang)}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 12, color: '#8888aa' }}>{a.agency?.name ?? tx.auditions.agencyLabel}</span>
+                            <span style={{ fontSize: 12, color: '#8A7F6E' }}>{a.agency?.name ?? tx.auditions.agencyLabel}</span>
                             {a.category.split(',').map(c => (
-                              <span key={c} style={{ fontSize: 10, color: '#22d3ee', background: 'rgba(6,182,212,0.12)', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
+                              <span key={c} style={{ fontSize: 10, color: '#D84A1E', background: 'rgba(255,111,60,0.12)', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
                                 {categoryLabel[c.trim()] ?? c.trim()}
                               </span>
                             ))}
-                            {a.deadline && <span style={{ fontSize: 11, color: '#555570' }}>~{a.deadline}</span>}
+                            {a.deadline && <span style={{ fontSize: 11, color: '#8A7F6E' }}>~{a.deadline}</span>}
                           </div>
                         </div>
-                        <ChevronRight size={16} color="#333350" />
+                        <ChevronRight size={16} color="#C9B79E" />
                       </div>
                     </div>
                   </Link>
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                       {recentAuditions.map((_, i) => (
                         <button key={i} onClick={() => setAuditionIdx(i)}
                           style={{ width: i === auditionIdx ? 16 : 5, height: 5, borderRadius: 3, border: 'none', cursor: 'pointer', transition: 'all 0.3s',
-                            background: i === auditionIdx ? '#22d3ee' : 'rgba(255,255,255,0.15)',
+                            background: i === auditionIdx ? '#D84A1E' : 'rgba(36,28,21,0.15)',
                             padding: 0,
                           }} />
                       ))}
@@ -407,15 +407,15 @@ export default function DashboardPage() {
           {/* Profile CTA */}
           {!profile?.bio && (
             <Link href="/profile/edit" style={{ textDecoration: 'none' }}>
-              <div style={{ background: 'rgba(6,182,212,0.06)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, border: '1px solid rgba(6,182,212,0.15)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(6,182,212,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#22d3ee' }}>
+              <div style={{ background: 'rgba(255,111,60,0.07)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, border: '1px solid rgba(255,111,60,0.18)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,111,60,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#D84A1E' }}>
                   <User size={16} strokeWidth={1.8} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 13 }}>{tx.dashboard.completeProfile}</div>
-                  <div style={{ fontSize: 12, color: '#22d3ee', marginTop: 1 }}>{tx.dashboard.profileDesc}</div>
+                  <div style={{ fontWeight: 700, color: '#241C15', fontSize: 13 }}>{tx.dashboard.completeProfile}</div>
+                  <div style={{ fontSize: 12, color: '#D84A1E', marginTop: 1 }}>{tx.dashboard.profileDesc}</div>
                 </div>
-                <ChevronRight size={16} color="#22d3ee" />
+                <ChevronRight size={16} color="#D84A1E" />
               </div>
             </Link>
           )}

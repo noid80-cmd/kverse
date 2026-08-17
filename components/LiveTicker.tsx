@@ -85,9 +85,9 @@ export default function LiveTicker({ items, durationSeconds = 12 }: { items: Tic
       }}
     >
       {doubled.map((item, i) => (
-        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#f472b6', flexShrink: 0 }}>
-          {item.dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f472b6', boxShadow: '0 0 6px #f472b6', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} />}
-          {!item.dot && <span style={{ fontSize: 11, color: 'rgba(236,72,153,0.5)' }}>✦</span>}
+        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '0 32px', fontSize: 13, fontWeight: 700, color: '#DB2777', flexShrink: 0 }}>
+          {item.dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#DB2777', boxShadow: '0 0 6px rgba(219,39,119,0.6)', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} />}
+          {!item.dot && <span style={{ fontSize: 11, color: 'rgba(219,39,119,0.55)' }}>✦</span>}
           {item.text}
         </span>
       ))}

@@ -88,22 +88,22 @@ export default function PushSubscribe() {
       {/* 바텀시트 */}
       <div style={{
         position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 201,
-        background: '#13131e',
+        background: '#FFFCF6',
         borderRadius: '24px 24px 0 0',
         padding: '28px 24px 40px',
-        boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 -8px 40px rgba(36,28,21,0.18)',
+        border: '1px solid rgba(36,28,21,0.08)',
         animation: 'slideUp 0.3s cubic-bezier(0.32,0.72,0,1)',
         maxWidth: 480, margin: '0 auto',
       }}>
         {/* 핸들 */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 24px' }} />
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(36,28,21,0.15)', margin: '0 auto 24px' }} />
 
         <button onClick={handleDismiss} style={{
           position: 'absolute', top: 20, right: 20,
-          background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10,
+          background: 'rgba(36,28,21,0.05)', border: 'none', borderRadius: 10,
           width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', color: '#555570',
+          cursor: 'pointer', color: '#8A7F6E',
         }}>
           <X size={16} strokeWidth={2} />
         </button>
@@ -111,15 +111,15 @@ export default function PushSubscribe() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
           <div style={{
             width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(6,182,212,0.35)',
+            boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
           }}>
             <Bell size={24} strokeWidth={1.8} color="white" />
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#eeeeff', marginBottom: 3 }}>기획사 알림 받기</div>
-            <div style={{ fontSize: 13, color: '#555570' }}>놓치면 아쉬운 연락이 올 수 있어요</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>기획사 알림 받기</div>
+            <div style={{ fontSize: 13, color: '#8A7F6E' }}>놓치면 아쉬운 연락이 올 수 있어요</div>
           </div>
         </div>
 
@@ -131,25 +131,25 @@ export default function PushSubscribe() {
           ].map(item => (
             <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 16, flexShrink: 0 }}>{item.emoji}</span>
-              <span style={{ fontSize: 14, color: '#8888aa' }}>{item.text}</span>
+              <span style={{ fontSize: 14, color: '#6B6355' }}>{item.text}</span>
             </div>
           ))}
         </div>
 
         <button onClick={handleAllow} style={{
           width: '100%', padding: '15px',
-          background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+          background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
           border: 'none', borderRadius: 16,
           color: 'white', fontSize: 16, fontWeight: 700,
           cursor: 'pointer', marginBottom: 10,
-          boxShadow: '0 4px 16px rgba(6,182,212,0.35)',
+          boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
         }}>
           알림 켜기
         </button>
         <button onClick={handleDismiss} style={{
           width: '100%', padding: '13px',
           background: 'none', border: 'none',
-          color: '#555570', fontSize: 14, fontWeight: 600,
+          color: '#8A7F6E', fontSize: 14, fontWeight: 600,
           cursor: 'pointer',
         }}>
           나중에
