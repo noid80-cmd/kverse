@@ -320,11 +320,11 @@ export default function TalentAuditionsPage() {
               {/* Agency + title */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(36,28,21,0.13)', border: '1.5px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{agencyInitials}</span>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: '#241C15' }}>{agencyInitials}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.65)', marginBottom: 2 }}>{firstActive.agency?.name ?? tx.auditions.adminNotice}</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: 'white', lineHeight: 1.2 }}>{getAuditionTitle(firstActive, lang)}</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, color: '#241C15', lineHeight: 1.2 }}>{getAuditionTitle(firstActive, lang)}</div>
                 </div>
               </div>
               {/* Tags + deadline */}
