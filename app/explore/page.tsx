@@ -44,6 +44,7 @@ function SwipeCard({
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [paused, setPaused] = useState(false)
+  const [buffering, setBuffering] = useState(false)
 
   useEffect(() => {
     const el = containerRef.current
@@ -51,6 +52,7 @@ function SwipeCard({
     const obs = new IntersectionObserver(([entry]) => {
       if (!videoRef.current) return
       if (entry.isIntersecting) {
+        if (videoRef.current.readyState < 3) setBuffering(true)
         videoRef.current.play().catch(() => {})
         setPaused(false)
       } else {
@@ -69,7 +71,11 @@ function SwipeCard({
 
   function handleTap() {
     if (!videoRef.current) return
-    if (videoRef.current.paused) { videoRef.current.play().catch(() => {}); setPaused(false) }
+    if (videoRef.current.paused) {
+      if (videoRef.current.readyState < 3) setBuffering(true)
+      videoRef.current.play().catch(() => {})
+      setPaused(false)
+    }
     else { videoRef.current.pause(); setPaused(true) }
   }
 
@@ -77,7 +83,10 @@ function SwipeCard({
     <div ref={containerRef} style={{ height: '100dvh', scrollSnapAlign: 'start', position: 'relative', background: '#000', flexShrink: 0, overflow: 'hidden' }}>
       {video.video_url ? (
         <video ref={videoRef} src={video.video_url} poster={video.thumbnail_url ?? undefined}
-          loop muted={muted} playsInline
+          loop muted={muted} playsInline preload="auto"
+          onWaiting={() => setBuffering(true)}
+          onPlaying={() => setBuffering(false)}
+          onCanPlay={() => setBuffering(false)}
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
       ) : video.thumbnail_url ? (
         <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
@@ -87,9 +96,15 @@ function SwipeCard({
 
       <div onClick={handleTap} style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'pointer', touchAction: 'pan-y' }} />
 
-      {paused && (
+      {paused && !buffering && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 64, height: 64, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6, pointerEvents: 'none' }}>
           <svg width="22" height="26" viewBox="0 0 22 26" fill="white"><rect x="0" y="0" width="8" height="26" rx="2"/><rect x="14" y="0" width="8" height="26" rx="2"/></svg>
+        </div>
+      )}
+
+      {buffering && !paused && (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 44, height: 44, zIndex: 6, pointerEvents: 'none' }}>
+          <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '3px solid rgba(255,255,255,0.25)', borderTopColor: '#fff', animation: 'kv-spin 0.8s linear infinite' }} />
         </div>
       )}
 

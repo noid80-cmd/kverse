@@ -14,6 +14,7 @@ input::placeholder, textarea::placeholder { color: #8A7F6E; }
 select option { background: #FFFFFF; color: #241C15; }
 
 @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
+@keyframes kv-spin { to { transform: rotate(360deg) } }
 
 .kv-live-ticker {
   scrollbar-width: none;

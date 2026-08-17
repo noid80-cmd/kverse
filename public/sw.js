@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kpick-v2'
+const CACHE_NAME = 'kpick-v3'
 const PRECACHE = ['/offline.html']
 
 self.addEventListener('install', (event) => {
