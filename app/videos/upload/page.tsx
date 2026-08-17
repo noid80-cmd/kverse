@@ -9,8 +9,8 @@ import { useT } from '@/lib/i18n/translations'
 import { compressVideoIfNeeded } from '@/lib/compressVideo'
 
 const inputStyle = {
-  width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
+  width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
+  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
 }
 
 const MAX_SIZE_MB = 500
@@ -312,7 +312,7 @@ export default function UploadPage() {
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: '#09090f' }}>
+    <div className="min-h-screen pb-10" style={{ background: '#FFF8E7' }}>
 
       {/* 카메라 오버레이 */}
       <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 100, display: recordMode ? 'flex' : 'none', flexDirection: 'column' }}>
@@ -330,21 +330,21 @@ export default function UploadPage() {
         }}>
           <button onClick={stopCamera} style={{
             width: 48, height: 48, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+            background: 'rgba(36,28,21,0.16)', border: '1px solid rgba(36,28,21,0.26)',
             color: '#fff', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>✕</button>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             {recording && (
-              <div style={{ fontSize: 13, fontWeight: 800, color: recordSecs >= 270 ? '#ff4444' : 'rgba(255,255,255,0.8)', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: recordSecs >= 270 ? '#ff4444' : 'rgba(36,28,21,1)', letterSpacing: '0.05em' }}>
                 ● {fmt(recordSecs)}
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginLeft: 4 }}>/ 5:00</span>
+                <span style={{ fontSize: 10, color: 'rgba(36,28,21,0.52)', marginLeft: 4 }}>/ 5:00</span>
               </div>
             )}
             <button onClick={recording ? stopRecording : startRecording} style={{
               width: 72, height: 72, borderRadius: '50%', border: 'none', cursor: 'pointer',
               background: recording ? '#ff4444' : '#fff',
-              boxShadow: recording ? '0 0 0 4px rgba(255,68,68,0.4)' : '0 0 0 4px rgba(255,255,255,0.25)',
+              boxShadow: recording ? '0 0 0 4px rgba(255,68,68,0.4)' : '0 0 0 4px rgba(36,28,21,0.33)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {recording
@@ -352,14 +352,14 @@ export default function UploadPage() {
                 : <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#ff4444' }} />
               }
             </button>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
+            <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.65)', fontWeight: 600 }}>
               {recording ? '탭하면 중지' : '탭하면 녹화'}
             </div>
           </div>
 
           <button onClick={flipCamera} style={{
             width: 48, height: 48, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+            background: 'rgba(36,28,21,0.16)', border: '1px solid rgba(36,28,21,0.26)',
             color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <RotateCcw size={20} strokeWidth={2} />
@@ -371,11 +371,11 @@ export default function UploadPage() {
         <div className="flex items-center gap-3 mb-8">
           <button onClick={() => router.back()} style={{
             width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0,
+            background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.1)', color: '#241C15', cursor: 'pointer', flexShrink: 0,
           }}>
             <ArrowLeft size={20} strokeWidth={2} />
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>{tx.videos.uploadTitle}</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#241C15' }}>{tx.videos.uploadTitle}</h1>
         </div>
 
         <form onSubmit={handleUpload} className="flex flex-col gap-4">
@@ -393,40 +393,40 @@ export default function UploadPage() {
           }} style={{ display: 'none' }} />
 
           {preview ? (
-            <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(36,28,21,0.13)' }}>
               <video src={preview} controls playsInline
                 style={{ width: '100%', display: 'block', background: '#000', maxHeight: 340, objectFit: 'contain' }} />
-              <div style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                <button type="button" onClick={startCamera} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(255,255,255,0.07)', color: '#8888aa', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>다시 촬영</button>
-                <button type="button" onClick={() => fileRef.current?.click()} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(255,255,255,0.07)', color: '#8888aa', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>파일 선택</button>
-                <button type="button" onClick={() => { setFile(null); setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null }) }} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>취소</button>
+              <div style={{ display: 'flex', borderTop: '1px solid rgba(36,28,21,0.09)' }}>
+                <button type="button" onClick={startCamera} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(36,28,21,0.09)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>다시 촬영</button>
+                <button type="button" onClick={() => fileRef.current?.click()} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(36,28,21,0.09)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>파일 선택</button>
+                <button type="button" onClick={() => { setFile(null); setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null }) }} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>취소</button>
               </div>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="button" onClick={startCamera} style={{
                 flex: 1, padding: '28px 12px', borderRadius: 20,
-                background: '#111118', border: '1px solid rgba(6,182,212,0.3)',
-                color: '#eeeeff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                background: '#FFFFFF', border: '1px solid rgba(255,111,60,0.3)',
+                color: '#241C15', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
               }}>
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D84A1E' }}>
                   <Camera size={22} strokeWidth={1.8} />
                 </div>
                 지금 촬영하기
-                <span style={{ fontSize: 11, color: '#555570', fontWeight: 600 }}>후면 카메라로 녹화</span>
+                <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>후면 카메라로 녹화</span>
               </button>
               <button type="button" onClick={() => fileRef.current?.click()} style={{
                 flex: 1, padding: '28px 12px', borderRadius: 20,
-                background: '#111118', border: '1px dashed rgba(255,255,255,0.1)',
-                color: '#555570', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                background: '#FFFFFF', border: '1px dashed rgba(36,28,21,0.13)',
+                color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
               }}>
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(36,28,21,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Upload size={20} strokeWidth={1.8} />
                 </div>
                 파일 선택
-                <span style={{ fontSize: 11, color: '#333350', fontWeight: 600 }}>갤러리에서 올리기</span>
+                <span style={{ fontSize: 11, color: '#C9B79E', fontWeight: 600 }}>갤러리에서 올리기</span>
               </button>
             </div>
           )}
@@ -450,7 +450,7 @@ export default function UploadPage() {
             placeholder={tx.videos.tagsPlaceholder} style={inputStyle} />
 
           <div>
-            <div style={{ fontSize: 12, color: '#8888aa', marginBottom: 8, fontWeight: 600 }}>{tx.videos.visibilityLabel}</div>
+            <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 8, fontWeight: 600 }}>{tx.videos.visibilityLabel}</div>
             <div style={{ display: 'flex', gap: 8 }}>
               {(['public', 'agency_only', 'private'] as const).map(v => {
                 const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
@@ -458,9 +458,9 @@ export default function UploadPage() {
                 const selected = visibility === v
                 return (
                   <button key={v} type="button" onClick={() => setVisibility(v)} style={{
-                    flex: 1, padding: '10px 8px', borderRadius: 12, border: selected ? 'none' : '1.5px solid rgba(255,255,255,0.1)',
-                    background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
-                    color: selected ? 'white' : '#555570', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    flex: 1, padding: '10px 8px', borderRadius: 12, border: selected ? 'none' : '1.5px solid rgba(36,28,21,0.13)',
+                    background: selected ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
+                    color: selected ? 'white' : '#8A7F6E', fontSize: 12, fontWeight: 700, cursor: 'pointer',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                   }}>
                     <span style={{ fontSize: 16 }}>{icons[v]}</span>
@@ -471,14 +471,14 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {error && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{error}</p>}
+          {error && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{error}</p>}
 
           {uploading && (
             <div>
-              <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', transition: 'width 0.3s', borderRadius: 3 }} />
+              <div style={{ height: 6, background: 'rgba(36,28,21,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', transition: 'width 0.3s', borderRadius: 3 }} />
               </div>
-              <p style={{ fontSize: 12, color: '#8888aa', marginTop: 6, textAlign: 'center' }}>
+              <p style={{ fontSize: 12, color: '#8A7F6E', marginTop: 6, textAlign: 'center' }}>
                 {stage === 'compressing' ? '영상 최적화 중...' : `${tx.videos.uploading} ${progress}%`}
               </p>
             </div>
@@ -486,7 +486,7 @@ export default function UploadPage() {
 
           <button type="submit" disabled={uploading}
             className="w-full py-4 rounded-2xl text-white disabled:opacity-50 transition active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.35)', border: 'none', marginTop: 4 }}>
+            style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.35)', border: 'none', marginTop: 4 }}>
             {uploading ? tx.videos.uploading : tx.videos.uploadBtn}
           </button>
         </form>

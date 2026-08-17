@@ -60,9 +60,9 @@ export default function AdminDashboardPage() {
   }, [])
 
   const statCards = stats ? [
-    { label: '전체 회원', value: stats.totalUsers, sub: `지망생 ${stats.talentCount} · 기획사 ${stats.agencyCount}`, color: '#0891b2', bg: '#eef2ff', href: '/admin/users' },
+    { label: '전체 회원', value: stats.totalUsers, sub: `지망생 ${stats.talentCount} · 기획사 ${stats.agencyCount}`, color: '#D84A1E', bg: '#eef2ff', href: '/admin/users' },
     { label: '인증 대기', value: stats.pendingVerifications, sub: '사업자등록증 제출됨', color: stats.pendingVerifications > 0 ? '#d97706' : '#22c55e', bg: stats.pendingVerifications > 0 ? '#fef9c3' : '#f0fdf4', href: '/admin/agencies' },
-    { label: '활성 영상', value: stats.totalVideos, sub: '공개 중인 영상', color: '#06b6d4', bg: '#f5f3ff', href: '/admin/videos' },
+    { label: '활성 영상', value: stats.totalVideos, sub: '공개 중인 영상', color: '#FF6F3C', bg: '#f5f3ff', href: '/admin/videos' },
     { label: '활성 오디션', value: stats.totalAuditions, sub: '진행 중인 공고', color: '#0ea5e9', bg: '#f0f9ff', href: '/admin/auditions' },
   ] : []
 
@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
         <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b', marginBottom: 24 }}>대시보드</h1>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 32 }}>

@@ -17,8 +17,8 @@ type Agency = {
 }
 
 const inputStyle = {
-  background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#eeeeff', width: '100%',
+  background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
+  borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#241C15', width: '100%',
 }
 
 export default function AgencySettingsPage() {
@@ -104,16 +104,16 @@ export default function AgencySettingsPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}>불러오는 중...</div>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>불러오는 중...</div>
   )
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#eeeeff' }}>기획사 설정</h1>
+          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#241C15' }}>기획사 설정</h1>
         </div>
 
         <div style={{
@@ -124,10 +124,10 @@ export default function AgencySettingsPage() {
         }}>
           <div style={{ fontSize: 28 }}>{agency?.is_verified ? '✅' : '⏳'}</div>
           <div>
-            <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>
+            <div style={{ fontWeight: 800, color: '#241C15', fontSize: 15 }}>
               {agency?.is_verified ? '인증된 기획사' : '인증 대기 중'}
             </div>
-            <div style={{ fontSize: 12, color: '#8888aa', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2 }}>
               {agency?.is_verified
                 ? '인증이 완료된 기획사입니다.'
                 : agency?.business_registration_url
@@ -137,10 +137,10 @@ export default function AgencySettingsPage() {
           </div>
         </div>
 
-        <div style={{ background: '#111118', borderRadius: 20, padding: 20, marginBottom: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, marginBottom: 16, border: '1px solid rgba(36,28,21,0.09)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Building2 size={18} color="#22d3ee" strokeWidth={2} />
-            <span style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15 }}>명함</span>
+            <Building2 size={18} color="#D84A1E" strokeWidth={2} />
+            <span style={{ fontWeight: 800, color: '#241C15', fontSize: 15 }}>명함</span>
           </div>
 
           {agency?.business_registration_url ? (
@@ -148,7 +148,7 @@ export default function AgencySettingsPage() {
               <img
                 src={agency.business_registration_url}
                 alt="명함"
-                style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)', maxHeight: 300, objectFit: 'contain', background: '#1a1a25' }}
+                style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(36,28,21,0.09)', maxHeight: 300, objectFit: 'contain', background: '#FFFFFF' }}
               />
               <div style={{ fontSize: 12, color: '#34d399', fontWeight: 600, marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <CheckCircle size={13} strokeWidth={2} /> 제출 완료
@@ -158,9 +158,9 @@ export default function AgencySettingsPage() {
 
           <label style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            background: uploading ? '#1a1a25' : 'rgba(6,182,212,0.06)',
-            border: '1.5px dashed rgba(6,182,212,0.4)', borderRadius: 14, padding: '16px',
-            cursor: uploading ? 'default' : 'pointer', color: '#22d3ee', fontWeight: 700, fontSize: 14,
+            background: uploading ? '#FFFFFF' : 'rgba(255,111,60,0.06)',
+            border: '1.5px dashed rgba(255,111,60,0.4)', borderRadius: 14, padding: '16px',
+            cursor: uploading ? 'default' : 'pointer', color: '#D84A1E', fontWeight: 700, fontSize: 14,
           }}>
             <input type="file" accept="image/*" style={{ display: 'none' }}
               onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
@@ -168,31 +168,31 @@ export default function AgencySettingsPage() {
             <Upload size={18} strokeWidth={2} />
             {uploading ? '업로드 중...' : agency?.business_registration_url ? '명함 교체' : '명함 업로드'}
           </label>
-          <div style={{ fontSize: 12, color: '#555570', marginTop: 8, textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 8, textAlign: 'center' }}>
             회사명이 보이는 명함 앞면 사진 (JPG, PNG)
           </div>
         </div>
 
-        <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15, marginBottom: 16 }}>기본 정보</div>
+        <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
+          <div style={{ fontWeight: 800, color: '#241C15', fontSize: 15, marginBottom: 16 }}>기본 정보</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div>
-              <label style={{ fontSize: 12, color: '#555570', marginBottom: 4, display: 'block' }}>기획사명 *</label>
+              <label style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 4, display: 'block' }}>기획사명 *</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: '#555570', marginBottom: 4, display: 'block' }}>소개</label>
+              <label style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 4, display: 'block' }}>소개</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 rows={3} style={{ ...inputStyle, resize: 'none' }} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: '#555570', marginBottom: 4, display: 'block' }}>웹사이트</label>
+              <label style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 4, display: 'block' }}>웹사이트</label>
               <input value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
                 placeholder="https://" style={inputStyle} />
             </div>
             <button onClick={handleSave} disabled={saving || !form.name.trim()} style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
               fontSize: 15, fontWeight: 700, cursor: 'pointer',
               opacity: saving || !form.name.trim() ? 0.6 : 1, marginTop: 4,
             }}>
@@ -205,20 +205,20 @@ export default function AgencySettingsPage() {
 
       <div className="max-w-lg mx-auto px-4">
         {/* 알림 설정 */}
-        <div style={{ marginTop: 16, background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 15, marginBottom: 16 }}>알림 설정</div>
+        <div style={{ marginTop: 16, background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
+          <div style={{ fontWeight: 800, color: '#241C15', fontSize: 15, marginBottom: 16 }}>알림 설정</div>
           <button onClick={() => setNotifModal(true)} style={{
             width: '100%', padding: '14px 18px', borderRadius: 14,
-            background: notifPerm === 'granted' ? 'rgba(6,182,212,0.08)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.08)' : '#1a1a25',
-            border: `1px solid ${notifPerm === 'granted' ? 'rgba(6,182,212,0.25)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.08)'}`,
+            background: notifPerm === 'granted' ? 'rgba(255,111,60,0.08)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.08)' : '#FFFFFF',
+            border: `1px solid ${notifPerm === 'granted' ? 'rgba(255,111,60,0.25)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.2)' : 'rgba(36,28,21,0.1)'}`,
             display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
           }}>
-            {notifPerm === 'granted' ? <BellRing size={20} color="#22d3ee" strokeWidth={2} /> : notifPerm === 'denied' ? <BellOff size={20} color="#f87171" strokeWidth={2} /> : <Bell size={20} color="#555570" strokeWidth={2} />}
+            {notifPerm === 'granted' ? <BellRing size={20} color="#D84A1E" strokeWidth={2} /> : notifPerm === 'denied' ? <BellOff size={20} color="#DC2626" strokeWidth={2} /> : <Bell size={20} color="#8A7F6E" strokeWidth={2} />}
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: notifPerm === 'granted' ? '#22d3ee' : notifPerm === 'denied' ? '#f87171' : '#8888aa' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
                 {notifPerm === 'granted' ? '알림 켜짐' : notifPerm === 'denied' ? '알림 차단됨' : '알림 꺼짐'}
               </div>
-              <div style={{ fontSize: 12, color: '#555570', marginTop: 1 }}>탭해서 설정 변경</div>
+              <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 1 }}>탭해서 설정 변경</div>
             </div>
           </button>
         </div>
@@ -232,7 +232,7 @@ export default function AgencySettingsPage() {
             window.location.href = '/login'
           }} style={{
             width: '100%', padding: '14px', borderRadius: 14, border: '1px solid rgba(248,113,113,0.2)',
-            background: 'rgba(248,113,113,0.06)', color: '#f87171', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            background: 'rgba(248,113,113,0.06)', color: '#DC2626', fontSize: 15, fontWeight: 700, cursor: 'pointer',
           }}>
             로그아웃
           </button>
@@ -243,35 +243,35 @@ export default function AgencySettingsPage() {
 
       {notifModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={() => setNotifModal(false)}>
-          <div style={{ background: '#111118', borderRadius: '24px 24px 0 0', padding: '28px 24px 40px', width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: '#FFFFFF', borderRadius: '24px 24px 0 0', padding: '28px 24px 40px', width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#eeeeff', margin: 0 }}>알림 설정</h3>
-              <button onClick={() => setNotifModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555570', padding: 4 }}><X size={20} /></button>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#241C15', margin: 0 }}>알림 설정</h3>
+              <button onClick={() => setNotifModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8A7F6E', padding: 4 }}><X size={20} /></button>
             </div>
             {notifPerm === 'granted' && (
               <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
-                <BellRing size={32} color="#22d3ee" style={{ margin: '0 auto 12px' }} />
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>알림이 켜져 있어요</p>
-                <p style={{ fontSize: 13, color: '#8888aa' }}>새 지원자, 채팅 알림을 받고 있습니다</p>
+                <BellRing size={32} color="#D84A1E" style={{ margin: '0 auto 12px' }} />
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#241C15', marginBottom: 6 }}>알림이 켜져 있어요</p>
+                <p style={{ fontSize: 13, color: '#8A7F6E' }}>새 지원자, 채팅 알림을 받고 있습니다</p>
               </div>
             )}
             {notifPerm === 'denied' && (
               <>
                 <div style={{ textAlign: 'center', padding: '12px 0 16px' }}>
-                  <BellOff size={32} color="#f87171" style={{ margin: '0 auto 12px' }} />
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>알림이 차단되어 있어요</p>
+                  <BellOff size={32} color="#DC2626" style={{ margin: '0 auto 12px' }} />
+                  <p style={{ fontSize: 15, fontWeight: 700, color: '#241C15', marginBottom: 6 }}>알림이 차단되어 있어요</p>
                 </div>
-                <div style={{ background: '#1a1a25', borderRadius: 14, padding: '16px', fontSize: 13, color: '#8888aa', lineHeight: 1.7 }}>
-                  <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#eeeeff' }}>Chrome (Android)</p>
+                <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '16px', fontSize: 13, color: '#8A7F6E', lineHeight: 1.7 }}>
+                  <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#241C15' }}>Chrome (Android)</p>
                   <p style={{ margin: 0 }}>주소창 자물쇠 아이콘 → 알림 → 허용</p>
-                  <p style={{ margin: '12px 0 8px', fontWeight: 700, color: '#eeeeff' }}>Safari (iPhone)</p>
+                  <p style={{ margin: '12px 0 8px', fontWeight: 700, color: '#241C15' }}>Safari (iPhone)</p>
                   <p style={{ margin: 0 }}>설정 앱 → Safari → 알림 허용</p>
                 </div>
               </>
             )}
             {notifPerm === 'default' && (
               <>
-                <p style={{ fontSize: 14, color: '#8888aa', marginBottom: 20, lineHeight: 1.6 }}>새 지원자가 오디션에 지원하거나 채팅이 오면 알림을 받을 수 있어요</p>
+                <p style={{ fontSize: 14, color: '#8A7F6E', marginBottom: 20, lineHeight: 1.6 }}>새 지원자가 오디션에 지원하거나 채팅이 오면 알림을 받을 수 있어요</p>
                 <button onClick={async () => {
                   if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
                     alert('이 브라우저는 알림을 지원하지 않아요.\niOS는 홈 화면에 추가(PWA) 후 사용해주세요.')
@@ -300,7 +300,7 @@ export default function AgencySettingsPage() {
                     alert('알림 설정 중 오류가 발생했어요.')
                   }
                   setNotifModal(false)
-                }} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #0891b2, #06b6d4)', border: 'none', borderRadius: 14, color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                }} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', border: 'none', borderRadius: 14, color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
                   알림 허용하기
                 </button>
               </>

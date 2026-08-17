@@ -23,28 +23,28 @@ export default function KakaoGuard() {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
-      background: '#07070d',
+      background: '#FFF8E7',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       padding: 32, textAlign: 'center',
     }}>
       <div style={{ fontSize: 56, marginBottom: 24 }}>🌐</div>
-      <div style={{ fontSize: 20, fontWeight: 800, color: '#eeeeff', marginBottom: 12 }}>
+      <div style={{ fontSize: 20, fontWeight: 800, color: '#241C15', marginBottom: 12 }}>
         외부 브라우저에서 열어주세요
       </div>
-      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.8, marginBottom: 32 }}>
+      <div style={{ fontSize: 14, color: 'rgba(36,28,21,0.59)', lineHeight: 1.8, marginBottom: 32 }}>
         카카오톡 내 브라우저에서는<br />
         일부 기능이 제한돼요.
       </div>
       <div style={{
-        background: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: '20px 24px',
-        border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: 320,
+        background: 'rgba(36,28,21,0.07)', borderRadius: 16, padding: '20px 24px',
+        border: '1px solid rgba(36,28,21,0.1)', width: '100%', maxWidth: 320,
       }}>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 16, fontWeight: 600 }}>
+        <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.65)', marginBottom: 16, fontWeight: 600 }}>
           여는 방법
         </div>
-        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 2, textAlign: 'left' }}>
-          <span style={{ color: '#06b6d4', fontWeight: 700 }}>1.</span> 화면 오른쪽 하단 <strong style={{ color: '#eeeeff' }}>···</strong> 버튼<br />
-          <span style={{ color: '#06b6d4', fontWeight: 700 }}>2.</span> <strong style={{ color: '#eeeeff' }}>기본 브라우저로 열기</strong> 선택
+        <div style={{ fontSize: 14, color: 'rgba(36,28,21,0.91)', lineHeight: 2, textAlign: 'left' }}>
+          <span style={{ color: '#FF6F3C', fontWeight: 700 }}>1.</span> 화면 오른쪽 하단 <strong style={{ color: '#241C15' }}>···</strong> 버튼<br />
+          <span style={{ color: '#FF6F3C', fontWeight: 700 }}>2.</span> <strong style={{ color: '#241C15' }}>기본 브라우저로 열기</strong> 선택
         </div>
       </div>
     </div>

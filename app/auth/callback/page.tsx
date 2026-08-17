@@ -66,8 +66,8 @@ function AuthCallbackContent() {
   }, [router, searchParams])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07070d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15 }}>{message}</div>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: 'rgba(36,28,21,0.65)', fontSize: 15 }}>{message}</div>
     </div>
   )
 }

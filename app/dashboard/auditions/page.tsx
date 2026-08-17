@@ -283,12 +283,12 @@ export default function TalentAuditionsPage() {
     <div className="min-h-screen pb-28" style={{ background: '#050e1a' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
-          <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(36,28,21,0.09)', border: '1px solid rgba(36,28,21,0.1)', color: '#241C15', cursor: 'pointer', flexShrink: 0 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
           </button>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{tx.auditions.title}</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15' }}>{tx.auditions.title}</h1>
         </div>
-        <p style={{ fontSize: 13, color: '#8888aa', marginBottom: 20 }}>{tx.auditions.pageDesc}</p>
+        <p style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 20 }}>{tx.auditions.pageDesc}</p>
       </div>
 
       {/* Featured audition card */}
@@ -304,38 +304,38 @@ export default function TalentAuditionsPage() {
             <div style={{
               background: 'linear-gradient(135deg, #003a5a 0%, #001828 100%)',
               borderRadius: 24, padding: '22px 20px', position: 'relative', overflow: 'hidden',
-              border: '1px solid rgba(6,182,212,0.15)',
+              border: '1px solid rgba(255,111,60,0.15)',
             }}>
               {/* Glow decorations */}
-              <div style={{ position: 'absolute', right: -30, top: -30, width: 200, height: 200, borderRadius: '50%', background: 'rgba(6,182,212,0.06)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', right: -30, top: -30, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,111,60,0.06)', pointerEvents: 'none' }} />
               <div style={{ position: 'absolute', right: 40, top: 20, opacity: 0.18, pointerEvents: 'none' }}>
                 <svg width="80" height="80" viewBox="0 0 100 100">
-                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4"/>
+                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C"/>
                 </svg>
               </div>
               {/* FEATURED badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#06b6d4', borderRadius: 20, padding: '5px 12px', marginBottom: 16, fontSize: 11, fontWeight: 800, color: 'white', letterSpacing: 0.5 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#FF6F3C', borderRadius: 20, padding: '5px 12px', marginBottom: 16, fontSize: 11, fontWeight: 800, color: 'white', letterSpacing: 0.5 }}>
                 ✦ FEATURED
               </div>
               {/* Agency + title */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(36,28,21,0.13)', border: '1.5px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{agencyInitials}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 2 }}>{firstActive.agency?.name ?? tx.auditions.adminNotice}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.65)', marginBottom: 2 }}>{firstActive.agency?.name ?? tx.auditions.adminNotice}</div>
                   <div style={{ fontSize: 20, fontWeight: 900, color: 'white', lineHeight: 1.2 }}>{getAuditionTitle(firstActive, lang)}</div>
                 </div>
               </div>
               {/* Tags + deadline */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
                 {firstActive.category.split(',').map(c => (
-                  <span key={c} style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', color: '#22d3ee', fontSize: 12, fontWeight: 700 }}>
+                  <span key={c} style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(255,111,60,0.15)', border: '1px solid rgba(255,111,60,0.3)', color: '#D84A1E', fontSize: 12, fontWeight: 700 }}>
                     {categoryLabels[c] ?? c}
                   </span>
                 ))}
                 {firstActive.deadline && (
-                  <span style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600 }}>
+                  <span style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(36,28,21,0.09)', color: 'rgba(36,28,21,0.65)', fontSize: 12, fontWeight: 600 }}>
                     {tx.auditions.deadline} {firstActive.deadline}
                   </span>
                 )}
@@ -345,9 +345,9 @@ export default function TalentAuditionsPage() {
                 onClick={() => canApply && openModal(firstActive)}
                 style={{
                   width: '100%', padding: '13px', borderRadius: 16, border: 'none', fontSize: 15, fontWeight: 700, cursor: canApply ? 'pointer' : 'default',
-                  background: appStatus === 'pending' ? 'rgba(251,191,36,0.15)' : appStatus === 'invited' ? 'linear-gradient(135deg,#22c55e,#16a34a)' : canApply ? 'linear-gradient(135deg,#0891b2,#06b6d4)' : 'rgba(255,255,255,0.06)',
-                  color: appStatus === 'pending' ? '#fbbf24' : appStatus ? 'white' : canApply ? 'white' : '#555570',
-                  boxShadow: canApply && !appStatus ? '0 4px 16px rgba(6,182,212,0.3)' : 'none',
+                  background: appStatus === 'pending' ? 'rgba(251,191,36,0.15)' : appStatus === 'invited' ? 'linear-gradient(135deg,#22c55e,#16a34a)' : canApply ? 'linear-gradient(135deg,#D84A1E,#FF6F3C)' : 'rgba(36,28,21,0.08)',
+                  color: appStatus === 'pending' ? '#fbbf24' : appStatus ? 'white' : canApply ? 'white' : '#8A7F6E',
+                  boxShadow: canApply && !appStatus ? '0 4px 16px rgba(255,111,60,0.3)' : 'none',
                 }}>
                 {appStatus === 'pending' ? tx.auditions.review : appStatus === 'invited' ? tx.auditions.checkChat : canApply ? `${tx.auditions.apply} →` : firstActive.mode === 'offline' ? '📍 오프라인 오디션' : tx.auditions.expiredPost}
               </button>
@@ -359,37 +359,37 @@ export default function TalentAuditionsPage() {
       <div className="max-w-lg mx-auto px-4">
         {/* More opportunities header */}
         {!loading && auditions.filter(a => !isExpired(a.deadline)).length > 1 && (
-          <div style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff', marginBottom: 16 }}>More Opportunities</div>
+          <div style={{ fontSize: 17, fontWeight: 800, color: '#241C15', marginBottom: 16 }}>More Opportunities</div>
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div style={{ display: 'flex', gap: 6 }}>
             {([['all', tx.explore.allCategories], ['online', tx.auditions.modeOnline], ['offline', tx.auditions.modeOffline]] as const).map(([val, label]) => (
               <button key={val} onClick={() => setFilterMode(val)} style={{
-                padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(36,28,21,0.1)',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                background: filterMode === val ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'rgba(255,255,255,0.05)',
-                color: filterMode === val ? 'white' : '#555570',
+                background: filterMode === val ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : 'rgba(36,28,21,0.07)',
+                color: filterMode === val ? 'white' : '#8A7F6E',
               }}>{label}</button>
             ))}
           </div>
           <button onClick={() => setSortBy(s => s === 'recent' ? 'deadline' : 'recent')} style={{
             display: 'flex', alignItems: 'center', gap: 4,
             background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 12, fontWeight: 700, color: '#22d3ee', flexShrink: 0,
+            fontSize: 12, fontWeight: 700, color: '#D84A1E', flexShrink: 0,
           }}>
             ↕ {sortBy === 'recent' ? tx.auditions.sortLatest : tx.auditions.sortDeadline}
           </button>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>{tx.common.loading}</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>{tx.common.loading}</div>
         ) : auditions.length === 0 ? (
-          <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#22d3ee' }}>
+          <div style={{ background: 'rgba(36,28,21,0.05)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#D84A1E' }}>
               <Megaphone size={22} strokeWidth={1.8} />
             </div>
-            <div style={{ fontWeight: 700, color: '#eeeeff' }}>{tx.auditions.noAuditions}</div>
+            <div style={{ fontWeight: 700, color: '#241C15' }}>{tx.auditions.noAuditions}</div>
           </div>
         ) : (() => {
           const firstActiveId = auditions.find(a => !isExpired(a.deadline))?.id
@@ -424,42 +424,42 @@ export default function TalentAuditionsPage() {
             const isSkip = appStatus === 'skip'
             return (
               <div style={{
-                background: isInvited ? 'rgba(34,197,94,0.08)' : exp ? 'rgba(255,255,255,0.02)' : '#111118',
+                background: isInvited ? 'rgba(34,197,94,0.08)' : exp ? 'rgba(36,28,21,0.03)' : '#FFFFFF',
                 borderRadius: 20, padding: '18px 20px',
-                border: `1px solid ${isInvited ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                border: `1px solid ${isInvited ? 'rgba(34,197,94,0.3)' : 'rgba(36,28,21,0.09)'}`,
                 opacity: exp && !appInfo ? 0.65 : 1,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 18 }}>{a.agency?.name ?? tx.auditions.adminNotice}</div>
+                  <div style={{ fontWeight: 900, color: '#241C15', fontSize: 18 }}>{a.agency?.name ?? tx.auditions.adminNotice}</div>
                   {a.agency?.is_verified && (
-                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{tx.common.verified}</span>
+                    <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{tx.common.verified}</span>
                   )}
                   {isInvited && <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: 8, fontWeight: 800 }}>{tx.dashboard.invited} 🎉</span>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-                  <div style={{ fontWeight: 700, color: '#22d3ee', fontSize: 14 }}>{displayTitle}</div>
+                  <div style={{ fontWeight: 700, color: '#D84A1E', fontSize: 14 }}>{displayTitle}</div>
                   {a.category.split(',').map(c => (
-                    <span key={c} style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                    <span key={c} style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                       {categoryLabels[c] ?? c}
                     </span>
                   ))}
                   {a.mode && (
-                    <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.07)', color: '#8888aa', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                    <span style={{ fontSize: 11, background: 'rgba(36,28,21,0.09)', color: '#8A7F6E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
                       {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
                     </span>
                   )}
                 </div>
                 {displayDesc && (
                   <div onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}
-                    style={{ fontSize: 13, color: '#8888aa', marginBottom: 10, cursor: 'pointer',
+                    style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 10, cursor: 'pointer',
                       ...(expandedId === a.id ? { whiteSpace: 'pre-wrap' } : { overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }),
                     }}>
                     {displayDesc}
-                    {expandedId !== a.id && <span style={{ color: '#555570' }}> 더보기</span>}
+                    {expandedId !== a.id && <span style={{ color: '#8A7F6E' }}> 더보기</span>}
                   </div>
                 )}
                 {a.deadline && (
-                  <div style={{ fontSize: 12, color: exp ? '#f87171' : '#555570', fontWeight: exp ? 700 : 400, marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: exp ? '#DC2626' : '#8A7F6E', fontWeight: exp ? 700 : 400, marginBottom: 12 }}>
                     {exp ? `${tx.auditions.expired} · ` : `${tx.auditions.deadline} `}{a.deadline}
                   </div>
                 )}
@@ -470,14 +470,14 @@ export default function TalentAuditionsPage() {
                         style={{ width: '100%', borderRadius: 12, maxHeight: 220, background: '#000', display: 'block' }} />
                     ) : (
                       <div onClick={() => appInfo.videoUrl && setPlayingAuditionId(a.id)}
-                        style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'rgba(6,182,212,0.08)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
+                        style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', height: 100, background: 'rgba(255,111,60,0.08)', cursor: appInfo.videoUrl ? 'pointer' : 'default' }}>
                         {appInfo.thumbnailUrl
                           ? <img src={appInfo.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}><Video size={24} strokeWidth={1.5} /></div>
+                          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}><Video size={24} strokeWidth={1.5} /></div>
                         }
                         {appInfo.videoUrl && (
                           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: 'white' }}>▶</div>
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: 'white' }}>▶</div>
                           </div>
                         )}
                         <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 11, color: 'white', fontWeight: 700, background: 'rgba(0,0,0,0.45)', padding: '2px 7px', borderRadius: 6 }}>{tx.auditions.submittedVideo}</div>
@@ -497,7 +497,7 @@ export default function TalentAuditionsPage() {
                 ) : exp ? (
                   <div style={{
                     width: '100%', padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700,
-                    background: '#1a1a25', color: '#555570', textAlign: 'center',
+                    background: '#FFFFFF', color: '#8A7F6E', textAlign: 'center',
                   }}>
                     {tx.auditions.expiredPost}
                   </div>
@@ -514,14 +514,14 @@ export default function TalentAuditionsPage() {
                     <button onClick={() => !appStatus && openModal(a)} style={{
                       width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
                       cursor: appStatus ? 'default' : 'pointer',
-                      background: isPending ? 'rgba(251,191,36,0.12)' : isSkip ? '#1a1a25' : 'linear-gradient(135deg, #0891b2, #06b6d4)',
-                      color: isPending ? '#fbbf24' : isSkip ? '#555570' : 'white',
+                      background: isPending ? 'rgba(251,191,36,0.12)' : isSkip ? '#FFFFFF' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+                      color: isPending ? '#fbbf24' : isSkip ? '#8A7F6E' : 'white',
                     }}>
                       {isPending ? tx.auditions.review : isSkip ? tx.auditions.skipped : tx.auditions.apply}
                     </button>
                     {isPending && (
                       <button onClick={() => cancelApplication(a.id)} style={{
-                        width: '100%', background: 'none', border: 'none', color: '#555570',
+                        width: '100%', background: 'none', border: 'none', color: '#8A7F6E',
                         fontSize: 12, cursor: 'pointer', marginTop: 6, textDecoration: 'underline',
                       }}>
                         {tx.auditions.cancelApplication}
@@ -542,7 +542,7 @@ export default function TalentAuditionsPage() {
               )}
               {expired.length > 0 && (
                 <>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.auditions.expiredPost}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#8A7F6E', marginBottom: 12 }}>{tx.auditions.expiredPost}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     {expired.map(a => <AuditionCard key={a.id} a={a} />)}
                   </div>
@@ -559,17 +559,17 @@ export default function TalentAuditionsPage() {
           background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end',
         }} onClick={closeModal}>
           <div style={{
-            background: '#111118', borderRadius: '24px 24px 0 0', width: '100%', maxHeight: '90vh',
+            background: '#FFFFFF', borderRadius: '24px 24px 0 0', width: '100%', maxHeight: '90vh',
             overflow: 'auto', padding: '24px 20px 40px',
-            border: '1px solid rgba(255,255,255,0.07)',
+            border: '1px solid rgba(36,28,21,0.09)',
           }} onClick={e => e.stopPropagation()}>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <div style={{ fontSize: 12, color: '#555570', marginBottom: 2 }}>{modalAudition.agency?.name}</div>
-                <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 17 }}>{modalAudition.title}</div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 2 }}>{modalAudition.agency?.name}</div>
+                <div style={{ fontWeight: 800, color: '#241C15', fontSize: 17 }}>{modalAudition.title}</div>
               </div>
-              <button onClick={closeModal} style={{ background: '#1a1a25', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#555570' }}>
+              <button onClick={closeModal} style={{ background: '#FFFFFF', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#8A7F6E' }}>
                 <X size={16} strokeWidth={2} />
               </button>
             </div>
@@ -579,8 +579,8 @@ export default function TalentAuditionsPage() {
                 <button key={t} onClick={() => setTab(t)} style={{
                   flex: 1, padding: '10px', borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700,
                   cursor: 'pointer',
-                  background: tab === t ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
-                  color: tab === t ? 'white' : '#555570',
+                  background: tab === t ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
+                  color: tab === t ? 'white' : '#8A7F6E',
                 }}>
                   {t === 'existing' ? tx.auditions.existingVideo : tx.auditions.newVideoTab}
                 </button>
@@ -590,7 +590,7 @@ export default function TalentAuditionsPage() {
             {tab === 'existing' ? (
               <div>
                 {myVideos.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: 32, color: '#555570', fontSize: 14 }}>
+                  <div style={{ textAlign: 'center', padding: 32, color: '#8A7F6E', fontSize: 14 }}>
                     {tx.auditions.noVideosYet}
                   </div>
                 ) : (
@@ -600,20 +600,20 @@ export default function TalentAuditionsPage() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                           borderRadius: 14, cursor: 'pointer', border: '2px solid',
-                          borderColor: selectedVideo?.id === v.id ? '#0891b2' : 'rgba(255,255,255,0.07)',
-                          background: selectedVideo?.id === v.id ? 'rgba(6,182,212,0.12)' : '#1a1a25',
+                          borderColor: selectedVideo?.id === v.id ? '#D84A1E' : 'rgba(36,28,21,0.09)',
+                          background: selectedVideo?.id === v.id ? 'rgba(255,111,60,0.12)' : '#FFFFFF',
                         }}>
-                        <div style={{ width: 56, height: 42, borderRadius: 8, overflow: 'hidden', background: 'rgba(6,182,212,0.1)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: 56, height: 42, borderRadius: 8, overflow: 'hidden', background: 'rgba(255,111,60,0.1)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {v.thumbnail_url
                             ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : <Video size={16} color="#555570" />
+                            : <Video size={16} color="#8A7F6E" />
                           }
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 600, color: '#eeeeff', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.title}</div>
-                          <div style={{ fontSize: 11, color: '#555570' }}>{categoryLabels[v.category] ?? v.category}</div>
+                          <div style={{ fontWeight: 600, color: '#241C15', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.title}</div>
+                          <div style={{ fontSize: 11, color: '#8A7F6E' }}>{categoryLabels[v.category] ?? v.category}</div>
                         </div>
-                        {selectedVideo?.id === v.id && <CheckCircle size={18} color="#0891b2" strokeWidth={2} />}
+                        {selectedVideo?.id === v.id && <CheckCircle size={18} color="#D84A1E" strokeWidth={2} />}
                       </div>
                     ))}
                   </div>
@@ -622,8 +622,8 @@ export default function TalentAuditionsPage() {
             ) : (
               <div style={{ marginBottom: 16 }}>
                 <label style={{
-                  display: 'block', background: newFile ? 'rgba(6,182,212,0.1)' : '#1a1a25',
-                  border: `2px dashed ${newFile ? '#0891b2' : 'rgba(255,255,255,0.12)'}`,
+                  display: 'block', background: newFile ? 'rgba(255,111,60,0.1)' : '#FFFFFF',
+                  border: `2px dashed ${newFile ? '#D84A1E' : 'rgba(36,28,21,0.16)'}`,
                   borderRadius: 16, padding: '24px', textAlign: 'center', cursor: 'pointer', marginBottom: 8,
                 }}>
                   <input type="file" accept="video/*" onChange={e => {
@@ -648,20 +648,20 @@ export default function TalentAuditionsPage() {
                     }
                     vid.onerror = () => { URL.revokeObjectURL(url); setNewFile(f); setError('') }
                   }} style={{ display: 'none' }} />
-                  <div style={{ color: newFile ? '#22d3ee' : '#555570', marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ color: newFile ? '#D84A1E' : '#8A7F6E', marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
                     {newFile ? <CheckCircle size={28} strokeWidth={1.5} /> : <Video size={28} strokeWidth={1.5} />}
                   </div>
-                  <div style={{ fontWeight: 700, color: newFile ? '#22d3ee' : '#eeeeff', fontSize: 14 }}>
+                  <div style={{ fontWeight: 700, color: newFile ? '#D84A1E' : '#241C15', fontSize: 14 }}>
                     {newFile ? newFile.name : tx.videos.selectVideoFile}
                   </div>
-                  {newFile && <div style={{ fontSize: 12, color: '#555570', marginTop: 2 }}>{(newFile.size / 1024 / 1024).toFixed(1)} MB</div>}
+                  {newFile && <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2 }}>{(newFile.size / 1024 / 1024).toFixed(1)} MB</div>}
                 </label>
                 {submitting && progress > 0 && (
                   <div>
-                    <div style={{ height: 5, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', transition: 'width 0.3s' }} />
+                    <div style={{ height: 5, background: 'rgba(36,28,21,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', transition: 'width 0.3s' }} />
                     </div>
-                    <div style={{ fontSize: 12, color: '#555570', marginTop: 4, textAlign: 'center' }}>{progress}%</div>
+                    <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 4, textAlign: 'center' }}>{progress}%</div>
                   </div>
                 )}
               </div>
@@ -669,15 +669,15 @@ export default function TalentAuditionsPage() {
 
             <textarea value={message} onChange={e => setMessage(e.target.value)}
               placeholder={tx.auditions.messagePlaceholder} rows={3}
-              style={{ width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '12px 16px', fontSize: 14, color: '#eeeeff', resize: 'none', marginBottom: 12 }} />
+              style={{ width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)', borderRadius: 14, padding: '12px 16px', fontSize: 14, color: '#241C15', resize: 'none', marginBottom: 12 }} />
 
             {error && <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 8, textAlign: 'center' }}>{error}</p>}
 
             <button onClick={submitApplication} disabled={submitting} style={{
               width: '100%', padding: '14px', borderRadius: 16, border: 'none', fontSize: 16, fontWeight: 700,
-              background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
               cursor: submitting ? 'default' : 'pointer', opacity: submitting ? 0.7 : 1,
-              boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
+              boxShadow: '0 4px 16px rgba(255,111,60,0.3)',
             }}>
               {submitting ? tx.auditions.submitting : tx.auditions.apply}
             </button>

@@ -92,38 +92,38 @@ export default function TalentPublicProfilePage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}>불러오는 중...</div>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>불러오는 중...</div>
   )
 
   if (!talent) return (
-    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}>프로필을 찾을 수 없어요</div>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>프로필을 찾을 수 없어요</div>
   )
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8888aa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
-          <span style={{ fontSize: 18, fontWeight: 900, color: '#eeeeff' }}>프로필</span>
+          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+          <span style={{ fontSize: 18, fontWeight: 900, color: '#241C15' }}>프로필</span>
         </div>
 
         {/* 프로필 카드 */}
-        <div style={{ background: '#111118', borderRadius: 24, padding: 24, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16 }}>
+        <div style={{ background: '#FFFFFF', borderRadius: 24, padding: 24, border: '1px solid rgba(36,28,21,0.09)', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <div style={{
               width: 72, height: 72, borderRadius: 22, flexShrink: 0, overflow: 'hidden',
-              background: 'rgba(6,182,212,0.2)',
+              background: 'rgba(255,111,60,0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {talent.avatar_url
                 ? <img src={talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ color: '#22d3ee', fontWeight: 900, fontSize: 26 }}>{talent.name?.[0] ?? '?'}</span>
+                : <span style={{ color: '#D84A1E', fontWeight: 900, fontSize: 26 }}>{talent.name?.[0] ?? '?'}</span>
               }
             </div>
             <div>
-              <div style={{ fontWeight: 900, color: '#eeeeff', fontSize: 22, marginBottom: 4 }}>{talent.name}</div>
-              <div style={{ fontSize: 14, color: '#8888aa' }}>
+              <div style={{ fontWeight: 900, color: '#241C15', fontSize: 22, marginBottom: 4 }}>{talent.name}</div>
+              <div style={{ fontSize: 14, color: '#8A7F6E' }}>
                 {[
                   getAge(talent.birth_date) && `${getAge(talent.birth_date)}세`,
                   talent.gender === 'male' ? '남성' : talent.gender === 'female' ? '여성' : null,
@@ -135,21 +135,21 @@ export default function TalentPublicProfilePage() {
 
           {myRole === 'agency' && (talent.height || talent.weight) && (
             <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-              {talent.height && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
-              {talent.weight && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
+              {talent.height && <span style={{ fontSize: 13, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
+              {talent.weight && <span style={{ fontSize: 13, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
             </div>
           )}
 
           {myRole === 'agency' && talent.skills?.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: talent.bio ? 16 : 0 }}>
               {talent.skills.map(s => (
-                <span key={s} style={{ fontSize: 13, background: 'rgba(8,145,178,0.12)', color: '#a78bfa', padding: '5px 12px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
+                <span key={s} style={{ fontSize: 13, background: 'rgba(216,74,30,0.12)', color: '#a78bfa', padding: '5px 12px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
               ))}
             </div>
           )}
 
           {myRole === 'agency' && talent.bio && (
-            <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.7, background: '#1a1a25', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
+            <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.7, background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
           )}
         </div>
 
@@ -158,8 +158,8 @@ export default function TalentPublicProfilePage() {
           <button onClick={handleChat} disabled={starting}
             style={{
               width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
-              fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
+              fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)',
               marginBottom: 24, opacity: starting ? 0.7 : 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}>
@@ -169,37 +169,37 @@ export default function TalentPublicProfilePage() {
         )}
 
         {/* 영상 목록 */}
-        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#eeeeff', marginBottom: 14 }}>올린 영상 {videos.length}개</h2>
+        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#241C15', marginBottom: 14 }}>올린 영상 {videos.length}개</h2>
         {videos.length === 0 ? (
-          <div style={{ background: '#111118', borderRadius: 18, padding: 32, textAlign: 'center', border: '1.5px dashed rgba(255,255,255,0.08)', color: '#555570', fontSize: 14 }}>
+          <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 32, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)', color: '#8A7F6E', fontSize: 14 }}>
             아직 올린 영상이 없어요
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {videos.map(v => (
               <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#111118', borderRadius: 18, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ background: '#FFFFFF', borderRadius: 18, padding: '14px 16px', border: '1px solid rgba(36,28,21,0.09)', display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{
                     width: 64, height: 64, borderRadius: 14, flexShrink: 0, overflow: 'hidden',
-                    background: 'rgba(6,182,212,0.12)',
+                    background: 'rgba(255,111,60,0.12)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {v.thumbnail_url
                       ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Video size={22} strokeWidth={1.5} color="#22d3ee" />
+                      : <Video size={22} strokeWidth={1.5} color="#D84A1E" />
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#eeeeff', fontSize: 14, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
+                    <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, background: 'rgba(6,182,212,0.12)', color: '#22d3ee', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category] ?? v.category}</span>
-                      <span style={{ fontSize: 12, color: '#555570' }}>조회 {v.view_count}회</span>
-                      <span style={{ fontSize: 12, color: '#555570', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <span style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category] ?? v.category}</span>
+                      <span style={{ fontSize: 12, color: '#8A7F6E' }}>조회 {v.view_count}회</span>
+                      <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}>
                         <Heart size={11} strokeWidth={2} color="#f43f5e" fill="#f43f5e" /> {v.like_count}
                       </span>
                     </div>
                   </div>
-                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#555570" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#8A7F6E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               </Link>
             ))}

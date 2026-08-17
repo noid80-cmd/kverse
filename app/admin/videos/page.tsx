@@ -67,15 +67,15 @@ export default function AdminVideosPage() {
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>영상 관리 <span style={{ fontSize: 14, color: '#8b8baa', fontWeight: 500 }}>({filtered.length}개)</span></h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>영상 관리 <span style={{ fontSize: 14, color: '#8A7F6E', fontWeight: 500 }}>({filtered.length}개)</span></h1>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           {(['all', 'active', 'processing', 'hidden', 'deleted'] as const).map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
               style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700, transition: 'all 0.15s', cursor: 'pointer',
-                background: statusFilter === s ? '#0891b2' : '#fff',
-                color: statusFilter === s ? 'white' : '#8b8baa',
+                background: statusFilter === s ? '#D84A1E' : '#fff',
+                color: statusFilter === s ? 'white' : '#8A7F6E',
                 border: statusFilter === s ? '1px solid transparent' : '1px solid #e0e0f0',
               }}>
               {s === 'all' ? '전체' : statusLabel[s]}
@@ -84,7 +84,7 @@ export default function AdminVideosPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : (
           <div className="flex flex-col gap-2">
             {filtered.map(v => (
@@ -93,9 +93,9 @@ export default function AdminVideosPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>{v.title}</div>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8b8baa' }}>{v.talent?.name ?? '?'}</span>
-                      <span style={{ fontSize: 11, background: '#f0f0f8', color: '#0891b2', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>{categoryLabel[v.category]}</span>
-                      <span style={{ fontSize: 12, color: '#8b8baa' }}>조회 {v.view_count}</span>
+                      <span style={{ fontSize: 12, color: '#8A7F6E' }}>{v.talent?.name ?? '?'}</span>
+                      <span style={{ fontSize: 11, background: '#f0f0f8', color: '#D84A1E', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>{categoryLabel[v.category]}</span>
+                      <span style={{ fontSize: 12, color: '#8A7F6E' }}>조회 {v.view_count}</span>
                       {v.is_featured && <span style={{ fontSize: 11, background: '#fef9c3', color: '#d97706', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>⭐추천</span>}
                     </div>
                   </div>
@@ -108,7 +108,7 @@ export default function AdminVideosPage() {
                       <option value="deleted">삭제</option>
                     </select>
                     <button onClick={() => toggleFeatured(v.id, v.is_featured)}
-                      style={{ fontSize: 11, padding: '5px 8px', borderRadius: 8, border: '1px solid #e0e0f0', background: 'none', color: v.is_featured ? '#d97706' : '#8b8baa', fontWeight: 700 }}>
+                      style={{ fontSize: 11, padding: '5px 8px', borderRadius: 8, border: '1px solid #e0e0f0', background: 'none', color: v.is_featured ? '#d97706' : '#8A7F6E', fontWeight: 700 }}>
                       {v.is_featured ? '⭐ 추천중' : '추천'}
                     </button>
                     <button onClick={() => deleteVideo(v.id, v.title)}

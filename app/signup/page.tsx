@@ -10,8 +10,8 @@ import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
 const inputStyle = {
-  width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
+  width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
+  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
 }
 
 export default function SignupPage() {
@@ -119,37 +119,37 @@ export default function SignupPage() {
   const agencyFormValid = role !== 'agency' || (agencyName.trim() && bizRegUrl)
 
   if (done) return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#09090f' }}>
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#FFF8E7' }}>
       <div className="text-center">
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(6,182,212,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#22d3ee' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#D84A1E' }}>
           <Mail size={26} strokeWidth={1.8} />
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#eeeeff', marginBottom: 8 }}>{tx.auth.signupDone}</h2>
-        <p style={{ color: '#8888aa', fontSize: 14, marginBottom: 24 }}>{tx.auth.goToDashboard}</p>
-        <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>{tx.auth.loginLink}</Link>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#241C15', marginBottom: 8 }}>{tx.auth.signupDone}</h2>
+        <p style={{ color: '#8A7F6E', fontSize: 14, marginBottom: 24 }}>{tx.auth.goToDashboard}</p>
+        <Link href="/login" style={{ color: '#D84A1E', fontWeight: 700 }}>{tx.auth.loginLink}</Link>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#09090f' }}>
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#FFF8E7' }}>
       <div className="w-full max-w-sm flex flex-col" style={{ marginBottom: '8vh' }}>
 
         <div className="flex flex-col items-center mb-8">
           <div style={{
             width: 64, height: 64, borderRadius: 20, marginBottom: 14,
-            background: 'linear-gradient(145deg, #001a20, #0a3d4a)',
+            background: 'linear-gradient(145deg, #FFEDE0, #FFD9BC)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(6,182,212,0.3)',
+            boxShadow: '0 8px 32px rgba(255,111,60,0.3)',
           }}>
             <svg width="46" height="46" viewBox="0 0 100 100">
-              <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" />
-              <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#06b6d4" />
-              <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.8)" />
+              <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" />
+              <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="#FF6F3C" />
+              <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(255,111,60,0.8)" />
             </svg>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 4 }}>{tx.auth.signupTitle}</h1>
-          <p style={{ fontSize: 13, color: '#8888aa' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', marginBottom: 4 }}>{tx.auth.signupTitle}</h1>
+          <p style={{ fontSize: 13, color: '#8A7F6E' }}>
             {step === 'role' ? tx.auth.signupStepRole : step === 'method' ? tx.auth.signupStepMethod : tx.auth.signupStepForm}
           </p>
         </div>
@@ -163,17 +163,17 @@ export default function SignupPage() {
               <button key={r.value} onClick={() => setRole(r.value)}
                 className="w-full text-left p-5 rounded-2xl transition"
                 style={{
-                  background: role === r.value ? 'rgba(6,182,212,0.12)' : '#111118',
-                  border: `2px solid ${role === r.value ? '#0891b2' : 'rgba(255,255,255,0.08)'}`,
+                  background: role === r.value ? 'rgba(255,111,60,0.12)' : '#FFFFFF',
+                  border: `2px solid ${role === r.value ? '#D84A1E' : 'rgba(36,28,21,0.1)'}`,
                 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: role === r.value ? 'rgba(6,182,212,0.15)' : '#1a1a25', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, color: role === r.value ? '#22d3ee' : '#555570' }}>{r.icon}</div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: '#eeeeff', marginBottom: 2 }}>{r.label}</div>
-                <div style={{ fontSize: 13, color: '#8888aa' }}>{r.desc}</div>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: role === r.value ? 'rgba(255,111,60,0.15)' : '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, color: role === r.value ? '#D84A1E' : '#8A7F6E' }}>{r.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 16, color: '#241C15', marginBottom: 2 }}>{r.label}</div>
+                <div style={{ fontSize: 13, color: '#8A7F6E' }}>{r.desc}</div>
               </button>
             ))}
             <button onClick={() => role === 'agency' ? setStep('form') : setStep('method')}
               className="w-full py-4 rounded-2xl text-white mt-1"
-              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,111,60,0.3)' }}>
               {tx.common.next}
             </button>
           </div>
@@ -184,7 +184,7 @@ export default function SignupPage() {
             {!isKakao && (
               <button onClick={() => handleSocialLogin('google')}
                 className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl"
-                style={{ background: '#111118', color: '#eeeeff', fontSize: 16, fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+                style={{ background: '#FFFFFF', color: '#241C15', fontSize: 16, fontWeight: 700, border: '1px solid rgba(36,28,21,0.13)', cursor: 'pointer' }}>
                 <svg width="22" height="22" viewBox="0 0 48 48">
                   <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
                   <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
@@ -196,18 +196,18 @@ export default function SignupPage() {
             )}
 
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
-              <span style={{ fontSize: 12, color: '#555570', fontWeight: 600 }}>{tx.auth.signupEmailBtn}</span>
-              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              <div className="flex-1 h-px" style={{ background: 'rgba(36,28,21,0.1)' }} />
+              <span style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 600 }}>{tx.auth.signupEmailBtn}</span>
+              <div className="flex-1 h-px" style={{ background: 'rgba(36,28,21,0.1)' }} />
             </div>
 
             <button onClick={() => setStep('form')}
               className="w-full py-4 rounded-2xl"
-              style={{ background: '#111118', color: '#22d3ee', fontSize: 15, fontWeight: 700, border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              style={{ background: '#FFFFFF', color: '#D84A1E', fontSize: 15, fontWeight: 700, border: '1px solid rgba(36,28,21,0.1)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Mail size={18} strokeWidth={2} /> {tx.auth.signupEmailBtn}
             </button>
 
-            <button onClick={() => setStep('role')} style={{ background: 'none', border: 'none', color: '#555570', fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
+            <button onClick={() => setStep('role')} style={{ background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
               {tx.common.back}
             </button>
           </div>
@@ -222,20 +222,20 @@ export default function SignupPage() {
                 <input type="text" value={agencyName} onChange={e => setAgencyName(e.target.value)}
                   placeholder={tx.auth.agencyNamePlaceholder} required style={inputStyle} />
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: '#8888aa', marginBottom: 4 }}>{tx.auth.bizRegUpload}</p>
-                  <p style={{ fontSize: 11, color: '#555570', marginBottom: 8 }}>{tx.auth.bizRegUpload}</p>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 4 }}>{tx.auth.bizRegUpload}</p>
+                  <p style={{ fontSize: 11, color: '#8A7F6E', marginBottom: 8 }}>{tx.auth.bizRegUpload}</p>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
                   {bizRegUrl ? (
-                    <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, overflow: 'hidden' }}>
-                      <img src={bizRegUrl} alt="명함" style={{ width: '100%', maxHeight: 160, objectFit: 'contain', background: '#1a1a25', display: 'block' }} />
+                    <div style={{ border: '1px solid rgba(36,28,21,0.13)', borderRadius: 14, overflow: 'hidden' }}>
+                      <img src={bizRegUrl} alt="명함" style={{ width: '100%', maxHeight: 160, objectFit: 'contain', background: '#FFFFFF', display: 'block' }} />
                       <button type="button" onClick={() => fileInputRef.current?.click()}
-                        style={{ width: '100%', padding: '10px', background: 'none', border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', color: '#22d3ee', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                        style={{ width: '100%', padding: '10px', background: 'none', border: 'none', borderTop: '1px solid rgba(36,28,21,0.1)', color: '#D84A1E', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                         <CheckCircle size={14} strokeWidth={2} /> {tx.common.uploadDone}
                       </button>
                     </div>
                   ) : (
                     <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                      style={{ width: '100%', padding: '16px', borderRadius: 14, border: '1.5px dashed rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.06)', color: uploading ? '#555570' : '#22d3ee', fontSize: 14, fontWeight: 700, cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                      style={{ width: '100%', padding: '16px', borderRadius: 14, border: '1.5px dashed rgba(255,111,60,0.4)', background: 'rgba(255,111,60,0.06)', color: uploading ? '#8A7F6E' : '#D84A1E', fontSize: 14, fontWeight: 700, cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                       <Upload size={16} strokeWidth={2} />
                       {uploading ? tx.auth.bizRegUploading : tx.auth.bizRegUpload}
                     </button>
@@ -247,22 +247,22 @@ export default function SignupPage() {
               placeholder={tx.auth.emailPlaceholder} required style={inputStyle} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder={tx.auth.passwordMinPlaceholder} minLength={6} required style={inputStyle} />
-            {error && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{error}</p>}
+            {error && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{error}</p>}
             <button type="submit" disabled={loading || !agencyFormValid}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 mt-1"
-              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,111,60,0.3)' }}>
               {loading ? tx.auth.signingUp : tx.auth.signupBtn}
             </button>
             <button type="button" onClick={() => setStep(role === 'agency' ? 'role' : 'method')}
-              style={{ background: 'none', border: 'none', color: '#555570', fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
+              style={{ background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
               {tx.common.back}
             </button>
           </form>
         )}
 
-        <p className="text-center text-sm font-medium mt-6" style={{ color: '#8888aa' }}>
+        <p className="text-center text-sm font-medium mt-6" style={{ color: '#8A7F6E' }}>
           {tx.auth.hasAccount}{' '}
-          <Link href="/login" style={{ color: '#22d3ee', fontWeight: 700 }}>{tx.auth.loginLink}</Link>
+          <Link href="/login" style={{ color: '#D84A1E', fontWeight: 700 }}>{tx.auth.loginLink}</Link>
         </p>
       </div>
     </div>

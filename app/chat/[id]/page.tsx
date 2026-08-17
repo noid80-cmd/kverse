@@ -138,26 +138,26 @@ export default function ChatPage() {
   const other = conv ? (myId === conv.talent_id ? conv.agency_member : conv.talent) : null
 
   if (!conv) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFF8E7' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(36,28,21,0.1)', borderTop: '3px solid #D84A1E', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#09090f' }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#FFF8E7' }}>
       <div style={{
         flexShrink: 0, zIndex: 40,
         background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px',
+        borderBottom: '1px solid rgba(36,28,21,0.09)', padding: '12px 16px',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111118', border: '1px solid rgba(255,255,255,0.08)', color: '#eeeeff', cursor: 'pointer', flexShrink: 0 }}>
+        <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.1)', color: '#241C15', cursor: 'pointer', flexShrink: 0 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
         </button>
         <div style={{
           width: 40, height: 40, borderRadius: 13, overflow: 'hidden', flexShrink: 0,
-          background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+          background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           {other?.avatar_url
@@ -167,15 +167,15 @@ export default function ChatPage() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 800, color: '#eeeeff', fontSize: 17 }}>
+            <span style={{ fontWeight: 800, color: '#241C15', fontSize: 17 }}>
               {conv && myId === conv.talent_id && agencyCard ? agencyCard.name : other?.name ?? '...'}
             </span>
             {agencyCard?.is_verified && conv && myId === conv.talent_id && (
-              <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+              <span style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
             )}
           </div>
           {conv && myId === conv.talent_id && agencyCard && other?.name && (
-            <span style={{ fontSize: 12, color: '#555570' }}>{other.name}</span>
+            <span style={{ fontSize: 12, color: '#8A7F6E' }}>{other.name}</span>
           )}
         </div>
         <button onClick={deleteConversation} disabled={deleting}
@@ -190,14 +190,14 @@ export default function ChatPage() {
         {/* 기획사 명함 카드 — 지망생에게만 표시 */}
         {conv && myId === conv.talent_id && agencyCard && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(8,145,178,0.08))',
-            border: '1px solid rgba(6,182,212,0.25)',
+            background: 'linear-gradient(135deg, rgba(255,111,60,0.1), rgba(216,74,30,0.08))',
+            border: '1px solid rgba(255,111,60,0.25)',
             borderRadius: 20, padding: '18px 18px 16px', marginBottom: 20,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: agencyCard.description || agencyCard.website ? 14 : 0 }}>
               <div style={{
                 width: 52, height: 52, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
-                background: 'rgba(6,182,212,0.2)',
+                background: 'rgba(255,111,60,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 {agencyCard.logo_url
@@ -207,20 +207,20 @@ export default function ChatPage() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
-                  <span style={{ fontWeight: 900, color: '#eeeeff', fontSize: 16 }}>{agencyCard.name}</span>
+                  <span style={{ fontWeight: 900, color: '#241C15', fontSize: 16 }}>{agencyCard.name}</span>
                   {agencyCard.is_verified && (
-                    <span style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                    <span style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
                   )}
                 </div>
-                <div style={{ fontSize: 11, color: '#22d3ee', fontWeight: 600 }}>기획사</div>
+                <div style={{ fontSize: 11, color: '#D84A1E', fontWeight: 600 }}>기획사</div>
               </div>
             </div>
             {agencyCard.description && (
-              <p style={{ fontSize: 13, color: '#8888aa', lineHeight: 1.6, margin: '0 0 10px' }}>{agencyCard.description}</p>
+              <p style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.6, margin: '0 0 10px' }}>{agencyCard.description}</p>
             )}
             {agencyCard.website && (
               <a href={agencyCard.website} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                style={{ fontSize: 12, color: '#D84A1E', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 🔗 {agencyCard.website.replace(/^https?:\/\//, '')}
               </a>
             )}
@@ -228,7 +228,7 @@ export default function ChatPage() {
         )}
 
         {messages !== null && messages.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#555570', fontSize: 13, marginTop: 40 }}>첫 메시지를 보내보세요</div>
+          <div style={{ textAlign: 'center', color: '#8A7F6E', fontSize: 13, marginTop: 40 }}>첫 메시지를 보내보세요</div>
         )}
         {(messages ?? []).map(msg => {
           const isMine = msg.sender_id === myId
@@ -239,8 +239,8 @@ export default function ChatPage() {
               <div style={{
                 maxWidth: '70%', padding: '10px 14px',
                 borderRadius: isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: isMine ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
-                color: isMine ? 'white' : '#eeeeff',
+                background: isMine ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
+                color: isMine ? 'white' : '#241C15',
                 fontSize: 15, lineHeight: 1.5,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                 opacity: isSelected ? 0.85 : 1,
@@ -253,7 +253,7 @@ export default function ChatPage() {
               </div>
               {isSelected && (
                 <button onClick={e => { e.stopPropagation(); deleteMessage(msg.id) }}
-                  style={{ marginTop: 4, fontSize: 12, color: '#f87171', background: '#1a1a25', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 700 }}>
+                  style={{ marginTop: 4, fontSize: 12, color: '#DC2626', background: '#FFFFFF', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 700 }}>
                   삭제
                 </button>
               )}
@@ -266,19 +266,19 @@ export default function ChatPage() {
       <div style={{
         flexShrink: 0,
         background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(16px)',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
+        borderTop: '1px solid rgba(36,28,21,0.09)',
         padding: '10px 16px', paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
         display: 'flex', gap: 10,
       }}>
         <input value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
           placeholder="메시지 입력..."
-          style={{ flex: 1, background: '#1a1a25', border: 'none', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#eeeeff', outline: 'none' }}
+          style={{ flex: 1, background: '#FFFFFF', border: 'none', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#241C15', outline: 'none' }}
         />
         <button onClick={sendMessage} disabled={!input.trim() || sending}
           style={{
             width: 44, height: 44, borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: input.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
+            background: input.trim() ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
             color: 'white', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>↑</button>
       </div>

@@ -9,8 +9,8 @@ import { useLang } from '@/lib/i18n/context'
 import { useT, type Lang } from '@/lib/i18n/translations'
 
 const inputStyle = {
-  width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#eeeeff',
+  width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
+  borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
 }
 
 const SKILL_KEYS = ['보컬', '댄스', '랩', '연기', '작사', '작곡', '악기', '퍼포먼스'] as const
@@ -179,26 +179,26 @@ export default function ProfileEditPage() {
   }
 
   if (!form) return (
-    <div style={{ minHeight: '100vh', background: '#09090f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #0891b2', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(36,28,21,0.1)', borderTop: '3px solid #D84A1E', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
   const { name, bio, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff', marginBottom: 24 }}>{tx.profile.myProfile}</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', marginBottom: 24 }}>{tx.profile.myProfile}</h1>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
           <label style={{ cursor: 'pointer', position: 'relative' }}>
             <div style={{
               width: 96, height: 96, borderRadius: 28, overflow: 'hidden',
-              background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '3px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 24px rgba(6,182,212,0.3)',
+              border: '3px solid rgba(36,28,21,0.13)', boxShadow: '0 4px 24px rgba(255,111,60,0.3)',
             }}>
               {avatarUrl
                 ? <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -208,18 +208,18 @@ export default function ProfileEditPage() {
             <div style={{
               position: 'absolute', bottom: 0, right: 0,
               width: 28, height: 28, borderRadius: '50%',
-              background: '#0891b2', border: '2px solid #09090f',
+              background: '#D84A1E', border: '2px solid #FFF8E7',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13,
             }}>📷</div>
             <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
           </label>
           {avatarStatus ? (
-            <p style={{ fontSize: 13, color: avatarStatus.ok ? '#4ade80' : '#f87171', marginTop: 8, fontWeight: 700, textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: avatarStatus.ok ? '#4ade80' : '#DC2626', marginTop: 8, fontWeight: 700, textAlign: 'center' }}>
               {avatarStatus.msg}
             </p>
           ) : (
-            <p style={{ fontSize: 12, color: '#8888aa', marginTop: 8 }}>
+            <p style={{ fontSize: 12, color: '#8A7F6E', marginTop: 8 }}>
               {avatarUploading ? tx.profile.avatarUploading : tx.profile.changePhoto}
             </p>
           )}
@@ -227,20 +227,20 @@ export default function ProfileEditPage() {
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.15)', borderRadius: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(255,111,60,0.07)', border: '1px solid rgba(255,111,60,0.15)', borderRadius: 12 }}>
             <span style={{ fontSize: 15 }}>🏢</span>
-            <span style={{ fontSize: 12, color: '#22d3ee', fontWeight: 600 }}>{tx.profile.bodyInfoNote}</span>
+            <span style={{ fontSize: 12, color: '#D84A1E', fontWeight: 600 }}>{tx.profile.bodyInfoNote}</span>
           </div>
 
-          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.basicInfo}</p>
+          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.basicInfo}</p>
             <div className="flex flex-col gap-3">
               <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
                 placeholder={tx.profile.nameRequired} required style={inputStyle} />
               <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 11, color: '#555570', fontWeight: 600 }}>{tx.profile.birthDate}</span>
+                <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>{tx.profile.birthDate}</span>
                 <input type="date" value={birthDate} onChange={e => updateForm(f => ({ ...f, birthDate: e.target.value }))}
-                  style={{ border: 'none', outline: 'none', fontSize: 15, color: '#eeeeff', background: 'transparent', width: '100%', padding: 0, colorScheme: 'dark' }} />
+                  style={{ border: 'none', outline: 'none', fontSize: 15, color: '#241C15', background: 'transparent', width: '100%', padding: 0, colorScheme: 'dark' }} />
               </div>
               <select value={gender} onChange={e => updateForm(f => ({ ...f, gender: e.target.value }))} style={inputStyle}>
                 <option value="">{tx.profile.selectGender}</option>
@@ -315,8 +315,8 @@ export default function ProfileEditPage() {
             </div>
           </div>
 
-          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.bodyInfo}</p>
+          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12 }}>{tx.profile.bodyInfo}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
                 placeholder={tx.profile.heightPlaceholder} style={inputStyle} />
@@ -325,15 +325,15 @@ export default function ProfileEditPage() {
             </div>
           </div>
 
-          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', marginBottom: 12 }}>{tx.profile.skillsLabel}</p>
+          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12 }}>{tx.profile.skillsLabel}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {SKILL_KEYS.map(s => (
                 <button key={s} type="button" onClick={() => toggleSkill(s)}
                   style={{
                     padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', transition: 'all 0.15s',
-                    background: skills.includes(s) ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#1a1a25',
-                    color: skills.includes(s) ? 'white' : '#8888aa',
+                    background: skills.includes(s) ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
+                    color: skills.includes(s) ? 'white' : '#8A7F6E',
                   }}>
                   {skillLabels[s]}
                 </button>
@@ -341,9 +341,9 @@ export default function ProfileEditPage() {
             </div>
           </div>
 
-          <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#555570', margin: 0 }}>{tx.profile.aboutMe}</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0 }}>{tx.profile.aboutMe}</p>
               <span style={{ fontSize: 11, color: '#4ade80', fontWeight: 600, background: 'rgba(74,222,128,0.08)', padding: '3px 8px', borderRadius: 6 }}>🌐 전체 공개</span>
             </div>
             <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
@@ -351,27 +351,27 @@ export default function ProfileEditPage() {
               style={{ ...inputStyle, resize: 'none' }} />
           </div>
 
-          {saveError && <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
+          {saveError && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
 
           <button type="submit" disabled={saving || avatarUploading || !isDirty}
             className="w-full py-4 rounded-2xl disabled:opacity-50 transition active:scale-95"
             style={saved
-              ? { background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', color: '#8888aa', fontSize: 17, fontWeight: 700 }
-              : { background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
+              ? { background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)', color: '#8A7F6E', fontSize: 17, fontWeight: 700 }
+              : { background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', border: 'none', fontSize: 17, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.35)' }}>
             {saving ? tx.profile.saving : saved ? tx.profile.saveDone : tx.profile.saveBtn}
           </button>
 
           <button type="button" onClick={() => setNotifModal(true)}
-            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(255,255,255,0.08)', color: notifPerm === 'denied' ? '#f87171' : '#555570', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(36,28,21,0.1)', color: notifPerm === 'denied' ? '#DC2626' : '#8A7F6E', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             {notifPerm === 'denied' ? <BellOff size={17} strokeWidth={1.8} /> : <BellRing size={17} strokeWidth={1.8} />}
             알림 설정
-            <span style={{ fontSize: 12, fontWeight: 600, marginLeft: 'auto', color: notifPerm === 'granted' ? '#22d3ee' : notifPerm === 'denied' ? '#f87171' : '#555570' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, marginLeft: 'auto', color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
               {notifPerm === 'granted' ? '켜짐' : notifPerm === 'denied' ? '차단됨' : '꺼짐'}
             </span>
           </button>
 
           <button type="button" onClick={handleLogout}
-            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(255,255,255,0.08)', color: '#555570', fontWeight: 700, fontSize: 15 }}>
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(36,28,21,0.1)', color: '#8A7F6E', fontWeight: 700, fontSize: 15 }}>
             {tx.profile.logout}
           </button>
         </form>
@@ -381,29 +381,29 @@ export default function ProfileEditPage() {
             <div onClick={() => setNotifModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }} />
             <div style={{
               position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 201,
-              background: '#13131e', borderRadius: '24px 24px 0 0',
+              background: '#FFFCF6', borderRadius: '24px 24px 0 0',
               padding: '28px 24px 40px', boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.08)', maxWidth: 480, margin: '0 auto',
+              border: '1px solid rgba(36,28,21,0.1)', maxWidth: 480, margin: '0 auto',
             }}>
-              <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 24px' }} />
-              <button onClick={() => setNotifModal(false)} style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#555570' }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(36,28,21,0.2)', margin: '0 auto 24px' }} />
+              <button onClick={() => setNotifModal(false)} style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(36,28,21,0.08)', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#8A7F6E' }}>
                 <X size={16} strokeWidth={2} />
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
                 <div style={{
                   width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-                  background: notifPerm === 'granted' ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.15)' : '#1a1a25',
+                  background: notifPerm === 'granted' ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : notifPerm === 'denied' ? 'rgba(248,113,113,0.15)' : '#FFFFFF',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {notifPerm === 'denied'
-                    ? <BellOff size={24} strokeWidth={1.8} color="#f87171" />
-                    : <BellRing size={24} strokeWidth={1.8} color={notifPerm === 'granted' ? 'white' : '#555570'} />
+                    ? <BellOff size={24} strokeWidth={1.8} color="#DC2626" />
+                    : <BellRing size={24} strokeWidth={1.8} color={notifPerm === 'granted' ? 'white' : '#8A7F6E'} />
                   }
                 </div>
                 <div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#eeeeff', marginBottom: 3 }}>알림 설정</div>
-                  <div style={{ fontSize: 13, color: notifPerm === 'granted' ? '#22d3ee' : notifPerm === 'denied' ? '#f87171' : '#555570' }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>알림 설정</div>
+                  <div style={{ fontSize: 13, color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
                     {notifPerm === 'granted' ? '알림이 켜져 있어요' : notifPerm === 'denied' ? '알림이 차단되어 있어요' : '알림이 꺼져 있어요'}
                   </div>
                 </div>
@@ -418,15 +418,15 @@ export default function ProfileEditPage() {
                       { label: 'Safari (iOS)', desc: '설정 앱 → Safari → kpick.app → 알림 허용' },
                     ].map(item => (
                       <div key={item.label}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#f87171' }}>{item.label}</span>
-                        <p style={{ fontSize: 12, color: '#8888aa', margin: '2px 0 0' }}>{item.desc}</p>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{item.label}</span>
+                        <p style={{ fontSize: 12, color: '#8A7F6E', margin: '2px 0 0' }}>{item.desc}</p>
                       </div>
                     ))}
                   </div>
                 </div>
               ) : notifPerm === 'granted' ? (
-                <div style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                  <p style={{ fontSize: 14, color: '#22d3ee', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
+                <div style={{ background: 'rgba(255,111,60,0.08)', border: '1px solid rgba(255,111,60,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
+                  <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
                 </div>
               ) : (
                 <div style={{ marginBottom: 20 }}>
@@ -435,16 +435,16 @@ export default function ProfileEditPage() {
                     setNotifPerm(perm)
                   }} style={{
                     width: '100%', padding: '15px',
-                    background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                    background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
                     border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(6,182,212,0.35)',
+                    boxShadow: '0 4px 16px rgba(255,111,60,0.35)',
                   }}>
                     알림 켜기
                   </button>
                 </div>
               )}
 
-              <button onClick={() => setNotifModal(false)} style={{ width: '100%', padding: '13px', background: 'none', border: 'none', color: '#555570', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={() => setNotifModal(false)} style={{ width: '100%', padding: '13px', background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                 닫기
               </button>
             </div>

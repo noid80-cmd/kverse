@@ -64,7 +64,7 @@ function AuditionForm({
             }))} style={{
               padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 700,
               cursor: 'pointer', border: selected ? 'none' : '1.5px solid #e0e0f0',
-              background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#f8f8fc',
+              background: selected ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#f8f8fc',
               color: selected ? 'white' : '#94a3b8',
             }}>
               {categoryLabel[cat]}
@@ -80,7 +80,7 @@ function AuditionForm({
             return (
               <button key={val} type="button" onClick={() => setForm(f => ({ ...f, mode: val }))} style={{
                 flex: 1, padding: '8px 4px', borderRadius: 10, border: selected ? 'none' : '1.5px solid #e0e0f0',
-                background: selected ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#f8f8fc',
+                background: selected ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#f8f8fc',
                 color: selected ? 'white' : '#94a3b8', fontSize: 11, fontWeight: 700, cursor: 'pointer',
               }}>
                 {label}
@@ -97,10 +97,10 @@ function AuditionForm({
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button onClick={onCancel} style={{
           flex: 1, background: '#f0f0f8', border: 'none', borderRadius: 12, padding: 12,
-          fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#8b8baa',
+          fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#8A7F6E',
         }}>취소</button>
         <button onClick={onSave} disabled={disabled} style={{
-          flex: 2, background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
+          flex: 2, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
           border: 'none', borderRadius: 12, padding: 12, fontSize: 14, fontWeight: 700,
           cursor: 'pointer', opacity: disabled ? 0.5 : 1,
         }}>{saving ? '저장 중...' : saveLabel}</button>
@@ -236,10 +236,10 @@ export default function AdminAuditionsPage() {
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>오디션 관리 <span style={{ fontSize: 14, color: '#8b8baa', fontWeight: 500 }}>({auditions.length}개)</span></h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>오디션 관리 <span style={{ fontSize: 14, color: '#8A7F6E', fontWeight: 500 }}>({auditions.length}개)</span></h1>
           <button onClick={() => setShowCreate(v => !v)} style={{
             display: 'flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
+            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
             borderRadius: 14, padding: '10px 16px', fontSize: 14, fontWeight: 700,
           }}>
             <Plus size={16} strokeWidth={2.5} /> 공고 올리기
@@ -258,7 +258,7 @@ export default function AdminAuditionsPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : (
           <>
             {active.length > 0 && (
@@ -266,18 +266,18 @@ export default function AdminAuditionsPage() {
                 {active.map(a => (
                   <div key={a.id} onClick={() => { setDetail(a); setEditing(false) }} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid #e8e8f2', position: 'relative', cursor: 'pointer' }}>
                     <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
-                    <div style={{ fontWeight: 600, color: '#0891b2', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
+                    <div style={{ fontWeight: 600, color: '#D84A1E', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       {a.category.split(',').map(c => (
-                        <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#0891b2', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+                        <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#D84A1E', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
                       ))}
                       {a.mode && (
-                        <span style={{ fontSize: 11, background: '#f0f0f8', color: '#8b8baa', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
+                        <span style={{ fontSize: 11, background: '#f0f0f8', color: '#8A7F6E', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
                           {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
                         </span>
                       )}
-                      <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
-                      {a.deadline && <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
+                      <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
+                      {a.deadline && <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
                     </div>
                     <button onClick={e => { e.stopPropagation(); deleteAudition(a.id) }} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
                       <Trash2 size={16} strokeWidth={2} />
@@ -296,7 +296,7 @@ export default function AdminAuditionsPage() {
                       <div style={{ fontWeight: 600, color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>마감 {a.deadline}</span>
-                        <span style={{ fontSize: 12, color: '#8b8baa', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
+                        <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       </div>
                       <button onClick={e => { e.stopPropagation(); deleteAudition(a.id) }} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
                         <Trash2 size={16} strokeWidth={2} />
@@ -307,7 +307,7 @@ export default function AdminAuditionsPage() {
               </>
             )}
             {auditions.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>등록된 공고가 없습니다</div>
+              <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>등록된 공고가 없습니다</div>
             )}
           </>
         )}
@@ -334,27 +334,27 @@ export default function AdminAuditionsPage() {
             <>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4, paddingRight: 32 }}>
                 <div>
-                  <div style={{ fontSize: 13, color: '#8b8baa' }}>{detail.agency?.name ?? '관리자 공지'}</div>
+                  <div style={{ fontSize: 13, color: '#8A7F6E' }}>{detail.agency?.name ?? '관리자 공지'}</div>
                   <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18, marginTop: 2 }}>{detail.title}</div>
                 </div>
                 <button onClick={() => openEdit(detail)} style={{
                   display: 'flex', alignItems: 'center', gap: 5, background: '#f0f0f8', border: 'none',
-                  borderRadius: 10, padding: '7px 12px', fontSize: 13, fontWeight: 700, color: '#0891b2', cursor: 'pointer',
+                  borderRadius: 10, padding: '7px 12px', fontSize: 13, fontWeight: 700, color: '#D84A1E', cursor: 'pointer',
                 }}>
                   <Pencil size={13} strokeWidth={2.5} /> 수정
                 </button>
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, marginTop: 12 }}>
                 {detail.category.split(',').map(c => (
-                  <span key={c} style={{ fontSize: 12, background: '#eef2ff', color: '#0891b2', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+                  <span key={c} style={{ fontSize: 12, background: '#eef2ff', color: '#D84A1E', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
                 ))}
                 {detail.mode && (
-                  <span style={{ fontSize: 12, background: '#f0f0f8', color: '#8b8baa', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>
+                  <span style={{ fontSize: 12, background: '#f0f0f8', color: '#8A7F6E', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>
                     {detail.mode === 'online' ? '🖥️ 온라인' : detail.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
                   </span>
                 )}
                 {detail.deadline && (
-                  <span style={{ fontSize: 12, color: isExpired(detail.deadline) ? '#ef4444' : '#8b8baa', fontWeight: isExpired(detail.deadline) ? 700 : 400 }}>
+                  <span style={{ fontSize: 12, color: isExpired(detail.deadline) ? '#ef4444' : '#8A7F6E', fontWeight: isExpired(detail.deadline) ? 700 : 400 }}>
                     {isExpired(detail.deadline) ? '마감 ' : '~'}{detail.deadline}
                   </span>
                 )}
@@ -366,7 +366,7 @@ export default function AdminAuditionsPage() {
               ) : (
                 <div style={{ fontSize: 14, color: '#94a3b8', textAlign: 'center', padding: 20 }}>상세 내용 없음</div>
               )}
-              <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 6, color: '#8b8baa', fontSize: 13 }}>
+              <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 6, color: '#8A7F6E', fontSize: 13 }}>
                 <Users size={14} /> {detail.applicant_count}명 지원
               </div>
             </>

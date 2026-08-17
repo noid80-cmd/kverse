@@ -42,33 +42,33 @@ export default function VideosPage() {
   }, [])
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div className="flex items-center justify-between mb-6">
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#eeeeff' }}>{tx.videos.myVideos}</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15' }}>{tx.videos.myVideos}</h1>
           <Link href="/videos/upload"
-            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 4px 12px rgba(6,182,212,0.3)' }}>
+            style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontWeight: 700, fontSize: 14, padding: '10px 18px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 4px 12px rgba(255,111,60,0.3)' }}>
             + {tx.videos.uploadBtn}
           </Link>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#555570' }}>{tx.common.loading}</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>{tx.common.loading}</div>
         ) : videos.length === 0 ? (
-          <div style={{ background: '#111118', borderRadius: 20, padding: 40, textAlign: 'center', border: '2px dashed rgba(255,255,255,0.08)' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 40, textAlign: 'center', border: '2px dashed rgba(36,28,21,0.1)' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🎬</div>
-            <div style={{ fontWeight: 700, color: '#eeeeff', marginBottom: 6 }}>{tx.videos.noVideos}</div>
-            <div style={{ fontSize: 13, color: '#555570', marginBottom: 20 }}>{tx.videos.firstVideo}</div>
+            <div style={{ fontWeight: 700, color: '#241C15', marginBottom: 6 }}>{tx.videos.noVideos}</div>
+            <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 20 }}>{tx.videos.firstVideo}</div>
             <Link href="/videos/upload"
-              style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', fontWeight: 700, fontSize: 14, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>
+              style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontWeight: 700, fontSize: 14, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>
               {tx.videos.uploadVideo}
             </Link>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
             {videos.map(v => (
-              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'rgba(6,182,212,0.08)' }}>
+              <Link key={v.id} href={`/videos/${v.id}`} style={{ textDecoration: 'none', aspectRatio: '1', display: 'block', position: 'relative', overflow: 'hidden', background: 'rgba(255,111,60,0.08)' }}>
                 {v.thumbnail_url
                   ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎬</div>

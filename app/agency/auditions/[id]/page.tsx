@@ -114,9 +114,9 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
           <div>
-            <div style={{ fontSize: 13, color: '#8b8baa', marginBottom: 2 }}>
+            <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 2 }}>
               {audition ? audition.category.split(',').map(c => categoryLabel[c] ?? c).join(' · ') : ''}
               {audition?.deadline ? ` · ~${audition.deadline}` : ''}
             </div>
@@ -124,16 +124,16 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
           </div>
         </div>
 
-        <div style={{ fontSize: 13, color: '#8b8baa', marginBottom: 16, fontWeight: 600 }}>
+        <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 16, fontWeight: 600 }}>
           지원자 {apps.length}명
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : apps.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed #e2e8f0' }}>
             <div style={{ fontWeight: 700, color: '#1e1b4b', marginBottom: 4 }}>아직 지원자가 없어요</div>
-            <div style={{ fontSize: 13, color: '#8b8baa' }}>공고를 지망생들과 공유해보세요</div>
+            <div style={{ fontSize: 13, color: '#8A7F6E' }}>공고를 지망생들과 공유해보세요</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -160,7 +160,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                           : <Video size={36} strokeWidth={1.5} color="#a5b4fc" />
                         }
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>▶</div>
+                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(36,28,21,1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>▶</div>
                         </div>
                         <div style={{ position: 'absolute', top: 10, right: 10 }}>
                           <span style={{ background: badge.bg, color: badge.color, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>{badge.label}</span>
@@ -174,7 +174,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                     <Link href={`/agency/talents/${a.talent?.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <div style={{
                         width: 36, height: 36, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
-                        background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                        background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         {a.talent?.avatar_url
@@ -184,7 +184,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{a.talent?.name ?? '이름 없음'}</div>
-                        {age && <div style={{ fontSize: 12, color: '#8b8baa' }}>{age}세</div>}
+                        {age && <div style={{ fontSize: 12, color: '#8A7F6E' }}>{age}세</div>}
                       </div>
                       <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </Link>
@@ -210,7 +210,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                           disabled={updating === a.id}
                           style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white', border: 'none', borderRadius: 12,
+                            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
                           <CheckCircle size={15} strokeWidth={2} /> 초대

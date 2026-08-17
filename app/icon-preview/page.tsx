@@ -4,7 +4,7 @@ export default function IconPreview() {
   const icons = [
     {
       label: '① 시안 버전',
-      bg: 'linear-gradient(145deg, #001a20, #0a3d4a)',
+      bg: 'linear-gradient(145deg, #FFEDE0, #FFD9BC)',
       content: (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="130" height="130" viewBox="0 0 100 100">
@@ -28,10 +28,10 @@ export default function IconPreview() {
               </filter>
             </defs>
             {/* main star */}
-            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#06b6d4" filter="url(#glow)" />
+            <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" filter="url(#glow)" />
             {/* small sparkles */}
-            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(6,182,212,0.75)" filter="url(#glowSm)" />
-            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(6,182,212,0.6)" filter="url(#glowSm)" />
+            <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(255,111,60,0.75)" filter="url(#glowSm)" />
+            <path d="M16 70 L17 74 L21 75 L17 76 L16 80 L15 76 L11 75 L15 74 Z" fill="rgba(255,111,60,0.6)" filter="url(#glowSm)" />
           </svg>
         </div>
       ),
@@ -67,7 +67,7 @@ export default function IconPreview() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
           <div style={{ position: 'relative', width: 110, height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="110" height="100" viewBox="0 0 110 100" style={{ position: 'absolute' }}>
-              <path d="M55 88 C55 88 8 58 8 30 C8 14 20 4 36 4 C45 4 52 9 55 14 C58 9 65 4 74 4 C90 4 102 14 102 30 C102 58 55 88 55 88 Z" fill="#f472b6" />
+              <path d="M55 88 C55 88 8 58 8 30 C8 14 20 4 36 4 C45 4 52 9 55 14 C58 9 65 4 74 4 C90 4 102 14 102 30 C102 58 55 88 55 88 Z" fill="#DB2777" />
             </svg>
             <span style={{
               position: 'relative', zIndex: 1,
@@ -84,7 +84,7 @@ export default function IconPreview() {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 40 }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 40 }}>
       <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>Krookie 아이콘 2차</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         {icons.map(({ label, bg, content }) => (
@@ -98,7 +98,7 @@ export default function IconPreview() {
             }}>
               {content}
             </div>
-            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, fontWeight: 600 }}>{label}</span>
+            <span style={{ color: 'rgba(36,28,21,0.91)', fontSize: 15, fontWeight: 600 }}>{label}</span>
           </div>
         ))}
       </div>

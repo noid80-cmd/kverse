@@ -42,10 +42,10 @@ export default function WelcomeCarousel() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07070d', display: 'flex', flexDirection: 'column', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', flexDirection: 'column', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 20px', flexShrink: 0 }}>
         <button onClick={() => router.push('/signup')}
-          style={{ background: 'none', border: 'none', color: '#8888aa', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 8 }}>
+          style={{ background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 8 }}>
           건너뛰기
         </button>
       </div>
@@ -55,10 +55,10 @@ export default function WelcomeCarousel() {
         {slides.map((s, i) => (
           <div key={i} style={{ flex: '0 0 100%', scrollSnapAlign: 'start', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 32px', textAlign: 'center' }}>
             <div style={{ fontSize: 64, marginBottom: 32 }}>{s.icon}</div>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: '#eeeeff', marginBottom: 16, whiteSpace: 'pre-line', lineHeight: 1.3, wordBreak: 'keep-all' }}>
+            <h1 style={{ fontSize: 28, fontWeight: 900, color: '#241C15', marginBottom: 16, whiteSpace: 'pre-line', lineHeight: 1.3, wordBreak: 'keep-all' }}>
               {s.title}
             </h1>
-            <p style={{ fontSize: 15, color: '#8888aa', lineHeight: 1.7, whiteSpace: 'pre-line', wordBreak: 'keep-all' }}>
+            <p style={{ fontSize: 15, color: '#8A7F6E', lineHeight: 1.7, whiteSpace: 'pre-line', wordBreak: 'keep-all' }}>
               {s.desc}
             </p>
           </div>
@@ -68,12 +68,12 @@ export default function WelcomeCarousel() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, padding: '0 32px 40px', flexShrink: 0 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {slides.map((_, i) => (
-            <div key={i} style={{ width: i === index ? 20 : 6, height: 6, borderRadius: 3, background: i === index ? '#0891b2' : 'rgba(255,255,255,0.15)', transition: 'all 0.3s' }} />
+            <div key={i} style={{ width: i === index ? 20 : 6, height: 6, borderRadius: 3, background: i === index ? '#D84A1E' : 'rgba(36,28,21,0.2)', transition: 'all 0.3s' }} />
           ))}
         </div>
         <button
           onClick={() => (isLast ? router.push('/signup') : goTo(index + 1))}
-          style={{ width: '100%', padding: '16px', background: 'linear-gradient(135deg, #0891b2, #06b6d4)', border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
+          style={{ width: '100%', padding: '16px', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,111,60,0.35)' }}>
           {isLast ? '무료로 시작하기' : '다음'}
         </button>
       </div>

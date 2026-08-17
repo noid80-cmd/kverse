@@ -10,7 +10,7 @@ type Profile = {
 }
 
 const roleLabel: Record<string, string> = { talent: '지망생', agency: '기획사', admin: '관리자' }
-const roleColor: Record<string, string> = { talent: '#0891b2', agency: '#16a34a', admin: '#dc2626' }
+const roleColor: Record<string, string> = { talent: '#D84A1E', agency: '#16a34a', admin: '#dc2626' }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<Profile[]>([])
@@ -55,7 +55,7 @@ export default function AdminUsersPage() {
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>회원 관리 <span style={{ fontSize: 14, color: '#8b8baa', fontWeight: 500 }}>({filtered.length}명)</span></h1>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#1e1b4b' }}>회원 관리 <span style={{ fontSize: 14, color: '#8A7F6E', fontWeight: 500 }}>({filtered.length}명)</span></h1>
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -72,7 +72,7 @@ export default function AdminUsersPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: '#8b8baa' }}>불러오는 중...</div>
+          <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : (
           <div className="flex flex-col gap-2">
             {filtered.map(u => (
@@ -83,14 +83,14 @@ export default function AdminUsersPage() {
               }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                  background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                  background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <span style={{ color: 'white', fontWeight: 900, fontSize: 16 }}>{u.name[0]}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{u.name}</div>
-                  <div style={{ fontSize: 12, color: '#8b8baa' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')} 가입</div>
+                  <div style={{ fontSize: 12, color: '#8A7F6E' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')} 가입</div>
                 </div>
                 <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 8, background: `${roleColor[u.role]}15`, color: roleColor[u.role] }}>
                   {roleLabel[u.role]}

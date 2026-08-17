@@ -93,7 +93,7 @@ export default function TalentProfilePage() {
   }
 
   if (!talent) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f8', color: '#8b8baa' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f8', color: '#8A7F6E' }}>
       불러오는 중...
     </div>
   )
@@ -103,7 +103,7 @@ export default function TalentProfilePage() {
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8b8baa', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
+          <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
           <span style={{ fontSize: 18, fontWeight: 900, color: '#1e1b4b' }}>프로필</span>
         </div>
 
@@ -112,7 +112,7 @@ export default function TalentProfilePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <div style={{
               width: 72, height: 72, borderRadius: 22, flexShrink: 0, overflow: 'hidden',
-              background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {talent.avatar_url
@@ -132,7 +132,7 @@ export default function TalentProfilePage() {
                   <Bookmark size={15} strokeWidth={2} fill={bookmarked ? 'currentColor' : 'none'} />
                 </button>
               </div>
-              <div style={{ fontSize: 14, color: '#8b8baa' }}>
+              <div style={{ fontSize: 14, color: '#8A7F6E' }}>
                 {[
                   getAge(talent.birth_date) && `${getAge(talent.birth_date)}세`,
                   talent.gender === 'male' ? '남성' : talent.gender === 'female' ? '여성' : null,
@@ -144,8 +144,8 @@ export default function TalentProfilePage() {
 
           {(talent.height || talent.weight) && (
             <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-              {talent.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
-              {talent.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#0891b2', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
+              {talent.height && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#D84A1E', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>키 {talent.height}cm</span>}
+              {talent.weight && <span style={{ fontSize: 13, background: '#f0f0f8', color: '#D84A1E', padding: '7px 14px', borderRadius: 12, fontWeight: 700 }}>몸무게 {talent.weight}kg</span>}
             </div>
           )}
 
@@ -166,8 +166,8 @@ export default function TalentProfilePage() {
         <button onClick={handleChat} disabled={starting}
           style={{
             width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: 'white',
-            fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.3)',
+            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
+            fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)',
             marginBottom: 24, opacity: starting ? 0.7 : 1,
           }}>
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -202,7 +202,7 @@ export default function TalentProfilePage() {
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <span style={{ fontSize: 11, background: '#e0e7ff', color: '#4f46e5', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category]}</span>
                       <span style={{ fontSize: 12, color: '#b0b0cc' }}>조회 {v.view_count}회</span>
-                      <span style={{ fontSize: 12, color: '#b0b0cc', display: 'flex', alignItems: 'center', gap: 3 }}><Heart size={11} strokeWidth={2} color="#f87171" fill="#f87171" /> {v.like_count}</span>
+                      <span style={{ fontSize: 12, color: '#b0b0cc', display: 'flex', alignItems: 'center', gap: 3 }}><Heart size={11} strokeWidth={2} color="#DC2626" fill="#DC2626" /> {v.like_count}</span>
                     </div>
                   </div>
                   <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>

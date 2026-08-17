@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'sans-serif', lineHeight: 1.7, color: '#eeeeff', background: '#050e1a', minHeight: '100vh' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'sans-serif', lineHeight: 1.7, color: '#241C15', background: '#050e1a', minHeight: '100vh' }}>
       <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>개인정보처리방침</h1>
       <p style={{ color: '#666', marginBottom: 40 }}>Privacy Policy — Last updated: 2026-07-14</p>
 
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
 
       <section style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>7. 문의 / Contact</h2>
-        <p>개인정보 관련 문의: <a href="mailto:noid80@hanmail.net" style={{ color: '#0891b2' }}>noid80@hanmail.net</a></p>
+        <p>개인정보 관련 문의: <a href="mailto:noid80@hanmail.net" style={{ color: '#D84A1E' }}>noid80@hanmail.net</a></p>
       </section>
     </div>
   )

@@ -100,7 +100,7 @@ export default function AgencyVideoPage() {
   }
 
   if (!video) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#09090f', color: '#555570' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFF8E7', color: '#8A7F6E' }}>
       불러오는 중...
     </div>
   )
@@ -109,14 +109,14 @@ export default function AgencyVideoPage() {
 
   return (
     <>
-      <div className="min-h-screen pb-28" style={{ background: '#09090f' }}>
+      <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
         <div className="max-w-lg mx-auto px-4 pt-10">
 
           <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => router.back()} style={{ fontSize: 22, color: '#555570', background: 'none', border: 'none', padding: 0 }}>←</button>
-            <span style={{ fontSize: 18, fontWeight: 900, color: '#eeeeff', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</span>
+            <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0 }}>←</button>
+            <span style={{ fontSize: 18, fontWeight: 900, color: '#241C15', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</span>
             <button onClick={toggleBookmark}
-              style={{ width: 40, height: 40, borderRadius: 12, background: bookmarked ? 'rgba(251,191,36,0.15)' : '#111118', border: `1px solid ${bookmarked ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: bookmarked ? '#fbbf24' : '#555570' }}>
+              style={{ width: 40, height: 40, borderRadius: 12, background: bookmarked ? 'rgba(251,191,36,0.15)' : '#FFFFFF', border: `1px solid ${bookmarked ? 'rgba(251,191,36,0.4)' : 'rgba(36,28,21,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: bookmarked ? '#fbbf24' : '#8A7F6E' }}>
               <Bookmark size={18} strokeWidth={2} fill={bookmarked ? 'currentColor' : 'none'} />
             </button>
           </div>
@@ -127,13 +127,13 @@ export default function AgencyVideoPage() {
               <video src={video.video_url} controls style={{ width: '100%', maxHeight: 300, display: 'block' }}
                 poster={video.thumbnail_url ?? undefined} />
             ) : (
-              <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555570' }}>영상 준비 중...</div>
+              <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>영상 준비 중...</div>
             )}
           </div>
 
           {/* 태그/카테고리 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-            <span style={{ fontSize: 12, background: 'rgba(6,182,212,0.15)', color: '#22d3ee', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
+            <span style={{ fontSize: 12, background: 'rgba(255,111,60,0.15)', color: '#D84A1E', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
               {categoryLabel[video.category]}
             </span>
             {video.tags.map(tag => (
@@ -143,11 +143,11 @@ export default function AgencyVideoPage() {
 
           {/* 지망생 프로필 카드 */}
           {t && (
-            <div style={{ background: '#111118', borderRadius: 20, padding: 20, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+            <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)', marginBottom: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
                 <div style={{
                   width: 56, height: 56, borderRadius: 18, flexShrink: 0, overflow: 'hidden',
-                  background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+                  background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {t.avatar_url
@@ -156,8 +156,8 @@ export default function AgencyVideoPage() {
                   }
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, color: '#eeeeff', fontSize: 18 }}>{t.name}</div>
-                  <div style={{ fontSize: 13, color: '#8888aa' }}>
+                  <div style={{ fontWeight: 800, color: '#241C15', fontSize: 18 }}>{t.name}</div>
+                  <div style={{ fontSize: 13, color: '#8A7F6E' }}>
                     {[getAge(t.birth_date) && `${getAge(t.birth_date)}세`, t.gender === 'male' ? '남' : t.gender === 'female' ? '여' : null, t.nationality].filter(Boolean).join(' · ')}
                   </div>
                 </div>
@@ -165,8 +165,8 @@ export default function AgencyVideoPage() {
 
               {(t.height || t.weight) && (
                 <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  {t.height && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.1)', color: '#22d3ee', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>키 {t.height}cm</span>}
-                  {t.weight && <span style={{ fontSize: 13, background: 'rgba(6,182,212,0.1)', color: '#22d3ee', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>몸무게 {t.weight}kg</span>}
+                  {t.height && <span style={{ fontSize: 13, background: 'rgba(255,111,60,0.1)', color: '#D84A1E', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>키 {t.height}cm</span>}
+                  {t.weight && <span style={{ fontSize: 13, background: 'rgba(255,111,60,0.1)', color: '#D84A1E', padding: '6px 12px', borderRadius: 10, fontWeight: 600 }}>몸무게 {t.weight}kg</span>}
                 </div>
               )}
 
@@ -178,13 +178,13 @@ export default function AgencyVideoPage() {
                 </div>
               )}
 
-              {t.bio && <p style={{ fontSize: 14, color: '#8888aa', lineHeight: 1.6, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>}
+              {t.bio && <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6, background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>}
             </div>
           )}
 
           <button onClick={handleStartChat} disabled={starting}
             className="w-full py-4 rounded-2xl text-white transition active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(6,182,212,0.3)', opacity: starting ? 0.7 : 1 }}>
+            style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)', opacity: starting ? 0.7 : 1 }}>
             {starting ? '연결 중...' : '채팅하기'}
           </button>
         </div>
