@@ -12,7 +12,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: profile } = await supabase
-      .from('profiles').select('role').eq('id', data.user.id).single()
+      .from('profiles').select('role, is_active').eq('id', data.user.id).single()
+
+    if (profile && profile.is_active === false) {
+      await supabase.auth.signOut()
+      return NextResponse.json({ error: '정지된 계정입니다.' }, { status: 403 })
+    }
+
     const role = profile?.role ?? 'talent'
     const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
 

@@ -46,12 +46,16 @@ export default function DiscoverPage() {
       if (ag) { setAgencyName(ag.name); setAgencyVerified(ag.is_verified) }
     }
 
+    const { data: blocked } = await supabase.from('blocked_users').select('blocked_id').eq('blocker_id', user.id)
+    const blockedIds = (blocked ?? []).map(b => b.blocked_id)
+
     let q = supabase.from('videos').select(`
       id, title, description, thumbnail_url, view_count, like_count, category, tags, created_at,
       talent:profiles!talent_id(id, name, avatar_url, birth_date, skills)
     `).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').limit(50)
 
     if (category !== 'all') q = q.eq('category', category)
+    if (blockedIds.length > 0) q = q.not('talent_id', 'in', `(${blockedIds.join(',')})`)
     q = sort === 'likes'
       ? q.order('like_count', { ascending: false })
       : q.order('created_at', { ascending: false })

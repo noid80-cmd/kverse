@@ -179,12 +179,16 @@ export default function ExplorePage() {
     if (!user) { window.location.href = '/login'; return }
     setMyId(user.id)
 
+    const { data: blocked } = await supabase.from('blocked_users').select('blocked_id').eq('blocker_id', user.id)
+    const blockedIds = (blocked ?? []).map(b => b.blocked_id)
+
     let q = supabase.from('videos').select(`
       id, title, thumbnail_url, video_url, view_count, like_count, category, tags, created_at,
       talent:profiles!talent_id(id, name, avatar_url)
     `).eq('status', 'active').or('visibility.eq.public,visibility.is.null').limit(30)
 
     if (category !== 'all') q = q.eq('category', category)
+    if (blockedIds.length > 0) q = q.not('talent_id', 'in', `(${blockedIds.join(',')})`)
     q = sort === 'likes'
       ? q.order('like_count', { ascending: false })
       : q.order('created_at', { ascending: false })

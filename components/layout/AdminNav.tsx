@@ -11,6 +11,7 @@ const adminNav = [
   { href: '/admin/agencies', label: '기획사', emoji: '🏢' },
   { href: '/admin/videos', label: '영상', emoji: '🎬' },
   { href: '/admin/auditions', label: '오디션', emoji: '🎤' },
+  { href: '/admin/reports', label: '신고', emoji: '🚩' },
 ]
 
 const previewNav = [

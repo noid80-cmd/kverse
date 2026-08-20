@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Heart, Video, MessageCircle } from 'lucide-react'
+import ReportBlockMenu from '@/components/ReportBlockMenu'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
@@ -105,7 +106,9 @@ export default function TalentPublicProfilePage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
-          <span style={{ fontSize: 18, fontWeight: 900, color: '#241C15' }}>프로필</span>
+          <span style={{ fontSize: 18, fontWeight: 900, color: '#241C15', flex: 1 }}>프로필</span>
+          <ReportBlockMenu targetType="profile" targetId={talent.id} reportedUserId={talent.id} myId={myId}
+            onBlocked={() => router.push('/explore')} />
         </div>
 
         {/* 프로필 카드 */}

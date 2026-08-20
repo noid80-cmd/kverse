@@ -32,18 +32,21 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [isKakao, setIsKakao] = useState(false)
+  const [agreed, setAgreed] = useState(false)
 
   useEffect(() => {
     setIsKakao(/KAKAOTALK/i.test(navigator.userAgent))
   }, [])
 
-  async function handleSocialLogin(provider: 'kakao' | 'google') {
+  async function handleSocialLogin(provider: 'kakao' | 'google' | 'apple') {
+    if (!agreed) { setError('이용약관에 동의해주세요.'); return }
     const supabase = createClient()
-    // 네이티브 앱 + 구글 로그인일 때만 커스텀 스킴 콜백을 쓴다 — iOS 쪽
-    // GoogleAuthInterceptorPlugin이 이 이동을 ASWebAuthenticationSession으로
-    // 가로채 처리한 뒤 https://kpick.app/auth/callback?role=...&code=... 로
-    // 변환해 웹뷰에 다시 로드해준다.
-    const redirectTo = provider === 'google' && isNativeApp()
+    // 네이티브 앱 + 구글/애플 로그인일 때만 커스텀 스킴 콜백을 쓴다 — iOS 쪽
+    // GoogleAuthInterceptorPlugin/AppleAuthInterceptorPlugin이 이 이동을
+    // ASWebAuthenticationSession으로 가로채 처리한 뒤
+    // https://kpick.app/auth/callback?role=...&code=... 로 변환해 웹뷰에
+    // 다시 로드해준다.
+    const redirectTo = (provider === 'google' || provider === 'apple') && isNativeApp()
       ? `kpick://auth-callback?role=${role}`
       : `${window.location.origin}/auth/callback?role=${role}`
     await supabase.auth.signInWithOAuth({
@@ -88,6 +91,7 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+    if (!agreed) { setError('이용약관에 동의해주세요.'); return }
     if (role === 'agency' && !bizRegUrl) { setError(tx.auth.bizRegRequired); return }
     setError(''); setLoading(true)
     const supabase = createClient()
@@ -181,6 +185,22 @@ export default function SignupPage() {
 
         {step === 'method' && (
           <div className="flex flex-col gap-3">
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#5A4F42', cursor: 'pointer', marginBottom: 2 }}>
+              <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
+              <span>
+                <Link href="/terms" target="_blank" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</Link>에 동의합니다 (필수)
+              </span>
+            </label>
+            {!isKakao && (
+              <button onClick={() => handleSocialLogin('apple')}
+                className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl"
+                style={{ background: '#000000', color: '#FFFFFF', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF">
+                  <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.014.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.696.91-1.395 0-2.35-1.25-3.44-2.79-1.36-1.94-2.42-4.94-2.42-7.78 0-4.58 2.98-7.01 5.92-7.01 1.365 0 2.51.9 3.37.9.81 0 2.11-.96 3.7-.96.61 0 2.81.06 4.28 2.09-.11.07-2.55 1.49-2.55 4.53 0 3.63 3.19 4.9 3.41 5.0z"/>
+                </svg>
+                {tx.auth.signupApple}
+              </button>
+            )}
             {!isKakao && (
               <button onClick={() => handleSocialLogin('google')}
                 className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl"
@@ -247,8 +267,14 @@ export default function SignupPage() {
               placeholder={tx.auth.emailPlaceholder} required style={inputStyle} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder={tx.auth.passwordMinPlaceholder} minLength={6} required style={inputStyle} />
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#5A4F42', cursor: 'pointer' }}>
+              <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
+              <span>
+                <Link href="/terms" target="_blank" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</Link>에 동의합니다 (필수)
+              </span>
+            </label>
             {error && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{error}</p>}
-            <button type="submit" disabled={loading || !agencyFormValid}
+            <button type="submit" disabled={loading || !agencyFormValid || !agreed}
               className="w-full py-4 rounded-2xl text-white disabled:opacity-50 mt-1"
               style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,111,60,0.3)' }}>
               {loading ? tx.auth.signingUp : tx.auth.signupBtn}

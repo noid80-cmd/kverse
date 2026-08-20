@@ -7,6 +7,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import { Home, Compass, Plus, Bell, Megaphone, Heart, Bookmark } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
+import ReportBlockMenu from '@/components/ReportBlockMenu'
 
 type Video = {
   id: string; title: string; description: string | null; video_url: string | null
@@ -110,6 +111,10 @@ export default function VideoDetailPage() {
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0 }}>←</button>
           <h1 style={{ fontSize: 20, fontWeight: 900, color: '#241C15', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{video.title}</h1>
+          {!isOwner && (
+            <ReportBlockMenu targetType="video" targetId={video.id} reportedUserId={video.talent_id} myId={myId}
+              onBlocked={() => router.push('/explore')} />
+          )}
         </div>
 
         <div style={{ borderRadius: 20, overflow: 'hidden', background: '#000', marginBottom: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>

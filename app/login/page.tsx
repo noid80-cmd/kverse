@@ -42,7 +42,11 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
       const result = await res.json()
-      if (!res.ok || result.error) { setError(tx.loginError); setLoading(false); return }
+      if (!res.ok || result.error) {
+        setError(res.status === 403 && result.error ? result.error : tx.loginError)
+        setLoading(false)
+        return
+      }
       try { localStorage.setItem('kpick-last-email', email) } catch { /* non-critical */ }
       try { localStorage.setItem('kpick-has-logged-in', '1') } catch { /* non-critical */ }
       // 전체 새로고침(window.location.href) 대신 앱 내 화면 전환으로 이동.
@@ -79,6 +83,21 @@ export default function LoginPage() {
         redirectTo,
         queryParams: { prompt: 'select_account' },
       },
+    })
+  }
+
+  async function handleApple() {
+    const supabase = createClient()
+    // Guideline 4.8 대응: 구글과 동일하게 네이티브 앱에서는 커스텀 스킴 콜백을 쓰고
+    // (ios/App/App/AppleAuthInterceptorPlugin.swift가 ASWebAuthenticationSession으로 처리),
+    // Sign in with Apple은 이름/이메일 수집만 요구하고 이메일 비공개 옵션을 제공해
+    // Apple의 "동등한 로그인 옵션" 요건을 만족한다.
+    const redirectTo = isNativeApp()
+      ? 'kpick://auth-callback'
+      : `${window.location.origin}/auth/callback`
+    await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo },
     })
   }
 
@@ -167,6 +186,19 @@ export default function LoginPage() {
         }}>
 
           {!isKakao && (
+            <button onClick={handleApple} className="apple-btn" style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '14px 20px', borderRadius: 16, marginBottom: 10,
+              background: '#000000', color: '#FFFFFF', fontSize: 15, fontWeight: 600,
+              border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+                <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.014.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.696.91-1.395 0-2.35-1.25-3.44-2.79-1.36-1.94-2.42-4.94-2.42-7.78 0-4.58 2.98-7.01 5.92-7.01 1.365 0 2.51.9 3.37.9.81 0 2.11-.96 3.7-.96.61 0 2.81.06 4.28 2.09-.11.07-2.55 1.49-2.55 4.53 0 3.63 3.19 4.9 3.41 5.0z"/>
+              </svg>
+              {tx.loginApple}
+            </button>
+          )}
+          {!isKakao && (
             <button onClick={handleGoogle} className="google-btn" style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               padding: '14px 20px', borderRadius: 16, marginBottom: 20,
@@ -222,6 +254,9 @@ export default function LoginPage() {
               {loading ? tx.loggingIn : tx.loginBtn}
             </button>
           </form>
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(36,28,21,0.45)', marginTop: 14 }}>
+            로그인 시 <a href="/terms" target="_blank" style={{ color: 'rgba(36,28,21,0.6)', textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</a>에 동의하는 것으로 간주됩니다.
+          </p>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(36,28,21,0.5)', marginTop: 24, fontWeight: 500 }}>
