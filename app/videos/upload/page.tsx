@@ -149,11 +149,18 @@ export default function UploadPage() {
         // 있어(브라우저별 타이밍 차이), 한 프레임 더 기다린 뒤 캡처한다.
         await new Promise(r => requestAnimationFrame(r))
 
+        // 목록 카드용이라 영상 원본 해상도(세로 영상이면 1080x1920)로 저장할 이유가 없다.
+        // 원본 그대로 저장하면 탐색 목록 로딩이 눈에 띄게 느려진다 — 긴 변 900px로 줄인다.
+        const MAX_EDGE = 900
+        const srcW = video.videoWidth || 640
+        const srcH = video.videoHeight || 360
+        const scale = Math.min(1, MAX_EDGE / Math.max(srcW, srcH))
         const canvas = document.createElement('canvas')
-        canvas.width = video.videoWidth || 640
-        canvas.height = video.videoHeight || 360
+        canvas.width = Math.round(srcW * scale)
+        canvas.height = Math.round(srcH * scale)
         const ctx = canvas.getContext('2d')
-        ctx?.drawImage(video, 0, 0)
+        if (ctx) { ctx.imageSmoothingQuality = 'high' }
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
 
         let isBlack = true
         if (ctx) {
@@ -162,7 +169,7 @@ export default function UploadPage() {
             if (data[i] > 20 || data[i + 1] > 20 || data[i + 2] > 20) { isBlack = false; break }
           }
         }
-        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', 0.8))
+        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(b => resolve(b), 'image/jpeg', 0.72))
         return { blob, isBlack }
       }
 

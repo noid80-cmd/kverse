@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
+import Image from 'next/image'
 import { Home, Compass, Plus, Bell, Megaphone, Heart, Volume2, VolumeX, Mic, Music, Clock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -35,6 +36,48 @@ const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #6BCC96, #2FA362)',
   'linear-gradient(135deg, #FF9A5C, #E06A2E)',
 ]
+
+/**
+ * 목록 카드 썸네일.
+ * 업로드 시 영상 원본 해상도로 저장되기 때문에(app/videos/upload 참고) 원본을 그대로
+ * 쓰면 매우 느리다. next/image 로 리사이즈 + AVIF/WebP 변환해서 받고,
+ * 받아지기 전에는 스켈레톤을 보여 준다(예전엔 빈 영역에 반투명 검정만 깔려서
+ * 썸네일이 잘린 것처럼 보였다).
+ */
+function FeedThumb({ src, grad, label }: { src: string | null; grad: string; label: string }) {
+  const [loaded, setLoaded] = useState(false)
+  return (
+    <div style={{ aspectRatio: '9/14', position: 'relative', overflow: 'hidden', background: '#EAE0D1' }}>
+      {src ? (
+        <Image src={src} alt="" fill sizes="(max-width: 768px) 100vw, 420px" quality={62}
+          onLoad={() => setLoaded(true)}
+          style={{ objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity 0.25s ease' }} />
+      ) : (
+        <div style={{ width: '100%', height: '100%', background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Music size={46} strokeWidth={1.5} color="rgba(255,255,255,0.35)" />
+        </div>
+      )}
+
+      {src && !loaded && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 34, height: 34, borderRadius: '50%', border: '3px solid rgba(36,28,21,0.15)', borderTopColor: 'rgba(36,28,21,0.45)', animation: 'kv-spin 0.8s linear infinite' }} />
+        </div>
+      )}
+
+      {(!src || loaded) && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.12)' }}>
+          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="15" height="17" viewBox="0 0 15 17" fill="white"><path d="M1 1L14 8.5L1 16V1Z"/></svg>
+          </div>
+        </div>
+      )}
+
+      <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '3px 8px', fontSize: 10, color: '#FFD9C7', fontWeight: 700 }}>
+        {label}
+      </div>
+    </div>
+  )
+}
 
 function SwipeCard({
   video, muted, onMuteToggle, liked, likeCount, onLike, talentFallback, myId, onBlocked,
@@ -331,23 +374,7 @@ export default function ExplorePage() {
                       ) : <div style={{ flex: 1 }} />}
                     </div>
 
-                    <div style={{ aspectRatio: '9/14', position: 'relative', overflow: 'hidden' }}>
-                      {v.thumbnail_url ? (
-                        <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      ) : (
-                        <div style={{ width: '100%', height: '100%', background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Music size={46} strokeWidth={1.5} color="rgba(255,255,255,0.35)" />
-                        </div>
-                      )}
-                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.12)' }}>
-                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="15" height="17" viewBox="0 0 15 17" fill="white"><path d="M1 1L14 8.5L1 16V1Z"/></svg>
-                        </div>
-                      </div>
-                      <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '3px 8px', fontSize: 10, color: '#FFD9C7', fontWeight: 700 }}>
-                        {categoryLabels[v.category] ?? v.category}
-                      </div>
-                    </div>
+                    <FeedThumb src={v.thumbnail_url} grad={grad} label={categoryLabels[v.category] ?? v.category} />
 
                     <div style={{ padding: '10px 10px 10px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
                       <div style={{ fontWeight: 700, color: '#241C15', fontSize: 13, lineHeight: 1.35, flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
