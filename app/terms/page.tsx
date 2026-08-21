@@ -1,14 +1,29 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 
 export default function TermsPage() {
   const router = useRouter()
 
+  // 가입/로그인 화면에서 target="_blank" 로 열리기 때문에 네이티브 앱(WKWebView)에서는
+  // 히스토리가 비어 router.back() 이 아무 동작도 하지 않았다. 돌아갈 곳이 없으면
+  // 어디서 왔는지 보고 직접 이동한다.
+  function goBack() {
+    if (typeof window !== 'undefined' && window.history.length > 1) { router.back(); return }
+    const from = typeof document !== 'undefined' ? document.referrer : ''
+    if (from.includes('/signup')) router.push('/signup')
+    else if (from.includes('/login')) router.push('/login')
+    else router.push('/')
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#FFF8E7', padding: '24px 20px 60px' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', padding: 'calc(env(safe-area-inset-top) + 20px) 20px 60px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, marginBottom: 20, cursor: 'pointer' }}>←</button>
+        <button onClick={goBack} aria-label="뒤로"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, marginLeft: -8, marginBottom: 12, color: '#5A4F42', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <ArrowLeft size={24} strokeWidth={2} />
+        </button>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', marginBottom: 24 }}>이용약관 및 커뮤니티 가이드라인</h1>
 
         <section style={{ marginBottom: 28 }}>
