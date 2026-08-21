@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
-import { Home, Compass, Plus, Bell, Megaphone, Heart, Volume2, VolumeX } from 'lucide-react'
+import { Home, Compass, Plus, Bell, Megaphone, Heart, Volume2, VolumeX, Mic, Music, Clock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -93,7 +93,7 @@ function SwipeCard({
       ) : video.thumbnail_url ? (
         <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
       ) : (
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, opacity: 0.2 }}>🎤</div>
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Mic size={46} strokeWidth={1.5} color="rgba(255,255,255,0.28)" /></div>
       )}
 
       <div onClick={handleTap} style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'pointer', touchAction: 'pan-y' }} />
@@ -117,14 +117,14 @@ function SwipeCard({
         {video.talent && (
           <Link href={`/talent/${video.talent.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,111,60,0.4)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {video.talent.avatar_url ? <img src={video.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 14 }}>🎤</span>}
+              {video.talent.avatar_url ? <img src={video.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Mic size={14} strokeWidth={1.8} color="#FFFFFF" />}
             </div>
-            <span style={{ color: '#241C15', fontWeight: 700, fontSize: 14 }}>{video.talent.name ?? talentFallback}</span>
+            <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: 14, textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{video.talent.name ?? talentFallback}</span>
           </Link>
         )}
         {video.tags?.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {video.tags.slice(0, 4).map(t => <span key={t} style={{ fontSize: 12, color: 'rgba(36,28,21,0.91)', fontWeight: 600 }}>#{t}</span>)}
+            {video.tags.slice(0, 4).map(t => <span key={t} style={{ fontSize: 12, color: 'rgba(255,255,255,0.88)', fontWeight: 600 }}>#{t}</span>)}
           </div>
         )}
       </div>
@@ -262,8 +262,10 @@ export default function ExplorePage() {
               </svg>
               <span style={{ fontSize: 22, fontWeight: 900, color: '#241C15', letterSpacing: -0.5 }}>Krookie</span>
             </Link>
-            <button onClick={() => setSort(s => s === 'latest' ? 'likes' : 'latest')} style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: '1px solid rgba(36,28,21,0.13)', cursor: 'pointer', background: 'rgba(36,28,21,0.07)', color: '#A69A87' }}>
-              {sort === 'latest' ? `🕐 ${tx.explore.sortLatest}` : `❤️ ${tx.explore.sortLikes}`}
+            <button onClick={() => setSort(s => s === 'latest' ? 'likes' : 'latest')} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: '1px solid rgba(36,28,21,0.13)', cursor: 'pointer', background: 'rgba(36,28,21,0.07)', color: '#6B6154' }}>
+              {sort === 'latest'
+                ? <><Clock size={13} strokeWidth={2} /> {tx.explore.sortLatest}</>
+                : <><Heart size={13} strokeWidth={2} /> {tx.explore.sortLikes}</>}
             </button>
           </div>
 
@@ -299,7 +301,7 @@ export default function ExplorePage() {
             </div>
           ) : videos.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>🎤</div>
+              <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Mic size={28} strokeWidth={1.6} color="#D84A1E" /></div>
               <div style={{ fontWeight: 700, color: '#241C15' }}>{tx.explore.noVideos}</div>
             </div>
           ) : (
@@ -311,12 +313,30 @@ export default function ExplorePage() {
                 return (
                   <div key={v.id} style={{ borderRadius: 18, overflow: 'hidden', background: '#FFFFFF', cursor: 'pointer' }}
                     onClick={() => setSwipeIdx(i)}>
+                    {/* 작성자 헤더 — 영상 위에 두어야 누가 올린 건지 먼저 읽힌다 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 8px 9px 10px' }}>
+                      {v.talent ? (
+                        <>
+                          <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,111,60,0.25)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {v.talent.avatar_url
+                              ? <img src={v.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              : <Mic size={13} strokeWidth={1.8} color="#D84A1E" />}
+                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#241C15', minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {v.talent.name ?? tx.common.talent}
+                          </span>
+                          <ReportBlockMenu targetType="video" targetId={v.id} reportedUserId={v.talent.id}
+                            myId={myId} onBlocked={() => load()} />
+                        </>
+                      ) : <div style={{ flex: 1 }} />}
+                    </div>
+
                     <div style={{ aspectRatio: '9/14', position: 'relative', overflow: 'hidden' }}>
                       {v.thumbnail_url ? (
                         <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 52, opacity: 0.2 }}>{v.category === 'dance' ? '♫' : '♪'}</span>
+                          <Music size={46} strokeWidth={1.5} color="rgba(255,255,255,0.35)" />
                         </div>
                       )}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.12)' }}>
@@ -324,36 +344,20 @@ export default function ExplorePage() {
                           <svg width="15" height="17" viewBox="0 0 15 17" fill="white"><path d="M1 1L14 8.5L1 16V1Z"/></svg>
                         </div>
                       </div>
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', background: 'linear-gradient(transparent, rgba(0,0,0,0.82))' }} />
-                      <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '3px 8px', fontSize: 10, color: '#D84A1E', fontWeight: 700 }}>
+                      <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '3px 8px', fontSize: 10, color: '#FFD9C7', fontWeight: 700 }}>
                         {categoryLabels[v.category] ?? v.category}
                       </div>
-                      {v.talent && (
-                        <div style={{ position: 'absolute', top: 4, right: 4, zIndex: 8 }}>
-                          <ReportBlockMenu targetType="video" targetId={v.id} reportedUserId={v.talent.id}
-                            myId={myId} tone="dark" onBlocked={() => load()} />
-                        </div>
-                      )}
                     </div>
-                    <div style={{ padding: '10px 10px 6px' }}>
-                      <div style={{ fontWeight: 700, color: '#241C15', fontSize: 13, lineHeight: 1.3, marginBottom: 7, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+
+                    <div style={{ padding: '10px 10px 10px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                      <div style={{ fontWeight: 700, color: '#241C15', fontSize: 13, lineHeight: 1.35, flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {v.title}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        {v.talent ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0, flex: 1 }}>
-                            <div style={{ width: 20, height: 20, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,111,60,0.25)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>
-                              {v.talent.avatar_url ? <img src={v.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '🎤'}
-                            </div>
-                            <span style={{ fontSize: 11, color: '#8A7F6E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.talent.name ?? tx.common.talent}</span>
-                          </div>
-                        ) : <div style={{ flex: 1 }} />}
-                        <button onClick={e => { e.stopPropagation(); toggleLike(v.id) }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0, padding: '2px 0 4px' }}>
-                          <Heart size={13} strokeWidth={2} fill={isLiked ? '#f43f5e' : 'none'} color={isLiked ? '#f43f5e' : '#8A7F6E'} />
-                          <span style={{ fontSize: 11, color: isLiked ? '#f43f5e' : '#8A7F6E', fontWeight: 600 }}>{count}</span>
-                        </button>
-                      </div>
+                      <button onClick={e => { e.stopPropagation(); toggleLike(v.id) }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0, padding: 0 }}>
+                        <Heart size={14} strokeWidth={2} fill={isLiked ? '#f43f5e' : 'none'} color={isLiked ? '#f43f5e' : '#6B6154'} />
+                        <span style={{ fontSize: 12, color: isLiked ? '#f43f5e' : '#6B6154', fontWeight: 700 }}>{count}</span>
+                      </button>
                     </div>
                   </div>
                 )
