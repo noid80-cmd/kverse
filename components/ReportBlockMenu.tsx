@@ -15,12 +15,18 @@ export default function ReportBlockMenu({
   reportedUserId,
   myId,
   onBlocked,
+  tone = 'light',
+  variant = 'plain',
 }: {
   targetType: 'video' | 'profile'
   targetId: string
   reportedUserId: string
   myId: string
   onBlocked?: () => void
+  /** 어두운 배경(영상 위) 에서는 'dark' 로 두어 아이콘을 흰색으로 */
+  tone?: 'light' | 'dark'
+  /** 'circle' 은 스와이프 뷰어의 좋아요/음소거 버튼과 같은 원형 버튼 */
+  variant?: 'plain' | 'circle'
 }) {
   const { lang } = useLang()
   const isKo = lang === 'ko'
@@ -66,11 +72,15 @@ export default function ReportBlockMenu({
     router.refresh()
   }
 
+  const iconColor = tone === 'dark' ? '#FFFFFF' : '#8A7F6E'
+
   return (
-    <div style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(v => !v)} aria-label="more"
-        style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', color: '#8A7F6E' }}>
-        <MoreVertical size={20} strokeWidth={1.8} />
+    <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+      <button onClick={e => { e.stopPropagation(); setOpen(v => !v) }} aria-label={isKo ? '더보기' : 'more'}
+        style={variant === 'circle'
+          ? { width: 46, height: 46, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: iconColor, padding: 0 }
+          : { background: tone === 'dark' ? 'rgba(0,0,0,0.45)' : 'none', backdropFilter: tone === 'dark' ? 'blur(4px)' : undefined, borderRadius: tone === 'dark' ? 8 : 0, border: 'none', padding: 6, cursor: 'pointer', color: iconColor, display: 'flex' }}>
+        <MoreVertical size={variant === 'circle' ? 22 : 20} strokeWidth={1.8} />
       </button>
       {open && (
         <div style={{

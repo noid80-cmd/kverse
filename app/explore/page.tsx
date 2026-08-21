@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
+import ReportBlockMenu from '@/components/ReportBlockMenu'
 import { Home, Compass, Plus, Bell, Megaphone, Heart, Volume2, VolumeX } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -36,10 +37,11 @@ const FALLBACK_GRADIENTS = [
 ]
 
 function SwipeCard({
-  video, muted, onMuteToggle, liked, likeCount, onLike, talentFallback,
+  video, muted, onMuteToggle, liked, likeCount, onLike, talentFallback, myId, onBlocked,
 }: {
   video: VideoItem; muted: boolean; onMuteToggle: () => void
   liked: boolean; likeCount: number; onLike: () => void; talentFallback: string
+  myId: string; onBlocked: () => void
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -139,6 +141,10 @@ function SwipeCard({
             {muted ? <VolumeX size={20} strokeWidth={2} color="white" /> : <Volume2 size={20} strokeWidth={2} color="white" />}
           </div>
         </button>
+        {video.talent && (
+          <ReportBlockMenu targetType="video" targetId={video.id} reportedUserId={video.talent.id}
+            myId={myId} tone="dark" variant="circle" onBlocked={onBlocked} />
+        )}
       </div>
     </div>
   )
@@ -322,6 +328,12 @@ export default function ExplorePage() {
                       <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '3px 8px', fontSize: 10, color: '#D84A1E', fontWeight: 700 }}>
                         {categoryLabels[v.category] ?? v.category}
                       </div>
+                      {v.talent && (
+                        <div style={{ position: 'absolute', top: 4, right: 4, zIndex: 8 }}>
+                          <ReportBlockMenu targetType="video" targetId={v.id} reportedUserId={v.talent.id}
+                            myId={myId} tone="dark" onBlocked={() => load()} />
+                        </div>
+                      )}
                     </div>
                     <div style={{ padding: '10px 10px 6px' }}>
                       <div style={{ fontWeight: 700, color: '#241C15', fontSize: 13, lineHeight: 1.3, marginBottom: 7, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
@@ -382,6 +394,8 @@ export default function ExplorePage() {
                 likeCount={likeCounts[v.id] ?? 0}
                 onLike={() => toggleLike(v.id)}
                 talentFallback={tx.common.talent}
+                myId={myId}
+                onBlocked={() => { setSwipeIdx(null); load() }}
               />
             </div>
           ))}
