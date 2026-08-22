@@ -9,6 +9,14 @@ import { useT } from '@/lib/i18n/translations'
 import { isNativeApp } from '@/lib/capacitor'
 
 export default function LoginPage() {
+  // 계정 삭제 직후 /login?deleted=1 로 돌아온다. 삭제가 끝났다는 걸 명확히 알린다.
+  const [justDeleted, setJustDeleted] = useState(false)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('deleted') === '1') {
+      setJustDeleted(true)
+    }
+  }, [])
+
   const router = useRouter()
   const { lang } = useLang()
   const tx = useT(lang).auth
@@ -172,6 +180,17 @@ export default function LoginPage() {
             fontSize: 42, fontWeight: 800, letterSpacing: -1.5, lineHeight: 1, marginBottom: 12,
             color: '#241C15',
           }}>Krookie</h1>
+
+          {justDeleted && (
+            <div style={{
+              margin: '0 0 16px', padding: '12px 16px', borderRadius: 14,
+              background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)',
+              fontSize: 14, fontWeight: 700, color: '#15803D', lineHeight: 1.6,
+            }}>
+              계정이 삭제되었습니다.<br />
+              <span style={{ fontWeight: 500, fontSize: 13 }}>그동안 이용해 주셔서 감사합니다.</span>
+            </div>
+          )}
           <p style={{ fontSize: 13, color: 'rgba(36,28,21,0.55)', fontWeight: 500, letterSpacing: 0.3 }}>
             {tx.tagline}
           </p>

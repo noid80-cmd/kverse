@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Upload, Building2, Bell, BellOff, BellRing, X } from 'lucide-react'
+import DeleteAccountButton from '@/components/DeleteAccountButton'
 
 type Agency = {
   id: string
@@ -236,6 +237,10 @@ export default function AgencySettingsPage() {
           }}>
             로그아웃
           </button>
+
+          <div style={{ marginTop: 10 }}>
+            <DeleteAccountButton />
+          </div>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import { Home, Compass, Plus, Bell, Megaphone, BellOff, BellRing, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT, type Lang } from '@/lib/i18n/translations'
+import DeleteAccountButton from '@/components/DeleteAccountButton'
 
 const inputStyle = {
   width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
@@ -374,6 +375,8 @@ export default function ProfileEditPage() {
             style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(36,28,21,0.1)', color: '#8A7F6E', fontWeight: 700, fontSize: 15 }}>
             {tx.profile.logout}
           </button>
+
+          <DeleteAccountButton />
         </form>
 
         {notifModal && (
