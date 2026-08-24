@@ -8,6 +8,7 @@
 	},
 	"packageClassList": [
 		"PreferencesPlugin",
-		"GoogleAuthInterceptorPlugin"
+		"GoogleAuthInterceptorPlugin",
+		"AppleAuthInterceptorPlugin"
 	]
 }
