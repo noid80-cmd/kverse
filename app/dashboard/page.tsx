@@ -85,7 +85,10 @@ export default function DashboardPage() {
         supabase.from('videos').select('id, title, thumbnail_url', { count: 'exact' }).eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(6),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('id', { count: 'exact' }).eq('talent_id', user.id).eq('deleted_by_talent', false),
-        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name)').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
+        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name)')
+          .eq('status', 'active')
+          .or(`deadline.is.null,deadline.gte.${new Date().toISOString().slice(0, 10)}`)
+          .order('created_at', { ascending: false }).limit(8),
       ])
 
       const fresh: PageData = {
