@@ -132,6 +132,14 @@ export async function PATCH(request: NextRequest) {
 
   const sb = serviceClient()
 
+  // status만 바꾸는 호출(마감/재개)이 있으므로 보내온 필드만 갱신한다.
+  // 예전처럼 통째로 덮으면 {id, status}만 받았을 때 title 등이 날아간다.
+  if ('status' in fields && Object.keys(fields).length === 1) {
+    const { error } = await sb.from('auditions').update({ status: fields.status }).eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
   const translations = await autoTranslate(fields.title, fields.description ?? null)
 
   const { error } = await sb.from('auditions').update({

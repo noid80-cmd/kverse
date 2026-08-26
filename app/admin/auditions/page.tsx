@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
-import { Trash2, Plus, Calendar, Users, X, Pencil } from 'lucide-react'
+import { Trash2, Plus, Calendar, Users, X, Pencil, Archive, RotateCcw } from 'lucide-react'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -203,6 +203,17 @@ export default function AdminAuditionsPage() {
     setEditing(true)
   }
 
+  // 마감된 공고는 앱 목록에서 빠지지만 기록과 지원 내역은 남는다(삭제와 다름)
+  async function setStatus(id: string, status: 'active' | 'closed') {
+    const res = await fetch('/api/admin/auditions', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    })
+    if (!res.ok) { const e = await res.json(); alert('변경 실패: ' + e.error); return }
+    setAuditions(prev => prev.map(a => (a.id === id ? { ...a, status } : a)))
+    setDetail(d => (d && d.id === id ? { ...d, status } : d))
+  }
+
   async function deleteAudition(id: string) {
     if (!confirm('공고를 완전히 삭제할까요?')) return
     await fetch('/api/admin/auditions', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
@@ -321,12 +332,21 @@ export default function AdminAuditionsPage() {
                   <div style={{ fontSize: 13, color: '#8A7F6E' }}>{detail.agency?.name ?? '관리자 공지'}</div>
                   <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 18, marginTop: 2 }}>{detail.title}</div>
                 </div>
-                <button onClick={() => openEdit(detail)} style={{
-                  display: 'flex', alignItems: 'center', gap: 5, background: '#f0f0f8', border: 'none',
-                  borderRadius: 10, padding: '7px 12px', fontSize: 13, fontWeight: 700, color: '#D84A1E', cursor: 'pointer',
-                }}>
-                  <Pencil size={13} strokeWidth={2.5} /> 수정
-                </button>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button onClick={() => setStatus(detail.id, detail.status === 'closed' ? 'active' : 'closed')} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, background: '#f0f0f8', border: 'none',
+                    borderRadius: 10, padding: '7px 12px', fontSize: 13, fontWeight: 700,
+                    color: detail.status === 'closed' ? '#16a34a' : '#8A7F6E', cursor: 'pointer',
+                  }}>
+                    {detail.status === 'closed' ? <><RotateCcw size={13} strokeWidth={2.5} /> 재개</> : <><Archive size={13} strokeWidth={2.5} /> 마감</>}
+                  </button>
+                  <button onClick={() => openEdit(detail)} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, background: '#f0f0f8', border: 'none',
+                    borderRadius: 10, padding: '7px 12px', fontSize: 13, fontWeight: 700, color: '#D84A1E', cursor: 'pointer',
+                  }}>
+                    <Pencil size={13} strokeWidth={2.5} /> 수정
+                  </button>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, marginTop: 12 }}>
                 {detail.category.split(',').map(c => (
