@@ -49,8 +49,6 @@ async function getAudition(id: string): Promise<PublicAudition | null> {
   }
 }
 
-export const revalidate = 60
-
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
   const a = await getAudition(id)
