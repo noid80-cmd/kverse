@@ -35,6 +35,8 @@ const COPY = {
     deadline: '마감일', category: '분야', mode: '진행 방식',
     online: '온라인', offline: '오프라인', both: '온라인 + 오프라인',
     apply: '지원하기', applyClosed: '마감된 오디션입니다',
+    applyOffline: '현장에서 진행되는 오디션입니다',
+    offlineNote: '이 공고는 온라인 지원을 받지 않습니다. 지원 방법은 공고 내용을 확인해주세요.',
     how: '지원 방법',
     steps: ['Krookie 가입 (30초)', '갖고 있는 영상 선택 또는 새로 업로드', '지원 완료 — 결과는 앱으로 알려드립니다'],
     note: '이미 갖고 있는 커버 영상으로 지원할 수 있습니다. 새로 촬영하지 않아도 됩니다.',
@@ -47,6 +49,8 @@ const COPY = {
     deadline: 'Deadline', category: 'Category', mode: 'Format',
     online: 'Online', offline: 'In person', both: 'Online + In person',
     apply: 'Apply now', applyClosed: 'This audition has closed',
+    applyOffline: 'Held in person',
+    offlineNote: 'This audition does not accept online applications. See the posting for how to apply.',
     how: 'How to apply',
     steps: ['Sign up for Krookie (30 seconds)', 'Pick a video you already have, or upload a new one', 'Done — you will hear back in the app'],
     note: 'You can apply with a cover video you already have. No new filming required.',
@@ -82,6 +86,10 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
 
   const left = audition.deadline ? daysUntil(audition.deadline) : null
   const isOpen = audition.status === 'active' && (left === null || left >= 0)
+  // /dashboard/auditions 는 mode === 'offline' 공고의 지원을 막는다. 여기서도 막지 않으면
+  // 지원하기를 눌러 이동한 뒤에야 지원이 안 된다는 걸 알게 된다.
+  const isOffline = audition.mode === 'offline'
+  const canApply = isOpen && !isOffline
 
   const categoryLabel = (c as unknown as Record<string, string>)[audition.category] ?? audition.category
   const modeLabel = audition.mode === 'offline' ? c.offline : audition.mode === 'both' ? c.both : c.online
@@ -147,9 +155,12 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
           </p>
         )}
 
-        <h2 style={{ fontSize: 15, fontWeight: 800, margin: '0 0 12px' }}>{c.how}</h2>
-        <ol style={{ margin: '0 0 14px', padding: 0, listStyle: 'none' }}>
-          {c.steps.map((s, i) => (
+        {/* 오프라인 공고에는 온라인 지원 절차가 적용되지 않는다 */}
+        {!isOffline && (
+          <>
+            <h2 style={{ fontSize: 15, fontWeight: 800, margin: '0 0 12px' }}>{c.how}</h2>
+            <ol style={{ margin: '0 0 14px', padding: 0, listStyle: 'none' }}>
+              {c.steps.map((s, i) => (
             <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 9 }}>
               <span
                 style={{
@@ -160,11 +171,15 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
               >
                 {i + 1}
               </span>
-              <span style={{ fontSize: 14, lineHeight: 1.55, color: '#3C332A' }}>{s}</span>
-            </li>
-          ))}
-        </ol>
-        <p style={{ fontSize: 13, lineHeight: 1.6, color: '#8A7F6E', margin: 0 }}>{c.note}</p>
+                  <span style={{ fontSize: 14, lineHeight: 1.55, color: '#3C332A' }}>{s}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: '#8A7F6E', margin: 0 }}>
+          {isOffline ? c.offlineNote : c.note}
+        </p>
       </div>
 
       <div
@@ -178,25 +193,27 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
         <div style={{ maxWidth: 560, margin: '0 auto' }}>
           <button
             onClick={apply}
-            disabled={!isOpen}
+            disabled={!canApply}
             style={{
               width: '100%', height: 54, borderRadius: 14, border: 'none',
-              background: isOpen ? '#FF6F3C' : '#DCD2C4', color: '#FFFFFF',
-              fontSize: 16, fontWeight: 800, cursor: isOpen ? 'pointer' : 'default',
+              background: canApply ? '#FF6F3C' : '#DCD2C4', color: '#FFFFFF',
+              fontSize: 16, fontWeight: 800, cursor: canApply ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
           >
-            {isOpen ? (
+            {canApply ? (
               <>
                 {c.apply}
                 <ArrowRight size={19} strokeWidth={2.4} />
               </>
+            ) : isOffline ? (
+              c.applyOffline
             ) : (
               c.applyClosed
             )}
           </button>
 
-          {!isOpen && (
+          {!canApply && (
             <button
               onClick={() => router.push(authed ? '/dashboard/auditions' : '/signup')}
               style={{
