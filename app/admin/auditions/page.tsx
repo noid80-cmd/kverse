@@ -221,8 +221,11 @@ export default function AdminAuditionsPage() {
     if (detail?.id === id) setDetail(null)
   }
 
-  const active = auditions.filter(a => !isExpired(a.deadline))
-  const expired = auditions.filter(a => isExpired(a.deadline))
+  // 마감일이 지난 것뿐 아니라 수동으로 마감 처리한 것도 내려야 한다.
+  // (마감일이 남았는데 status만 closed인 공고가 상단에 그대로 남아 헷갈렸다)
+  const isInactive = (a: Audition) => a.status === 'closed' || isExpired(a.deadline)
+  const active = auditions.filter(a => !isInactive(a))
+  const expired = auditions.filter(isInactive)
 
   return (
     <>
@@ -290,7 +293,9 @@ export default function AdminAuditionsPage() {
                       <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
                       <div style={{ fontWeight: 600, color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>마감 {a.deadline}</span>
+                        <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>
+                          {isExpired(a.deadline) ? `마감 ${a.deadline}` : `마감 처리됨 (마감일 ~${a.deadline})`}
+                        </span>
                         <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       </div>
                       <button onClick={e => { e.stopPropagation(); deleteAudition(a.id) }} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
