@@ -54,17 +54,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const a = await getAudition(id)
   if (!a) return { title: '오디션을 찾을 수 없습니다' }
 
-  const who = a.agencyName ? `${a.agencyName} ` : ''
-  const title = `${who}${a.title}`
+  // 공고 제목에 이미 기획사명이 들어있는 경우가 많아(예: "[큐브엔터테인먼트] ...") 중복을 피한다
+  const prefix = a.agencyName && !a.title.includes(a.agencyName) ? `${a.agencyName} ` : ''
+  const title = `${prefix}${a.title}`
   const description = a.description?.slice(0, 150) || '영상 하나로 기획사 담당자에게 바로 지원하세요. Krookie 오디션.'
   const url = `https://kpick.app/audition/${a.id}`
+  // 페이지에서 openGraph를 선언하면 레이아웃 값을 병합이 아니라 대체하므로 이미지를 다시 지정해야 한다
+  const images = [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Krookie' }]
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { type: 'article', url, title: `${title} | Krookie`, description, siteName: 'Krookie' },
-    twitter: { card: 'summary_large_image', title: `${title} | Krookie`, description },
+    openGraph: { type: 'article', url, title: `${title} | Krookie`, description, siteName: 'Krookie', images },
+    twitter: { card: 'summary_large_image', title: `${title} | Krookie`, description, images: ['/og-image.png'] },
   }
 }
 
