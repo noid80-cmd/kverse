@@ -269,11 +269,6 @@ export default function AdminAuditionsPage() {
                       {a.category.split(',').map(c => (
                         <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#D84A1E', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
                       ))}
-                      {a.mode && (
-                        <span style={{ fontSize: 11, background: '#f0f0f8', color: '#8A7F6E', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
-                          {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
-                        </span>
-                      )}
                       <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Users size={12} /> {a.applicant_count}명</span>
                       {a.deadline && <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
                     </div>
@@ -357,11 +352,6 @@ export default function AdminAuditionsPage() {
                 {detail.category.split(',').map(c => (
                   <span key={c} style={{ fontSize: 12, background: '#eef2ff', color: '#D84A1E', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
                 ))}
-                {detail.mode && (
-                  <span style={{ fontSize: 12, background: '#f0f0f8', color: '#8A7F6E', padding: '3px 9px', borderRadius: 8, fontWeight: 700 }}>
-                    {detail.mode === 'online' ? '🖥️ 온라인' : detail.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
-                  </span>
-                )}
                 {detail.deadline && (
                   <span style={{ fontSize: 12, color: isExpired(detail.deadline) ? '#ef4444' : '#8A7F6E', fontWeight: isExpired(detail.deadline) ? 700 : 400 }}>
                     {isExpired(detail.deadline) ? '마감 ' : '~'}{detail.deadline}

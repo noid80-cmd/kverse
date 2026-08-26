@@ -75,7 +75,6 @@ export default function TalentAuditionsPage() {
   const [myVideos, setMyVideos] = useState<MyVideo[]>([])
 
   const [sortBy, setSortBy] = useState<'recent' | 'deadline'>('recent')
-  const [filterMode, setFilterMode] = useState<'all' | 'online' | 'offline'>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
   const [tab, setTab] = useState<'existing' | 'new'>('existing')
@@ -363,16 +362,7 @@ export default function TalentAuditionsPage() {
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {([['all', tx.explore.allCategories], ['online', tx.auditions.modeOnline], ['offline', tx.auditions.modeOffline]] as const).map(([val, label]) => (
-              <button key={val} onClick={() => setFilterMode(val)} style={{
-                padding: '7px 14px', borderRadius: 10, border: filterMode === val ? 'none' : '1px solid rgba(36,28,21,0.1)',
-                fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                background: filterMode === val ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : 'rgba(36,28,21,0.07)',
-                color: filterMode === val ? 'white' : '#8A7F6E',
-              }}>{label}</button>
-            ))}
-          </div>
+          <div />
           <button onClick={() => setSortBy(s => s === 'recent' ? 'deadline' : 'recent')} style={{
             display: 'flex', alignItems: 'center', gap: 4,
             background: 'none', border: 'none', cursor: 'pointer',
@@ -404,12 +394,7 @@ export default function TalentAuditionsPage() {
             }
             return list
           }
-          const matchesMode = (a: Audition) => {
-            if (filterMode === 'all') return true
-            if (filterMode === 'online') return a.mode === 'online' || a.mode === 'both'
-            return a.mode === 'offline' || a.mode === 'both'
-          }
-          const filtered = auditions.filter(matchesMode)
+          const filtered = auditions
           const active = sortAuditions(filtered.filter(a => !isExpired(a.deadline) && a.id !== firstActiveId))
           const expired = sortAuditions(filtered.filter(a => isExpired(a.deadline)))
 
@@ -443,11 +428,6 @@ export default function TalentAuditionsPage() {
                       {categoryLabels[c] ?? c}
                     </span>
                   ))}
-                  {a.mode && (
-                    <span style={{ fontSize: 11, background: 'rgba(36,28,21,0.09)', color: '#8A7F6E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                      {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
-                    </span>
-                  )}
                 </div>
                 {displayDesc && (
                   <div onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}

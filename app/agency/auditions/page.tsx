@@ -151,11 +151,6 @@ export default function AgencyAuditionsPage() {
             {a.category.split(',').map(c => (
               <span key={c} style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
             ))}
-            {a.mode && (
-              <span style={{ fontSize: 11, background: 'rgba(36,28,21,0.09)', color: '#8A7F6E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-                {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
-              </span>
-            )}
           </div>
           {a.description && (
             <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
@@ -192,11 +187,6 @@ export default function AgencyAuditionsPage() {
         {a.category.split(',').map(c => (
           <span key={c} style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
         ))}
-        {a.mode && (
-          <span style={{ fontSize: 11, background: 'rgba(36,28,21,0.09)', color: '#8A7F6E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
-            {a.mode === 'online' ? '🖥️ 온라인' : a.mode === 'offline' ? '📍 오프라인' : '🔀 온+오프'}
-          </span>
-        )}
       </div>
       {a.description && (
         <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 10, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</div>
