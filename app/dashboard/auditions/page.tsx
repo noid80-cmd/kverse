@@ -20,6 +20,7 @@ type Audition = {
   category: string
   mode: 'online' | 'offline' | 'both' | null
   deadline: string | null
+  status: string
   created_at: string
   agency: { name: string; is_verified: boolean } | null
   translations?: AuditionTranslations | null
@@ -47,6 +48,10 @@ type MyVideo = { id: string; title: string; thumbnail_url: string | null; video_
 const today = new Date().toISOString().slice(0, 10)
 function isExpired(deadline: string | null) {
   return !!deadline && deadline < today
+}
+// 마감일이 지난 것과 운영자가 마감 처리한 것을 함께 '끝난 공고'로 본다
+function isDone(a: Audition) {
+  return a.status === 'closed' || isExpired(a.deadline)
 }
 
 export default function TalentAuditionsPage() {
@@ -95,8 +100,8 @@ export default function TalentAuditionsPage() {
 
     const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
       supabase.from('auditions')
-        .select('id, title, description, category, mode, deadline, created_at, translations, agency:agencies(name, is_verified)')
-        .eq('status', 'active')
+        .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, is_verified)')
+        .in('status', ['active', 'closed'])
         .order('created_at', { ascending: false }),
       supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
       supabase.from('videos').select('id, title, thumbnail_url, video_url, category')
@@ -292,7 +297,7 @@ export default function TalentAuditionsPage() {
 
       {/* Featured audition card */}
       {!loading && (() => {
-        const firstActive = auditions.find(a => !isExpired(a.deadline))
+        const firstActive = auditions.find(a => !isDone(a))
         if (!firstActive) return null
         const appInfo = applicationMap[firstActive.id]
         const appStatus = appInfo?.status
@@ -357,7 +362,7 @@ export default function TalentAuditionsPage() {
 
       <div className="max-w-lg mx-auto px-4">
         {/* More opportunities header */}
-        {!loading && auditions.filter(a => !isExpired(a.deadline)).length > 1 && (
+        {!loading && auditions.filter(a => !isDone(a)).length > 1 && (
           <div style={{ fontSize: 17, fontWeight: 800, color: '#241C15', marginBottom: 16 }}>More Opportunities</div>
         )}
 
@@ -382,7 +387,7 @@ export default function TalentAuditionsPage() {
             <div style={{ fontWeight: 700, color: '#241C15' }}>{tx.auditions.noAuditions}</div>
           </div>
         ) : (() => {
-          const firstActiveId = auditions.find(a => !isExpired(a.deadline))?.id
+          const firstActiveId = auditions.find(a => !isDone(a))?.id
           const sortAuditions = (list: Audition[]) => {
             if (sortBy === 'deadline') {
               return [...list].sort((a, b) => {
@@ -395,11 +400,11 @@ export default function TalentAuditionsPage() {
             return list
           }
           const filtered = auditions
-          const active = sortAuditions(filtered.filter(a => !isExpired(a.deadline) && a.id !== firstActiveId))
-          const expired = sortAuditions(filtered.filter(a => isExpired(a.deadline)))
+          const active = sortAuditions(filtered.filter(a => !isDone(a) && a.id !== firstActiveId))
+          const expired = sortAuditions(filtered.filter(isDone))
 
           const AuditionCard = ({ a }: { a: Audition }) => {
-            const exp = isExpired(a.deadline)
+            const exp = isDone(a)
             const appInfo = applicationMap[a.id]
             const displayTitle = getAuditionTitle(a, lang)
             const displayDesc = getAuditionDesc(a, lang)
