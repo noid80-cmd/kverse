@@ -72,23 +72,7 @@ function AuditionForm({
           )
         })}
       </div>
-      <div>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8, fontWeight: 600 }}>진행방식</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {([['online', '🖥️ 온라인'], ['offline', '📍 오프라인'], ['both', '🔀 온+오프라인']] as const).map(([val, label]) => {
-            const selected = form.mode === val
-            return (
-              <button key={val} type="button" onClick={() => setForm(f => ({ ...f, mode: val }))} style={{
-                flex: 1, padding: '8px 4px', borderRadius: 10, border: selected ? 'none' : '1.5px solid #e0e0f0',
-                background: selected ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#f8f8fc',
-                color: selected ? 'white' : '#94a3b8', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-              }}>
-                {label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      {/* 온라인 전용 플랫폼이라 진행방식 선택을 두지 않는다. 새 공고는 항상 'online'. */}
       <div>
         <label style={{ fontSize: 12, color: '#ef4444', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
         <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
@@ -110,7 +94,7 @@ function AuditionForm({
 }
 
 const emptyForm = (): FormState => ({
-  title: '', description: '', categories: ['vocal'], mode: 'offline', deadline: '', agencyId: ''
+  title: '', description: '', categories: ['vocal'], mode: 'online', deadline: '', agencyId: ''
 })
 
 export default function AdminAuditionsPage() {
@@ -212,7 +196,7 @@ export default function AdminAuditionsPage() {
       title: a.title,
       description: a.description ?? '',
       categories: a.category.split(','),
-      mode: a.mode ?? 'offline',
+      mode: a.mode ?? 'online',
       deadline: a.deadline ?? '',
       agencyId: a.agency_id ?? 'ADMIN',
     })

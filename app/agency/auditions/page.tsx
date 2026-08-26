@@ -37,7 +37,7 @@ export default function AgencyAuditionsPage() {
   const [agencyName, setAgencyName] = useState('')
   const [tab, setTab] = useState<'mine' | 'all'>('mine')
   const [showCreate, setShowCreate] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'both' as 'online' | 'offline' | 'both', deadline: '' })
+  const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'online' as 'online' | 'offline' | 'both', deadline: '' })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const supabase = createClient()
@@ -134,7 +134,7 @@ export default function AgencyAuditionsPage() {
         })
       })
 
-      setForm({ title: '', description: '', categories: ['vocal'], mode: 'both', deadline: '' })
+      setForm({ title: '', description: '', categories: ['vocal'], mode: 'online', deadline: '' })
       setShowCreate(false)
       load()
     }
@@ -297,23 +297,8 @@ export default function AgencyAuditionsPage() {
                   )
                 })}
               </div>
-              <div>
-                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 8, fontWeight: 600 }}>진행방식</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {([['online', '🖥️ 온라인'], ['offline', '📍 오프라인'], ['both', '🔀 온+오프라인']] as const).map(([val, label]) => {
-                    const selected = form.mode === val
-                    return (
-                      <button key={val} type="button" onClick={() => setForm(f => ({ ...f, mode: val }))} style={{
-                        flex: 1, padding: '8px 4px', borderRadius: 10, border: selected ? 'none' : '1.5px solid rgba(36,28,21,0.13)',
-                        background: selected ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
-                        color: selected ? 'white' : '#8A7F6E', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                      }}>
-                        {label}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
+              {/* Krookie는 온라인 전용 오디션 플랫폼이라 진행방식 선택을 두지 않는다.
+                  mode 컬럼은 기존 공고 때문에 남겨두고 새 공고는 항상 'online'으로 만든다. */}
               <div>
                 <label style={{ fontSize: 12, color: '#DC2626', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
                 <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
