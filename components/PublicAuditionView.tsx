@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/i18n/context'
 import { createClient } from '@/lib/supabase/client'
+import { setSignupIntent } from '@/lib/intent'
 import { BadgeCheck, CalendarDays, Monitor, MapPin, Shuffle, ArrowRight } from 'lucide-react'
 
 export type PublicAudition = {
@@ -96,11 +97,11 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
   const ModeIcon = audition.mode === 'offline' ? MapPin : audition.mode === 'both' ? Shuffle : Monitor
 
   function apply() {
-    const next = '/dashboard/auditions'
-    // 가입 페이지는 아직 next 파라미터를 읽지 않는다(가입 후 /onboarding으로 간다).
-    // 애플 심사가 가입 플로우를 보고 있는 동안은 그쪽을 손대지 않고, 심사 통과 후
-    // signup → onboarding 체인에 next를 연결할 것. 그때까지 이 값은 무시된다.
-    router.push(authed ? next : `/signup?next=${encodeURIComponent(next)}`)
+    // 목록이 아니라 이 공고의 지원 화면이 바로 열리게 한다
+    const next = `/dashboard/auditions?id=${audition.id}`
+    // 가입/로그인 왕복을 건너 살아남아야 하므로 URL이 아니라 localStorage에 남긴다
+    setSignupIntent({ next, from: `audition:${audition.id}` })
+    router.push(authed ? next : '/signup')
   }
 
   return (

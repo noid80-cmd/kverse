@@ -4,6 +4,23 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Bell, BellOff, Video, Star, MessageCircle, Search, ClipboardList } from 'lucide-react'
 import { isNativeApp } from '@/lib/capacitor'
+import { createClient } from '@/lib/supabase/client'
+import { peekSignupIntent, clearSignupIntent } from '@/lib/intent'
+
+// 공고를 보고 들어와 가입한 사람인지 남긴다. 이미 값이 있으면 덮지 않는다
+// (첫 유입 경로가 알고 싶은 것이지 마지막 경로가 아니다).
+async function recordSignupSource(from: string) {
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data: prof } = await supabase.from('profiles').select('signup_source').eq('id', user.id).single()
+    if (prof?.signup_source) return
+    await supabase.from('profiles').update({ signup_source: from }).eq('id', user.id)
+  } catch {
+    // 기록 실패가 온보딩을 막으면 안 된다
+  }
+}
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -44,7 +61,9 @@ export default function OnboardingPage() {
 function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const nextPath = searchParams.get('next') ?? '/dashboard'
+  // 공개 공고에서 넘어온 경우 URL이 아니라 localStorage에 목적지가 들어있다
+  const intent = typeof window !== 'undefined' ? peekSignupIntent() : {}
+  const nextPath = searchParams.get('next') ?? intent.next ?? '/dashboard'
   const isAgency = nextPath.includes('agency')
   const isPreview = searchParams.get('preview') === '1'
   const [step, setStep] = useState<0 | 1 | 2 | null>(null)
@@ -89,6 +108,8 @@ function OnboardingContent() {
 
   function finish() {
     if (!isPreview) localStorage.setItem('kpick-onboarded', '1')
+    if (intent.from) recordSignupSource(intent.from)
+    clearSignupIntent()
     router.replace(nextPath)
   }
 

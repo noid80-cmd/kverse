@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { resolveAfterAuth } from '@/lib/intent'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
@@ -63,7 +64,7 @@ export default function LoginPage() {
       // ("여러 번 시도해야 로그인됨"). router.push는 같은 JS 컨텍스트를
       // 유지해서 이 문제를 피하고, RSC 페치가 실패해도 Next.js가 자동으로
       // 브라우저 네비게이션으로 대체한다.
-      router.push(result.href)
+      router.push(resolveAfterAuth(result.href))
       router.refresh()
     } catch (err) {
       console.error('[login] error:', err)

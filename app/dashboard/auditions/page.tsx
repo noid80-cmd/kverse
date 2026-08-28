@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
@@ -114,10 +114,26 @@ export default function TalentAuditionsPage() {
     setApplicationMap(map)
     setMyVideos((vids as unknown as MyVideo[]) ?? [])
     setLoading(false)
+    return (auds as unknown as Audition[]) ?? []
+  }, [])
+
+  // 공개 공고 페이지의 '지원하기'가 /dashboard/auditions?id=<공고>로 보낸다.
+  // 목록만 띄우면 방금 본 공고를 다시 찾아야 하므로 그 공고의 지원 화면을 바로 연다.
+  // useSearchParams 대신 location을 읽는 건 이 페이지에 Suspense 경계를
+  // 새로 두지 않기 위해서다(클라이언트에서만 실행되므로 동작은 같다).
+  const openedFromLink = useRef(false)
+  const openFromQuery = useCallback((list: Audition[] | undefined) => {
+    if (openedFromLink.current || !list) return
+    const id = new URLSearchParams(window.location.search).get('id')
+    if (!id) return
+    const target = list.find(a => a.id === id)
+    if (!target || isDone(target)) return
+    openedFromLink.current = true
+    openModal(target)
   }, [])
 
   useEffect(() => {
-    load()
+    load().then(openFromQuery)
     const onVisible = () => { if (document.visibilityState === 'visible') load() }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)

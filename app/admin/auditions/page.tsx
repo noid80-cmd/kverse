@@ -46,9 +46,23 @@ function AuditionForm({
       <select value={form.agencyId} onChange={e => setForm(f => ({ ...f, agencyId: e.target.value }))}
         style={{ ...inputStyle, border: `1px solid ${form.agencyId ? '#e0e0f0' : '#fca5a5'}` }}>
         <option value="">공고 주체 선택 *</option>
-        <option value="ADMIN">📌 관리자 공고</option>
+        <option value="ADMIN">관리자 공고 (기획사 없음)</option>
         {agencies.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
       </select>
+      {/* 기획사 없이 올린 공고는 아무 에러 없이 조용히 반쪽만 동작한다.
+          실제로 이렇게 등록된 공고가 쌓여 있었으므로 결과를 명시한다. */}
+      {form.agencyId === 'ADMIN' && (
+        <div style={{
+          background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.25)',
+          borderRadius: 10, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.65, color: '#b91c1c',
+        }}>
+          기획사를 지정하지 않으면 이렇게 됩니다.<br />
+          · 공개 공고 페이지에 기획사 이름과 인증 배지가 표시되지 않아요<br />
+          · 지원이 들어와도 <b>기획사에 알림이 가지 않아요</b><br />
+          · 기획사가 지원자 목록을 볼 수 없어요<br />
+          기획사가 목록에 없으면 <b>기획사 관리</b>에서 먼저 등록해주세요.
+        </div>
+      )}
       <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
         placeholder="공고 제목 *" style={inputStyle} />
       <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}

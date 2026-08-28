@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { resolveAfterAuth } from '@/lib/intent'
 
 export default function AuthCallback() {
   return (
@@ -53,13 +54,13 @@ function AuthCallbackContent() {
         })
         const result = await res.json()
         if (!res.ok || result.error) {
-          router.push('/dashboard')
+          router.push(resolveAfterAuth('/dashboard'))
           return
         }
-        router.push(result.href)
+        router.push(resolveAfterAuth(result.href))
         router.refresh()
       } catch {
-        router.push('/dashboard')
+        router.push(resolveAfterAuth('/dashboard'))
       }
     }
     run()
