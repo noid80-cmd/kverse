@@ -22,7 +22,7 @@ type Audition = {
   deadline: string | null
   status: string
   created_at: string
-  agency: { name: string; is_verified: boolean } | null
+  agency: { name: string; is_verified: boolean; logo_url: string | null } | null
   translations?: AuditionTranslations | null
 }
 
@@ -100,7 +100,7 @@ export default function TalentAuditionsPage() {
 
     const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
       supabase.from('auditions')
-        .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, is_verified)')
+        .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, is_verified, logo_url)')
         .in('status', ['active', 'closed'])
         .order('created_at', { ascending: false }),
       supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
@@ -339,8 +339,10 @@ export default function TalentAuditionsPage() {
               </div>
               {/* Agency + title */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(36,28,21,0.13)', border: '1.5px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: 15, fontWeight: 900, color: '#241C15' }}>{agencyInitials}</span>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', background: firstActive.agency?.logo_url ? '#FFFFFF' : 'rgba(36,28,21,0.13)', border: '1.5px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {firstActive.agency?.logo_url
+                    ? <img src={firstActive.agency.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    : <span style={{ fontSize: 15, fontWeight: 900, color: '#241C15' }}>{agencyInitials}</span>}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.65)', marginBottom: 2 }}>{firstActive.agency?.name ?? tx.auditions.adminNotice}</div>
@@ -436,6 +438,15 @@ export default function TalentAuditionsPage() {
                 opacity: exp && !appInfo ? 0.65 : 1,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                  {a.agency?.logo_url && (
+                    <span style={{
+                      width: 28, height: 28, borderRadius: 8, overflow: 'hidden', flexShrink: 0,
+                      background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.09)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <img src={a.agency.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </span>
+                  )}
                   <div style={{ fontWeight: 900, color: '#241C15', fontSize: 18 }}>{a.agency?.name ?? tx.auditions.adminNotice}</div>
                   {a.agency?.is_verified && (
                     <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{tx.common.verified}</span>

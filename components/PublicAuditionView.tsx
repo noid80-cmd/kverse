@@ -17,6 +17,7 @@ export type PublicAudition = {
   status: string
   agencyName: string | null
   agencyVerified: boolean
+  agencyLogo: string | null
   translations: Record<string, { title?: string; description?: string }> | null
 }
 
@@ -121,7 +122,18 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
         </span>
 
         {audition.agencyName && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
+            {audition.agencyLogo && (
+              /* 기획사 로고는 공고의 신뢰도를 만드는 요소라 이름보다 먼저 보이게 둔다.
+                 로고는 잘리면 안 되므로 cover가 아니라 contain. */
+              <span style={{
+                width: 34, height: 34, borderRadius: 9, overflow: 'hidden', flexShrink: 0,
+                background: '#FFFFFF', border: '1px solid #EAE0D1',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <img src={audition.agencyLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </span>
+            )}
             <span style={{ fontSize: 14, fontWeight: 700, color: '#8A7F6E' }}>{audition.agencyName}</span>
             {audition.agencyVerified && <BadgeCheck size={15} strokeWidth={2.2} color="#FF6F3C" />}
           </div>

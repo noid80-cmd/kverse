@@ -12,7 +12,7 @@ import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
 
 type Profile = { name: string; avatar_url: string | null; bio: string | null }
 type RecentVideo = { id: string; title: string; thumbnail_url: string | null }
-type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string } | null; translations?: Record<string, { title: string; description: string }> | null }
+type RecentAudition = { id: string; title: string; category: string; deadline: string | null; agency: { name: string; logo_url: string | null } | null; translations?: Record<string, { title: string; description: string }> | null }
 type PageData = {
   profile: Profile | null
   recentVideos: RecentVideo[]
@@ -85,7 +85,7 @@ export default function DashboardPage() {
         supabase.from('videos').select('id, title, thumbnail_url', { count: 'exact' }).eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(6),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('id', { count: 'exact' }).eq('talent_id', user.id).eq('deleted_by_talent', false),
-        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name)')
+        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name, logo_url)')
           .eq('status', 'active')
           .or(`deadline.is.null,deadline.gte.${new Date().toISOString().slice(0, 10)}`)
           .order('created_at', { ascending: false }).limit(8),
@@ -373,6 +373,15 @@ export default function DashboardPage() {
                   <Link href="/dashboard/auditions" style={{ textDecoration: 'none' }}>
                     <div key={auditionIdx} style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(36,28,21,0.07)', background: '#FFFFFF', animation: 'fadeSlide 0.4s ease' }}>
                       <div style={{ padding: '16px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {a.agency?.logo_url && (
+                          <span style={{
+                            width: 40, height: 40, borderRadius: 11, overflow: 'hidden', flexShrink: 0,
+                            background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.07)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <img src={a.agency.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          </span>
+                        )}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {getAuditionDisplayTitle(a, lang)}

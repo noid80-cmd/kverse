@@ -13,6 +13,8 @@ function admin() {
   )
 }
 
+type AgencyRow = { name: string; is_verified: boolean; logo_url: string | null }
+
 type Row = {
   id: string
   title: string
@@ -22,13 +24,13 @@ type Row = {
   deadline: string | null
   status: string
   translations: Record<string, { title?: string; description?: string }> | null
-  agency: { name: string; is_verified: boolean } | { name: string; is_verified: boolean }[] | null
+  agency: AgencyRow | AgencyRow[] | null
 }
 
 async function getAudition(id: string): Promise<PublicAudition | null> {
   const { data, error } = await admin()
     .from('auditions')
-    .select('id, title, description, category, mode, deadline, status, translations, agency:agencies(name, is_verified)')
+    .select('id, title, description, category, mode, deadline, status, translations, agency:agencies(name, is_verified, logo_url)')
     .eq('id', id)
     .maybeSingle<Row>()
 
@@ -45,6 +47,7 @@ async function getAudition(id: string): Promise<PublicAudition | null> {
     status: data.status,
     agencyName: agency?.name ?? null,
     agencyVerified: agency?.is_verified ?? false,
+    agencyLogo: agency?.logo_url ?? null,
     translations: data.translations,
   }
 }

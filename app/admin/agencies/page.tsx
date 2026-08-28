@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
 
@@ -26,6 +26,9 @@ export default function AdminAgenciesPage() {
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
   const [inviteLink, setInviteLink] = useState<{ url: string; agencyName: string } | null>(null)
   const [copied, setCopied] = useState(false)
+  const logoInputRef = useRef<HTMLInputElement>(null)
+  const [logoTarget, setLogoTarget] = useState<string | null>(null)
+  const [logoUploading, setLogoUploading] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -41,6 +44,46 @@ export default function AdminAgenciesPage() {
     }
     load()
   }, [])
+
+  function pickLogo(agencyId: string) {
+    setLogoTarget(agencyId)
+    logoInputRef.current?.click()
+  }
+
+  // 로고는 공개 공고 페이지에 그대로 노출되므로 기획사가 보내준 파일을 여기서 바로 올린다
+  async function onLogoSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    const agencyId = logoTarget
+    e.target.value = ''
+    if (!file || !agencyId) return
+    setLogoUploading(agencyId)
+    try {
+      const res = await fetch('/api/upload-agency-logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error ?? '업로드 주소를 못 받았어요')
+      const { url, publicUrl } = await res.json()
+      const ok = await new Promise<boolean>(resolve => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', url)
+        xhr.setRequestHeader('Content-Type', file.type)
+        xhr.onload = () => resolve(xhr.status === 200)
+        xhr.onerror = () => resolve(false)
+        xhr.send(file)
+      })
+      if (!ok) throw new Error('파일 전송에 실패했어요')
+      const { error } = await supabase.from('agencies').update({ logo_url: publicUrl }).eq('id', agencyId)
+      if (error) throw new Error(error.message)
+      setAgencies(prev => prev.map(a => (a.id === agencyId ? { ...a, logo_url: publicUrl } : a)))
+    } catch (err) {
+      alert('로고 업로드 실패: ' + (err instanceof Error ? err.message : '알 수 없는 오류'))
+    } finally {
+      setLogoUploading(null)
+      setLogoTarget(null)
+    }
+  }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -193,22 +236,35 @@ export default function AdminAgenciesPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onLogoSelected}
+              style={{ display: 'none' }}
+            />
             {displayed.map(a => (
               <div key={a.id} style={{
                 background: '#FFFFFF', borderRadius: 18, padding: '18px 20px',
                 border: `1px solid ${a.business_registration_url && !a.is_verified ? 'rgba(251,191,36,0.25)' : 'rgba(36,28,21,0.09)'}`,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: a.business_registration_url ? 14 : 0 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 14, flexShrink: 0, overflow: 'hidden',
-                    background: 'rgba(255,111,60,0.12)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {a.logo_url
-                      ? <img src={a.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <span style={{ fontSize: 20 }}>🏢</span>
+                  <button
+                    onClick={() => pickLogo(a.id)}
+                    title="클릭해서 로고 등록/변경"
+                    style={{
+                      width: 44, height: 44, borderRadius: 14, flexShrink: 0, overflow: 'hidden',
+                      background: 'rgba(255,111,60,0.12)', padding: 0, cursor: 'pointer',
+                      border: a.logo_url ? '1px solid rgba(36,28,21,0.09)' : '1px dashed rgba(255,111,60,0.5)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                    {logoUploading === a.id
+                      ? <span style={{ fontSize: 10, fontWeight: 700, color: '#D84A1E' }}>올리는 중</span>
+                      : a.logo_url
+                      ? <img src={a.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#FFFFFF' }} />
+                      : <span style={{ fontSize: 10, fontWeight: 700, color: '#D84A1E', lineHeight: 1.2 }}>로고<br />추가</span>
                     }
-                  </div>
+                  </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: 700, color: '#241C15', fontSize: 15 }}>{a.name}</span>

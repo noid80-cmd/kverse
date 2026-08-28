@@ -1,0 +1,45 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { createClient } from '@/lib/supabase/server'
+
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+})
+
+export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getSession()).data.session?.user
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  // 로고는 관리자와 기획사 담당자만 올린다(지망생 계정까지 열어둘 이유가 없다)
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin' && profile?.role !== 'agency') {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+
+  const { filename, contentType } = await req.json()
+
+  if (!contentType?.startsWith('image/')) {
+    return NextResponse.json({ error: 'image only' }, { status: 400 })
+  }
+
+  const key = `agency-logo/${Date.now()}_${filename}`
+  const url = await getSignedUrl(
+    r2,
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: key,
+      ContentType: contentType,
+    }),
+    { expiresIn: 600 }
+  )
+
+  const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
+  return NextResponse.json({ url, publicUrl })
+}
