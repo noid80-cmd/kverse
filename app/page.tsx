@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 import LandingClient from './LandingClient'
 
 export const metadata: Metadata = {
-  title: 'Krookie — 매주 새로운 오디션에 지원하세요',
-  description: '기획사가 직접 여는 온라인 오디션. 갖고 있는 영상 하나로 지원하고 결과는 앱에서 받아보세요.',
+  title: 'Krookie — 기획사가 직접 발굴하는 오디션 플랫폼',
+  description: '영상 하나로 전세계 기획사 담당자에게 노출됩니다. K팝 보컬·댄스·연기 오디션의 새로운 방식.',
   openGraph: {
-    title: 'Krookie — 매주 새로운 오디션에 지원하세요',
-    description: '기획사가 직접 여는 온라인 오디션. 영상 하나로 지원하세요.',
+    title: 'Krookie — 기획사가 직접 발굴하는 오디션 플랫폼',
+    description: '영상 하나로 전세계 기획사 담당자에게 노출됩니다.',
     url: 'https://kpick.app',
   },
 }

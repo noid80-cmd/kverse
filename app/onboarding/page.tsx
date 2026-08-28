@@ -167,12 +167,12 @@ function OnboardingContent() {
             </div>
 
             <h1 style={{ fontSize: 26, fontWeight: 900, color: '#241C15', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>
-              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : <>매주 새로운 오디션에<br />지원하세요</>}
+              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : <>K-pop 커버로 시작하는<br />데뷔의 문</>}
             </h1>
             <p style={{ fontSize: 15, color: '#8A7F6E', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
               {isAgency
                 ? <>전세계 K-pop 팬들의 커버 영상에서<br />다음 스타를 찾아보세요</>
-                : <>기획사가 직접 여는 온라인 오디션.<br />갖고 있는 영상으로 지원하세요</>}
+                : <>커버 영상을 올리면 전세계 기획사가<br />직접 찾아와요</>}
             </p>
 
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
@@ -183,9 +183,9 @@ function OnboardingContent() {
                     { Icon: MessageCircle, text: '채팅으로 소통 — 마음에 든 지망생과 바로 연락' },
                   ]
                 : [
-                    { Icon: ClipboardList, text: '매주 새 오디션 — 기획사가 직접 열어요' },
-                    { Icon: Video, text: '영상으로 지원 — 갖고 있는 영상이면 충분해요' },
-                    { Icon: Star, text: '결과는 앱으로 — 커버 영상을 올려두면 기획사가 먼저 찾아오기도 해요' },
+                    { Icon: Video, text: '커버 영상 올리기 — 원하는 곡으로 자유롭게' },
+                    { Icon: Star, text: '기획사가 발견해요 — 관심 있으면 북마크·오디션 제안' },
+                    { Icon: MessageCircle, text: '채팅으로 소통 — 오디션까지 이어져요' },
                   ]
               ).map(item => (
                 <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#FFFFFF', borderRadius: 14, border: '1px solid rgba(36,28,21,0.09)' }}>

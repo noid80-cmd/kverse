@@ -39,7 +39,7 @@ const t = {
 
   // ── Auth ─────────────────────────────────────────────
   auth: {
-    tagline:         ['매주 새로운 오디션에 지원하세요', 'Apply to a new audition every week', '毎週新しいオーディションに応募しよう', '每周都有新试镜等你报名', '每週都有新試鏡等你報名', 'สมัครออดิชันใหม่ได้ทุกสัปดาห์', 'Ikuti audisi baru setiap minggu', 'Ứng tuyển thử vai mới mỗi tuần', 'Mag-apply sa bagong audisyon kada linggo', 'Postúlate a una nueva audición cada semana'],
+    tagline:         ['기획사가 직접 발굴하는 오디션 플랫폼', 'The audition platform where agencies find you', '芸能事務所が直接スカウトするオーディションプラットフォーム', '经纪公司直接发掘人才的试镜平台', '經紀公司直接發掘人才的試鏡平台', 'แพลตฟอร์มออดิชันที่ค่ายเพลงค้นหาคุณเอง', 'Platform audisi tempat agensi menemukan kamu', 'Nền tảng thử vai nơi các công ty phát hiện bạn', 'Ang platform ng audisyon kung saan hinahanap ka ng mga ahensya', 'La plataforma de audiciones donde las agencias te encuentran'],
     loginTitle:      ['로그인', 'Log in', 'ログイン', '登录', '登入', 'เข้าสู่ระบบ', 'Masuk', 'Đăng nhập', 'Mag-login', 'Iniciar sesión'],
     loginGoogle:     ['Google로 로그인', 'Continue with Google', 'Googleでログイン', '使用Google登录', '使用Google登入', 'เข้าสู่ระบบด้วย Google', 'Masuk dengan Google', 'Đăng nhập bằng Google', 'Mag-login gamit ang Google', 'Continuar con Google'],
     loginApple:      ['Apple로 로그인', 'Continue with Apple', 'Appleでログイン', '使用Apple登录', '使用Apple登入', 'เข้าสู่ระบบด้วย Apple', 'Masuk dengan Apple', 'Đăng nhập bằng Apple', 'Mag-login gamit ang Apple', 'Continuar con Apple'],
