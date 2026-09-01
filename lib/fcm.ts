@@ -109,3 +109,22 @@ export async function sendFcm(
 
   return { sent, failed, deadTokens: dead }
 }
+
+/**
+ * FCM 설정이 실제로 동작하는지 확인한다.
+ * 서비스 계정 JSON을 Vercel 환경변수에 붙여넣을 때 개행에서 잘려 들어가도
+ * 화면상으로는 구별이 안 된다. 알림을 보내봐야 아는 상황을 피하려고,
+ * 토큰 발급까지 실제로 해본다.
+ */
+export async function fcmHealth(): Promise<{ ok: boolean; reason?: string; projectId?: string }> {
+  const raw = process.env.FCM_SERVICE_ACCOUNT
+  if (!raw) return { ok: false, reason: 'FCM_SERVICE_ACCOUNT 환경변수가 없음' }
+  const sa = serviceAccount()
+  if (!sa) return { ok: false, reason: `JSON 파싱 실패 (길이 ${raw.length}자 — 붙여넣다 잘렸을 가능성)` }
+  if (!sa.project_id || !sa.client_email || !sa.private_key) {
+    return { ok: false, reason: 'JSON에 project_id·client_email·private_key 중 빠진 항목이 있음' }
+  }
+  const token = await accessToken(sa)
+  if (!token) return { ok: false, reason: '액세스 토큰 발급 실패 — private_key가 잘렸거나 손상됨', projectId: sa.project_id }
+  return { ok: true, projectId: sa.project_id }
+}

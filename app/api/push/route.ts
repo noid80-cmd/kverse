@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { sendFcm } from '@/lib/fcm'
+import { sendFcm, fcmHealth } from '@/lib/fcm'
 
 export const dynamic = 'force-dynamic'
 
@@ -136,4 +136,9 @@ export async function POST(req: NextRequest) {
 
   console.log('[push] web:', sent, '/ app:', fcm.sent, '(실패', fcm.failed, ')')
   return NextResponse.json({ sent, web: sent, app: fcm.sent, appFailed: fcm.failed })
+}
+
+// 설정 점검용. 비밀값은 내보내지 않고 성공 여부와 프로젝트 ID만 알려준다.
+export async function GET() {
+  return NextResponse.json(await fcmHealth())
 }
