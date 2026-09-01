@@ -18,7 +18,7 @@ export default function TermsPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFF8E7', padding: 'calc(env(safe-area-inset-top) + 20px) 20px 60px' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', padding: 'calc(var(--safe-top-0) + 20px) 20px 60px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <button onClick={goBack} aria-label="뒤로"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, marginLeft: -8, marginBottom: 12, color: '#5A4F42', background: 'none', border: 'none', cursor: 'pointer' }}>

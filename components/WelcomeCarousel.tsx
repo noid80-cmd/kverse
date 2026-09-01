@@ -42,7 +42,7 @@ export default function WelcomeCarousel() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', flexDirection: 'column', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', flexDirection: 'column', paddingTop: 'var(--safe-top-0)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 20px', flexShrink: 0 }}>
         <button onClick={() => router.push('/signup')}
           style={{ background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 8 }}>

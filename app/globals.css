@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/* 상단 안전영역.
+   layout.tsx가 apple-mobile-web-app-status-bar-style을 black-translucent로
+   두고 있어서 홈화면 추가(PWA)와 네이티브 앱에서는 페이지가 상태바 "아래로"
+   깔린다. 그런데 iOS는 이 모드에서 env(safe-area-inset-top)을 0으로 보고할
+   때가 있어(실측: 로고가 시계와 겹침) env만 믿으면 안 된다. 그래서 상태바가
+   페이지를 덮는 맥락에서는 최소값을 따로 준다.
+   - 브라우저: 상태바가 페이지를 안 덮으므로 20px면 충분
+   - PWA/앱: 노치·다이내믹 아일랜드 높이를 감안해 최소 52px */
+:root {
+  --safe-top: max(env(safe-area-inset-top, 0px), 20px);
+  --safe-top-0: env(safe-area-inset-top, 0px);
+}
+@media (display-mode: standalone) {
+  :root {
+    --safe-top: max(env(safe-area-inset-top, 0px), 52px);
+    --safe-top-0: max(env(safe-area-inset-top, 0px), 52px);
+  }
+}
+html[data-native="1"] {
+  --safe-top: max(env(safe-area-inset-top, 0px), 52px);
+  --safe-top-0: max(env(safe-area-inset-top, 0px), 52px);
+}
+
 body {
   background: #FFF8E7;
   color: #241C15;

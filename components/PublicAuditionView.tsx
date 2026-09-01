@@ -107,7 +107,7 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
 
   return (
     <main style={{ minHeight: '100dvh', background: '#FFF8E7', color: '#241C15' }}>
-      <div style={{ maxWidth: 560, margin: '0 auto', padding: 'calc(env(safe-area-inset-top) + 28px) 20px 130px' }}>
+      <div style={{ maxWidth: 560, margin: '0 auto', padding: 'calc(var(--safe-top-0) + 28px) 20px 130px' }}>
 
         <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.4, marginBottom: 22 }}>Krookie</div>
 

@@ -291,7 +291,7 @@ export default function ExplorePage() {
       <div style={{ background: '#FFF8E7', minHeight: '100dvh', paddingBottom: 88 }}>
 
         {/* Sticky header */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: 'max(env(safe-area-inset-top, 0px), 12px) 16px 12px' }}>
+        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: 'var(--safe-top) 16px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
               <svg width="26" height="26" viewBox="0 0 100 100">
@@ -397,12 +397,12 @@ export default function ExplorePage() {
           {/* Back button */}
           <button
             onClick={() => setSwipeIdx(null)}
-            style={{ position: 'fixed', top: 'max(env(safe-area-inset-top, 0px), 16px)', left: 16, zIndex: 120, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            style={{ position: 'fixed', top: 'var(--safe-top)', left: 16, zIndex: 120, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
           </button>
 
           {/* Category pills */}
-          <div style={{ position: 'fixed', top: 'max(env(safe-area-inset-top, 0px), 16px)', left: 64, right: 16, zIndex: 120, display: 'flex', gap: 8, overflowX: 'auto' }}>
+          <div style={{ position: 'fixed', top: 'var(--safe-top)', left: 64, right: 16, zIndex: 120, display: 'flex', gap: 8, overflowX: 'auto' }}>
             {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
               <button key={c} onClick={() => { setCategory(c); setSwipeIdx(null) }} style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)', background: category === c ? 'rgba(255,111,60,0.85)' : 'rgba(0,0,0,0.5)', color: 'white', boxShadow: category === c ? '0 2px 8px rgba(255,111,60,0.4)' : 'none' }}>
                 {c === 'all' ? tx.explore.allCategories : categoryLabels[c]}

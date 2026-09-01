@@ -192,7 +192,7 @@ export default function DashboardPage() {
       <div style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ── Krookie 로고 ── */}
-        <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 20px)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+        <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'var(--safe-top)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <svg width="24" height="24" viewBox="0 0 100 100">
             <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C" />
             <path d="M82 18 L84 26 L92 28 L84 30 L82 38 L80 30 L72 28 L80 26 Z" fill="rgba(216,74,30,0.7)" />

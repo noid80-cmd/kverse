@@ -269,7 +269,7 @@ export default function LandingClient() {
       </div>
 
       {/* Nav */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,248,231,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: '0 24px', paddingTop: 'env(safe-area-inset-top)' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,248,231,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: '0 24px', paddingTop: 'var(--safe-top-0)' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(145deg, #FFEDE0, #FFD9BC)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

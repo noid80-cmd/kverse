@@ -107,7 +107,7 @@ export default function DiscoverPage() {
           display: 'flex', alignItems: 'center', gap: 6,
         }}>⚙️ 관리자</a>
       )}
-      <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 20px)' }}>
+      <div className="max-w-lg mx-auto px-4" style={{ paddingTop: 'var(--safe-top)' }}>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <svg width="24" height="24" viewBox="0 0 100 100">
