@@ -280,18 +280,16 @@ export default function TalentAuditionsPage() {
     setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
 
-    const { data: audData } = await supabase.from('auditions').select('agency_id').eq('id', modalAudition.id).single()
-    if (audData?.agency_id) {
-      const { data: members } = await supabase.from('agency_members').select('profile_id').eq('agency_id', audData.agency_id)
-      const { data: prof } = await supabase.from('profiles').select('name').eq('id', myId).single()
-      members?.forEach(m => {
-        sendPush({
-          userId: m.profile_id, title: '새 오디션 지원',
-          body: `${prof?.name ?? '지망생'}이 지원했어요`,
-          url: `/agency/auditions/${modalAudition.id}`,
-        })
-      })
-    }
+    // 담당자를 여기서 찾지 않는다 — agency_members는 talent에게 RLS로 빈
+    // 배열이라, 예전 코드는 알림을 한 건도 못 보내면서 에러도 안 냈다.
+    // 오디션 id만 넘기고 대상 계산은 서버(/api/push)에 맡긴다.
+    const { data: prof } = await supabase.from('profiles').select('name').eq('id', myId).single()
+    sendPush({
+      auditionId: modalAudition.id,
+      title: '새 오디션 지원',
+      body: `${prof?.name ?? '지망생'}이 지원했어요`,
+      url: `/agency/auditions/${modalAudition.id}`,
+    })
 
     setSubmitting(false)
     setModalAudition(null)

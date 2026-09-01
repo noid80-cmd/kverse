@@ -9,6 +9,10 @@ import { createClient } from './supabase/client'
 
 type PushArgs = {
   userId?: string
+  // 기획사 담당자 전원에게 보낼 때 쓴다. 담당자가 누구인지는 서버가 찾는다 —
+  // agency_members는 RLS상 talent에게 빈 배열로 보여서 클라이언트가 찾으면 안 된다.
+  agencyId?: string
+  auditionId?: string
   broadcast?: boolean
   title: string
   body: string
