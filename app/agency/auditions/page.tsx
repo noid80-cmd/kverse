@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
 import { Plus, Megaphone, Users, Calendar, Trash2 } from 'lucide-react'
+import { sendPush } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -122,16 +123,13 @@ export default function AgencyAuditionsPage() {
           })
           await supabase.from('auditions').update({ translations }).eq('id', inserted.id)
         })
+      })
 
-        fetch('/api/push', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-          body: JSON.stringify({
-            broadcast: true,
-            title: '새 오디션 공고',
-            body: `${form.title.trim()} 오디션이 올라왔어요!`,
-            url: '/dashboard/auditions',
-          }),
-        })
+      sendPush({
+        broadcast: true,
+        title: '새 오디션 공고',
+        body: `${form.title.trim()} 오디션이 올라왔어요!`,
+        url: '/dashboard/auditions',
       })
 
       setForm({ title: '', description: '', categories: ['vocal'], mode: 'online', deadline: '' })

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
 import { Trash2, Plus, Calendar, Users, X, Pencil, Archive, RotateCcw } from 'lucide-react'
+import { sendPush } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -171,12 +172,7 @@ export default function AdminAuditionsPage() {
     })
     setSaving(false)
     if (!res.ok) { const e = await res.json(); alert('저장 실패: ' + e.error); return }
-    const token = (await createClient().auth.getSession()).data.session?.access_token
-    fetch('/api/push', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: JSON.stringify({ broadcast: true, title: '새 오디션 공고', body: `${form.title.trim()} 오디션이 올라왔어요!`, url: '/dashboard/auditions' }),
-    })
+    sendPush({ broadcast: true, title: '새 오디션 공고', body: `${form.title.trim()} 오디션이 올라왔어요!`, url: '/dashboard/auditions' })
     setForm(emptyForm())
     setShowCreate(false)
     load()

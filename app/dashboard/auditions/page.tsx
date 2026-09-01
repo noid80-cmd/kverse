@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { Home, Compass, Plus, Bell, Megaphone, Video, CheckCircle, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
+import { sendPush } from '@/lib/notify'
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 
@@ -284,13 +285,10 @@ export default function TalentAuditionsPage() {
       const { data: members } = await supabase.from('agency_members').select('profile_id').eq('agency_id', audData.agency_id)
       const { data: prof } = await supabase.from('profiles').select('name').eq('id', myId).single()
       members?.forEach(m => {
-        fetch('/api/push', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: m.profile_id, title: '새 오디션 지원',
-            body: `${prof?.name ?? '지망생'}이 지원했어요`,
-            url: `/agency/auditions/${modalAudition.id}`,
-          }),
+        sendPush({
+          userId: m.profile_id, title: '새 오디션 지원',
+          body: `${prof?.name ?? '지망생'}이 지원했어요`,
+          url: `/agency/auditions/${modalAudition.id}`,
         })
       })
     }

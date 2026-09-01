@@ -7,6 +7,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, Megaphone, Heart, Video, MessageCircle } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
+import { sendPush } from '@/lib/notify'
 
 const talentNav = [
   { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
@@ -78,8 +79,7 @@ export default function TalentPublicProfilePage() {
     if (data) {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
-      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' }) })
+      sendPush({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' })
       router.push(`/chat/${data.id}`)
       return
     }

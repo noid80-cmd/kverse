@@ -7,6 +7,7 @@ import { CheckCircle, Video, ArrowLeft, Camera, RotateCcw, Upload } from 'lucide
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { compressVideoIfNeeded } from '@/lib/compressVideo'
+import { sendPush } from '@/lib/notify'
 
 const inputStyle = {
   width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
@@ -308,8 +309,7 @@ export default function UploadPage() {
       const talentName = prof?.name ?? '지망생'
       const uniqueIds = [...new Set(bms.map(b => b.agency_member_id).filter(Boolean))]
       uniqueIds.forEach(agencyMemberId => {
-        fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: agencyMemberId, title: `🎬 ${talentName}`, body: `새 영상을 올렸어요: ${title.trim()}`, url: '/agency/discover' }) })
+        sendPush({ userId: agencyMemberId, title: `🎬 ${talentName}`, body: `새 영상을 올렸어요: ${title.trim()}`, url: '/agency/discover' })
       })
     }
 

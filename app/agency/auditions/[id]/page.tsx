@@ -6,6 +6,7 @@ import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Video, CheckCircle, XCircle } from 'lucide-react'
+import { sendPush } from '@/lib/notify'
 
 type Application = {
   id: string
@@ -82,17 +83,11 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
           }
         }
       }
-      supabase.auth.getSession().then(({ data: s }) => {
-        const token = s.session?.access_token
-        fetch('/api/push', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-          body: JSON.stringify({
-            userId: talentId,
-            title: '오디션 초대 🎉',
-            body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요! 채팅을 확인해보세요.`,
-            url: '/dashboard/auditions',
-          }),
-        })
+      sendPush({
+        userId: talentId,
+        title: '오디션 초대 🎉',
+        body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요! 채팅을 확인해보세요.`,
+        url: '/dashboard/auditions',
       })
     }
     setUpdating(null)

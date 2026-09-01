@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { Bookmark, MessageCircle } from 'lucide-react'
 import AgencyNav from '@/components/layout/AgencyNav'
+import { sendPush } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -66,8 +67,7 @@ export default function AgencyVideoPage() {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: video.talent.id, video_id: video.id })
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
-      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: video.talent.id, title: '관심 표시', body: `${agName}이 내 영상을 관심 목록에 추가했어요`, url: '/reactions?tab=bookmarks' }) })
+      sendPush({ userId: video.talent.id, title: '관심 표시', body: `${agName}이 내 영상을 관심 목록에 추가했어요`, url: '/reactions?tab=bookmarks' })
     }
     setBookmarked(b => !b)
   }
@@ -85,8 +85,7 @@ export default function AgencyVideoPage() {
     if (newConv) {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
-      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: video.talent.id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' }) })
+      sendPush({ userId: video.talent.id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' })
       router.push(`/chat/${newConv.id}`)
       return
     }

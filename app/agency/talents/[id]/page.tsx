@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
 import { MessageCircle, Video, Heart, Bookmark } from 'lucide-react'
+import { sendPush } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -63,11 +64,7 @@ export default function TalentProfilePage() {
     } else {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: id })
       setBookmarked(true)
-      fetch('/api/push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: id, title: '관심 기획사 +1', body: `${agencyName}이(가) 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' }),
-      })
+      sendPush({ userId: id, title: '관심 기획사 +1', body: `${agencyName}이(가) 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' })
     }
   }
 
@@ -78,8 +75,7 @@ export default function TalentProfilePage() {
     if (data) {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
-      fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' }) })
+      sendPush({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' })
       router.push(`/chat/${data.id}`)
       return
     }

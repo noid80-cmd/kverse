@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
+import { sendPush } from '@/lib/notify'
 
 type Message = { id: string; content: string; sender_id: string; created_at: string; is_read: boolean }
 type Conversation = {
@@ -109,11 +110,7 @@ export default function ChatPage() {
         const senderName = myId === conv.talent_id
           ? (conv.talent?.name ?? '지망생')
           : (agencyCard?.name || conv.agency_member?.name || '기획사')
-        supabase.auth.getSession().then(({ data: s }) => {
-          const token = s.session?.access_token
-          fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-            body: JSON.stringify({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` }) })
-        })
+        sendPush({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` })
       }
     }
     setSending(false)
