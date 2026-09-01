@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
-import { Home, Compass, Plus, Bell, Megaphone, Heart, Bookmark } from 'lucide-react'
+import { useTalentNav } from '@/components/layout/talentNav'
+import { Heart, Bookmark } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
@@ -22,13 +23,7 @@ export default function VideoDetailPage() {
   const { lang } = useLang()
   const tx = useT(lang)
 
-  const talentNav = [
-    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
-    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
-    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={22} strokeWidth={1.8} /> },
-    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
-    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
-  ]
+  const talentNav = useTalentNav()
 
   const categoryLabel: Record<string, string> = {
     vocal: tx.videos.vocal, dance: tx.videos.dance, acting: tx.videos.acting,

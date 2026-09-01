@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
-import { Home, Compass, Plus, Bell, Megaphone, BellOff, BellRing, X } from 'lucide-react'
+import { useTalentNav } from '@/components/layout/talentNav'
+import { BellOff, BellRing, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT, type Lang } from '@/lib/i18n/translations'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
@@ -28,13 +29,7 @@ export default function ProfileEditPage() {
     '악기': tx.profile.skillInstrument, '퍼포먼스': tx.profile.skillPerformance,
   }
 
-  const talentNav = [
-    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
-    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
-    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={24} strokeWidth={2.5} color="white" />, fab: true },
-    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
-    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
-  ]
+  const talentNav = useTalentNav()
 
   type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)

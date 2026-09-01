@@ -4,18 +4,12 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
+import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
-import { Home, Compass, Plus, Bell, Megaphone, Heart, Video, MessageCircle } from 'lucide-react'
+import { Heart, Video, MessageCircle } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
 import { sendPush } from '@/lib/notify'
 
-const talentNav = [
-  { href: '/dashboard', label: '홈', icon: <Home size={22} strokeWidth={1.8} /> },
-  { href: '/explore', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
-  { href: '/videos/upload', label: '올리기', icon: <Plus size={24} strokeWidth={2.5} color="white" />, fab: true },
-  { href: '/dashboard/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
-  { href: '/reactions', label: '반응', icon: <Bell size={22} strokeWidth={1.8} /> },
-]
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -29,6 +23,7 @@ type Talent = {
 type VideoItem = { id: string; title: string; thumbnail_url: string | null; view_count: number; like_count: number; category: string }
 
 export default function TalentPublicProfilePage() {
+  const talentNav = useTalentNav()
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [talent, setTalent] = useState<Talent | null>(null)

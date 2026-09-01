@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Home, Compass, Plus, Bell, Megaphone, Video, CheckCircle, X } from 'lucide-react'
+import { Megaphone, Video, CheckCircle, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { sendPush } from '@/lib/notify'
@@ -60,13 +61,7 @@ export default function TalentAuditionsPage() {
   const { lang } = useLang()
   const tx = useT(lang)
 
-  const talentNav = [
-    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
-    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
-    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={24} strokeWidth={2.5} color="white" />, fab: true },
-    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
-    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
-  ]
+  const talentNav = useTalentNav()
 
   const categoryLabels: Record<string, string> = {
     vocal: tx.videos.vocal, dance: tx.videos.dance, acting: tx.videos.acting, rap: tx.videos.rap, other: tx.videos.other,

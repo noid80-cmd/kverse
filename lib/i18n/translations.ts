@@ -14,6 +14,7 @@ const t = {
     explore:   ['탐색', 'Explore', '探索', '探索', '探索', 'สำรวจ', 'Jelajahi', 'Khám phá', 'I-explore', 'Explorar'],
     auditions: ['오디션', 'Auditions', 'オーディション', '试镜', '試鏡', 'ออดิชัน', 'Audisi', 'Thử vai', 'Audisyon', 'Audición'],
     upload:    ['올리기', 'Upload', 'アップ', '上传', '上傳', 'อัปโหลด', 'Unggah', 'Tải lên', 'I-upload', 'Subir'],
+    myVideos:  ['내 영상', 'My Videos', 'マイ動画', '我的视频', '我的影片', 'วิดีโอของฉัน', 'Video saya', 'Video của tôi', 'Mga video ko', 'Mis videos'],
     activity:  ['반응', 'Activity', '通知', '动态', '動態', 'กิจกรรม', 'Aktivitas', 'Hoạt động', 'Aktibidad', 'Actividad'],
   },
 
@@ -125,6 +126,11 @@ const t = {
     invited:         ['초대됨', 'Invited', '招待済み', '已邀请', '已邀請', 'ได้รับเชิญ', 'Diundang', 'Được mời', 'Inimbitahan', 'Invitado'],
     tickerFinalPass: ['최종 합격자 2명 배출', '2 final round winners announced', '最終合格者2名を輩出', '2位决赛胜出者诞生', '2位決賽勝出者誕生', 'มีผู้ผ่านรอบสุดท้ายแล้ว 2 คน', '2 pemenang final telah lahir', 'Đã có 2 người vượt qua vòng chung kết', '2 nakapasa na sa final round', '2 ganadores de la ronda final anunciados'],
     tickerAgencies:  ['개 기획사 참여 중', ' agencies participating', '社参加中', '家公司参与中', '家公司參與中', 'บริษัทกำลังเข้าร่วม', 'agensi berpartisipasi', 'công ty đang tham gia', 'ahensyang lumalahok', 'agencias participando'],
+    agencyReactions: ['기획사 반응', 'Agency interest', '事務所の反応', '经纪公司反馈', '經紀公司反饋', 'ความสนใจจากค่าย', 'Minat agensi', 'Phản hồi từ công ty', 'Interes ng ahensya', 'Interés de agencias'],
+    myApplications:  ['내 지원 현황', 'My applications', '応募状況', '我的报名', '我的報名', 'สถานะการสมัครของฉัน', 'Lamaran saya', 'Đơn ứng tuyển của tôi', 'Mga aplikasyon ko', 'Mis postulaciones'],
+    appTotal:        ['전체', 'Total', '合計', '全部', '全部', 'ทั้งหมด', 'Total', 'Tổng', 'Kabuuan', 'Total'],
+    appPending:      ['심사중', 'In review', '審査中', '审核中', '審核中', 'กำลังพิจารณา', 'Ditinjau', 'Đang xét', 'Sinusuri', 'En revisión'],
+    appInvited:      ['오디션 콜', 'Invited', 'オーディション招待', '试镜邀请', '試鏡邀請', 'ได้รับเชิญ', 'Diundang', 'Được mời', 'Inimbitahan', 'Invitado'],
   },
 
   // ── Videos ───────────────────────────────────────────

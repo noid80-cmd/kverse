@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import { useTalentNav } from '@/components/layout/talentNav'
 import PushSubscribe, { doSubscribe } from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Home, Compass, Plus, Bell, Megaphone, MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
+import { MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -37,13 +38,7 @@ function ReactionsContent() {
   const tx = useT(lang)
   const searchParams = useSearchParams()
 
-  const talentNav = [
-    { href: '/dashboard', label: tx.nav.home, icon: <Home size={22} strokeWidth={1.8} /> },
-    { href: '/explore', label: tx.nav.explore, icon: <Compass size={22} strokeWidth={1.8} /> },
-    { href: '/videos/upload', label: tx.nav.upload, icon: <Plus size={24} strokeWidth={2.5} color="white" />, fab: true },
-    { href: '/dashboard/auditions', label: tx.nav.auditions, icon: <Megaphone size={22} strokeWidth={1.8} /> },
-    { href: '/reactions', label: tx.nav.activity, icon: <Bell size={22} strokeWidth={1.8} /> },
-  ]
+  const talentNav = useTalentNav()
 
   const [pageData, setPageData] = useState<{ convs: Conversation[]; bookmarks: Bookmark[] } | null>(() => {
     try { const c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null } catch { return null }
