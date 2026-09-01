@@ -6,6 +6,7 @@ import { LangProvider } from '@/lib/i18n/context'
 import KakaoGuard from '@/components/KakaoGuard'
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 import NativeSessionSync from '@/components/NativeSessionSync'
+import NativeNotificationRouter from '@/components/NativeNotificationRouter'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -62,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Krookie" />
       </head>
-      <body><LangProvider><ServiceWorkerRegister /><KakaoGuard /><NativeSessionSync />{children}<Analytics /></LangProvider></body>
+      <body><LangProvider><ServiceWorkerRegister /><KakaoGuard /><NativeSessionSync /><NativeNotificationRouter />{children}<Analytics /></LangProvider></body>
     </html>
   )
 }
