@@ -7,6 +7,7 @@ import { isNativeAppAsync } from '@/lib/capacitor'
 import Link from 'next/link'
 import { LANGS, LANG_LABELS, type Lang } from '@/lib/i18n/translations'
 import LiveTicker from '@/components/LiveTicker'
+import AuditionCountdown from '@/components/AuditionCountdown'
 import WelcomeCarousel from '@/components/WelcomeCarousel'
 
 type TxShape = {
@@ -324,6 +325,12 @@ export default function LandingClient() {
             <Link href="/signup" style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 20px rgba(216,74,30,0.35)' }}>
               {tx.ctaStart}
             </Link>
+          </div>
+
+          {/* 첫 오디션까지 남은 날. 오픈 전에 가입을 받아두려고 히어로 바로 아래에 둔다.
+              오픈일이 지나면 컴포넌트가 스스로 사라진다. */}
+          <div style={{ maxWidth: 360, margin: '32px auto 0' }}>
+            <AuditionCountdown variant="signup" />
           </div>
 
           {/* 소셜 프루프 티커 */}

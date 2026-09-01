@@ -172,6 +172,15 @@ const t = {
 
   // ── Auditions ────────────────────────────────────────
   auditions: {
+    // 첫 오디션 오픈 카운트다운 ({n} = 남은 일수, {date} = 오픈일)
+    countdownLabel:  ['첫 오디션까지', 'Until the first audition', '初オーディションまで', '距离首场试镜', '距離首場試鏡', 'จนถึงออดิชันแรก', 'Menuju audisi pertama', 'Đến buổi thử vai đầu tiên', 'Hanggang sa unang audisyon', 'Hasta la primera audición'],
+    countdownToday:  ['오늘 첫 오디션이 열려요', 'The first audition opens today', '本日、初オーディション開催', '今天首场试镜开启', '今天首場試鏡開啟', 'ออดิชันแรกเปิดวันนี้', 'Audisi pertama dibuka hari ini', 'Buổi thử vai đầu tiên mở hôm nay', 'Bukas na ngayon ang unang audisyon', 'Hoy abre la primera audición'],
+    countdownDesc:   ['{date}부터 매주 새로운 오디션이 열려요', 'From {date}, a new audition every week', '{date}から毎週新しいオーディションが開催されます', '{date}起每周都有新试镜', '{date}起每週都有新試鏡', 'ตั้งแต่ {date} มีออดิชันใหม่ทุกสัปดาห์', 'Mulai {date}, audisi baru setiap minggu', 'Từ {date}, mỗi tuần một buổi thử vai mới', 'Mula {date}, bagong audisyon kada linggo', 'Desde el {date}, una nueva audición cada semana'],
+    countdownNotify: ['알림 받기', 'Turn on alerts', '通知を受け取る', '开启通知', '開啟通知', 'เปิดการแจ้งเตือน', 'Aktifkan notifikasi', 'Bật thông báo', 'I-on ang alerts', 'Activar avisos'],
+    countdownNotifyDesc: ['공고가 올라오면 가장 먼저 알려드릴게요', 'Be the first to know when it opens', '公開されたら真っ先にお知らせします', '公告一发布就第一时间通知你', '公告一發布就第一時間通知你', 'เราจะแจ้งคุณเป็นคนแรกเมื่อเปิดรับ', 'Kami beri tahu Anda lebih dulu', 'Bạn sẽ được báo đầu tiên', 'Ikaw ang unang mabalitaan', 'Te avisamos antes que a nadie'],
+    countdownNotifyOn: ['알림이 켜져 있어요', 'Alerts are on', '通知はオンです', '通知已开启', '通知已開啟', 'เปิดการแจ้งเตือนแล้ว', 'Notifikasi aktif', 'Thông báo đang bật', 'Naka-on ang alerts', 'Avisos activados'],
+    countdownNotifyOnDesc: ['새 공고가 올라오면 바로 알려드릴게요', 'We’ll ping you as soon as it opens', '新しい公募が出たらすぐお知らせします', '有新公告会立刻通知你', '有新公告會立刻通知你', 'มีประกาศใหม่จะแจ้งทันที', 'Kami kabari begitu ada yang baru', 'Có tin mới sẽ báo ngay', 'Aabisuhan ka agad', 'Te avisaremos en cuanto abra'],
+    countdownSignup: ['지금 가입하고 기다리기', 'Sign up and get ready', '今すぐ登録して待つ', '立即注册等待', '立即註冊等待', 'สมัครตอนนี้แล้วรอเลย', 'Daftar sekarang', 'Đăng ký ngay', 'Mag-sign up na', 'Regístrate y prepárate'],
     title:           ['오디션 공고', 'Auditions', 'オーディション', '试镜公告', '試鏡公告', 'ออดิชัน', 'Audisi', 'Thử vai', 'Mga Audisyon', 'Audiciones'],
     noAuditions:     ['현재 열린 오디션이 없어요', 'No open auditions', '開催中のオーディションはありません', '目前没有试镜', '目前沒有試鏡', 'ไม่มีออดิชันที่เปิดรับ', 'Tidak ada audisi terbuka', 'Không có buổi thử vai', 'Walang bukas na audisyon', 'No hay audiciones abiertas'],
     deadline:        ['마감', 'Deadline', '締切', '截止', '截止', 'วันหมดอายุ', 'Batas', 'Hạn chót', 'Deadline', 'Fecha límite'],

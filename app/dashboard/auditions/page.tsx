@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
+import AuditionCountdown from '@/components/AuditionCountdown'
+import { daysUntilLaunch } from '@/lib/launch'
 import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -389,12 +391,14 @@ export default function TalentAuditionsPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>{tx.common.loading}</div>
         ) : auditions.length === 0 ? (
-          <div style={{ background: 'rgba(36,28,21,0.05)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#D84A1E' }}>
-              <Megaphone size={22} strokeWidth={1.8} />
+          daysUntilLaunch() >= 0 ? <AuditionCountdown /> : (
+            <div style={{ background: 'rgba(36,28,21,0.05)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#D84A1E' }}>
+                <Megaphone size={22} strokeWidth={1.8} />
+              </div>
+              <div style={{ fontWeight: 700, color: '#241C15' }}>{tx.auditions.noAuditions}</div>
             </div>
-            <div style={{ fontWeight: 700, color: '#241C15' }}>{tx.auditions.noAuditions}</div>
-          </div>
+          )
         ) : (() => {
           const firstActiveId = auditions.find(a => !isDone(a))?.id
           const sortAuditions = (list: Audition[]) => {

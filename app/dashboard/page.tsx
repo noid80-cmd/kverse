@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
 import PushSubscribe from '@/components/PushSubscribe'
+import AuditionCountdown from '@/components/AuditionCountdown'
+import { daysUntilLaunch } from '@/lib/launch'
 import LiveTicker from '@/components/LiveTicker'
 import Link from 'next/link'
 import { Plus, Megaphone, Bookmark, MessageCircle, User, ChevronRight, Play } from 'lucide-react'
@@ -278,13 +280,19 @@ export default function DashboardPage() {
             </div>
 
             {recentAuditions.length === 0 ? (
-              <div style={{ background: '#FFFFFF', borderRadius: 18, padding: '24px 20px', textAlign: 'center', border: '1px solid rgba(36,28,21,0.06)' }}>
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#D84A1E' }}>
-                  <Megaphone size={20} strokeWidth={1.5} />
-                </div>
-                <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 4 }}>{tx.dashboard.noAuditions}</div>
-                <div style={{ fontSize: 12, color: '#8A7F6E' }}>{tx.dashboard.auditionDesc}</div>
-              </div>
+              // 오픈 전이면 카운트다운이, 오픈일이 지났는데 공고가 비면 원래 안내가 뜬다.
+              <>
+                <AuditionCountdown />
+                {daysUntilLaunch() < 0 && (
+                  <div style={{ background: '#FFFFFF', borderRadius: 18, padding: '24px 20px', textAlign: 'center', border: '1px solid rgba(36,28,21,0.06)' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#D84A1E' }}>
+                      <Megaphone size={20} strokeWidth={1.5} />
+                    </div>
+                    <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 4 }}>{tx.dashboard.noAuditions}</div>
+                    <div style={{ fontSize: 12, color: '#8A7F6E' }}>{tx.dashboard.auditionDesc}</div>
+                  </div>
+                )}
+              </>
             ) : (() => {
               const safeIdx = auditionIdx < recentAuditions.length ? auditionIdx : 0
               const a = recentAuditions[safeIdx]
