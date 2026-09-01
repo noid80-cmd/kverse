@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error || !data.user) {
-      return NextResponse.json({ error: error?.message ?? 'Login failed' }, { status: 401 })
+      // 원인을 화면에서 구분할 수 있게 코드를 같이 내려준다 — 인증 안 된 계정과
+      // 비번 오류가 똑같은 문구로 보이면 사용자도 우리도 원인을 못 짚는다.
+      const code = /confirm/i.test(error?.message ?? '') ? 'email_not_confirmed' : 'invalid_credentials'
+      return NextResponse.json({ error: error?.message ?? 'Login failed', code }, { status: 401 })
     }
 
     const { data: profile } = await supabase

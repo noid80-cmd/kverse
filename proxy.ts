@@ -6,7 +6,10 @@ export async function proxy(request: NextRequest) {
 
   // Skip Supabase client for auth callback paths — prevents Set-Cookie headers
   // from wiping the PKCE code verifier before exchangeCodeForSession runs.
-  if (pathname.startsWith('/auth')) {
+  // /reset-password도 같은 이유로 제외한다 — 비밀번호 복구 링크가 ?code=로
+  // 들어와서 페이지가 직접 교환하는데, 여기서 세션 쿠키를 다시 쓰면 그 전에
+  // verifier가 날아가 "링크가 만료됐다"고만 뜬다(OAuth 콜백에서 겪은 그 문제).
+  if (pathname.startsWith('/auth') || pathname.startsWith('/reset-password')) {
     return NextResponse.next()
   }
 

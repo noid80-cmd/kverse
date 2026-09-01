@@ -52,7 +52,11 @@ export default function LoginPage() {
       })
       const result = await res.json()
       if (!res.ok || result.error) {
-        setError(res.status === 403 && result.error ? result.error : tx.loginError)
+        setError(
+          res.status === 403 && result.error ? result.error
+          : result.code === 'email_not_confirmed' ? tx.emailNotConfirmed
+          : tx.loginError
+        )
         setLoading(false)
         return
       }
@@ -274,6 +278,11 @@ export default function LoginPage() {
               {loading ? tx.loggingIn : tx.loginBtn}
             </button>
           </form>
+          <p style={{ textAlign: 'center', marginTop: 14 }}>
+            <Link href="/forgot-password" style={{ fontSize: 13, color: 'rgba(36,28,21,0.5)', fontWeight: 600, textDecoration: 'none' }}>
+              {tx.forgotPassword}
+            </Link>
+          </p>
           <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(36,28,21,0.45)', marginTop: 14 }}>
             로그인 시 <a href="/terms" target="_blank" style={{ color: 'rgba(36,28,21,0.6)', textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</a>에 동의하는 것으로 간주됩니다.
           </p>
