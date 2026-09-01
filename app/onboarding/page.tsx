@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Bell, BellOff, Video, Star, MessageCircle, Search, ClipboardList } from 'lucide-react'
 import { isNativeApp } from '@/lib/capacitor'
+import { enableNativeNotifications } from '@/lib/pushNative'
 import { createClient } from '@/lib/supabase/client'
 import { peekSignupIntent, clearSignupIntent } from '@/lib/intent'
 
@@ -33,6 +34,11 @@ function urlBase64ToUint8Array(base64String: string) {
 
 async function subscribeNotif() {
   try {
+    // 스토어 앱에는 웹 푸시가 없다. 앱이면 FCM 토큰 등록으로 대체한다.
+    if (isNativeApp()) {
+      await enableNativeNotifications()
+      return
+    }
     const keyRes = await fetch('/api/push/vapid-key')
     if (!keyRes.ok) return
     const { publicKey } = await keyRes.json()

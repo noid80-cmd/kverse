@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Bell, X } from 'lucide-react'
+import { isNativeApp } from '@/lib/capacitor'
+import { enableNativeNotifications, nativeNotifState, refreshNativeToken } from '@/lib/pushNative'
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -13,6 +15,13 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export async function doSubscribe() {
+  // 스토어 앱(WKWebView)에는 PushManager가 없어 아래 웹 푸시 경로가 통째로
+  // 실패한다. 앱이면 FCM 토큰을 등록하고 여기서 끝낸다.
+  if (isNativeApp()) {
+    await enableNativeNotifications()
+    return
+  }
+
   const keyRes = await fetch('/api/push/vapid-key')
   if (!keyRes.ok) return
   const { publicKey } = await keyRes.json()
@@ -47,15 +56,33 @@ export default function PushSubscribe() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
+    // 이미 한 번 닫은 경우 24시간 내 재표시 안 함
+    const dismissed = localStorage.getItem('kpick-push-dismissed')
+    const recentlyDismissed = dismissed && Date.now() - Number(dismissed) < 86400000
+
+    // 앱(WKWebView)에는 serviceWorker·PushManager·Notification이 모두 없다.
+    // 웹 기준으로 판단하면 앱에서는 배너가 영영 안 뜬다.
+    if (isNativeApp()) {
+      nativeNotifState().then((state) => {
+        if (state === 'granted') {
+          // 토큰은 재설치·갱신으로 바뀌므로 열 때마다 다시 올린다
+          refreshNativeToken().catch(() => {})
+          return
+        }
+        if (state === 'prompt' && !recentlyDismissed) {
+          setTimeout(() => setShow(true), 1500)
+        }
+      })
+      return
+    }
+
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
     if (Notification.permission !== 'default') {
       // 이미 결정된 경우 — granted면 조용히 재등록
       if (Notification.permission === 'granted') doSubscribe().catch(() => {})
       return
     }
-    // 이미 한 번 닫은 경우 24시간 내 재표시 안 함
-    const dismissed = localStorage.getItem('kpick-push-dismissed')
-    if (dismissed && Date.now() - Number(dismissed) < 86400000) return
+    if (recentlyDismissed) return
 
     const timer = setTimeout(() => setShow(true), 1500)
     return () => clearTimeout(timer)
@@ -63,6 +90,10 @@ export default function PushSubscribe() {
 
   async function handleAllow() {
     setShow(false)
+    if (isNativeApp()) {
+      await enableNativeNotifications()
+      return
+    }
     const perm = await Notification.requestPermission()
     if (perm === 'granted') doSubscribe().catch(() => {})
   }

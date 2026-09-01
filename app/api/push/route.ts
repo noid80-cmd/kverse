@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { sendFcm } from '@/lib/fcm'
 
 export const dynamic = 'force-dynamic'
 
@@ -105,10 +106,34 @@ export async function POST(req: NextRequest) {
     console.log('[push] userId:', userId, 'subs:', subs.length)
   }
 
-  if (!subs.length) return NextResponse.json({ sent: 0 })
+  // 앱(FCM) 대상 토큰. 웹 푸시와 대상이 겹치지 않는다 — 스토어 앱에는
+  // 웹 푸시가 아예 없고, 브라우저에는 FCM 토큰이 없다.
+  let tokens: { id: string; token: string }[] = []
+  if (broadcast) {
+    const { data: agencyMembers } = await adminSupabase.from('agency_members').select('profile_id')
+    const agencyIds = agencyMembers?.map((m: { profile_id: string }) => m.profile_id) ?? []
+    let q = adminSupabase.from('device_tokens').select('id, token')
+    if (agencyIds.length > 0) q = q.not('user_id', 'in', `(${agencyIds.join(',')})`)
+    const { data } = await q
+    tokens = data ?? []
+  } else if (userId) {
+    const { data } = await adminSupabase.from('device_tokens').select('id, token').eq('user_id', userId)
+    tokens = data ?? []
+  }
 
   const payload = JSON.stringify({ title, body, url })
-  const sent = await sendToSubs(subs, payload, publicKey, privateKey)
-  console.log('[push] done sent:', sent)
-  return NextResponse.json({ sent })
+  const [sent, fcm] = await Promise.all([
+    subs.length ? sendToSubs(subs, payload, publicKey, privateKey) : Promise.resolve(0),
+    tokens.length
+      ? sendFcm(tokens.map((t) => t.token), { title, body, url })
+      : Promise.resolve({ sent: 0, failed: 0, deadTokens: [] as string[] }),
+  ])
+
+  // 죽은 토큰을 안 지우면 계속 쌓여 발송이 느려진다
+  if (fcm.deadTokens.length > 0) {
+    await adminSupabase.from('device_tokens').delete().in('token', fcm.deadTokens)
+  }
+
+  console.log('[push] web:', sent, '/ app:', fcm.sent, '(실패', fcm.failed, ')')
+  return NextResponse.json({ sent, web: sent, app: fcm.sent, appFailed: fcm.failed })
 }
