@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCu_zWWYMwGX2a1XlDtBETM12SBTovHHFY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1045251423749</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>app.kpick.ios</string>
+	<key>PROJECT_ID</key>
+	<string>krookie-1cb0f</string>
+	<key>STORAGE_BUCKET</key>
+	<string>krookie-1cb0f.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1045251423749:ios:d4d1c5453d21e8a651666c</string>
+</dict>
+</plist>
