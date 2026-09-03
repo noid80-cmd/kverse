@@ -1,8 +1,13 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.kpick.twa",
-        "sha256_cert_fingerprints": ["5A:6B:BA:3F:32:C4:C9:B0:01:BC:75:C5:51:04:D2:F0:DB:4D:74:D8:90:5F:88:FB:BA:B5:F0:D7:06:9B:43:B8"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.kpick.twa",
+      "sha256_cert_fingerprints": [
+        "7B:AA:6E:42:5B:D2:66:EF:CF:4C:F3:AD:2D:CF:68:D6:4F:1A:45:5D:84:BC:D4:B6:70:78:CA:78:C1:99:E2:A6",
+        "50:9A:80:D6:64:52:8F:CF:95:A8:13:14:BA:6D:D0:DA:BA:A3:7B:96:C0:E9:E2:06:49:E4:67:FA:89:71:A6:FD"
+      ]
+    }
+  }
+]
