@@ -17,11 +17,14 @@ export default function ReportBlockMenu({
   onBlocked,
   tone = 'light',
   variant = 'plain',
+  detail,
 }: {
   targetType: 'video' | 'profile'
   targetId: string
   reportedUserId: string
   myId: string
+  /** 신고와 함께 남길 증거. 대화 신고처럼 관리자가 맥락을 봐야 하는 경우에 쓴다 */
+  detail?: string
   onBlocked?: () => void
   /** 어두운 배경(영상 위) 에서는 'dark' 로 두어 아이콘을 흰색으로 */
   tone?: 'light' | 'dark'
@@ -48,6 +51,7 @@ export default function ReportBlockMenu({
       target_id: targetId,
       reported_user_id: reportedUserId,
       reason,
+      detail: detail ?? null,
     })
     setSubmitting(false)
     setDone(true)

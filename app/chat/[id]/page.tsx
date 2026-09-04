@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { sendPush } from '@/lib/notify'
+import { Trash2 } from 'lucide-react'
+import ReportBlockMenu from '@/components/ReportBlockMenu'
 
 type Message = { id: string; content: string; sender_id: string; created_at: string; is_read: boolean }
 type Conversation = {
@@ -133,6 +135,16 @@ export default function ChatPage() {
   }
 
   const other = conv ? (myId === conv.talent_id ? conv.agency_member : conv.talent) : null
+  const otherId = conv ? (myId === conv.talent_id ? conv.agency_member_id : conv.talent_id) : ''
+
+  // 이상한 요구는 프로필이 아니라 대화에서 나온다. 신고에 대화 내용을 함께
+  // 넘기지 않으면 관리자가 뭘 봐야 할지 모르고, 그러면 증거가 되지 않는다.
+  const reportEvidence = conv
+    ? [`conversation_id: ${conv.id}`, '--- 최근 대화 ---',
+       ...(messages ?? []).slice(-20).map(m =>
+         `[${new Date(m.created_at).toLocaleString('ko-KR')}] ${m.sender_id === myId ? '나' : (other?.name ?? '상대')}: ${m.content}`)]
+      .join('\n')
+    : undefined
 
   if (!conv) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFF8E7' }}>
@@ -175,11 +187,23 @@ export default function ChatPage() {
             <span style={{ fontSize: 12, color: '#8A7F6E' }}>{other.name}</span>
           )}
         </div>
-        <button onClick={deleteConversation} disabled={deleting}
-          style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', borderRadius: 10, color: '#3a3a5c', fontSize: 20 }}
-          title="대화 삭제">
-          🗑️
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 2 }}>
+          {otherId && (
+            <ReportBlockMenu
+              targetType="profile"
+              targetId={otherId}
+              reportedUserId={otherId}
+              myId={myId}
+              detail={reportEvidence}
+              onBlocked={() => router.back()}
+            />
+          )}
+          <button onClick={deleteConversation} disabled={deleting}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: 10, color: '#8A7F6E', display: 'flex', alignItems: 'center' }}
+            title="대화 삭제">
+            <Trash2 size={18} strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
