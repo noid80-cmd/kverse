@@ -45,11 +45,17 @@ export default function LoginPage() {
       // 요청에 곧바로 반영되지 않아 로그인 페이지로 튕기는 경우가 있었음
       // ("2~3번 시도해야 로그인됨"). 서버 라우트는 실제 Set-Cookie 응답
       // 헤더로 쿠키를 심어서 훨씬 안정적으로 반영된다.
+      // 응답이 안 오면 버튼이 "로그인 중..."인 채로 영원히 멈춘다.
+      // 끊어주고 에러를 보여주는 게 낫다.
+      const ac = new AbortController()
+      const killer = setTimeout(() => ac.abort(), 15000)
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        signal: ac.signal,
       })
+      clearTimeout(killer)
       const result = await res.json()
       if (!res.ok || result.error) {
         setError(
@@ -68,8 +74,19 @@ export default function LoginPage() {
       // ("여러 번 시도해야 로그인됨"). router.push는 같은 JS 컨텍스트를
       // 유지해서 이 문제를 피하고, RSC 페치가 실패해도 Next.js가 자동으로
       // 브라우저 네비게이션으로 대체한다.
-      router.push(resolveAfterAuth(result.href))
+      const target = resolveAfterAuth(result.href)
+      router.push(target)
       router.refresh()
+
+      // router.push가 조용히 아무것도 안 하는 경우가 있다(대상 페이지가 쿠키
+      // 반영 전에 다시 /login으로 되돌리는 등). 그러면 성공했는데도 버튼이
+      // "로그인 중..."인 채로 영원히 멈추고, 사용자는 실패인지 성공인지도 모른다.
+      // 잠시 뒤에도 여전히 로그인 화면이면 하드 이동으로 한 번 더 밀어준다.
+      setTimeout(() => {
+        if (window.location.pathname.startsWith('/login')) {
+          window.location.href = target
+        }
+      }, 2500)
     } catch (err) {
       console.error('[login] error:', err)
       setError(tx.loginError)
