@@ -678,7 +678,12 @@ export default function TalentAuditionsPage() {
                   <div style={{ fontWeight: 700, color: newFile ? '#D84A1E' : '#241C15', fontSize: 14 }}>
                     {newFile ? newFile.name : tx.videos.selectVideoFile}
                   </div>
-                  {newFile && <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2 }}>{(newFile.size / 1024 / 1024).toFixed(1)} MB</div>}
+                  {newFile
+                    ? <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2 }}>{(newFile.size / 1024 / 1024).toFixed(1)} MB</div>
+                    // 여기를 누르면 OS가 "보관함 / 촬영 / 파일" 시트를 띄운다.
+                    // 촬영이 그 안에 들어 있는데 이름만 봐서는 모르니 적어준다.
+                    // (capture 속성을 넣으면 카메라로 직행하고 보관함 선택이 사라진다)
+                    : <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 4, lineHeight: 1.5 }}>{tx.videos.pickOrRecord}</div>}
                 </label>
                 {submitting && progress > 0 && (
                   <div>

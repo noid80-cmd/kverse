@@ -155,6 +155,7 @@ const t = {
     tagsPlaceholder: ['태그 (쉼표로 구분)', 'Tags (comma-separated)', 'タグ（カンマ区切り）', '标签（逗号分隔）', '標籤（逗號分隔）', 'แท็ก (คั่นด้วยเครื่องหมายจุลภาค)', 'Tag (dipisah koma)', 'Thẻ (phân cách bằng dấu phẩy)', 'Mga tag (pinaghiwalay ng kuwit)', 'Etiquetas (separadas por coma)'],
     uploadBtn:       ['업로드', 'Upload', 'アップロード', '上传', '上傳', 'อัปโหลด', 'Unggah', 'Tải lên', 'I-upload', 'Subir'],
     selectVideoFile: ['영상 파일 선택', 'Select video file', '動画ファイルを選択', '选择视频文件', '選擇影片文件', 'เลือกไฟล์วิดีโอ', 'Pilih file video', 'Chọn tệp video', 'Pumili ng file ng video', 'Seleccionar archivo de video'],
+    pickOrRecord:    ['갤러리에서 고르거나 바로 촬영할 수 있어요', 'Pick from your gallery or record right now', 'ギャラリーから選ぶか、その場で撮影できます', '可以从相册选择，或立即拍摄', '可以從相簿選擇，或立即拍攝', 'เลือกจากแกลเลอรีหรือถ่ายใหม่ได้เลย', 'Pilih dari galeri atau rekam sekarang', 'Chọn từ thư viện hoặc quay ngay', 'Pumili mula sa gallery o mag-record ngayon', 'Elige de tu galería o graba ahora'],
     firstVideo:      ['첫 영상을 올리고 기획사에 노출되어 보세요', 'Upload your first video to get discovered', '最初の動画をアップして事務所に発見されよう', '上传你的第一个视频让经纪公司发现你', '上傳你的第一個影片讓經紀公司發現你', 'อัปโหลดวิดีโอแรกของคุณเพื่อให้ถูกค้นพบ', 'Upload video pertamamu untuk ditemukan', 'Tải video đầu tiên để được phát hiện', 'Mag-upload ng iyong unang video para matuklasan', 'Sube tu primer video para ser descubierto'],
     views:           ['조회', 'views', '再生', '次播放', '次播放', 'ครั้ง', 'tayangan', 'lượt xem', 'views', 'vistas'],
     likes:           ['좋아요', 'Likes', 'いいね', '点赞', '讚', 'ถูกใจ', 'Suka', 'Thích', 'Gusto', 'Me gusta'],
