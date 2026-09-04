@@ -73,8 +73,17 @@ async function sendToSubs(
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  const { data: { user } } = await adminSupabase.auth.getUser(token)
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  // 크론에는 로그인 사용자가 없다. CRON_SECRET이 설정돼 있을 때만 열리는
+  // 서버 대 서버 경로를 둔다 — 값이 없으면 이 분기 자체가 죽어서, 설정을
+  // 깜빡해도 누구나 부를 수 있는 구멍이 생기지는 않는다.
+  const cronSecret = (process.env.CRON_SECRET || '').trim()
+  const isInternal = cronSecret.length > 0 && token === cronSecret
+
+  if (!isInternal) {
+    const { data: { user } } = await adminSupabase.auth.getUser(token)
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
 
   const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '').trim()
   const privateKey = (process.env.VAPID_PRIVATE_KEY || '').trim()

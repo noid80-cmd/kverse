@@ -192,6 +192,8 @@ const t = {
     viewDetails:     ['자세히 보기', 'View details', '詳細を見る', '查看详情', '查看詳情', 'ดูรายละเอียด', 'Lihat detail', 'Xem chi tiết', 'Tingnan ang detalye', 'Ver detalles'],
     pageDesc:        ['기획사의 오디션에 맞춤 영상으로 지원해보세요', 'Apply with your video to agency auditions', 'エージェンシーのオーディションに応募しよう', '用视频申请经纪公司试镜', '用影片申請經紀公司試鏡', 'สมัครออดิชันด้วยวิดีโอของคุณ', 'Lamar audisi agensi dengan videomu', 'Ứng tuyển thử vai với video của bạn', 'Mag-apply sa audisyon ng ahensya gamit ang iyong video', 'Aplica a las audiciones con tu video'],
     review:          ['검토중', 'Under review', '審査中', '审核中', '審核中', 'อยู่ระหว่างการตรวจสอบ', 'Sedang ditinjau', 'Đang xem xét', 'Sinusuri', 'En revisión'],
+    reviewClosed:    ['이번 회차 심사가 끝났어요', 'This round has wrapped up', '今回の審査は終了しました', '本轮评审已结束', '本輪評審已結束', 'รอบนี้ปิดการพิจารณาแล้ว', 'Putaran ini telah selesai', 'Vòng này đã kết thúc', 'Tapos na ang round na ito', 'Esta ronda ha finalizado'],
+    nextRoundSoon:   ['다음 오디션이 곧 열려요', 'The next audition opens soon', '次のオーディションがまもなく始まります', '下一场试镜即将开始', '下一場試鏡即將開始', 'ออดิชันครั้งถัดไปกำลังจะเปิด', 'Audisi berikutnya segera dibuka', 'Buổi thử giọng tiếp theo sắp mở', 'Malapit nang magbukas ang susunod na audition', 'La próxima audición abre pronto'],
     skipped:         ['패스됨', 'Passed', 'パス', '未通过', '未通過', 'ผ่าน', 'Dilewati', 'Đã bỏ qua', 'Naipasa', 'Pasado'],
     cancelApplication: ['지원 취소', 'Cancel application', '応募取消', '取消申请', '取消申請', 'ยกเลิกใบสมัคร', 'Batalkan lamaran', 'Hủy ứng tuyển', 'Kanselahin ang aplikasyon', 'Cancelar solicitud'],
     expiredPost:     ['마감된 공고', 'Expired post', '締切済み公告', '已截止公告', '已截止公告', 'ประกาศที่หมดอายุ', 'Pengumuman kadaluarsa', 'Thông báo đã hết hạn', 'Expired na post', 'Publicación expirada'],

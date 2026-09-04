@@ -429,6 +429,10 @@ export default function TalentAuditionsPage() {
             // 초중등~고등 지망생이라 그 상태로 두면 그 자리에서 이탈한다.
             // 결과는 회차가 끝난 뒤에 한 번만 전한다.
             const underReview = isPending || appStatus === 'skip'
+            // 회차가 닫히면 결과를 전한다. '불합격'이라는 단어는 쓰지 않는다 —
+            // 대상이 초중등~고등이라 그 말을 보면 그 자리에서 앱을 지운다.
+            // 끝이 아니라 주기의 일부로 읽히게, 다음 회차를 바로 옆에 붙인다.
+            const isClosed = appStatus === 'rejected'
             return (
               <div style={{
                 background: isInvited ? 'rgba(34,197,94,0.08)' : exp ? 'rgba(36,28,21,0.03)' : '#FFFFFF',
@@ -525,11 +529,20 @@ export default function TalentAuditionsPage() {
                     <button onClick={() => !appStatus && openModal(a)} style={{
                       width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
                       cursor: appStatus ? 'default' : 'pointer',
-                      background: underReview ? 'rgba(251,191,36,0.12)' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
-                      color: underReview ? '#fbbf24' : 'white',
+                      background: isClosed ? 'rgba(36,28,21,0.05)'
+                        : underReview ? 'rgba(251,191,36,0.12)'
+                        : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+                      color: isClosed ? '#8A7F6E' : underReview ? '#fbbf24' : 'white',
                     }}>
-                      {underReview ? tx.auditions.review : tx.auditions.apply}
+                      {isClosed ? tx.auditions.reviewClosed
+                        : underReview ? tx.auditions.review
+                        : tx.auditions.apply}
                     </button>
+                    {isClosed && (
+                      <div style={{ fontSize: 12, color: '#8A7F6E', textAlign: 'center', marginTop: 7 }}>
+                        {tx.auditions.nextRoundSoon}
+                      </div>
+                    )}
                     {isPending && (
                       <button onClick={() => cancelApplication(a.id)} style={{
                         width: '100%', background: 'none', border: 'none', color: '#8A7F6E',

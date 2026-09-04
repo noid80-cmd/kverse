@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Video, CheckCircle, XCircle, Send } from 'lucide-react'
+import { Video, CheckCircle, XCircle, Send, Gavel } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
 
 type Application = {
@@ -35,6 +35,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   // 지망생은 기대만 부풀다 방치되는데, 그건 아예 안 뽑힌 것보다 나쁘다.
   const [passTarget, setPassTarget] = useState<{ appId: string; talentId: string; name: string } | null>(null)
   const [passMessage, setPassMessage] = useState('')
+  const [closing, setClosing] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -130,6 +131,38 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     setUpdating(null)
   }
 
+  // 회차를 닫는다. 기획사는 뽑을 사람만 고르고 [심사 완료]를 누르면 되며,
+  // '불합격' 버튼을 한 번도 누르지 않는다. 미성년자에게 불합격을 공식 기록으로
+  // 남기는 부담이 곧 결과 입력을 미루는 이유가 되기 때문이다.
+  async function closeReview() {
+    const remaining = apps.filter(a => a.status === 'pending' || a.status === 'skip')
+    if (remaining.length === 0) return
+    if (!confirm(`선택하지 않은 ${remaining.length}명의 심사를 종료합니다.
+지망생에게는 "이번 회차 심사가 끝났어요"로 전달됩니다.`)) return
+
+    setClosing(true)
+    const now = new Date().toISOString()
+    await supabase.from('audition_applications')
+      .update({ status: 'rejected', decided_at: now, auto_decided: false })
+      .in('id', remaining.map(a => a.id))
+
+    setApps(prev => prev.map(a =>
+      (a.status === 'pending' || a.status === 'skip') ? { ...a, status: 'rejected' } : a))
+
+    // 결과를 안 알려주면 다음 회차에 안 온다 — 매주 여는 구조에서 그게 가장
+    // 빠른 죽음이다. 다만 '불합격'이라는 단어는 쓰지 않고 다음 회차로 넘긴다.
+    remaining.forEach(a => {
+      if (!a.talent?.id) return
+      sendPush({
+        userId: a.talent.id,
+        title: '이번 회차 심사가 끝났어요',
+        body: '다음 오디션이 곧 열려요. 준비해두신 영상으로 바로 지원할 수 있어요.',
+        url: '/dashboard/auditions',
+      })
+    })
+    setClosing(false)
+  }
+
   function getAge(birth: string | null) {
     if (!birth) return null
     return new Date().getFullYear() - new Date(birth).getFullYear()
@@ -138,8 +171,12 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   const statusBadge = (s: string) => {
     if (s === 'invited') return { bg: '#dcfce7', color: '#16a34a', label: '1차 합격' }
     if (s === 'skip') return { bg: '#f0f0f8', color: '#94a3b8', label: '패스' }
+    if (s === 'rejected') return { bg: '#f0f0f8', color: '#94a3b8', label: '심사 종료' }
     return { bg: '#fef9c3', color: '#ca8a04', label: '검토중' }
   }
+
+  const passedCount = apps.filter(a => a.status === 'invited').length
+  const pendingCount = apps.filter(a => a.status === 'pending' || a.status === 'skip').length
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
@@ -158,7 +195,30 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
         <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 16, fontWeight: 600 }}>
           지원자 {apps.length}명
+          {passedCount > 0 && <span style={{ color: '#16a34a' }}> · 1차 합격 {passedCount}명</span>}
+          {pendingCount > 0 && <span style={{ color: '#ca8a04' }}> · 검토중 {pendingCount}명</span>}
         </div>
+
+        {pendingCount > 0 && (
+          <div style={{ background: '#fff', border: '1px solid #e8e8f2', borderRadius: 18, padding: '16px 18px', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 800, color: '#1e1b4b', marginBottom: 4 }}>
+              <Gavel size={16} strokeWidth={2} />
+              심사를 마치셨나요?
+            </div>
+            <div style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.6, marginBottom: 12 }}>
+              1차 합격시킬 지망생만 고르시면 됩니다. 나머지 {pendingCount}명은 한 번에 정리되고,
+              지망생에게는 “이번 회차 심사가 끝났어요”로 전달됩니다.
+            </div>
+            <button onClick={closeReview} disabled={closing}
+              style={{
+                width: '100%', padding: '13px', borderRadius: 14, border: 'none', cursor: 'pointer',
+                background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#fff',
+                fontSize: 15, fontWeight: 700, opacity: closing ? 0.7 : 1,
+              }}>
+              {closing ? '정리하는 중...' : `심사 완료 · 남은 ${pendingCount}명 정리`}
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
