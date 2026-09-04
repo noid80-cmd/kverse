@@ -85,6 +85,9 @@ export default function LoginPage() {
       setTimeout(() => {
         if (window.location.pathname.startsWith('/login')) {
           window.location.href = target
+          // 하드 이동도 안 먹으면 최소한 버튼은 풀어준다. 멈춰 있는 것보다
+          // 다시 눌러볼 수 있는 게 낫다.
+          setTimeout(() => setLoading(false), 3000)
         }
       }, 2500)
     } catch (err) {
@@ -144,6 +147,12 @@ export default function LoginPage() {
     }
 
     window.location.href = data.url
+
+    // 앱에서는 이 이동이 사파리로 넘어가버려서 웹뷰는 이 화면에 그대로 남는다.
+    // 그러면 버튼이 "로그인 중..."인 채로 영원히 멈춘다(실제로 그렇게 됐다).
+    // 이동이 먹었으면 이 컴포넌트는 이미 사라졌을 시점이니, 아직 여기 있다는
+    // 건 안 넘어갔다는 뜻이다. 풀어주고 다시 누를 수 있게 한다.
+    setTimeout(() => setLoading(false), 4000)
   }
 
   const handleGoogle = () => startOAuth('google')
