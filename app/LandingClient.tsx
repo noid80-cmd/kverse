@@ -17,6 +17,22 @@ type TxShape = {
   ctaTitle: string; ctaSub: string; ctaStart: string; footerDesc: string
 }
 
+// LIVE 티커 문구가 여기 하드코딩돼 있어서, 지원 언어 10개 중 어느 걸로 보든
+// 한국어가 그대로 떴다. 랜딩 히어로 바로 아래라 해외 사용자 눈에 제일 먼저
+// 띄는 자리인데도 그랬다. 숫자가 바뀌면 이 표만 고치면 된다.
+const TICKER: Record<Lang, { result: string; agencies: string }> = {
+  ko:      { result: 'FNC엔터테인먼트 최종 합격자 2명 배출', agencies: '16개 기획사 참여 중' },
+  en:      { result: '2 final picks at FNC Entertainment', agencies: '16 agencies taking part' },
+  ja:      { result: 'FNCエンターテインメント最終合格者2名', agencies: '16社の事務所が参加中' },
+  zh:      { result: 'FNC娱乐最终合格者2名', agencies: '16家经纪公司参与中' },
+  'zh-TW': { result: 'FNC娛樂最終合格者2名', agencies: '16家經紀公司參與中' },
+  th:      { result: 'ผ่านรอบสุดท้ายที่ FNC Entertainment 2 คน', agencies: '16 ค่ายเข้าร่วม' },
+  id:      { result: '2 lolos final di FNC Entertainment', agencies: '16 agensi ikut serta' },
+  vi:      { result: '2 người trúng tuyển tại FNC Entertainment', agencies: '16 công ty đang tham gia' },
+  tl:      { result: '2 ang pumasa sa final sa FNC Entertainment', agencies: '16 ahensya ang kalahok' },
+  es:      { result: '2 seleccionados finales en FNC Entertainment', agencies: '16 agencias participando' },
+}
+
 const t: Record<Lang, TxShape> = {
   ko: {
     tagline: '매주 새로운 오디션에 지원하세요',
@@ -341,8 +357,8 @@ export default function LandingClient() {
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <LiveTicker items={[
-                  { dot: true, text: 'FNC엔터테인먼트 최종 합격자 2명 배출' },
-                  { dot: false, text: '16개 기획사 참여 중' },
+                  { dot: true, text: TICKER[lang].result },
+                  { dot: false, text: TICKER[lang].agencies },
                 ]} />
               </div>
             </div>
