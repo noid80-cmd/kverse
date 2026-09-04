@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import PreferencesPlugin
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -41,9 +42,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        // OAuth 콜백이 밖에서 들어오면 여기서 받아 웹뷰로 넘긴다. 아래 주석 참고.
+        if handleAuthCallback(url) { return true }
+
         // Called when the app was launched with a url. Feel free to add additional processing here,
         // but if you want the App API to support tracking app url opens, make sure to keep this call
         return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+    }
+
+    // kpick://auth-callback?code=... 을 받아 웹뷰의 /auth/callback 으로 넘긴다.
+    //
+    // 정상 경로에서는 여기까지 오지 않는다. GoogleAuthInterceptorPlugin /
+    // AppleAuthInterceptorPlugin이 로그인 이동을 ASWebAuthenticationSession으로
+    // 가로채고, 그 세션이 kpick 스킴을 직접 잡아서 앱으로 돌려주기 때문이다.
+    //
+    // 그런데 애플 로그인에서 인터셉터가 걸리지 않고 사파리로 넘어가는 사례가
+    // 실기기에서 확인됐다(1.0.3, "'Krookie'에서 이 페이지를 열겠습니까?" 대화상자가
+    // 뜨는데, ASWebAuthenticationSession이라면 그 대화상자 자체가 안 뜬다).
+    // 그 경우 사파리가 받은 인증 코드가 앱으로 들어와도 아무도 받지 않아서
+    // 로그인 화면으로 되돌아간다.
+    //
+    // 인터셉터가 왜 안 걸리는지와 별개로, 코드가 앱에 도착하기만 하면 로그인은
+    // 성립한다. code_verifier가 웹뷰 저장소에 그대로 남아 있기 때문이다.
+    // 그래서 원인을 못 좁힌 상태에서도 통하는 복구 경로를 둔다.
+    private func handleAuthCallback(_ url: URL) -> Bool {
+        guard url.scheme?.lowercased() == "kpick" else { return false }
+        let isAuthCallback = (url.host == "auth-callback")
+            || url.absoluteString.contains("auth-callback")
+        guard isAuthCallback else { return false }
+
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "kpick.app"
+        components.path = "/auth/callback"
+        components.query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.query
+        guard let finalURL = components.url else { return false }
+
+        guard let webView = findBridgeWebView() else { return false }
+        DispatchQueue.main.async {
+            webView.load(URLRequest(url: finalURL))
+        }
+        return true
+    }
+
+    // 루트가 항상 CAPBridgeViewController인 건 아니라 한 겹 안까지 찾아본다.
+    private func findBridgeWebView() -> WKWebView? {
+        guard let root = window?.rootViewController else { return nil }
+        if let bridgeVC = root as? CAPBridgeViewController { return bridgeVC.bridge?.webView }
+        for child in root.children {
+            if let bridgeVC = child as? CAPBridgeViewController { return bridgeVC.bridge?.webView }
+        }
+        if let presented = root.presentedViewController as? CAPBridgeViewController {
+            return presented.bridge?.webView
+        }
+        return nil
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
