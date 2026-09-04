@@ -3,20 +3,21 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, Building2, Film, Mic2, Flag, Trophy } from 'lucide-react'
 
 const adminNav = [
-  { href: '/admin', label: '대시보드', emoji: '📊' },
-  { href: '/admin/users', label: '회원', emoji: '👥' },
-  { href: '/admin/agencies', label: '기획사', emoji: '🏢' },
-  { href: '/admin/videos', label: '영상', emoji: '🎬' },
-  { href: '/admin/auditions', label: '오디션', emoji: '🎤' },
-  { href: '/admin/reports', label: '신고', emoji: '🚩' },
+  { href: '/admin', label: '대시보드', Icon: LayoutDashboard },
+  { href: '/admin/users', label: '회원', Icon: Users },
+  { href: '/admin/agencies', label: '기획사', Icon: Building2 },
+  { href: '/admin/videos', label: '영상', Icon: Film },
+  { href: '/admin/auditions', label: '오디션', Icon: Mic2 },
+  { href: '/admin/outcomes', label: '합격 추적', Icon: Trophy },
+  { href: '/admin/reports', label: '신고', Icon: Flag },
 ]
 
 const previewNav = [
-  { href: '/dashboard', label: '지망생', emoji: '🎤' },
-  { href: '/agency/discover', label: '기획사', emoji: '🏢' },
+  { href: '/dashboard', label: '지망생', Icon: Mic2 },
+  { href: '/agency/discover', label: '기획사', Icon: Building2 },
 ]
 
 export default function AdminNav() {
@@ -43,7 +44,7 @@ export default function AdminNav() {
               border: '1px solid rgba(36,28,21,0.1)',
               display: 'flex', alignItems: 'center', gap: 4,
             }}>
-            <span>{n.emoji}</span>
+            <n.Icon size={15} strokeWidth={2} />
             <span>{n.label}</span>
           </a>
         ))}
@@ -59,7 +60,7 @@ export default function AdminNav() {
                 background: active ? 'rgba(255,111,60,0.12)' : 'transparent',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
               }}>
-              <span style={{ fontSize: 16 }}>{n.emoji}</span>
+              <n.Icon size={17} strokeWidth={2} />
               <span>{n.label}</span>
             </Link>
           )
