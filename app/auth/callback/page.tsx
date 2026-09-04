@@ -56,6 +56,13 @@ function AuthCallbackContent() {
         return
       }
 
+      // PKCE의 code_verifier가 실제로 남아있는지 먼저 본다. @supabase/ssr의
+      // 브라우저 클라이언트는 이걸 쿠키에 넣는데, WKWebView에서 쿠키가 유실되면
+      // 서버는 전부 200/302로 정상인데 여기서만 조용히 실패한다 — 그 경우와
+      // 다른 실패(코드 자체가 안 옴, 교환 거부)를 구분해야 손댈 곳이 정해진다.
+      const hasVerifier = document.cookie.split(';').some(c => c.includes('code-verifier'))
+      const env = `code=${code ? '있음' : '없음'} · verifier=${hasVerifier ? '있음' : '없음'}`
+
       let exchangeError: string | null = null
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
@@ -71,10 +78,8 @@ function AuthCallbackContent() {
       }
 
       if (!session) {
-        fail('로그인에 실패했어요', exchangeError
-          ?? (code
-            ? '인증 코드는 받았는데 세션이 만들어지지 않았어요 (code_verifier 유실 가능)'
-            : '인증 코드를 받지 못했어요'))
+        fail('로그인에 실패했어요', `${exchangeError ?? '세션이 만들어지지 않았어요'}
+${env}`)
         return
       }
 
@@ -115,7 +120,7 @@ function AuthCallbackContent() {
               background: 'rgba(36,28,21,0.05)', border: '1px solid rgba(36,28,21,0.1)',
               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
               fontSize: 12, color: '#241C15', lineHeight: 1.6,
-              wordBreak: 'break-word', textAlign: 'left',
+              wordBreak: 'break-word', textAlign: 'left', whiteSpace: 'pre-wrap',
             }}>
               {detail}
             </div>
