@@ -17,20 +17,41 @@ type TxShape = {
   ctaTitle: string; ctaSub: string; ctaStart: string; footerDesc: string
 }
 
-// LIVE 티커 문구가 여기 하드코딩돼 있어서, 지원 언어 10개 중 어느 걸로 보든
-// 한국어가 그대로 떴다. 랜딩 히어로 바로 아래라 해외 사용자 눈에 제일 먼저
-// 띄는 자리인데도 그랬다. 숫자가 바뀌면 이 표만 고치면 된다.
+// LIVE 티커. 실적이 쌓이면 그 숫자를 쓰고, 없으면 지금 사실을 그대로 쓴다.
+// 문구를 언어별로 통째로 들고 있으면 숫자가 바뀔 때마다 열 줄을 고쳐야 하므로
+// {agency}/{n} 자리를 비워둔 틀로 둔다.
+export type LiveStats = {
+  topAgency?: string
+  topAgencyCount?: number
+  activeAgencies?: number
+}
+
 const TICKER: Record<Lang, { result: string; agencies: string }> = {
-  ko:      { result: 'FNC엔터테인먼트 최종 합격자 2명 배출', agencies: '16개 기획사 참여 중' },
-  en:      { result: '2 final picks at FNC Entertainment', agencies: '16 agencies taking part' },
-  ja:      { result: 'FNCエンターテインメント最終合格者2名', agencies: '16社の事務所が参加中' },
-  zh:      { result: 'FNC娱乐最终合格者2名', agencies: '16家经纪公司参与中' },
-  'zh-TW': { result: 'FNC娛樂最終合格者2名', agencies: '16家經紀公司參與中' },
-  th:      { result: 'ผ่านรอบสุดท้ายที่ FNC Entertainment 2 คน', agencies: '16 ค่ายเข้าร่วม' },
-  id:      { result: '2 lolos final di FNC Entertainment', agencies: '16 agensi ikut serta' },
-  vi:      { result: '2 người trúng tuyển tại FNC Entertainment', agencies: '16 công ty đang tham gia' },
-  tl:      { result: '2 ang pumasa sa final sa FNC Entertainment', agencies: '16 ahensya ang kalahok' },
-  es:      { result: '2 seleccionados finales en FNC Entertainment', agencies: '16 agencias participando' },
+  ko:      { result: '{agency} 최종 합격자 {n}명 배출', agencies: '{n}개 기획사 참여 중' },
+  en:      { result: '{n} final picks at {agency}', agencies: '{n} agencies taking part' },
+  ja:      { result: '{agency}最終合格者{n}名', agencies: '{n}社の事務所が参加中' },
+  zh:      { result: '{agency}最终合格者{n}名', agencies: '{n}家经纪公司参与中' },
+  'zh-TW': { result: '{agency}最終合格者{n}名', agencies: '{n}家經紀公司參與中' },
+  th:      { result: 'ผ่านรอบสุดท้ายที่ {agency} {n} คน', agencies: '{n} ค่ายเข้าร่วม' },
+  id:      { result: '{n} lolos final di {agency}', agencies: '{n} agensi ikut serta' },
+  vi:      { result: '{n} người trúng tuyển tại {agency}', agencies: '{n} công ty đang tham gia' },
+  tl:      { result: '{n} ang pumasa sa final sa {agency}', agencies: '{n} ahensya ang kalahok' },
+  es:      { result: '{n} seleccionados finales en {agency}', agencies: '{n} agencias participando' },
+}
+
+// 실적이 아직 없을 때 쓰는 값. 사실이라서 그대로 두고, 데이터가 들어오면
+// 자동으로 갈린다.
+const TICKER_FALLBACK = { agency: 'FNC엔터테인먼트', count: 2, agencies: 16 }
+
+function fillTicker(lang: Lang, stats: LiveStats) {
+  const tpl = TICKER[lang]
+  const agency = stats.topAgency ?? TICKER_FALLBACK.agency
+  const count = stats.topAgencyCount ?? TICKER_FALLBACK.count
+  const agencies = stats.activeAgencies ?? TICKER_FALLBACK.agencies
+  return {
+    result: tpl.result.replace('{agency}', agency).replace('{n}', String(count)),
+    agencies: tpl.agencies.replace('{n}', String(agencies)),
+  }
 }
 
 const t: Record<Lang, TxShape> = {
@@ -186,7 +207,7 @@ const t: Record<Lang, TxShape> = {
   },
 }
 
-export default function LandingClient() {
+export default function LandingClient({ stats = {} }: { stats?: LiveStats }) {
   const router = useRouter()
   const [lang, setLang] = useState<Lang>(() => {
     try {
@@ -199,6 +220,7 @@ export default function LandingClient() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const tx = t[lang]
+  const ticker = fillTicker(lang, stats)
 
   function changeLang(l: Lang) {
     setLang(l)
@@ -357,8 +379,8 @@ export default function LandingClient() {
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
                 <LiveTicker items={[
-                  { dot: true, text: TICKER[lang].result },
-                  { dot: false, text: TICKER[lang].agencies },
+                  { dot: true, text: ticker.result },
+                  { dot: false, text: ticker.agencies },
                 ]} />
               </div>
             </div>
