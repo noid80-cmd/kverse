@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Video, CheckCircle, XCircle } from 'lucide-react'
+import { Video, CheckCircle, XCircle, Send } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
 
 type Application = {
@@ -30,6 +30,11 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
   const [playingId, setPlayingId] = useState<string | null>(null)
+  const [agencyName, setAgencyName] = useState('')
+  // 1차 합격은 메시지를 보내야 완료된다. 눌러만 놓고 아무 말도 안 하면
+  // 지망생은 기대만 부풀다 방치되는데, 그건 아예 안 뽑힌 것보다 나쁘다.
+  const [passTarget, setPassTarget] = useState<{ appId: string; talentId: string; name: string } | null>(null)
+  const [passMessage, setPassMessage] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -49,47 +54,79 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
         .order('created_at', { ascending: false })
 
       setApps((data as unknown as Application[]) ?? [])
+
+      const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).maybeSingle()
+      if (am?.agency_id) {
+        const { data: ag } = await supabase.from('agencies').select('name').eq('id', am.agency_id).maybeSingle()
+        setAgencyName(ag?.name ?? '')
+      }
       setLoading(false)
     }
     load()
   }, [])
 
-  async function updateStatus(appId: string, status: 'invited' | 'skip' | 'pending', talentId: string) {
+  async function updateStatus(appId: string, status: 'skip' | 'pending') {
     setUpdating(appId)
     await supabase.from('audition_applications').update({ status }).eq('id', appId)
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
+    setUpdating(null)
+  }
 
-    if (status === 'invited') {
-      if (!talentId) { setUpdating(null); return }
-      const user = (await supabase.auth.getSession()).data.session?.user
-      if (user) {
-        const { data: existing } = await supabase.from('conversations').select('id')
-          .eq('agency_member_id', user.id).eq('talent_id', talentId).single()
+  function openPass(appId: string, talentId: string, name: string) {
+    if (!talentId) return
+    setPassTarget({ appId, talentId, name })
+    // 기본 문구를 채워두면 마찰이 거의 없다. 고쳐 쓰는 건 자유.
+    setPassMessage(
+      `안녕하세요 ${name}님! ${agencyName || '저희 기획사'}입니다.
+` +
+      `"${audition?.title ?? '오디션'}"에 지원해 주신 영상 인상 깊게 봤습니다 😊
+` +
+      `다음 단계 안내드리고 싶은데, 편하게 말씀 나눠요!`
+    )
+  }
 
-        let convId = existing?.id
-        if (!existing) {
-          const { data: newConv } = await supabase.from('conversations')
-            .insert({ agency_member_id: user.id, talent_id: talentId })
-            .select('id').single()
-          convId = newConv?.id
+  async function confirmPass() {
+    if (!passTarget) return
+    const body = passMessage.trim()
+    if (!body) return
+    const { appId, talentId } = passTarget
+    setUpdating(appId)
 
-          if (convId) {
-            const { data: agMember } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
-            const agencyDisplayName = agMember?.agency_id
-              ? (await supabase.from('agencies').select('name').eq('id', agMember.agency_id).single()).data?.name
-              : null
-            const greeting = `안녕하세요! 저희 ${agencyDisplayName ?? '기획사'}에서 "${audition?.title ?? '오디션'}"에 지원해 주신 영상을 인상 깊게 봤습니다 😊 편하게 말씀 나눠요!`
-            await supabase.from('messages').insert({ conversation_id: convId, sender_id: user.id, content: greeting })
-          }
-        }
-      }
-      sendPush({
-        userId: talentId,
-        title: '오디션 초대 🎉',
-        body: `${audition?.title ?? '오디션'} 오디션 콜이 왔어요! 채팅을 확인해보세요.`,
-        url: '/dashboard/auditions',
-      })
+    const user = (await supabase.auth.getSession()).data.session?.user
+    if (!user) { setUpdating(null); return }
+
+    const { data: existing } = await supabase.from('conversations').select('id')
+      .eq('agency_member_id', user.id).eq('talent_id', talentId).limit(1).maybeSingle()
+
+    let convId: string | undefined = existing?.id
+    if (!convId) {
+      const { data: newConv } = await supabase.from('conversations')
+        .insert({ agency_member_id: user.id, talent_id: talentId })
+        .select('id').single()
+      convId = newConv?.id
     }
+    if (!convId) {
+      alert('대화를 열 수 없었어요. 잠시 후 다시 시도해주세요.')
+      setUpdating(null)
+      return
+    }
+
+    await supabase.from('messages').insert({ conversation_id: convId, sender_id: user.id, content: body })
+
+    // 메시지가 실제로 나간 뒤에 합격 처리한다. 순서가 바뀌면 메시지 전송이
+    // 실패했을 때 "합격했는데 아무 말 없음" 상태가 그대로 남는다.
+    await supabase.from('audition_applications').update({ status: 'invited' }).eq('id', appId)
+    setApps(prev => prev.map(a => a.id === appId ? { ...a, status: 'invited' } : a))
+
+    sendPush({
+      userId: talentId,
+      title: '1차 합격 🎉',
+      body: `${agencyName || '기획사'}에서 메시지가 왔어요. 확인해보세요.`,
+      url: `/chat/${convId}`,
+    })
+
+    setPassTarget(null)
+    setPassMessage('')
     setUpdating(null)
   }
 
@@ -99,7 +136,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   }
 
   const statusBadge = (s: string) => {
-    if (s === 'invited') return { bg: '#dcfce7', color: '#16a34a', label: '초대' }
+    if (s === 'invited') return { bg: '#dcfce7', color: '#16a34a', label: '1차 합격' }
     if (s === 'skip') return { bg: '#f0f0f8', color: '#94a3b8', label: '패스' }
     return { bg: '#fef9c3', color: '#ca8a04', label: '검토중' }
   }
@@ -192,7 +229,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
                     {a.status === 'pending' ? (
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button onClick={() => updateStatus(a.id, 'skip', a.talent?.id ?? '')}
+                        <button onClick={() => updateStatus(a.id, 'skip')}
                           disabled={updating === a.id}
                           style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -201,18 +238,18 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                           }}>
                           <XCircle size={15} strokeWidth={2} /> 패스
                         </button>
-                        <button onClick={() => updateStatus(a.id, 'invited', a.talent?.id ?? '')}
+                        <button onClick={() => openPass(a.id, a.talent?.id ?? '', a.talent?.name ?? '')}
                           disabled={updating === a.id}
                           style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                             background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
-                          <CheckCircle size={15} strokeWidth={2} /> 초대
+                          <CheckCircle size={15} strokeWidth={2} /> 1차 합격
                         </button>
                       </div>
                     ) : (
-                      <button onClick={() => updateStatus(a.id, 'pending', a.talent?.id ?? '')}
+                      <button onClick={() => updateStatus(a.id, 'pending')}
                         disabled={updating === a.id}
                         style={{
                           width: '100%', background: 'none', border: '1px solid #e0e0f0',
@@ -229,6 +266,67 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
           </div>
         )}
       </div>
+      {passTarget && (
+        <div
+          onClick={() => { if (!updating) { setPassTarget(null); setPassMessage('') } }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(36,28,21,0.45)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: '100%', maxWidth: 520, background: '#FFFFFF',
+            borderRadius: '24px 24px 0 0', padding: '24px 20px calc(24px + env(safe-area-inset-bottom))',
+          }}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 6 }}>
+              {passTarget.name}님을 1차 합격시킵니다
+            </div>
+            <div style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.6, marginBottom: 16 }}>
+              보내는 메시지가 지망생에게 바로 알림으로 갑니다. 합격만 눌러두고
+              연락이 없으면 기다리게 되기 때문에, 첫 마디까지 함께 보냅니다.
+            </div>
+
+            <textarea
+              value={passMessage}
+              onChange={e => setPassMessage(e.target.value)}
+              rows={6}
+              style={{
+                width: '100%', padding: '14px 16px', borderRadius: 16, resize: 'none',
+                border: '1px solid rgba(36,28,21,0.14)', background: '#FFFDF7',
+                fontSize: 14, lineHeight: 1.7, color: '#241C15', fontFamily: 'inherit',
+                outline: 'none', marginBottom: 16,
+              }} />
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => { setPassTarget(null); setPassMessage('') }}
+                disabled={!!updating}
+                style={{
+                  flex: 1, padding: '14px', borderRadius: 14, cursor: 'pointer',
+                  background: 'rgba(36,28,21,0.05)', color: '#8A7F6E',
+                  border: 'none', fontSize: 15, fontWeight: 700,
+                }}>
+                취소
+              </button>
+              <button
+                onClick={confirmPass}
+                disabled={!!updating || !passMessage.trim()}
+                style={{
+                  flex: 2, padding: '14px', borderRadius: 14,
+                  cursor: passMessage.trim() ? 'pointer' : 'not-allowed',
+                  background: passMessage.trim()
+                    ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)'
+                    : 'rgba(36,28,21,0.12)',
+                  color: '#FFFFFF', border: 'none', fontSize: 15, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}>
+                <Send size={16} strokeWidth={2} />
+                {updating ? '보내는 중...' : '합격 알리고 대화 시작'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <AgencyNav />
     </div>
   )

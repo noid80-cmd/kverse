@@ -424,7 +424,11 @@ export default function TalentAuditionsPage() {
             const appStatus = appInfo?.status
             const isInvited = appStatus === 'invited'
             const isPending = appStatus === 'pending'
-            const isSkip = appStatus === 'skip'
+            // 기획사가 심사 중에 누른 '패스'를 지망생에게 그대로 보여주면,
+            // 마감도 안 됐는데 남은 기간 내내 "패스됨"이 떠 있게 된다. 대상이
+            // 초중등~고등 지망생이라 그 상태로 두면 그 자리에서 이탈한다.
+            // 결과는 회차가 끝난 뒤에 한 번만 전한다.
+            const underReview = isPending || appStatus === 'skip'
             return (
               <div style={{
                 background: isInvited ? 'rgba(34,197,94,0.08)' : exp ? 'rgba(36,28,21,0.03)' : '#FFFFFF',
@@ -521,10 +525,10 @@ export default function TalentAuditionsPage() {
                     <button onClick={() => !appStatus && openModal(a)} style={{
                       width: '100%', padding: '12px', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 700,
                       cursor: appStatus ? 'default' : 'pointer',
-                      background: isPending ? 'rgba(251,191,36,0.12)' : isSkip ? '#FFFFFF' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
-                      color: isPending ? '#fbbf24' : isSkip ? '#8A7F6E' : 'white',
+                      background: underReview ? 'rgba(251,191,36,0.12)' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+                      color: underReview ? '#fbbf24' : 'white',
                     }}>
-                      {isPending ? tx.auditions.review : isSkip ? tx.auditions.skipped : tx.auditions.apply}
+                      {underReview ? tx.auditions.review : tx.auditions.apply}
                     </button>
                     {isPending && (
                       <button onClick={() => cancelApplication(a.id)} style={{
