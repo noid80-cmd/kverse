@@ -8,7 +8,7 @@ import Link from 'next/link'
 type Bookmark = {
   id: string; created_at: string; note: string | null
   video: { id: string; title: string; thumbnail_url: string | null; category: string } | null
-  talent: { id: string; name: string; avatar_url: string | null; bio: string | null; skills: string[] } | null
+  talent: { id: string; name: string; avatar_url: string | null; skills: string[] } | null
 }
 
 const categoryLabel: Record<string, string> = {
@@ -30,8 +30,8 @@ export default function AgencyTalentsPage() {
       const { data } = await supabase.from('bookmarks').select(`
         id, created_at, note,
         video:videos(id, title, thumbnail_url, category),
-        talent:profiles!talent_id(id, name, avatar_url, bio, skills)
-      `).eq('agency_member_id', user.id).order('created_at', { ascending: false })
+        talent:profiles!talent_id(id, name, avatar_url, skills)
+      `).eq('agency_member_id', user.id).is('cancelled_at', null).order('created_at', { ascending: false })
 
       setBookmarks((data as unknown as Bookmark[]) ?? [])
       setLoading(false)
@@ -40,7 +40,7 @@ export default function AgencyTalentsPage() {
   }, [])
 
   async function removeBookmark(id: string) {
-    await supabase.from('bookmarks').delete().eq('id', id)
+    await supabase.from('bookmarks').update({ cancelled_at: new Date().toISOString() }).eq('id', id)
     setBookmarks(prev => prev.filter(b => b.id !== id))
   }
 

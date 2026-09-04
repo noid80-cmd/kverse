@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { Bookmark, MessageCircle, Lock } from 'lucide-react'
 import { checkContactAccess } from '@/lib/contactGate'
+import AuditionOfferBox from '@/components/AuditionOfferBox'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { sendPush } from '@/lib/notify'
 
@@ -31,6 +32,7 @@ export default function AgencyVideoPage() {
   const [starting, setStarting] = useState(false)
   // 기본값은 잠금. 판정 전에 잠깐이라도 열려 보이면 안 된다.
   const [canContact, setCanContact] = useState(false)
+  const [myAgencyName, setMyAgencyName] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -45,6 +47,10 @@ export default function AgencyVideoPage() {
 
       const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).single()
       setMyAgencyId(am?.agency_id ?? '')
+      if (am?.agency_id) {
+        const { data: agRow } = await supabase.from('agencies').select('name').eq('id', am.agency_id).maybeSingle()
+        setMyAgencyName(agRow?.name ?? '')
+      }
 
       const { data: v } = await supabase.from('videos').select(`
         id, title, description, video_url, thumbnail_url, view_count, category, tags, created_at,
@@ -53,7 +59,7 @@ export default function AgencyVideoPage() {
       if (!v) { router.back(); return }
       setVideo(v as unknown as Video)
 
-      const { data: bm } = await supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('video_id', id).single()
+      const { data: bm } = await supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('video_id', id).is('cancelled_at', null).limit(1).maybeSingle()
       setBookmarked(!!bm)
 
       // 자기소개 전문은 사실상 외부 연락처라, 자격이 확인된 뒤에만 따로 가져온다.
@@ -85,7 +91,10 @@ export default function AgencyVideoPage() {
   async function toggleBookmark() {
     if (!video?.talent) return
     if (bookmarked) {
-      await supabase.from('bookmarks').delete().eq('agency_member_id', myId).eq('video_id', video.id)
+      // 지우지 않고 표시만 한다. 지우면 지망생 화면에서도 사라지는데,
+      // "○○이 관심을 표시했다"는 건 일어났던 사실이라 사라지면 안 된다.
+      await supabase.from('bookmarks').update({ cancelled_at: new Date().toISOString() })
+        .eq('agency_member_id', myId).eq('video_id', video.id).is('cancelled_at', null)
     } else {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: video.talent.id, video_id: video.id })
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
@@ -218,16 +227,11 @@ export default function AgencyVideoPage() {
               style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)', opacity: starting ? 0.7 : 1 }}>
               {starting ? '연결 중...' : '채팅하기'}
             </button>
-          ) : (
-            <div style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.09)', textAlign: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#8A7F6E' }}>
-                <Lock size={16} strokeWidth={2} />
-                1차 합격 후 대화할 수 있어요
-              </div>
-              <div style={{ fontSize: 12.5, color: '#b0a99b', marginTop: 6, lineHeight: 1.6 }}>
-                관심을 표시해두면 이 지망생이 오디션에 지원할 때 알려드려요
-              </div>
-            </div>
+          ) : t && (
+            <AuditionOfferBox
+              agencyMemberId={myId} agencyId={myAgencyId || null}
+              talentId={t.id} talentName={t.name}
+              videoId={video.id} agencyName={myAgencyName} />
           )}
         </div>
       </div>

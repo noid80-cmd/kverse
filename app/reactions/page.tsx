@@ -23,6 +23,13 @@ type Bookmark = {
   agency_member: { name: string } | null
 }
 
+// 제안은 캐시에 넣지 않는다. 수락/거절이 걸린 화면이라 옛 값이 잠깐이라도
+// 보이면 이미 응답한 제안에 또 답하게 된다.
+type Offer = {
+  id: string; message: string; created_at: string; expires_at: string
+  agency: { name: string } | null
+}
+
 const CACHE_KEY = 'kpick-reactions'
 
 export default function ReactionsPage() {
@@ -47,6 +54,8 @@ function ReactionsContent() {
   const [tab, setTab] = useState<'contacts' | 'bookmarks'>(
     searchParams.get('tab') === 'bookmarks' ? 'bookmarks' : 'contacts'
   )
+  const [offers, setOffers] = useState<Offer[]>([])
+  const [respondingId, setRespondingId] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [notifModal, setNotifModal] = useState(false)
   const [notifPerm, setNotifPerm] = useState<NotificationPermission | null>(null)
@@ -57,6 +66,24 @@ function ReactionsContent() {
   const userIdRef = useRef<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  async function respondToOffer(offerId: string, action: 'accept' | 'decline') {
+    setRespondingId(offerId)
+    const token = (await supabase.auth.getSession()).data.session?.access_token
+    const res = await fetch('/api/offers/respond', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+      body: JSON.stringify({ offerId, action }),
+    })
+    const result = await res.json().catch(() => ({}))
+    setRespondingId(null)
+    // 응답한 제안은 어느 쪽이든 목록에서 뺀다. 거절을 기획사에 알리지 않으므로
+    // 지망생 입장에서도 그냥 사라지는 게 자연스럽다.
+    setOffers(prev => prev.filter(o => o.id !== offerId))
+    if (action === 'accept' && result?.conversationId) {
+      router.push(`/chat/${result.conversationId}`)
+    }
+  }
 
   function showToast(msg: string) {
     setToast(msg)
@@ -81,6 +108,14 @@ function ReactionsContent() {
       lastMsgs?.forEach(m => { if (!lastMap[m.conversation_id]) lastMap[m.conversation_id] = m.content })
       list.forEach(c => { c.lastMessage = lastMap[c.id] })
     }
+
+    const { data: offerRows } = await supabase
+      .from('audition_offers')
+      .select('id, message, created_at, expires_at, agency:agencies(name)')
+      .eq('talent_id', userId).eq('status', 'pending')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+    setOffers((offerRows as unknown as Offer[]) ?? [])
 
     const fresh = { convs: list, bookmarks: (b as unknown as Bookmark[]) ?? [] }
     setPageData(fresh)
@@ -197,6 +232,47 @@ function ReactionsContent() {
           </button>
         </div>
         <p style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 20 }}>{tx.reactions.pageDesc}</p>
+
+        {offers.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+            {offers.map(o => (
+              <div key={o.id} style={{
+                background: 'linear-gradient(135deg, #FFEDE0 0%, #FFD9BC 100%)',
+                border: '1px solid rgba(255,111,60,0.25)', borderRadius: 20, padding: '18px 18px 16px',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#D84A1E', letterSpacing: '0.02em', marginBottom: 6 }}>
+                  {tx.reactions.offerTitle}
+                </div>
+                <div style={{ fontSize: 17, fontWeight: 900, color: '#241C15', marginBottom: 10 }}>
+                  {o.agency?.name ?? '기획사'}
+                </div>
+                <p style={{ fontSize: 14, color: '#5c5245', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: '0 0 12px' }}>
+                  {o.message}
+                </p>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 14 }}>
+                  {tx.reactions.offerHint}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => respondToOffer(o.id, 'decline')} disabled={respondingId === o.id}
+                    style={{
+                      flex: 1, padding: '12px', borderRadius: 13, border: 'none', cursor: 'pointer',
+                      background: 'rgba(36,28,21,0.06)', color: '#8A7F6E', fontSize: 14, fontWeight: 700,
+                    }}>
+                    {tx.reactions.offerDecline}
+                  </button>
+                  <button onClick={() => respondToOffer(o.id, 'accept')} disabled={respondingId === o.id}
+                    style={{
+                      flex: 2, padding: '12px', borderRadius: 13, border: 'none', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#FFFFFF',
+                      fontSize: 14, fontWeight: 700,
+                    }}>
+                    {respondingId === o.id ? '...' : tx.reactions.offerAccept}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: 'flex', background: '#FFFFFF', borderRadius: 16, padding: 4, marginBottom: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
           {(['contacts', 'bookmarks'] as const).map(t => (

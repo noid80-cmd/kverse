@@ -303,7 +303,7 @@ export default function UploadPage() {
     setProgress(100)
     if (dbError) { setError('저장 실패: ' + dbError.message); setUploading(false); return }
 
-    const { data: bms } = await supabase.from('bookmarks').select('agency_member_id').eq('talent_id', user.id)
+    const { data: bms } = await supabase.from('bookmarks').select('agency_member_id').eq('talent_id', user.id).is('cancelled_at', null)
     if (bms && bms.length > 0) {
       const { data: prof } = await supabase.from('profiles').select('name').eq('id', user.id).single()
       const talentName = prof?.name ?? '지망생'

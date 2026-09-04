@@ -7,6 +7,7 @@ import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
 import { MessageCircle, Video, Heart, Bookmark, Lock } from 'lucide-react'
 import { checkContactAccess } from '@/lib/contactGate'
+import AuditionOfferBox from '@/components/AuditionOfferBox'
 import { sendPush } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
@@ -31,6 +32,7 @@ export default function TalentProfilePage() {
   const [agencyName, setAgencyName] = useState('')
   // 기본값은 잠금. 판정이 끝나기 전에 잠깐이라도 열려 보이면 안 된다.
   const [canContact, setCanContact] = useState(false)
+  const [agencyId, setAgencyId] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function TalentProfilePage() {
         supabase.from('profiles').select('id, name, avatar_url, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
-        supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('talent_id', id).limit(1).maybeSingle(),
+        supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('talent_id', id).is('cancelled_at', null).limit(1).maybeSingle(),
         supabase.from('agency_members').select('agency_id, agencies(name)').eq('profile_id', user.id).single(),
       ])
 
@@ -60,9 +62,11 @@ export default function TalentProfilePage() {
       // 자기소개 전문은 사실상 외부 연락처다(인스타 아이디를 여기 적는다).
       // 그래서 아예 받아오지 않다가 자격이 확인된 뒤에만 따로 가져온다 —
       // 화면에서만 가리면 네트워크 탭에 그대로 남는다.
+      const myAgency = (ag?.agency_id as string | undefined) ?? null
+      setAgencyId(myAgency)
       const access = await checkContactAccess(supabase, {
         agencyMemberId: user.id,
-        agencyId: (ag?.agency_id as string | undefined) ?? null,
+        agencyId: myAgency,
         talentId: id,
       })
       setCanContact(access.allowed)
@@ -76,7 +80,9 @@ export default function TalentProfilePage() {
 
   async function toggleBookmark() {
     if (bookmarked) {
-      await supabase.from('bookmarks').delete().eq('agency_member_id', myId).eq('talent_id', id)
+      // 지우지 않고 표시만 한다 — 지망생 쪽 기록은 남는다.
+      await supabase.from('bookmarks').update({ cancelled_at: new Date().toISOString() })
+        .eq('agency_member_id', myId).eq('talent_id', id).is('cancelled_at', null)
       setBookmarked(false)
     } else {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: id })
@@ -202,18 +208,10 @@ export default function TalentProfilePage() {
             </span>
           </button>
         ) : (
-          <div style={{
-            width: '100%', padding: '16px', borderRadius: 18, marginBottom: 24,
-            background: '#fff', border: '1px solid #e8e8f2', textAlign: 'center',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#8A7F6E' }}>
-              <Lock size={16} strokeWidth={2} />
-              1차 합격 후 대화할 수 있어요
-            </div>
-            <div style={{ fontSize: 12.5, color: '#b0b0cc', marginTop: 6, lineHeight: 1.6 }}>
-              오디션 지원자를 1차 합격시키면 채팅과 연락처가 열립니다
-            </div>
-          </div>
+          <AuditionOfferBox
+            agencyMemberId={myId} agencyId={agencyId}
+            talentId={id} talentName={talent.name}
+            agencyName={agencyName} tone="cool" />
         )}
 
         {/* 영상 목록 */}
