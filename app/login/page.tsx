@@ -77,42 +77,60 @@ export default function LoginPage() {
     }
   }
 
-  async function handleGoogle() {
+  // OAuth 시작을 우리가 통제한다. 예전엔 signInWithOAuth가 알아서 이동하게
+  // 두고 반환값을 통째로 무시했는데, 그러면 시작이 실패해도 화면에 아무 일도
+  // 일어나지 않는다. 실제로 "눌렀는데 아무 반응이 없다"는 제보가 그거였다.
+  //
+  // 그리고 PKCE의 code_verifier가 저장소에 안착하기 전에 페이지를 떠나면,
+  // 돌아왔을 때 코드를 교환할 열쇠가 없어서 로그인이 실패한다. 구글·애플,
+  // 앱·웹 가릴 것 없이 "한 번 실패하고 두세 번째에 되는" 증상이 이걸로
+  // 설명된다. 그래서 값이 실제로 보일 때까지 잠깐 기다렸다가 이동한다.
+  async function startOAuth(provider: 'google' | 'apple') {
+    setError('')
+    setLoading(true)
     const supabase = createClient()
+
     // 네이티브 앱에서는 https 콜백 대신 커스텀 스킴(kpick://auth-callback)으로
     // 받는다 — iOS 쪽에서 이 이동을 ASWebAuthenticationSession으로 가로채
-    // Safari로 튕기지 않고 시스템 인증 세션 안에서 구글 로그인을 처리한 뒤,
-    // 완료되면 이 콜백을 https://kpick.app/auth/callback으로 변환해 웹뷰에
-    // 다시 로드해준다(자세한 내용은 ios/App/App/GoogleAuthInterceptorPlugin.swift).
-    // /auth/callback이 클라이언트 컴포넌트라 SDK가 알아서 리다이렉트하게 둠
-    // (skipBrowserRedirect 불필요 — 서버가 code_verifier 쿠키를 못 읽는
-    // 문제를 피하려고 콜백을 클라이언트에서 처리하도록 바꿨음).
+    // Safari로 튕기지 않고 시스템 인증 세션 안에서 처리한 뒤, 완료되면 이
+    // 콜백을 https://kpick.app/auth/callback으로 변환해 웹뷰에 다시 로드해준다
+    // (ios/App/App/{Google,Apple}AuthInterceptorPlugin.swift).
     const redirectTo = isNativeApp()
       ? 'kpick://auth-callback'
       : `${window.location.origin}/auth/callback`
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
+
+    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
       options: {
         redirectTo,
-        queryParams: { prompt: 'select_account' },
+        skipBrowserRedirect: true,
+        ...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}),
       },
     })
+
+    if (oauthError || !data?.url) {
+      setLoading(false)
+      setError(oauthError?.message ?? '로그인을 시작하지 못했어요. 다시 시도해주세요.')
+      return
+    }
+
+    // 최대 1초. 못 봐도 그냥 진행한다 — 저장 위치가 버전에 따라 다를 수 있어서
+    // 여기서 막아버리면 멀쩡한 로그인까지 못 하게 된다.
+    for (let i = 0; i < 20; i++) {
+      const inCookie = document.cookie.includes('code-verifier')
+      let inLocal = false
+      try {
+        inLocal = Object.keys(localStorage).some(k => k.includes('code-verifier'))
+      } catch { /* 접근이 막힌 브라우저도 있다 */ }
+      if (inCookie || inLocal) break
+      await new Promise(r => setTimeout(r, 50))
+    }
+
+    window.location.href = data.url
   }
 
-  async function handleApple() {
-    const supabase = createClient()
-    // Guideline 4.8 대응: 구글과 동일하게 네이티브 앱에서는 커스텀 스킴 콜백을 쓰고
-    // (ios/App/App/AppleAuthInterceptorPlugin.swift가 ASWebAuthenticationSession으로 처리),
-    // Sign in with Apple은 이름/이메일 수집만 요구하고 이메일 비공개 옵션을 제공해
-    // Apple의 "동등한 로그인 옵션" 요건을 만족한다.
-    const redirectTo = isNativeApp()
-      ? 'kpick://auth-callback'
-      : `${window.location.origin}/auth/callback`
-    await supabase.auth.signInWithOAuth({
-      provider: 'apple',
-      options: { redirectTo },
-    })
-  }
+  const handleGoogle = () => startOAuth('google')
+  const handleApple = () => startOAuth('apple')
 
   return (
     <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', overflow: 'hidden', position: 'relative' }}>
@@ -210,11 +228,11 @@ export default function LoginPage() {
         }}>
 
           {!isKakao && (
-            <button onClick={handleApple} className="apple-btn" style={{
+            <button onClick={handleApple} disabled={loading} className="apple-btn" style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               padding: '14px 20px', borderRadius: 16, marginBottom: 10,
               background: '#000000', color: '#FFFFFF', fontSize: 15, fontWeight: 600,
-              border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+              border: 'none', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1, transition: 'all 0.2s',
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
                 <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.014.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.696.91-1.395 0-2.35-1.25-3.44-2.79-1.36-1.94-2.42-4.94-2.42-7.78 0-4.58 2.98-7.01 5.92-7.01 1.365 0 2.51.9 3.37.9.81 0 2.11-.96 3.7-.96.61 0 2.81.06 4.28 2.09-.11.07-2.55 1.49-2.55 4.53 0 3.63 3.19 4.9 3.41 5.0z"/>
@@ -223,11 +241,11 @@ export default function LoginPage() {
             </button>
           )}
           {!isKakao && (
-            <button onClick={handleGoogle} className="google-btn" style={{
+            <button onClick={handleGoogle} disabled={loading} className="google-btn" style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               padding: '14px 20px', borderRadius: 16, marginBottom: 20,
               background: 'rgba(36,28,21,0.03)', color: '#241C15', fontSize: 15, fontWeight: 600,
-              border: '1px solid rgba(36,28,21,0.1)', cursor: 'pointer', transition: 'all 0.2s',
+              border: '1px solid rgba(36,28,21,0.1)', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1, transition: 'all 0.2s',
             }}>
               <svg width="20" height="20" viewBox="0 0 48 48">
                 <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z" />
@@ -242,6 +260,13 @@ export default function LoginPage() {
             <p style={{ fontSize: 12, color: 'rgba(36,28,21,0.4)', textAlign: 'center', marginBottom: 20, lineHeight: 1.7, whiteSpace: 'pre-line' }}>
               {tx.kakaoBlock}
             </p>
+          )}
+
+          {error && !isKakao && (
+            <p style={{
+              color: '#DC2626', fontSize: 13, textAlign: 'center',
+              margin: '0 0 16px', lineHeight: 1.6,
+            }}>{error}</p>
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
@@ -265,7 +290,6 @@ export default function LoginPage() {
                 borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
                 outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
               }} />
-            {error && <p style={{ color: '#DC2626', fontSize: 13, textAlign: 'center', margin: 0 }}>{error}</p>}
             <button type="submit" disabled={loading} className="submit-btn"
               style={{
                 width: '100%', padding: '15px', borderRadius: 16, border: 'none',
