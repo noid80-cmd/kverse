@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
-import { Bookmark, MessageCircle } from 'lucide-react'
+import { Bookmark, MessageCircle, Lock } from 'lucide-react'
+import { checkContactAccess } from '@/lib/contactGate'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { sendPush } from '@/lib/notify'
 
@@ -28,6 +29,8 @@ export default function AgencyVideoPage() {
   const [myId, setMyId] = useState('')
   const [myAgencyId, setMyAgencyId] = useState('')
   const [starting, setStarting] = useState(false)
+  // 기본값은 잠금. 판정 전에 잠깐이라도 열려 보이면 안 된다.
+  const [canContact, setCanContact] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -45,13 +48,33 @@ export default function AgencyVideoPage() {
 
       const { data: v } = await supabase.from('videos').select(`
         id, title, description, video_url, thumbnail_url, view_count, category, tags, created_at,
-        talent:profiles!talent_id(id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality)
+        talent:profiles!talent_id(id, name, avatar_url, birth_date, gender, height, weight, skills, nationality)
       `).eq('id', id).single()
       if (!v) { router.back(); return }
       setVideo(v as unknown as Video)
 
       const { data: bm } = await supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('video_id', id).single()
       setBookmarked(!!bm)
+
+      // 자기소개 전문은 사실상 외부 연락처라, 자격이 확인된 뒤에만 따로 가져온다.
+      // 화면에서만 가리면 네트워크 탭에 그대로 남는다.
+      const talentId = (v as unknown as Video).talent?.id
+      if (talentId) {
+        const access = await checkContactAccess(supabase, {
+          agencyMemberId: user.id,
+          agencyId: am?.agency_id ?? null,
+          talentId,
+        })
+        setCanContact(access.allowed)
+        if (access.allowed) {
+          const { data: full } = await supabase.from('profiles').select('bio').eq('id', talentId).single()
+          if (full?.bio) {
+            setVideo(prev => (prev && prev.talent
+              ? { ...prev, talent: { ...prev.talent, bio: full.bio as string } }
+              : prev))
+          }
+        }
+      }
 
       // 조회수 증가
       await supabase.from('videos').update({ view_count: (v as unknown as Video).view_count + 1 }).eq('id', id)
@@ -74,6 +97,7 @@ export default function AgencyVideoPage() {
 
   async function handleStartChat() {
     if (!video?.talent) return
+    if (!canContact) return
     setStarting(true)
     const { data: existing } = await supabase
       .from('conversations').select('id')
@@ -177,15 +201,34 @@ export default function AgencyVideoPage() {
                 </div>
               )}
 
-              {t.bio && <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6, background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>}
+              {canContact ? (
+                t.bio && <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6, background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A7F6E', background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px' }}>
+                  <Lock size={14} strokeWidth={2} />
+                  자기소개는 1차 합격 후에 볼 수 있어요
+                </div>
+              )}
             </div>
           )}
 
-          <button onClick={handleStartChat} disabled={starting}
-            className="w-full py-4 rounded-2xl text-white transition active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)', opacity: starting ? 0.7 : 1 }}>
-            {starting ? '연결 중...' : '채팅하기'}
-          </button>
+          {canContact ? (
+            <button onClick={handleStartChat} disabled={starting}
+              className="w-full py-4 rounded-2xl text-white transition active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)', opacity: starting ? 0.7 : 1 }}>
+              {starting ? '연결 중...' : '채팅하기'}
+            </button>
+          ) : (
+            <div style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.09)', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#8A7F6E' }}>
+                <Lock size={16} strokeWidth={2} />
+                1차 합격 후 대화할 수 있어요
+              </div>
+              <div style={{ fontSize: 12.5, color: '#b0a99b', marginTop: 6, lineHeight: 1.6 }}>
+                관심을 표시해두면 이 지망생이 오디션에 지원할 때 알려드려요
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { checkContactAccess } from '@/lib/contactGate'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
-import { Heart, Video, MessageCircle } from 'lucide-react'
+import { Heart, Video, MessageCircle, Lock } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
 import { sendPush } from '@/lib/notify'
 
@@ -33,6 +34,8 @@ export default function TalentPublicProfilePage() {
   const [convId, setConvId] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const [loading, setLoading] = useState(true)
+  // 기본값은 잠금. 판정 전에 잠깐이라도 열려 보이면 안 된다.
+  const [canContact, setCanContact] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -45,8 +48,10 @@ export default function TalentPublicProfilePage() {
       setMyRole(profile?.role ?? 'talent')
 
       const isAgency = profile?.role === 'agency'
+      // bio(자기소개 전문)는 사실상 외부 연락처라 처음부터 받지 않는다.
+      // 자격이 확인된 뒤에만 따로 가져온다 — 화면에서만 가리면 네트워크 탭에 남는다.
       const profileFields = isAgency
-        ? 'id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality'
+        ? 'id, name, avatar_url, birth_date, gender, height, weight, skills, nationality'
         : 'id, name, avatar_url'
 
       const [{ data: t }, { data: v }] = await Promise.all([
@@ -60,6 +65,18 @@ export default function TalentPublicProfilePage() {
       if (profile?.role === 'agency') {
         const { data: conv } = await supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).maybeSingle()
         if (conv) setConvId(conv.id)
+
+        const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).maybeSingle()
+        const access = await checkContactAccess(supabase, {
+          agencyMemberId: user.id,
+          agencyId: (am?.agency_id as string | undefined) ?? null,
+          talentId: id,
+        })
+        setCanContact(access.allowed)
+        if (access.allowed) {
+          const { data: full } = await supabase.from('profiles').select('bio').eq('id', id).single()
+          if (full?.bio) setTalent(prev => (prev ? { ...prev, bio: full.bio as string } : prev))
+        }
       }
 
       setLoading(false)
@@ -69,6 +86,7 @@ export default function TalentPublicProfilePage() {
 
   async function handleChat() {
     if (convId) { router.push(`/chat/${convId}`); return }
+    if (!canContact) return
     setStarting(true)
     const { data } = await supabase.from('conversations').insert({ agency_member_id: myId, talent_id: id }).select('id').single()
     if (data) {
@@ -146,13 +164,28 @@ export default function TalentPublicProfilePage() {
             </div>
           )}
 
-          {myRole === 'agency' && talent.bio && (
-            <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.7, background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
-          )}
+          {myRole === 'agency' && (canContact ? (
+            talent.bio && (
+              <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.7, background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
+            )
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A7F6E', background: '#FFFFFF', borderRadius: 14, padding: '14px 16px' }}>
+              <Lock size={14} strokeWidth={2} />
+              자기소개는 1차 합격 후에 볼 수 있어요
+            </div>
+          ))}
         </div>
 
-        {/* 채팅 버튼 (기획사만) */}
-        {myRole === 'agency' && (
+        {/* 채팅 버튼 (기획사만, 1차 합격 후) */}
+        {myRole === 'agency' && !canContact && (
+          <div style={{ width: '100%', padding: '16px', borderRadius: 18, marginBottom: 24, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.09)', textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#8A7F6E' }}>
+              <Lock size={16} strokeWidth={2} />
+              1차 합격 후 대화할 수 있어요
+            </div>
+          </div>
+        )}
+        {myRole === 'agency' && canContact && (
           <button onClick={handleChat} disabled={starting}
             style={{
               width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',

@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
-import { MessageCircle, Video, Heart, Bookmark } from 'lucide-react'
+import { MessageCircle, Video, Heart, Bookmark, Lock } from 'lucide-react'
+import { checkContactAccess } from '@/lib/contactGate'
 import { sendPush } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
@@ -28,6 +29,8 @@ export default function TalentProfilePage() {
   const [starting, setStarting] = useState(false)
   const [bookmarked, setBookmarked] = useState(false)
   const [agencyName, setAgencyName] = useState('')
+  // 기본값은 잠금. 판정이 끝나기 전에 잠깐이라도 열려 보이면 안 된다.
+  const [canContact, setCanContact] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -41,18 +44,32 @@ export default function TalentProfilePage() {
       setMyId(user.id)
 
       const [{ data: t }, { data: v }, { data: conv }, { data: bm }, { data: ag }] = await Promise.all([
-        supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
+        supabase.from('profiles').select('id, name, avatar_url, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
         supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('talent_id', id).limit(1).maybeSingle(),
-        supabase.from('agency_members').select('agencies(name)').eq('profile_id', user.id).single(),
+        supabase.from('agency_members').select('agency_id, agencies(name)').eq('profile_id', user.id).single(),
       ])
 
-      setTalent(t as unknown as Talent)
+      setTalent({ ...(t as unknown as Talent), bio: null })
       setVideos((v as unknown as Video[]) ?? [])
       if (conv) setConvId(conv.id)
       setBookmarked(!!bm)
       setAgencyName((ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사')
+
+      // 자기소개 전문은 사실상 외부 연락처다(인스타 아이디를 여기 적는다).
+      // 그래서 아예 받아오지 않다가 자격이 확인된 뒤에만 따로 가져온다 —
+      // 화면에서만 가리면 네트워크 탭에 그대로 남는다.
+      const access = await checkContactAccess(supabase, {
+        agencyMemberId: user.id,
+        agencyId: (ag?.agency_id as string | undefined) ?? null,
+        talentId: id,
+      })
+      setCanContact(access.allowed)
+      if (access.allowed) {
+        const { data: full } = await supabase.from('profiles').select('bio').eq('id', id).single()
+        if (full?.bio) setTalent(prev => (prev ? { ...prev, bio: full.bio as string } : prev))
+      }
     }
     load()
   }, [id])
@@ -70,6 +87,7 @@ export default function TalentProfilePage() {
 
   async function handleChat() {
     if (convId) { router.push(`/chat/${convId}`); return }
+    if (!canContact) return
     setStarting(true)
     const { data } = await supabase.from('conversations').insert({ agency_member_id: myId, talent_id: id }).select('id').single()
     if (data) {
@@ -153,24 +171,50 @@ export default function TalentProfilePage() {
             </div>
           )}
 
-          {talent.bio && (
-            <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.7, background: '#f8f7ff', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
+          {canContact ? (
+            talent.bio && (
+              <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.7, background: '#f8f7ff', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
+            )
+          ) : (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              fontSize: 13, color: '#8A7F6E', background: '#f8f7ff',
+              borderRadius: 14, padding: '14px 16px',
+            }}>
+              <Lock size={14} strokeWidth={2} />
+              자기소개는 1차 합격 후에 볼 수 있어요
+            </div>
           )}
         </div>
 
-        {/* 채팅 버튼 */}
-        <button onClick={handleChat} disabled={starting}
-          style={{
-            width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
-            fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)',
-            marginBottom: 24, opacity: starting ? 0.7 : 1,
+        {/* 채팅 버튼 — 1차 합격 전에는 열리지 않는다 */}
+        {canContact ? (
+          <button onClick={handleChat} disabled={starting}
+            style={{
+              width: '100%', padding: '16px', borderRadius: 18, border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
+              fontSize: 16, fontWeight: 700, boxShadow: '0 4px 16px rgba(255,111,60,0.3)',
+              marginBottom: 24, opacity: starting ? 0.7 : 1,
+            }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <MessageCircle size={18} strokeWidth={2} />
+              {starting ? '연결 중...' : convId ? '채팅 이어가기' : '채팅하기'}
+            </span>
+          </button>
+        ) : (
+          <div style={{
+            width: '100%', padding: '16px', borderRadius: 18, marginBottom: 24,
+            background: '#fff', border: '1px solid #e8e8f2', textAlign: 'center',
           }}>
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <MessageCircle size={18} strokeWidth={2} />
-            {starting ? '연결 중...' : convId ? '채팅 이어가기' : '채팅하기'}
-          </span>
-        </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#8A7F6E' }}>
+              <Lock size={16} strokeWidth={2} />
+              1차 합격 후 대화할 수 있어요
+            </div>
+            <div style={{ fontSize: 12.5, color: '#b0b0cc', marginTop: 6, lineHeight: 1.6 }}>
+              오디션 지원자를 1차 합격시키면 채팅과 연락처가 열립니다
+            </div>
+          </div>
+        )}
 
         {/* 영상 목록 */}
         <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1e1b4b', marginBottom: 14 }}>올린 영상 {videos.length}개</h2>
