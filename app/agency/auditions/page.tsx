@@ -109,7 +109,11 @@ export default function AgencyAuditionsPage() {
       category: form.categories.join(','),
       mode: form.mode,
       deadline: form.deadline || null,
-      status: 'active',
+      // 예전엔 여기서 바로 'active'가 돼 즉시 공개됐다. 제품의 정체가
+      // "이번 주 오디션 하나"인데 아무 때나 여러 곳이 올리면 그 말이
+      // 성립하지 않는다. 일정은 앱이 정할 게 아니라 사람이 정해야 해서,
+      // 신청으로 받아두고 담당자가 연락해 조율한 뒤 게시한다.
+      status: 'requested',
     }).select('id').single()
     if (!error && inserted) {
       supabase.auth.getSession().then(({ data: s }) => s.session?.access_token).then(token => {
@@ -125,12 +129,8 @@ export default function AgencyAuditionsPage() {
         })
       })
 
-      sendPush({
-        broadcast: true,
-        title: '새 오디션 공고',
-        body: `${form.title.trim()} 오디션이 올라왔어요!`,
-        url: '/dashboard/auditions',
-      })
+      // 알림은 실제로 공개될 때 보낸다. 신청 단계에서 보내면 지망생이
+      // 들어와도 볼 게 없다.
 
       setForm({ title: '', description: '', categories: ['vocal'], mode: 'online', deadline: '' })
       setShowCreate(false)
@@ -143,8 +143,20 @@ export default function AgencyAuditionsPage() {
     <div style={{ position: 'relative' }}>
       <Link href={`/agency/auditions/${a.id}`} style={{ textDecoration: 'none' }}>
         <div style={{ background: isExpired(a.deadline) ? 'rgba(36,28,21,0.03)' : '#FFFFFF', borderRadius: 20, padding: '18px 20px', border: '1px solid rgba(36,28,21,0.09)', opacity: isExpired(a.deadline) ? 0.7 : 1 }}>
-          <div style={{ fontWeight: 900, color: '#241C15', fontSize: 18, marginBottom: 4 }}>{agencyName}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontWeight: 900, color: '#241C15', fontSize: 18 }}>{agencyName}</span>
+            {a.status === 'requested' && (
+              <span style={{ fontSize: 11, fontWeight: 800, background: '#fef9c3', color: '#ca8a04', padding: '3px 9px', borderRadius: 8 }}>
+                신청 검토 중
+              </span>
+            )}
+          </div>
           <div style={{ fontWeight: 600, color: '#D84A1E', fontSize: 14, marginBottom: 10 }}>{a.title}</div>
+          {a.status === 'requested' && (
+            <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 10, lineHeight: 1.5 }}>
+              담당자가 연락드려 일정을 조율한 뒤 공고가 열립니다
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
             {a.category.split(',').map(c => (
               <span key={c} style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
@@ -239,7 +251,7 @@ export default function AgencyAuditionsPage() {
             background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
             borderRadius: 14, padding: '10px 16px', fontSize: 14, fontWeight: 700,
           }}>
-            <Plus size={16} strokeWidth={2.5} /> 공고 올리기
+            <Plus size={16} strokeWidth={2.5} /> 오디션 신청
           </button>
         </div>
 
@@ -297,11 +309,15 @@ export default function AgencyAuditionsPage() {
                   flex: 1, background: '#FFFFFF', border: 'none', borderRadius: 12, padding: 12,
                   fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#8A7F6E',
                 }}>취소</button>
+                <p style={{ fontSize: 12.5, color: '#8A7F6E', lineHeight: 1.6, margin: '0 0 12px' }}>
+                  신청하시면 담당자가 연락드려 일정을 조율합니다.
+                  조율이 끝나면 공고가 열리고, 그때 지망생에게 알림이 갑니다.
+                </p>
                 <button onClick={createAudition} disabled={saving || !form.title.trim() || !form.deadline} style={{
                   flex: 2, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
                   border: 'none', borderRadius: 12, padding: 12, fontSize: 14, fontWeight: 700,
                   cursor: 'pointer', opacity: saving || !form.title.trim() || !form.deadline ? 0.5 : 1,
-                }}>{saving ? '저장 중...' : '공고 올리기'}</button>
+                }}>{saving ? '보내는 중...' : '신청 보내기'}</button>
               </div>
             </div>
           </div>

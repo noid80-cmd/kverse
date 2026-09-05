@@ -224,6 +224,18 @@ export default function AdminAuditionsPage() {
     setDetail(d => (d && d.id === id ? { ...d, status } : d))
   }
 
+  // 게시하는 순간이 곧 지망생이 알게 되는 순간이다. 신청 단계에서 알림을
+  // 보내면 들어와도 볼 게 없어서, 여기로 옮겼다.
+  async function publishAudition(a: Audition) {
+    await setStatus(a.id, 'active')
+    sendPush({
+      broadcast: true,
+      title: '새 오디션이 열렸어요',
+      body: a.title,
+      url: '/dashboard/auditions',
+    })
+  }
+
   async function deleteAudition(id: string) {
     if (!confirm('공고를 완전히 삭제할까요?')) return
     await fetch('/api/admin/auditions', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
@@ -234,8 +246,11 @@ export default function AdminAuditionsPage() {
   // 마감일이 지난 것뿐 아니라 수동으로 마감 처리한 것도 내려야 한다.
   // (마감일이 남았는데 status만 closed인 공고가 상단에 그대로 남아 헷갈렸다)
   const isInactive = (a: Audition) => a.status === 'closed' || isExpired(a.deadline)
-  const active = auditions.filter(a => !isInactive(a))
-  const expired = auditions.filter(isInactive)
+  // 기획사가 올린 신청. 일정은 앱이 정하는 게 아니라 담당자가 연락해서
+  // 정하므로, 여기서는 "연락할 목록"으로만 쓰인다. 조율이 끝나면 게시한다.
+  const requested = auditions.filter(a => a.status === 'requested')
+  const active = auditions.filter(a => a.status !== 'requested' && !isInactive(a))
+  const expired = auditions.filter(a => a.status !== 'requested' && isInactive(a))
 
   return (
     <>
@@ -269,6 +284,44 @@ export default function AdminAuditionsPage() {
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : (
           <>
+            {requested.length > 0 && (
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#ca8a04', marginBottom: 4 }}>
+                  오디션 신청 {requested.length}건
+                </div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 10, lineHeight: 1.5 }}>
+                  기획사에 연락해 일정을 조율한 뒤 게시하세요. 게시하면 지망생 목록에 올라갑니다.
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {requested.map(a => (
+                    <div key={a.id} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid rgba(202,138,4,0.35)' }}>
+                      <div onClick={() => { setDetail(a); setEditing(false) }} style={{ cursor: 'pointer' }}>
+                        <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
+                        <div style={{ fontWeight: 600, color: '#D84A1E', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
+                          {a.category.split(',').map(c => (
+                            <span key={c} style={{ fontSize: 11, background: '#eef2ff', color: '#D84A1E', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[c] ?? c}</span>
+                          ))}
+                          {a.deadline && <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
+                          <span style={{ fontSize: 12, color: '#8A7F6E' }}>신청 {a.created_at.slice(0, 10)}</span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => deleteAudition(a.id)}
+                          style={{ flex: 1, padding: '10px', borderRadius: 11, border: '1px solid rgba(248,113,113,0.25)', background: 'rgba(248,113,113,0.06)', color: '#DC2626', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                          반려
+                        </button>
+                        <button onClick={() => publishAudition(a)}
+                          style={{ flex: 2, padding: '10px', borderRadius: 11, border: 'none', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                          게시하기
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {active.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: expired.length > 0 ? 28 : 0 }}>
                 {active.map(a => (
