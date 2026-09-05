@@ -1,3 +1,4 @@
+import { notifyTelegram } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
@@ -44,17 +45,11 @@ export async function POST(req: NextRequest) {
     if (isNewUser) {
       const userName = user.user_metadata?.full_name ?? user.email ?? ''
       const userEmail = user.email ?? ''
-      const BOT_TOKEN = '8844510756:AAEmttbeJQTNvy-HOWd77F4lvN0Cy4pi2xA'
-      const CHAT_ID = '8940756620'
       const kst = new Date(Date.now() + 9 * 60 * 60 * 1000)
       const time = kst.toISOString().replace('T', ' ').slice(0, 16)
       const roleLabel = role === 'agency' ? '기획사' : '탤런트'
       const text = ['🔔 새 회원가입 - Krookie', `이름: ${userName}`, `이메일: ${userEmail}`, `역할: ${roleLabel}`, `시간: ${time} KST`].filter(Boolean).join('\n')
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text }),
-      }).catch(() => {})
+      await notifyTelegram(text)
     }
 
     const finalDest = role === 'admin' ? '/admin'
