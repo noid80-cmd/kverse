@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Video, ArrowLeft, Camera, RotateCcw, Upload } from 'lucide-react'
+import { CheckCircle, Video, ArrowLeft, Camera, RotateCcw, Upload, Globe, Building2, Lock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { compressVideoIfNeeded } from '@/lib/compressVideo'
@@ -461,7 +461,7 @@ export default function UploadPage() {
             <div style={{ display: 'flex', gap: 8 }}>
               {(['public', 'agency_only', 'private'] as const).map(v => {
                 const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
-                const icons = { public: '🌐', agency_only: '🏢', private: '🔒' }
+                const Icon = v === 'public' ? Globe : v === 'agency_only' ? Building2 : Lock
                 const selected = visibility === v
                 return (
                   <button key={v} type="button" onClick={() => setVisibility(v)} style={{
@@ -470,11 +470,19 @@ export default function UploadPage() {
                     color: selected ? 'white' : '#8A7F6E', fontSize: 12, fontWeight: 700, cursor: 'pointer',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                   }}>
-                    <span style={{ fontSize: 16 }}>{icons[v]}</span>
+                    <Icon size={17} strokeWidth={1.8} />
                     <span>{labels[v]}</span>
                   </button>
                 )
               })}
+            </div>
+            <div style={{
+              fontSize: 12, color: visibility === 'private' ? '#D84A1E' : '#8A7F6E',
+              marginTop: 8, lineHeight: 1.5,
+            }}>
+              {visibility === 'public' ? tx.videos.visHintPublic
+                : visibility === 'agency_only' ? tx.videos.visHintAgency
+                : tx.videos.visHintPrivate}
             </div>
           </div>
 

@@ -414,7 +414,13 @@ export default function TalentAuditionsPage() {
           }
           const filtered = auditions
           const active = sortAuditions(filtered.filter(a => !isDone(a) && a.id !== firstActiveId))
-          const expired = sortAuditions(filtered.filter(isDone))
+          // 지원하지 않은 지난 공고는 볼 이유가 없다. 6월·8월에 마감된 공고가
+          // 계속 떠 있으면 10/1에 열리는 첫 오디션 옆에 반년 전 것이 나란히
+          // 보이고, 새로 온 지망생 눈엔 죽은 앱으로 읽힌다.
+          // 내가 지원한 건 남긴다 - 결과가 궁금한 건 그것뿐이다.
+          const expired = sortAuditions(
+            filtered.filter(a => isDone(a) && applicationMap[a.id])
+          )
 
           const AuditionCard = ({ a }: { a: Audition }) => {
             const exp = isDone(a)
