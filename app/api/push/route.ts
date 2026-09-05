@@ -35,6 +35,31 @@ async function makeVapidJwt(endpoint: string, publicKey: string): Promise<string
   return `${signingInput}.${Buffer.from(sig).toString('base64url')}`
 }
 
+// PostgREST는 한 번에 1000행까지만 준다. 초과분은 에러 없이 빠지므로
+// "일부에게만 알림이 갔다"가 조용히 벌어진다. 끝까지 읽는다.
+const PAGE = 1000
+// user_id 목록은 URL 쿼리로 나간다. UUID 하나가 36자라 수백 개를 한 번에
+// 넣으면 URL 길이 제한에 걸린다. 나눠서 조회한 뒤 합친다.
+const ID_CHUNK = 200
+
+async function collect<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
+): Promise<T[]> {
+  const out: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await build(from, from + PAGE - 1)
+    const rows = data ?? []
+    out.push(...rows)
+    if (rows.length < PAGE) return out
+  }
+}
+
+function chunked<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
+}
+
 async function sendToSubs(
   subs: { id: string; subscription: unknown }[],
   payload: string,
@@ -133,23 +158,39 @@ export async function POST(req: NextRequest) {
 
   // 웹 푸시 구독과 앱(FCM) 토큰은 대상이 겹치지 않는다 — 스토어 앱에는 웹
   // 푸시가 아예 없고, 브라우저에는 FCM 토큰이 없다. 대상자 목록만 같다.
-  let subs: { id: string; subscription: unknown }[] = []
-  let tokens: { id: string; token: string }[] = []
-  if (broadcast || (targetIds && targetIds.length > 0)) {
-    let subQ = adminSupabase.from('push_subscriptions').select('id, subscription')
-    let tokQ = adminSupabase.from('device_tokens').select('id, token')
-    if (broadcast) {
-      if (excludeIds.length > 0) {
-        subQ = subQ.not('user_id', 'in', `(${excludeIds.join(',')})`)
-        tokQ = tokQ.not('user_id', 'in', `(${excludeIds.join(',')})`)
-      }
-    } else {
-      subQ = subQ.in('user_id', targetIds!)
-      tokQ = tokQ.in('user_id', targetIds!)
+  type Sub = { id: string; subscription: unknown }
+  type Tok = { id: string; token: string }
+  const subs: Sub[] = []
+  const tokens: Tok[] = []
+
+  if (broadcast) {
+    const [s, t] = await Promise.all([
+      collect<Sub>((from, to) => {
+        let q = adminSupabase.from('push_subscriptions').select('id, subscription')
+        if (excludeIds.length > 0) q = q.not('user_id', 'in', `(${excludeIds.join(',')})`)
+        return q.order('id').range(from, to)
+      }),
+      collect<Tok>((from, to) => {
+        let q = adminSupabase.from('device_tokens').select('id, token')
+        if (excludeIds.length > 0) q = q.not('user_id', 'in', `(${excludeIds.join(',')})`)
+        return q.order('id').range(from, to)
+      }),
+    ])
+    subs.push(...s)
+    tokens.push(...t)
+  } else if (targetIds && targetIds.length > 0) {
+    for (const ids of chunked(targetIds, ID_CHUNK)) {
+      const [s, t] = await Promise.all([
+        collect<Sub>((from, to) => adminSupabase
+          .from('push_subscriptions').select('id, subscription')
+          .in('user_id', ids).order('id').range(from, to)),
+        collect<Tok>((from, to) => adminSupabase
+          .from('device_tokens').select('id, token')
+          .in('user_id', ids).order('id').range(from, to)),
+      ])
+      subs.push(...s)
+      tokens.push(...t)
     }
-    const [{ data: subData }, { data: tokData }] = await Promise.all([subQ, tokQ])
-    subs = subData ?? []
-    tokens = tokData ?? []
   }
   console.log('[push]', broadcast ? 'broadcast' : `대상 ${targetIds?.length ?? 0}명`,
     '- web:', subs.length, 'app:', tokens.length)

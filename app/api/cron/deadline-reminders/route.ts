@@ -21,6 +21,23 @@ const admin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+// PostgREST는 한 번에 1000행까지만 돌려준다. 초과분은 에러 없이 그냥
+// 빠지므로, 사람이 늘었을 때 "일부에게만 알림이 갔다"가 조용히 벌어진다.
+// 대상자 조회는 전부 끝까지 읽는다.
+const PAGE = 1000
+
+async function fetchAll<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
+): Promise<T[]> {
+  const out: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await build(from, from + PAGE - 1)
+    const rows = data ?? []
+    out.push(...rows)
+    if (rows.length < PAGE) return out
+  }
+}
+
 /** 한국 기준 날짜(YYYY-MM-DD). 마감은 한국 시간으로 정해진다. */
 function kstDay(offsetDays = 0): string {
   return new Date(Date.now() + 9 * 3600_000 + offsetDays * 86400_000)
@@ -55,14 +72,20 @@ export async function GET(req: NextRequest) {
 
   const auditionIds = auditions.map(a => a.id as string)
 
-  const [{ data: talents }, { data: applied }] = await Promise.all([
-    admin.from('profiles').select('id').eq('role', 'talent').eq('is_active', true),
-    admin.from('audition_applications').select('audition_id, talent_id').in('audition_id', auditionIds),
+  const [talents, applied] = await Promise.all([
+    fetchAll<{ id: string }>((from, to) =>
+      admin.from('profiles').select('id')
+        .eq('role', 'talent').eq('is_active', true)
+        .order('id').range(from, to)),
+    fetchAll<{ audition_id: string; talent_id: string }>((from, to) =>
+      admin.from('audition_applications').select('audition_id, talent_id')
+        .in('audition_id', auditionIds)
+        .order('id').range(from, to)),
   ])
 
   // 공고별로 "이미 지원한 사람" 집합
   const appliedBy = new Map<string, Set<string>>()
-  for (const row of applied ?? []) {
+  for (const row of applied) {
     const aid = row.audition_id as string
     if (!appliedBy.has(aid)) appliedBy.set(aid, new Set())
     appliedBy.get(aid)!.add(row.talent_id as string)
@@ -72,7 +95,7 @@ export async function GET(req: NextRequest) {
   // 그쪽이 급하므로 문구를 오늘 기준으로 쓴다.
   type Pending = { today: string[]; tomorrow: string[] }
   const pending = new Map<string, Pending>()
-  for (const t of talents ?? []) {
+  for (const t of talents) {
     const uid = t.id as string
     const mine: Pending = { today: [], tomorrow: [] }
     for (const a of auditions) {
