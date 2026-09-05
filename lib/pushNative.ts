@@ -11,11 +11,16 @@ import { createClient } from './supabase/client'
 type Messaging = typeof import('@capacitor-firebase/messaging')['FirebaseMessaging']
 
 async function messaging(): Promise<Messaging | null> {
+  // 실기기에서 [알림 켜기]가 아무 반응도 없이 멈추는 걸 추적하려고 각 단계를
+  // 찍는다. 에러도 응답도 없으면 어디서 멈췄는지가 유일한 단서다.
+  console.log('[fcm] messaging() native?', isNativeApp())
   if (!isNativeApp()) return null
   try {
     const mod = await import('@capacitor-firebase/messaging')
+    console.log('[fcm] module loaded?', !!mod?.FirebaseMessaging)
     return mod.FirebaseMessaging
-  } catch {
+  } catch (e) {
+    console.log('[fcm] module import failed', String(e))
     // 플러그인이 없는 빌드(구버전 앱)에서도 화면이 깨지지 않아야 한다
     return null
   }
@@ -50,14 +55,20 @@ export async function nativeNotifState(): Promise<'granted' | 'denied' | 'prompt
 
 /** 권한을 요청하고 토큰을 서버에 등록한다. 성공하면 true */
 export async function enableNativeNotifications(): Promise<boolean> {
+  console.log('[fcm] enable start')
   const fm = await messaging()
-  if (!fm) return false
+  if (!fm) { console.log('[fcm] no messaging module'); return false }
   try {
+    console.log('[fcm] requesting permissions...')
     const { receive } = await fm.requestPermissions()
+    console.log('[fcm] permission =', receive)
     if (receive !== 'granted') return false
+    console.log('[fcm] getting token...')
     const { token } = await fm.getToken()
+    console.log('[fcm] token?', token ? token.slice(0, 12) + '...' : 'none')
     if (!token) return false
     await saveToken(token)
+    console.log('[fcm] token saved')
     return true
   } catch {
     return false

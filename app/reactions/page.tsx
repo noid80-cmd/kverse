@@ -441,7 +441,18 @@ function ReactionsContent() {
                   // 앱에서는 Notification.requestPermission()이 존재하지 않아
                   // 던지고, 잡는 데가 없어서 버튼이 죽은 것처럼 보였다.
                   if (isNativeApp()) {
-                    const ok = await enableNativeNotifications()
+                    console.log('[notif] native path start')
+                    // 어딘가에서 응답 없이 멈추면 사용자는 버튼이 죽은 줄 안다.
+                    // 15초 안에 안 끝나면 그 사실을 화면에 알린다.
+                    const ok = await Promise.race([
+                      enableNativeNotifications(),
+                      new Promise<'timeout'>(r => setTimeout(() => r('timeout'), 15000)),
+                    ])
+                    console.log('[notif] native path result', ok)
+                    if (ok === 'timeout') {
+                      setNotifError('알림 설정이 응답하지 않아요. 앱을 껐다 켜고 다시 시도해주세요.')
+                      return
+                    }
                     setNotifPerm(ok ? 'granted' : 'denied')
                     if (!ok) setNotifError('알림을 켜지 못했어요. 아이폰 설정 → 알림 → Krookie에서 허용해주세요.')
                     return
