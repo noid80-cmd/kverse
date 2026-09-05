@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, X } from 'lucide-react'
-import { isNativeApp } from '@/lib/capacitor'
+import { Bell, X, Share, PlusSquare } from 'lucide-react'
+import { isNativeApp, isIosWebTab } from '@/lib/capacitor'
 import { enableNativeNotifications, nativeNotifState, refreshNativeToken } from '@/lib/pushNative'
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -52,8 +52,16 @@ export async function doSubscribe() {
   })
 }
 
+// 아이폰 사파리 탭에는 알림을 켤 방법 자체가 없다. 같은 배너를 쓰되
+// 내용을 바꿔서 '앱 설치' 또는 '홈 화면 추가'로 안내한다.
+type Mode = 'permission' | 'ios'
+
+const APP_STORE_URL = 'https://apps.apple.com/kr/app/id6791017827'
+
 export default function PushSubscribe() {
   const [show, setShow] = useState(false)
+  const [mode, setMode] = useState<Mode>('permission')
+  const [showHomeGuide, setShowHomeGuide] = useState(false)
 
   useEffect(() => {
     // 이미 한 번 닫은 경우 24시간 내 재표시 안 함
@@ -76,7 +84,15 @@ export default function PushSubscribe() {
       return
     }
 
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+    // 아이폰 사파리 탭 — Push API가 없다. 예전엔 여기서 그냥 return 해서
+    // 아무 안내도 못 받고 지나갔다. 이제 안내 배너를 띄운다.
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (isIosWebTab() && !recentlyDismissed) {
+        setMode('ios')
+        setTimeout(() => setShow(true), 1500)
+      }
+      return
+    }
     if (Notification.permission !== 'default') {
       // 이미 결정된 경우 — granted면 조용히 재등록
       if (Notification.permission === 'granted') doSubscribe().catch(() => {})
@@ -150,7 +166,9 @@ export default function PushSubscribe() {
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>기획사 알림 받기</div>
-            <div style={{ fontSize: 13, color: '#8A7F6E' }}>놓치면 아쉬운 연락이 올 수 있어요</div>
+            <div style={{ fontSize: 13, color: '#8A7F6E' }}>
+              {mode === 'ios' ? '아이폰 사파리에서는 알림을 켤 수 없어요' : '놓치면 아쉬운 연락이 올 수 있어요'}
+            </div>
           </div>
         </div>
 
@@ -167,16 +185,61 @@ export default function PushSubscribe() {
           ))}
         </div>
 
-        <button onClick={handleAllow} style={{
-          width: '100%', padding: '15px',
-          background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
-          border: 'none', borderRadius: 16,
-          color: 'white', fontSize: 16, fontWeight: 700,
-          cursor: 'pointer', marginBottom: 10,
-          boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
-        }}>
-          알림 켜기
-        </button>
+        {mode === 'ios' ? (
+          <>
+            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={handleDismiss} style={{
+              display: 'block', width: '100%', padding: '15px', boxSizing: 'border-box',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+              border: 'none', borderRadius: 16, textAlign: 'center', textDecoration: 'none',
+              color: 'white', fontSize: 16, fontWeight: 700,
+              cursor: 'pointer', marginBottom: 10,
+              boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
+            }}>
+              앱 설치하고 알림 받기
+            </a>
+
+            <button onClick={() => setShowHomeGuide(v => !v)} style={{
+              width: '100%', padding: '13px',
+              background: 'none', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 14,
+              color: '#6B6355', fontSize: 14, fontWeight: 600,
+              cursor: 'pointer', marginBottom: showHomeGuide ? 12 : 10,
+            }}>
+              앱 없이 홈 화면에 추가하기
+            </button>
+
+            {showHomeGuide && (
+              <div style={{
+                background: 'rgba(36,28,21,0.04)', borderRadius: 14,
+                padding: '14px 16px', marginBottom: 10,
+                display: 'flex', flexDirection: 'column', gap: 10,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Share size={16} strokeWidth={1.8} color="#8A7F6E" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: '#6B6355' }}>사파리 아래쪽 공유 버튼을 누르고</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <PlusSquare size={16} strokeWidth={1.8} color="#8A7F6E" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: '#6B6355' }}>[홈 화면에 추가]를 선택하세요</span>
+                </div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', paddingLeft: 26 }}>
+                  홈 화면에서 열면 알림을 켤 수 있어요
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <button onClick={handleAllow} style={{
+            width: '100%', padding: '15px',
+            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+            border: 'none', borderRadius: 16,
+            color: 'white', fontSize: 16, fontWeight: 700,
+            cursor: 'pointer', marginBottom: 10,
+            boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
+          }}>
+            알림 켜기
+          </button>
+        )}
+
         <button onClick={handleDismiss} style={{
           width: '100%', padding: '13px',
           background: 'none', border: 'none',

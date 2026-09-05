@@ -32,3 +32,23 @@ export async function isNativeAppAsync(retries = 5, delayMs = 200): Promise<bool
   }
   return false
 }
+
+// iOS는 홈 화면에 추가한 PWA에서만 Push API를 준다. 사파리 탭으로 연
+// 아이폰에는 window.PushManager가 아예 없어서, 웹 푸시 코드가 조용히
+// 중단된다 — 사용자는 알림이라는 게 있는지도 모른 채 지나간다.
+// 그 경우를 따로 잡아서 안내를 띄우기 위한 판정.
+export function isIosWebTab(): boolean {
+  if (typeof window === 'undefined') return false
+  if (isNativeApp()) return false
+
+  const ua = navigator.userAgent
+  // iPadOS 13+ 는 데스크톱 사파리로 위장하므로 터치 지원 여부로 구분한다.
+  const isIos = /iPad|iPhone|iPod/.test(ua)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  if (!isIos) return false
+
+  // 이미 홈 화면에서 실행 중이면 Push API가 있으므로 안내할 게 없다.
+  const standalone = window.matchMedia?.('(display-mode: standalone)')?.matches
+    || (navigator as unknown as { standalone?: boolean }).standalone === true
+  return !standalone
+}
