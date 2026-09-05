@@ -49,6 +49,12 @@ export async function GET(req: NextRequest) {
     .in('audition_id', auditionIds)
     .in('status', ['pending', 'skip'])
 
+  // 회차를 닫는 건 지원자 유무와 상관없다. 예전엔 정리할 지원자가 없으면
+  // 여기서 그냥 돌아가버려서, 아무도 지원 안 한 공고는 마감이 반년 지나도
+  // 계속 'active'로 남았다.
+  await admin.from('auditions').update({ status: 'closed' })
+    .in('id', auditionIds).neq('status', 'closed')
+
   const rows = stale ?? []
   if (rows.length === 0) {
     return NextResponse.json({ ok: true, auditions: auditionIds.length, closed: 0 })
@@ -61,9 +67,6 @@ export async function GET(req: NextRequest) {
     .in('id', rows.map(r => r.id as string))
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  await admin.from('auditions').update({ status: 'closed' })
-    .in('id', auditionIds).neq('status', 'closed')
 
   // 결과를 안 알려주면 다음 회차에 안 온다 — 매주 여는 구조에서 그게 가장
   // 빠른 죽음이다. '불합격'이라는 단어는 쓰지 않고 다음 회차로 넘긴다.
