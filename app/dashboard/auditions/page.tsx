@@ -390,7 +390,10 @@ export default function TalentAuditionsPage() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>{tx.common.loading}</div>
-        ) : auditions.length === 0 ? (
+        ) : !auditions.some(a => !isDone(a) || applicationMap[a.id]) ? (
+          // 화면에 실제로 남는 게 있는지로 판단해야 한다. 불러온 개수로 보면,
+          // 아래에서 걸러지는 지난 공고가 여기선 "있다"로 잡혀서
+          // 카운트다운도 빈 화면 안내도 없는 하얀 탭이 나온다.
           daysUntilLaunch() >= 0 ? <AuditionCountdown /> : (
             <div style={{ background: 'rgba(36,28,21,0.05)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)' }}>
               <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#D84A1E' }}>
