@@ -33,6 +33,23 @@ export default function ProfileEditPage() {
 
   const talentNav = useTalentNav()
 
+// 전화번호 자동 하이픈. 이 칸은 카톡 아이디도 같이 받으므로, 숫자(와 하이픈)만
+// 들어왔을 때에만 손댄다 - 아이디 중간에 하이픈이 끼면 그대로 저장돼서
+// 기획사가 찾을 수 없는 아이디가 된다.
+function formatPhone(v: string) {
+  if (!/^[0-9-]*$/.test(v)) return v
+  const d = v.replace(/[^0-9]/g, '').slice(0, 11)
+  if (d.length < 4) return d
+  if (d.startsWith('02')) {
+    if (d.length <= 5) return d.slice(0, 2) + '-' + d.slice(2)
+    if (d.length <= 9) return d.slice(0, 2) + '-' + d.slice(2, 5) + '-' + d.slice(5)
+    return d.slice(0, 2) + '-' + d.slice(2, 6) + '-' + d.slice(6, 10)
+  }
+  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3)
+  if (d.length <= 10) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6)
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7, 11)
+}
+
   type ProfileForm = { name: string; bio: string; instagram: string; phone: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [isDirty, setIsDirty] = useState(false)
@@ -71,7 +88,7 @@ export default function ProfileEditPage() {
         name: data?.name ?? '',
         bio: data?.bio ?? '',
         instagram: data?.instagram ?? '',
-        phone: data?.phone ?? '',
+        phone: formatPhone(data?.phone ?? ''),
         birthDate: data?.birth_date ?? '',
         gender: data?.gender ?? '',
         height: data?.height?.toString() ?? '',
@@ -392,8 +409,8 @@ export default function ProfileEditPage() {
                 onChange={e => updateForm(f => ({ ...f, instagram: e.target.value }))}
                 placeholder="인스타그램 아이디" style={{ ...inputStyle, flex: 1 }} />
             </div>
-            <input type="text" value={phone}
-              onChange={e => updateForm(f => ({ ...f, phone: e.target.value }))}
+            <input type="text" inputMode="text" value={phone}
+              onChange={e => updateForm(f => ({ ...f, phone: formatPhone(e.target.value) }))}
               placeholder="카톡 아이디나 전화번호 (선택)" style={inputStyle} />
           </div>
 

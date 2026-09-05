@@ -218,8 +218,17 @@ export default function TalentProfilePage() {
             <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.7, background: '#f8f7ff', borderRadius: 14, padding: '14px 16px', margin: '0 0 10px' }}>{talent.bio}</p>
           )}
 
+          {/* 열렸는데 지망생이 아무것도 안 적어둔 경우가 있다. 그때 아무 표시도
+              없으면 기획사는 화면이 고장난 건지 안 적은 건지 알 수가 없다. */}
           {canContact ? (
-            (talent.instagram || talent.phone) && (
+            !talent.instagram && !talent.phone ? (
+              <div style={{
+                fontSize: 13, color: '#8A7F6E', background: '#f8f7ff',
+                borderRadius: 14, padding: '12px 16px',
+              }}>
+                아직 연락처를 등록하지 않았어요. 채팅으로 물어보세요.
+              </div>
+            ) : (
               <div style={{ background: 'rgba(216,74,30,0.06)', border: '1px solid rgba(216,74,30,0.15)', borderRadius: 14, padding: '12px 16px' }}>
                 <div style={{ fontSize: 11, fontWeight: 800, color: '#D84A1E', marginBottom: 6 }}>연락처</div>
                 {talent.instagram && (
