@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { sendPush } from '@/lib/notify'
-import { Trash2, Building2, Link2 } from 'lucide-react'
+import { Trash2, Building2, Link2, ArrowUp } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
 
 type Message = { id: string; content: string; sender_id: string; created_at: string; is_read: boolean }
@@ -303,12 +303,20 @@ export default function ChatPage() {
           placeholder="메시지 입력..."
           style={{ flex: 1, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#241C15', outline: 'none' }}
         />
+        {/* 빈 상태의 배경이 흰색인데 화살표도 흰색이라, 아무것도 입력하지 않은
+            대화방에서는 버튼이 통째로 사라져 보였다. 처음 들어온 사람 눈엔
+            보낼 방법이 없는 화면이다. */}
         <button onClick={sendMessage} disabled={!input.trim() || sending}
+          aria-label="보내기"
           style={{
-            width: 44, height: 44, borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: input.trim() ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF',
-            color: 'white', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>↑</button>
+            width: 44, height: 44, borderRadius: 14, border: 'none', flexShrink: 0,
+            cursor: input.trim() ? 'pointer' : 'default',
+            background: input.trim() ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : 'rgba(36,28,21,0.06)',
+            color: input.trim() ? '#FFFFFF' : '#A79C8C',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+          <ArrowUp size={20} strokeWidth={2.4} />
+        </button>
       </div>
     </div>
   )
