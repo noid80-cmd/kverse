@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, X, Share, PlusSquare } from 'lucide-react'
+import { Bell, X, Share, PlusSquare, Star, MessageCircle, ClipboardList } from 'lucide-react'
 import { isNativeApp, isIosWebTab } from '@/lib/capacitor'
 import { enableNativeNotifications, nativeNotifState, refreshNativeToken } from '@/lib/pushNative'
 
@@ -167,20 +167,20 @@ export default function PushSubscribe() {
           <div>
             <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>기획사 알림 받기</div>
             <div style={{ fontSize: 13, color: '#8A7F6E' }}>
-              {mode === 'ios' ? '아이폰 사파리에서는 알림을 켤 수 없어요' : '놓치면 아쉬운 연락이 올 수 있어요'}
+              {mode === 'ios' ? '한 단계만 더 하면 받을 수 있어요' : '놓치면 아쉬운 연락이 올 수 있어요'}
             </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
           {[
-            { emoji: '⭐', text: '기획사가 내 영상에 관심을 표시했을 때' },
-            { emoji: '💬', text: '기획사 담당자가 채팅을 보냈을 때' },
-            { emoji: '📋', text: '새 오디션 공고가 올라왔을 때' },
-          ].map(item => (
-            <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>{item.emoji}</span>
-              <span style={{ fontSize: 14, color: '#6B6355' }}>{item.text}</span>
+            { Icon: Star, text: '기획사가 내 영상에 관심을 표시했을 때' },
+            { Icon: MessageCircle, text: '기획사 담당자가 채팅을 보냈을 때' },
+            { Icon: ClipboardList, text: '새 오디션 공고가 올라왔을 때' },
+          ].map(({ Icon, text }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Icon size={17} strokeWidth={1.8} color="#D84A1E" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 14, color: '#6B6355' }}>{text}</span>
             </div>
           ))}
         </div>
