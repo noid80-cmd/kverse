@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import AgencyNav from '@/components/layout/AgencyNav'
 import Link from 'next/link'
-import { MessageCircle, Video, Heart, Bookmark, Lock } from 'lucide-react'
+import { MessageCircle, Video, Heart, Bookmark, Lock, Play } from 'lucide-react'
 import { checkContactAccess } from '@/lib/contactGate'
 import AuditionOfferBox from '@/components/AuditionOfferBox'
 import { sendPush } from '@/lib/notify'
@@ -19,6 +19,14 @@ type Talent = {
   birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]; nationality: string | null
 }
 type Video = { id: string; title: string; thumbnail_url: string | null; view_count: number; like_count: number; category: string }
+// 기획사가 프로필에 오는 이유는 "이 사람 더 알아보려고"인데, 정작 우리
+// 오디션에 뭘 내고 지원했는지가 여기 없었다. 지원자 목록에서만 보여서
+// 프로필에 와도 볼 게 없었다.
+type AppliedRow = {
+  id: string; status: string; created_at: string; decided_at: string | null
+  video_url: string; thumbnail_url: string | null
+  auditionTitle: string
+}
 
 export default function TalentProfilePage() {
   const { id } = useParams<{ id: string }>()
@@ -33,6 +41,8 @@ export default function TalentProfilePage() {
   // 기본값은 잠금. 판정이 끝나기 전에 잠깐이라도 열려 보이면 안 된다.
   const [canContact, setCanContact] = useState(false)
   const [agencyId, setAgencyId] = useState<string | null>(null)
+  const [applied, setApplied] = useState<AppliedRow[]>([])
+  const [playingAppId, setPlayingAppId] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -64,6 +74,26 @@ export default function TalentProfilePage() {
       // 화면에서만 가리면 네트워크 탭에 그대로 남는다.
       const myAgency = (ag?.agency_id as string | undefined) ?? null
       setAgencyId(myAgency)
+
+      if (myAgency) {
+        const { data: mine } = await supabase.from('auditions').select('id, title').eq('agency_id', myAgency)
+        const titleById = new Map((mine ?? []).map(a => [a.id as string, a.title as string]))
+        if (titleById.size > 0) {
+          const { data: apps } = await supabase.from('audition_applications')
+            .select('id, audition_id, status, created_at, decided_at, video_url, thumbnail_url')
+            .eq('talent_id', id).in('audition_id', [...titleById.keys()])
+            .order('created_at', { ascending: false })
+          setApplied((apps ?? []).map(a => ({
+            id: a.id as string,
+            status: a.status as string,
+            created_at: a.created_at as string,
+            decided_at: (a.decided_at as string | null) ?? null,
+            video_url: a.video_url as string,
+            thumbnail_url: (a.thumbnail_url as string | null) ?? null,
+            auditionTitle: titleById.get(a.audition_id as string) ?? '오디션',
+          })))
+        }
+      }
       const access = await checkContactAccess(supabase, {
         agencyMemberId: user.id,
         agencyId: myAgency,
@@ -212,6 +242,48 @@ export default function TalentProfilePage() {
             agencyMemberId={myId} agencyId={agencyId}
             talentId={id} talentName={talent.name}
             agencyName={agencyName} tone="cool" />
+        )}
+
+        {applied.length > 0 && (
+          <>
+            <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1e1b4b', marginBottom: 14 }}>우리 오디션 지원 이력</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+              {applied.map(a => {
+                const label = a.status === 'invited' ? { t: '1차 합격', c: '#16a34a', bg: '#dcfce7' }
+                  : a.status === 'rejected' ? { t: '심사 종료', c: '#94a3b8', bg: '#f0f0f8' }
+                  : a.status === 'skip' ? { t: '패스', c: '#94a3b8', bg: '#f0f0f8' }
+                  : { t: '검토중', c: '#ca8a04', bg: '#fef9c3' }
+                return (
+                  <div key={a.id} style={{ background: '#fff', borderRadius: 18, overflow: 'hidden', border: '1px solid #e8e8f2' }}>
+                    {playingAppId === a.id ? (
+                      <video src={a.video_url} controls autoPlay playsInline poster={a.thumbnail_url ?? undefined}
+                        style={{ width: '100%', maxHeight: 280, display: 'block', background: '#000' }} />
+                    ) : (
+                      <div onClick={() => setPlayingAppId(a.id)} style={{ cursor: 'pointer', position: 'relative', height: 150, background: '#f0f0f8', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        {a.thumbnail_url
+                          ? <img src={a.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <Video size={30} strokeWidth={1.5} color="#a5b4fc" />}
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(36,28,21,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Play size={18} strokeWidth={2} color="#fff" fill="#fff" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.auditionTitle}</div>
+                        <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2 }}>
+                          지원 {new Date(a.created_at).toLocaleDateString('ko-KR')}
+                        </div>
+                      </div>
+                      <span style={{ background: label.bg, color: label.c, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 8, flexShrink: 0 }}>{label.t}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
         )}
 
         {/* 영상 목록 */}
