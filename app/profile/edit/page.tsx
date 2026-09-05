@@ -159,8 +159,6 @@ export default function ProfileEditPage() {
     const { error } = await supabase.from('profiles').update({
       name: form.name.trim(),
       bio: form.bio.trim() || null,
-      instagram: form.instagram.trim().replace(/^@/, '') || null,
-      phone: form.phone.trim() || null,
       birth_date: form.birthDate || null,
       gender: form.gender || null,
       height: form.height ? parseInt(form.height) : null,
@@ -168,6 +166,14 @@ export default function ProfileEditPage() {
       nationality: form.nationality.trim() || null,
       skills: form.skills,
     }).eq('id', form.userId)
+    // 연락처는 따로 저장한다. instagram 컬럼이 아직 없는 환경에서도 나머지
+    // 저장이 통째로 실패하지 않게 하려는 것 — 마이그레이션 순서에 코드가
+    // 매달리면 배포할 때마다 순서를 맞춰야 한다.
+    await supabase.from('profiles').update({
+      instagram: form.instagram.trim().replace(/^@/, '') || null,
+      phone: form.phone.trim() || null,
+    }).eq('id', form.userId)
+
     setSaving(false)
     if (error) { setSaveError('저장 실패: ' + error.message) }
     else { setSaved(true); setIsDirty(false); router.refresh() }
