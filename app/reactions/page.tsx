@@ -8,6 +8,8 @@ import PushSubscribe, { doSubscribe } from '@/components/PushSubscribe'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
+import { isNativeApp } from '@/lib/capacitor'
+import { enableNativeNotifications, nativeNotifState } from '@/lib/pushNative'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -58,10 +60,22 @@ function ReactionsContent() {
   const [respondingId, setRespondingId] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [notifModal, setNotifModal] = useState(false)
+  const [notifError, setNotifError] = useState('')
   const [notifPerm, setNotifPerm] = useState<NotificationPermission | null>(null)
 
+  // 앱(WKWebView)에는 Notification 객체가 아예 없다. 그래서 웹 API로 상태를
+  // 읽으면 앱에서는 언제나 null이 되고, 화면은 "알림 꺼짐"으로만 남는다.
   useEffect(() => {
-    if ('Notification' in window) setNotifPerm(Notification.permission)
+    let alive = true
+    ;(async () => {
+      if (isNativeApp()) {
+        const st = await nativeNotifState()
+        if (alive) setNotifPerm(st === 'granted' ? 'granted' : st === 'denied' ? 'denied' : 'default')
+        return
+      }
+      if ('Notification' in window) setNotifPerm(Notification.permission)
+    })()
+    return () => { alive = false }
   }, [])
   const userIdRef = useRef<string | null>(null)
   const router = useRouter()
@@ -423,9 +437,23 @@ function ReactionsContent() {
             ) : (
               <div style={{ marginBottom: 20 }}>
                 <button onClick={async () => {
-                  const perm = await Notification.requestPermission()
-                  setNotifPerm(perm)
-                  if (perm === 'granted') doSubscribe().catch(() => {})
+                  setNotifError('')
+                  // 앱에서는 Notification.requestPermission()이 존재하지 않아
+                  // 던지고, 잡는 데가 없어서 버튼이 죽은 것처럼 보였다.
+                  if (isNativeApp()) {
+                    const ok = await enableNativeNotifications()
+                    setNotifPerm(ok ? 'granted' : 'denied')
+                    if (!ok) setNotifError('알림을 켜지 못했어요. 아이폰 설정 → 알림 → Krookie에서 허용해주세요.')
+                    return
+                  }
+                  try {
+                    const perm = await Notification.requestPermission()
+                    setNotifPerm(perm)
+                    if (perm === 'granted') doSubscribe().catch(() => {})
+                    else setNotifError('브라우저에서 알림이 차단됐어요.')
+                  } catch {
+                    setNotifError('이 브라우저에서는 알림을 켤 수 없어요.')
+                  }
                 }} style={{
                   width: '100%', padding: '15px',
                   background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
@@ -434,6 +462,11 @@ function ReactionsContent() {
                 }}>
                   알림 켜기
                 </button>
+                {notifError && (
+                  <p style={{ fontSize: 13, color: '#DC2626', textAlign: 'center', margin: '10px 0 0', lineHeight: 1.5 }}>
+                    {notifError}
+                  </p>
+                )}
               </div>
             )}
 
