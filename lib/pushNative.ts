@@ -57,21 +57,15 @@ export async function nativeNotifState(): Promise<'granted' | 'denied' | 'prompt
 
 /** 권한을 요청하고 토큰을 서버에 등록한다. 성공하면 true */
 export async function enableNativeNotifications(): Promise<boolean> {
-  console.log('[fcm] enable start')
   const m = await messaging()
   const fm = m?.fm
   if (!fm) return false
   try {
-    console.log('[fcm] requesting permissions...')
     const { receive } = await fm.requestPermissions()
-    console.log('[fcm] permission =', receive)
     if (receive !== 'granted') return false
-    console.log('[fcm] getting token...')
     const { token } = await fm.getToken()
-    console.log('[fcm] token?', token ? token.slice(0, 12) + '...' : 'none')
     if (!token) return false
     await saveToken(token)
-    console.log('[fcm] token saved')
     return true
   } catch {
     return false
