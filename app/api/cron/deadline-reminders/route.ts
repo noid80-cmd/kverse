@@ -35,6 +35,10 @@ export async function GET(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
   if (token !== secret) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
+  // ?dry=1 이면 계산만 하고 보내지 않는다. 실제 발송은 되돌릴 수 없어서,
+  // 문구와 대상이 맞는지 눈으로 보고 나서 보낼 수 있어야 한다.
+  const dry = new URL(req.url).searchParams.get('dry') === '1'
+
   const today = kstDay(0)
   const tomorrow = kstDay(1)
 
@@ -98,6 +102,15 @@ export async function GET(req: NextRequest) {
     const key = `${title}|${body}`
     if (!groups.has(key)) groups.set(key, { title, body, ids: [] })
     groups.get(key)!.ids.push(uid)
+  }
+
+  if (dry) {
+    return NextResponse.json({
+      ok: true, dry: true, today, tomorrow,
+      auditions: auditions.map(a => ({ title: a.title, deadline: a.deadline })),
+      groups: [...groups.values()].map(g => ({ title: g.title, body: g.body, 대상: g.ids.length })),
+      notified: pending.size,
+    })
   }
 
   const origin = new URL(req.url).origin
