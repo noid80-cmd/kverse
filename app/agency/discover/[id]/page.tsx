@@ -18,6 +18,7 @@ type Video = {
   thumbnail_url: string | null; view_count: number; category: string; tags: string[]; created_at: string
   talent: {
     id: string; name: string; avatar_url: string | null; bio: string | null
+    instagram: string | null; phone: string | null
     birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]; nationality: string | null
   } | null
 }
@@ -54,7 +55,7 @@ export default function AgencyVideoPage() {
 
       const { data: v } = await supabase.from('videos').select(`
         id, title, description, video_url, thumbnail_url, view_count, category, tags, created_at,
-        talent:profiles!talent_id(id, name, avatar_url, birth_date, gender, height, weight, skills, nationality)
+        talent:profiles!talent_id(id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality)
       `).eq('id', id).single()
       if (!v) { router.back(); return }
       setVideo(v as unknown as Video)
@@ -62,8 +63,8 @@ export default function AgencyVideoPage() {
       const { data: bm } = await supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('video_id', id).is('cancelled_at', null).limit(1).maybeSingle()
       setBookmarked(!!bm)
 
-      // 자기소개 전문은 사실상 외부 연락처라, 자격이 확인된 뒤에만 따로 가져온다.
-      // 화면에서만 가리면 네트워크 탭에 그대로 남는다.
+      // 연락처는 전용 칸에 따로 있다. 자기소개는 심사 재료라 항상 보여주고,
+      // 연락처만 자격 확인 후에 가져온다.
       const talentId = (v as unknown as Video).talent?.id
       if (talentId) {
         const access = await checkContactAccess(supabase, {
@@ -73,10 +74,14 @@ export default function AgencyVideoPage() {
         })
         setCanContact(access.allowed)
         if (access.allowed) {
-          const { data: full } = await supabase.from('profiles').select('bio').eq('id', talentId).single()
-          if (full?.bio) {
+          const { data: contact } = await supabase.from('profiles').select('instagram, phone').eq('id', talentId).single()
+          if (contact) {
             setVideo(prev => (prev && prev.talent
-              ? { ...prev, talent: { ...prev.talent, bio: full.bio as string } }
+              ? { ...prev, talent: {
+                  ...prev.talent,
+                  instagram: (contact.instagram as string | null) ?? null,
+                  phone: (contact.phone as string | null) ?? null,
+                } }
               : prev))
           }
         }
@@ -210,12 +215,25 @@ export default function AgencyVideoPage() {
                 </div>
               )}
 
+              {t.bio && <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6, background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px', marginBottom: 10 }}>{t.bio}</p>}
+
               {canContact ? (
-                t.bio && <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6, background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px' }}>{t.bio}</p>
+                (t.instagram || t.phone) && (
+                  <div style={{ background: 'rgba(216,74,30,0.06)', border: '1px solid rgba(216,74,30,0.15)', borderRadius: 12, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#D84A1E', marginBottom: 6 }}>연락처</div>
+                    {t.instagram && (
+                      <a href={`https://instagram.com/${t.instagram}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'block', fontSize: 14, color: '#241C15', fontWeight: 600, textDecoration: 'none', marginBottom: t.phone ? 4 : 0 }}>
+                        @{t.instagram}
+                      </a>
+                    )}
+                    {t.phone && <div style={{ fontSize: 14, color: '#241C15', fontWeight: 600 }}>{t.phone}</div>}
+                  </div>
+                )
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A7F6E', background: 'rgba(36,28,21,0.05)', borderRadius: 12, padding: '12px 14px' }}>
                   <Lock size={14} strokeWidth={2} />
-                  자기소개는 1차 합격 후에 볼 수 있어요
+                  연락처는 1차 합격 후에 볼 수 있어요
                 </div>
               )}
             </div>

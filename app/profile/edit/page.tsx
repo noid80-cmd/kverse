@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
-import { BellOff, BellRing, X } from 'lucide-react'
+import {BellOff, BellRing, X, Lock, Globe } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT, type Lang } from '@/lib/i18n/translations'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
@@ -31,7 +31,7 @@ export default function ProfileEditPage() {
 
   const talentNav = useTalentNav()
 
-  type ProfileForm = { name: string; bio: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
+  type ProfileForm = { name: string; bio: string; instagram: string; phone: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -56,6 +56,8 @@ export default function ProfileEditPage() {
         userId: user.id,
         name: data?.name ?? '',
         bio: data?.bio ?? '',
+        instagram: data?.instagram ?? '',
+        phone: data?.phone ?? '',
         birthDate: data?.birth_date ?? '',
         gender: data?.gender ?? '',
         height: data?.height?.toString() ?? '',
@@ -157,6 +159,8 @@ export default function ProfileEditPage() {
     const { error } = await supabase.from('profiles').update({
       name: form.name.trim(),
       bio: form.bio.trim() || null,
+      instagram: form.instagram.trim().replace(/^@/, '') || null,
+      phone: form.phone.trim() || null,
       birth_date: form.birthDate || null,
       gender: form.gender || null,
       height: form.height ? parseInt(form.height) : null,
@@ -180,7 +184,7 @@ export default function ProfileEditPage() {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
-  const { name, bio, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
+  const { name, bio, instagram, phone, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
@@ -340,11 +344,37 @@ export default function ProfileEditPage() {
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0 }}>{tx.profile.aboutMe}</p>
-              <span style={{ fontSize: 11, color: '#4ade80', fontWeight: 600, background: 'rgba(74,222,128,0.08)', padding: '3px 8px', borderRadius: 6 }}>🌐 전체 공개</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#2F7A4F', fontWeight: 700, background: 'rgba(47,122,79,0.08)', padding: '3px 8px', borderRadius: 6 }}><Globe size={11} strokeWidth={2.2} /> 전체 공개</span>
             </div>
             <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
               placeholder={tx.profile.bioPlaceholderLong} rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
+            <p style={{ fontSize: 12, color: '#8A7F6E', margin: '8px 0 0', lineHeight: 1.5 }}>
+              연락처는 아래 칸에 적어주세요. 여기 적으면 누구나 볼 수 있어요.
+            </p>
+          </div>
+
+          {/* 연락처 — 지망생이 자기소개에 인스타를 적는 건 적을 데가 없어서다.
+              칸을 만들어주고 "1차 합격한 곳만 본다"를 알려주면 거기 쓴다. */}
+          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0 }}>연락처</p>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#D84A1E', fontWeight: 700, background: 'rgba(216,74,30,0.08)', padding: '3px 8px', borderRadius: 6 }}>
+                <Lock size={11} strokeWidth={2.2} /> 1차 합격한 기획사만
+              </span>
+            </div>
+            <p style={{ fontSize: 12, color: '#8A7F6E', margin: '0 0 12px', lineHeight: 1.5 }}>
+              여기 적은 건 1차 합격시킨 기획사에게만 보여요. 다른 사람에게는 보이지 않습니다.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
+              <input type="text" value={instagram}
+                onChange={e => updateForm(f => ({ ...f, instagram: e.target.value }))}
+                placeholder="인스타그램 아이디" style={{ ...inputStyle, flex: 1 }} />
+            </div>
+            <input type="text" value={phone}
+              onChange={e => updateForm(f => ({ ...f, phone: e.target.value }))}
+              placeholder="카톡 아이디나 전화번호 (선택)" style={inputStyle} />
           </div>
 
           {saveError && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}

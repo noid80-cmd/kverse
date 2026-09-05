@@ -16,6 +16,7 @@ const categoryLabel: Record<string, string> = {
 
 type Talent = {
   id: string; name: string; avatar_url: string | null; bio: string | null
+  instagram: string | null; phone: string | null
   birth_date: string | null; gender: string | null; height: number | null; weight: number | null; skills: string[]; nationality: string | null
 }
 type Video = { id: string; title: string; thumbnail_url: string | null; view_count: number; like_count: number; category: string }
@@ -56,22 +57,22 @@ export default function TalentProfilePage() {
       setMyId(user.id)
 
       const [{ data: t }, { data: v }, { data: conv }, { data: bm }, { data: ag }] = await Promise.all([
-        supabase.from('profiles').select('id, name, avatar_url, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
+        supabase.from('profiles').select('id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality').eq('id', id).single(),
         supabase.from('videos').select('id, title, thumbnail_url, view_count, like_count, category').eq('talent_id', id).eq('status', 'active').or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null').order('created_at', { ascending: false }),
         supabase.from('conversations').select('id').eq('agency_member_id', user.id).eq('talent_id', id).eq('deleted_by_agency', false).single(),
         supabase.from('bookmarks').select('id').eq('agency_member_id', user.id).eq('talent_id', id).is('cancelled_at', null).limit(1).maybeSingle(),
         supabase.from('agency_members').select('agency_id, agencies(name)').eq('profile_id', user.id).single(),
       ])
 
-      setTalent({ ...(t as unknown as Talent), bio: null })
+      setTalent({ ...(t as unknown as Talent), instagram: null, phone: null })
       setVideos((v as unknown as Video[]) ?? [])
       if (conv) setConvId(conv.id)
       setBookmarked(!!bm)
       setAgencyName((ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사')
 
-      // 자기소개 전문은 사실상 외부 연락처다(인스타 아이디를 여기 적는다).
-      // 그래서 아예 받아오지 않다가 자격이 확인된 뒤에만 따로 가져온다 —
-      // 화면에서만 가리면 네트워크 탭에 그대로 남는다.
+      // 연락처는 전용 칸에 따로 있다. 자기소개는 심사 재료라 항상 보여주고,
+      // 연락처만 자격 확인 후에 가져온다 — 화면에서만 가리면 네트워크 탭에
+      // 그대로 남는다.
       const myAgency = (ag?.agency_id as string | undefined) ?? null
       setAgencyId(myAgency)
 
@@ -101,8 +102,14 @@ export default function TalentProfilePage() {
       })
       setCanContact(access.allowed)
       if (access.allowed) {
-        const { data: full } = await supabase.from('profiles').select('bio').eq('id', id).single()
-        if (full?.bio) setTalent(prev => (prev ? { ...prev, bio: full.bio as string } : prev))
+        const { data: contact } = await supabase.from('profiles').select('instagram, phone').eq('id', id).single()
+        if (contact) {
+          setTalent(prev => (prev ? {
+            ...prev,
+            instagram: (contact.instagram as string | null) ?? null,
+            phone: (contact.phone as string | null) ?? null,
+          } : prev))
+        }
       }
     }
     load()
@@ -207,18 +214,31 @@ export default function TalentProfilePage() {
             </div>
           )}
 
+          {talent.bio && (
+            <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.7, background: '#f8f7ff', borderRadius: 14, padding: '14px 16px', margin: '0 0 10px' }}>{talent.bio}</p>
+          )}
+
           {canContact ? (
-            talent.bio && (
-              <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.7, background: '#f8f7ff', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
+            (talent.instagram || talent.phone) && (
+              <div style={{ background: 'rgba(216,74,30,0.06)', border: '1px solid rgba(216,74,30,0.15)', borderRadius: 14, padding: '12px 16px' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#D84A1E', marginBottom: 6 }}>연락처</div>
+                {talent.instagram && (
+                  <a href={`https://instagram.com/${talent.instagram}`} target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'block', fontSize: 14, color: '#241C15', fontWeight: 600, textDecoration: 'none', marginBottom: talent.phone ? 4 : 0 }}>
+                    @{talent.instagram}
+                  </a>
+                )}
+                {talent.phone && <div style={{ fontSize: 14, color: '#241C15', fontWeight: 600 }}>{talent.phone}</div>}
+              </div>
             )
           ) : (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
               fontSize: 13, color: '#8A7F6E', background: '#f8f7ff',
-              borderRadius: 14, padding: '14px 16px',
+              borderRadius: 14, padding: '12px 16px',
             }}>
               <Lock size={14} strokeWidth={2} />
-              자기소개는 1차 합격 후에 볼 수 있어요
+              연락처는 1차 합격 후에 볼 수 있어요
             </div>
           )}
         </div>

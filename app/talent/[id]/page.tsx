@@ -18,6 +18,7 @@ const categoryLabel: Record<string, string> = {
 
 type Talent = {
   id: string; name: string; avatar_url: string | null; bio: string | null
+  instagram?: string | null; phone?: string | null
   birth_date: string | null; gender: string | null; height: number | null; weight: number | null
   skills: string[]; nationality: string | null
 }
@@ -48,10 +49,10 @@ export default function TalentPublicProfilePage() {
       setMyRole(profile?.role ?? 'talent')
 
       const isAgency = profile?.role === 'agency'
-      // bio(자기소개 전문)는 사실상 외부 연락처라 처음부터 받지 않는다.
-      // 자격이 확인된 뒤에만 따로 가져온다 — 화면에서만 가리면 네트워크 탭에 남는다.
+      // 자기소개는 심사 재료라 기획사에게 항상 보여준다. 연락처는 전용 칸에
+      // 따로 있고, 자격이 확인된 뒤에만 가져온다.
       const profileFields = isAgency
-        ? 'id, name, avatar_url, birth_date, gender, height, weight, skills, nationality'
+        ? 'id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality'
         : 'id, name, avatar_url'
 
       const [{ data: t }, { data: v }] = await Promise.all([
@@ -74,8 +75,14 @@ export default function TalentPublicProfilePage() {
         })
         setCanContact(access.allowed)
         if (access.allowed) {
-          const { data: full } = await supabase.from('profiles').select('bio').eq('id', id).single()
-          if (full?.bio) setTalent(prev => (prev ? { ...prev, bio: full.bio as string } : prev))
+          const { data: contact } = await supabase.from('profiles').select('instagram, phone').eq('id', id).single()
+          if (contact) {
+            setTalent(prev => (prev ? {
+              ...prev,
+              instagram: (contact.instagram as string | null) ?? null,
+              phone: (contact.phone as string | null) ?? null,
+            } : prev))
+          }
         }
       }
 
@@ -164,14 +171,26 @@ export default function TalentPublicProfilePage() {
             </div>
           )}
 
+          {myRole === 'agency' && talent.bio && (
+            <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.7, background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', margin: '0 0 10px' }}>{talent.bio}</p>
+          )}
           {myRole === 'agency' && (canContact ? (
-            talent.bio && (
-              <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.7, background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', margin: 0 }}>{talent.bio}</p>
+            (talent.instagram || talent.phone) && (
+                  <div style={{ background: 'rgba(216,74,30,0.06)', border: '1px solid rgba(216,74,30,0.15)', borderRadius: 12, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#D84A1E', marginBottom: 6 }}>연락처</div>
+                    {talent.instagram && (
+                      <a href={`https://instagram.com/${talent.instagram}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'block', fontSize: 14, color: '#241C15', fontWeight: 600, textDecoration: 'none', marginBottom: talent.phone ? 4 : 0 }}>
+                        @{talent.instagram}
+                      </a>
+                    )}
+                    {talent.phone && <div style={{ fontSize: 14, color: '#241C15', fontWeight: 600 }}>{talent.phone}</div>}
+                  </div>
             )
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A7F6E', background: '#FFFFFF', borderRadius: 14, padding: '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A7F6E', background: '#FFFFFF', borderRadius: 14, padding: '12px 16px' }}>
               <Lock size={14} strokeWidth={2} />
-              자기소개는 1차 합격 후에 볼 수 있어요
+              연락처는 1차 합격 후에 볼 수 있어요
             </div>
           ))}
         </div>
