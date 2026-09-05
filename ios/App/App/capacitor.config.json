@@ -6,9 +6,19 @@
 		"url": "https://kpick.app",
 		"cleartext": false
 	},
+	"experimental": {
+		"ios": {
+			"spm": {
+				"packageOptions": {
+					"@capacitor-firebase/messaging": {
+						"symlink": true
+					}
+				}
+			}
+		}
+	},
 	"packageClassList": [
-		"PreferencesPlugin",
-		"GoogleAuthInterceptorPlugin",
-		"AppleAuthInterceptorPlugin"
+		"FirebaseMessagingPlugin",
+		"PreferencesPlugin"
 	]
 }
