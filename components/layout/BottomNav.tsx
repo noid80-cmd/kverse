@@ -45,7 +45,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
               justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
               outline: 'none',
-              color: active ? '#D84A1E' : '#A69A87',
+              color: active ? '#D84A1E' : '#6B6355',
               transition: 'color 0.15s',
             }}>
             {item.icon}

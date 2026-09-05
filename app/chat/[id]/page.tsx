@@ -158,8 +158,8 @@ export default function ChatPage() {
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#FFF8E7' }}>
       <div style={{
         flexShrink: 0, zIndex: 40,
-        background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255,248,231,0.12)',
+        background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(36,28,21,0.08)',
         // 이게 없어서 헤더가 상태바 밑에 깔렸고, 뒤로가기·프로필·휴지통이
         // 아예 눌리지 않았다(실기기 확인). 다른 화면은 이미 쓰고 있던 변수다.
         padding: 'calc(var(--safe-top-0) + 12px) 16px 12px',
@@ -183,7 +183,7 @@ export default function ChatPage() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 800, color: '#FFF8E7', fontSize: 17 }}>
+            <span style={{ fontWeight: 800, color: '#241C15', fontSize: 17 }}>
               {conv && myId === conv.talent_id && agencyCard ? agencyCard.name : other?.name ?? '...'}
             </span>
             {agencyCard?.is_verified && conv && myId === conv.talent_id && (
@@ -191,7 +191,7 @@ export default function ChatPage() {
             )}
           </div>
           {conv && myId === conv.talent_id && agencyCard && other?.name && (
-            <span style={{ fontSize: 12, color: 'rgba(255,248,231,0.55)' }}>{other.name}</span>
+            <span style={{ fontSize: 12, color: '#8A7F6E' }}>{other.name}</span>
           )}
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -201,13 +201,12 @@ export default function ChatPage() {
               targetId={otherId}
               reportedUserId={otherId}
               myId={myId}
-              tone="dark"
               detail={reportEvidence}
               onBlocked={() => router.back()}
             />
           )}
           <button onClick={deleteConversation} disabled={deleting}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: 10, color: 'rgba(255,248,231,0.7)', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: 10, color: '#8A7F6E', display: 'flex', alignItems: 'center' }}
             title="대화 삭제">
             <Trash2 size={18} strokeWidth={2} />
           </button>
@@ -294,15 +293,15 @@ export default function ChatPage() {
 
       <div style={{
         flexShrink: 0,
-        background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(16px)',
-        borderTop: '1px solid rgba(36,28,21,0.09)',
+        background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(16px)',
+        borderTop: '1px solid rgba(36,28,21,0.08)',
         padding: '10px 16px', paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
         display: 'flex', gap: 10,
       }}>
         <input value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
           placeholder="메시지 입력..."
-          style={{ flex: 1, background: '#FFFFFF', border: 'none', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#241C15', outline: 'none' }}
+          style={{ flex: 1, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#241C15', outline: 'none' }}
         />
         <button onClick={sendMessage} disabled={!input.trim() || sending}
           style={{

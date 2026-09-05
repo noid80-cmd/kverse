@@ -19,8 +19,8 @@ export default function AgencyNav() {
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-      background: 'rgba(9,9,15,0.97)', backdropFilter: 'blur(24px)',
-      borderTop: '1px solid rgba(36,28,21,0.09)',
+      background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(24px)',
+      borderTop: '1px solid rgba(36,28,21,0.08)',
       display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
       {agencyNav.map(item => {
@@ -29,7 +29,7 @@ export default function AgencyNav() {
           <Link key={item.href} href={item.href} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
-            outline: 'none', color: active ? '#D84A1E' : '#3a3a5c', transition: 'color 0.15s',
+            outline: 'none', color: active ? '#D84A1E' : '#6B6355', transition: 'color 0.15s',
           }}>
             {item.icon}
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: 0.3 }}>{item.label}</span>
