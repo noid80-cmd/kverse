@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { sendPush } from '@/lib/notify'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Building2, Link2 } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
 
 type Message = { id: string; content: string; sender_id: string; created_at: string; is_read: boolean }
@@ -31,6 +31,7 @@ export default function ChatPage() {
   const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null)
   const [activeUsers, setActiveUsers] = useState<Set<string>>(new Set())
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -167,10 +168,13 @@ export default function ChatPage() {
         <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.1)', color: '#241C15', cursor: 'pointer', flexShrink: 0 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
         </button>
-        <div style={{
+        <div
+          onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+          style={{
           width: 40, height: 40, borderRadius: 13, overflow: 'hidden', flexShrink: 0,
           background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer',
         }}>
           {other?.avatar_url
             ? <img src={other.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -210,7 +214,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '16px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
 
         {/* 기획사 명함 카드 — 지망생에게만 표시 */}
         {conv && myId === conv.talent_id && agencyCard && (
@@ -227,7 +231,7 @@ export default function ChatPage() {
               }}>
                 {agencyCard.logo_url
                   ? <img src={agencyCard.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: 22 }}>🏢</span>
+                  : <Building2 size={24} strokeWidth={1.8} color="#D84A1E" />
                 }
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -246,7 +250,7 @@ export default function ChatPage() {
             {agencyCard.website && (
               <a href={agencyCard.website} target="_blank" rel="noopener noreferrer"
                 style={{ fontSize: 12, color: '#D84A1E', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                🔗 {agencyCard.website.replace(/^https?:\/\//, '')}
+                <Link2 size={13} strokeWidth={2} /> {agencyCard.website.replace(/^https?:\/\//, '')}
               </a>
             )}
           </div>

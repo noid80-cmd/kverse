@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Flag, ShieldOff, MoreVertical } from 'lucide-react'
@@ -40,6 +40,15 @@ export default function ReportBlockMenu({
   const [mode, setMode] = useState<'menu' | 'report'>('menu')
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
+
+  // 바깥을 눌러도 닫히지 않아서 한 번 열면 화면을 가린 채로 남았다.
+  // 감싼 div가 stopPropagation을 하므로 안쪽 클릭은 여기까지 오지 않는다.
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [open])
 
   if (!myId || myId === reportedUserId) return null
 
