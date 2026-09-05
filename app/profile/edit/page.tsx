@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isNativeApp } from '@/lib/capacitor'
+import { enableNativeNotifications, nativeNotifState } from '@/lib/pushNative'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
@@ -41,10 +43,22 @@ export default function ProfileEditPage() {
   const [saveError, setSaveError] = useState('')
   const [notifModal, setNotifModal] = useState(false)
   const [notifPerm, setNotifPerm] = useState<NotificationPermission | null>(null)
+  const [notifError, setNotifError] = useState('')
   const supabase = createClient()
 
+  // 앱(WKWebView)에는 Notification 객체가 없다. 웹 API로만 판단하면 앱에서는
+  // 알림이 켜져 있어도 언제나 "꺼짐"으로 보인다.
   useEffect(() => {
-    if ('Notification' in window) setNotifPerm(Notification.permission)
+    let alive = true
+    ;(async () => {
+      if (isNativeApp()) {
+        const st = await nativeNotifState()
+        if (alive) setNotifPerm(st === 'granted' ? 'granted' : st === 'denied' ? 'denied' : 'default')
+        return
+      }
+      if ('Notification' in window) setNotifPerm(Notification.permission)
+    })()
+    return () => { alive = false }
   }, [])
 
   useEffect(() => {
@@ -465,8 +479,27 @@ export default function ProfileEditPage() {
               ) : (
                 <div style={{ marginBottom: 20 }}>
                   <button onClick={async () => {
-                    const perm = await Notification.requestPermission()
-                    setNotifPerm(perm)
+                    setNotifError('')
+                    if (isNativeApp()) {
+                      const ok = await Promise.race([
+                        enableNativeNotifications().catch(() => false),
+                        new Promise<'timeout'>(r => setTimeout(() => r('timeout'), 15000)),
+                      ])
+                      if (ok === 'timeout') {
+                        setNotifError('알림 설정이 응답하지 않아요. 앱을 껐다 켜고 다시 시도해주세요.')
+                        return
+                      }
+                      setNotifPerm(ok ? 'granted' : 'denied')
+                      if (!ok) setNotifError('알림을 켜지 못했어요. 아이폰 설정 → 알림 → Krookie에서 허용해주세요.')
+                      return
+                    }
+                    try {
+                      const perm = await Notification.requestPermission()
+                      setNotifPerm(perm)
+                      if (perm !== 'granted') setNotifError('브라우저에서 알림이 차단됐어요.')
+                    } catch {
+                      setNotifError('이 브라우저에서는 알림을 켤 수 없어요.')
+                    }
                   }} style={{
                     width: '100%', padding: '15px',
                     background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
@@ -475,6 +508,11 @@ export default function ProfileEditPage() {
                   }}>
                     알림 켜기
                   </button>
+                  {notifError && (
+                    <p style={{ fontSize: 13, color: '#DC2626', textAlign: 'center', margin: '10px 0 0', lineHeight: 1.5 }}>
+                      {notifError}
+                    </p>
+                  )}
                 </div>
               )}
 
