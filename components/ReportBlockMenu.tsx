@@ -52,6 +52,21 @@ export default function ReportBlockMenu({
 
   if (!myId || myId === reportedUserId) return null
 
+  // 신고가 들어온 걸 운영자가 바로 알아야 한다. 실패해도 신고 접수 자체는
+  // 이미 끝났으므로 사용자 흐름을 막지 않는다.
+  async function pingAdmin(reason: string) {
+    try {
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (!token) return
+      await fetch('/api/notify-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ targetType, reason }),
+      })
+    } catch { /* 알림 실패는 삼킨다 */ }
+  }
+
   async function submitReport(reason: string) {
     setSubmitting(true)
     await supabase.from('reports').insert({
@@ -62,6 +77,7 @@ export default function ReportBlockMenu({
       reason,
       detail: detail ?? null,
     })
+    void pingAdmin(reason)
     setSubmitting(false)
     setDone(true)
     setTimeout(() => { setOpen(false); setMode('menu'); setDone(false) }, 1400)
@@ -79,6 +95,7 @@ export default function ReportBlockMenu({
       reported_user_id: reportedUserId,
       reason: isKo ? '(자동) 사용자 차단됨' : '(auto) user blocked',
     })
+    void pingAdmin('(자동) 사용자 차단됨')
     setSubmitting(false)
     setOpen(false)
     onBlocked?.()

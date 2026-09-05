@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import AdminNav from '@/components/layout/AdminNav'
+import { Flag, Mic2 } from 'lucide-react'
 
 type Stats = {
   totalUsers: number
@@ -12,6 +13,8 @@ type Stats = {
   totalVideos: number
   pendingVerifications: number
   totalAuditions: number
+  pendingReports: number
+  requestedAuditions: number
 }
 
 export default function AdminDashboardPage() {
@@ -32,6 +35,8 @@ export default function AdminDashboardPage() {
         { count: agencyCount },
         { count: totalVideos },
         { count: totalAuditions },
+        { count: pendingReports },
+        { count: requestedAuditions },
         { data: agencies },
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -39,6 +44,8 @@ export default function AdminDashboardPage() {
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'agency'),
         supabase.from('videos').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('auditions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('auditions').select('*', { count: 'exact', head: true }).eq('status', 'requested'),
         supabase.from('agencies').select('is_verified, business_registration_url'),
       ])
 
@@ -53,6 +60,8 @@ export default function AdminDashboardPage() {
         totalVideos: totalVideos ?? 0,
         pendingVerifications,
         totalAuditions: totalAuditions ?? 0,
+        pendingReports: pendingReports ?? 0,
+        requestedAuditions: requestedAuditions ?? 0,
       })
       setLoading(false)
     }
@@ -91,6 +100,43 @@ export default function AdminDashboardPage() {
                 </Link>
               ))}
             </div>
+
+            {/* 신고와 공고 신청은 화면을 열어봐야만 알 수 있었다. 링크는 nav에
+                있었지만 "볼 게 있다"고 말해주는 곳이 없으면 기억에 의존하게
+                된다. 신고는 방치하면 안전 문제이자 심사 문제다. */}
+            {stats && stats.pendingReports > 0 && (
+              <Link href="/admin/reports" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #fee2e2, #fecaca)',
+                  border: '1px solid #f87171', borderRadius: 20, padding: '18px 20px',
+                  display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12,
+                }}>
+                  <Flag size={24} strokeWidth={2} color="#dc2626" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15 }}>처리 안 된 신고 {stats.pendingReports}건</div>
+                    <div style={{ fontSize: 12, color: '#991b1b', marginTop: 2 }}>미루면 안전 문제이자 앱 심사 문제가 됩니다</div>
+                  </div>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+              </Link>
+            )}
+
+            {stats && stats.requestedAuditions > 0 && (
+              <Link href="/admin/auditions" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #ffedd5, #fed7aa)',
+                  border: '1px solid #fb923c', borderRadius: 20, padding: '18px 20px',
+                  display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12,
+                }}>
+                  <Mic2 size={24} strokeWidth={2} color="#c2410c" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15 }}>오디션 신청 {stats.requestedAuditions}건</div>
+                    <div style={{ fontSize: 12, color: '#9a3412', marginTop: 2 }}>기획사에 연락해 일정을 조율한 뒤 게시하세요</div>
+                  </div>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#c2410c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+              </Link>
+            )}
 
             {stats && stats.pendingVerifications > 0 && (
               <Link href="/admin/agencies" style={{ textDecoration: 'none' }}>
