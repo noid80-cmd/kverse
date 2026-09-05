@@ -115,6 +115,31 @@ export default function AdminAgenciesPage() {
     }
   }
 
+  // 기획사는 소개글을 안 쓴다. 자기가 원하는 걸 얻는 데 필요 없는 일이라
+  // 그렇다. 참여사가 16곳뿐이라 우리가 채우는 게 빠르고, 지망생이 뭘
+  // 궁금해하는지도 우리가 더 잘 안다.
+  const [editing, setEditing] = useState<string | null>(null)
+  const [draftDesc, setDraftDesc] = useState('')
+  const [draftSite, setDraftSite] = useState('')
+  const [savingInfo, setSavingInfo] = useState(false)
+
+  function startEdit(a: { id: string; description: string | null; website: string | null }) {
+    setEditing(a.id)
+    setDraftDesc(a.description ?? '')
+    setDraftSite(a.website ?? '')
+  }
+
+  async function saveInfo(id: string) {
+    setSavingInfo(true)
+    const site = draftSite.trim()
+    const description = draftDesc.trim() || null
+    const website = site ? (site.startsWith('http') ? site : `https://${site}`) : null
+    await supabase.from('agencies').update({ description, website }).eq('id', id)
+    setAgencies(prev => prev.map(a => a.id === id ? { ...a, description, website } : a))
+    setSavingInfo(false)
+    setEditing(null)
+  }
+
   async function toggleVerified(id: string, current: boolean) {
     await supabase.from('agencies').update({ is_verified: !current }).eq('id', id)
     setAgencies(prev => prev.map(a => a.id === id ? { ...a, is_verified: !current } : a))
@@ -285,6 +310,13 @@ export default function AdminAgenciesPage() {
                       }}>
                       {a.is_verified ? '인증해제' : '인증'}
                     </button>
+                    <button onClick={() => startEdit(a)}
+                      style={{
+                        fontSize: 12, padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(36,28,21,0.12)',
+                        background: '#FFFFFF', color: '#241C15', fontWeight: 700, cursor: 'pointer',
+                      }}>
+                      소개
+                    </button>
                     <button onClick={() => deleteAgency(a.id, a.name)}
                       style={{
                         fontSize: 12, padding: '8px 10px', borderRadius: 10, border: '1px solid rgba(248,113,113,0.2)',
@@ -294,6 +326,28 @@ export default function AdminAgenciesPage() {
                     </button>
                   </div>
                 </div>
+
+                {editing === a.id && (
+                  <div style={{ borderTop: '1px solid rgba(36,28,21,0.09)', paddingTop: 14, marginBottom: 14 }}>
+                    <div style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 600, marginBottom: 8 }}>
+                      지망생이 채팅에서 보는 소개입니다
+                    </div>
+                    <textarea value={draftDesc} onChange={e => setDraftDesc(e.target.value)} rows={3}
+                      placeholder="어떤 회사인지, 소속 아티스트가 누구인지 한두 줄"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(36,28,21,0.13)', fontSize: 13, fontFamily: 'inherit', resize: 'none', outline: 'none', marginBottom: 8 }} />
+                    <input value={draftSite} onChange={e => setDraftSite(e.target.value)}
+                      placeholder="홈페이지 (선택)"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(36,28,21,0.13)', fontSize: 13, outline: 'none', marginBottom: 10 }} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => setEditing(null)}
+                        style={{ flex: 1, padding: '10px', borderRadius: 11, border: 'none', background: 'rgba(36,28,21,0.05)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>취소</button>
+                      <button onClick={() => saveInfo(a.id)} disabled={savingInfo}
+                        style={{ flex: 2, padding: '10px', borderRadius: 11, border: 'none', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                        {savingInfo ? '저장 중...' : '저장'}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {a.business_registration_url && (
                   <div style={{ borderTop: '1px solid rgba(36,28,21,0.09)', paddingTop: 14 }}>
