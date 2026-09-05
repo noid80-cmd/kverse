@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
   webpush.setVapidDetails(`mailto:${process.env.VAPID_EMAIL}`, publicKey, privateKey)
 
-  const { userId, agencyId, auditionId, broadcast, title, body, url } = await req.json()
+  const { userId, userIds, agencyId, auditionId, broadcast, title, body, url } = await req.json()
 
   // 수신자 계산은 전부 여기(서비스 롤)에서 한다. 예전엔 오디션 지원 알림의
   // 대상 담당자를 지망생 브라우저가 agency_members에서 직접 찾았는데, 그
@@ -99,7 +99,11 @@ export async function POST(req: NextRequest) {
   // 볼 수 없는 대상은 클라이언트에게 찾게 하면 안 된다.
   let targetIds: string[] | null = null // null이면 broadcast
   if (!broadcast) {
-    if (userId) {
+    // 마감 알림처럼 수백 명에게 같은 문구를 보내는 경우가 있다. 한 명씩
+    // 요청하면 왕복 횟수만큼 시간이 들어 크론의 maxDuration에 걸린다.
+    if (Array.isArray(userIds) && userIds.length > 0) {
+      targetIds = [...new Set(userIds as string[])].filter(Boolean)
+    } else if (userId) {
       targetIds = [userId]
     } else if (agencyId || auditionId) {
       let agId: string | null = agencyId ?? null
