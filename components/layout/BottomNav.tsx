@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 
-type NavItem = { href: string; label: string; icon: ReactNode; fab?: boolean }
+type NavItem = { href: string; label: string; icon: ReactNode; fab?: boolean; badge?: number }
 
 export default function BottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
@@ -48,7 +48,16 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
               color: active ? '#D84A1E' : '#6B6355',
               transition: 'color 0.15s',
             }}>
-            {item.icon}
+            <span style={{ position: 'relative', display: 'flex' }}>
+              {item.icon}
+              {!!item.badge && item.badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -8, minWidth: 16, height: 16,
+                  padding: '0 4px', borderRadius: 8, background: '#D84A1E', color: '#FFFFFF',
+                  fontSize: 10, fontWeight: 800, lineHeight: '16px', textAlign: 'center',
+                }}>{item.badge > 99 ? '99+' : item.badge}</span>
+              )}
+            </span>
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: 0.3 }}>{item.label}</span>
           </Link>
         )

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useNavBadges } from '@/lib/useNavBadges'
 import { createClient } from '@/lib/supabase/client'
 import { Compass, Bookmark, MessageCircle, Megaphone, Settings } from 'lucide-react'
 
@@ -15,6 +16,7 @@ const agencyNav = [
 
 export default function AgencyNav() {
   const pathname = usePathname()
+  const badges = useNavBadges('agency')
 
   return (
     <nav style={{
@@ -31,7 +33,21 @@ export default function AgencyNav() {
             justifyContent: 'center', padding: '10px 0 8px', gap: 4, textDecoration: 'none',
             outline: 'none', color: active ? '#D84A1E' : '#6B6355', transition: 'color 0.15s',
           }}>
-            {item.icon}
+            <span style={{ position: 'relative', display: 'flex' }}>
+              {item.icon}
+              {(() => {
+                const n = item.href.startsWith('/agency/contacts') ? badges.chats
+                  : item.href.startsWith('/agency/auditions') ? badges.applicants
+                  : 0
+                return n > 0 ? (
+                  <span style={{
+                    position: 'absolute', top: -4, right: -8, minWidth: 16, height: 16,
+                    padding: '0 4px', borderRadius: 8, background: '#D84A1E', color: '#FFFFFF',
+                    fontSize: 10, fontWeight: 800, lineHeight: '16px', textAlign: 'center',
+                  }}>{n > 99 ? '99+' : n}</span>
+                ) : null
+              })()}
+            </span>
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: 0.3 }}>{item.label}</span>
           </Link>
         )
