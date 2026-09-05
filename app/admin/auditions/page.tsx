@@ -16,6 +16,9 @@ type Audition = {
   deadline: string | null; status: string; created_at: string; applicant_count: number
   agency_id: string | null
   agency: { name: string } | null
+  // 신청 건에만 실려 온다. 담당자가 전화로 일정을 잡아야 게시가 되므로
+  // 연락처가 카드 안에 있어야 한다.
+  contacts?: { name: string | null; phone: string | null; email: string | null }[]
 }
 
 type Agency = { id: string; name: string }
@@ -305,6 +308,26 @@ export default function AdminAuditionsPage() {
                           {a.deadline && <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={12} /> ~{a.deadline}</span>}
                           <span style={{ fontSize: 12, color: '#8A7F6E' }}>신청 {a.created_at.slice(0, 10)}</span>
                         </div>
+                      </div>
+
+                      {/* 전화가 이 화면의 다음 행동이다. 번호를 눌러서 바로 걸 수
+                          있어야 하고, 옮겨 적는 단계가 끼면 안 된다. */}
+                      <div style={{ background: '#faf9f6', border: '1px solid #ece8e0', borderRadius: 11, padding: '10px 12px', marginBottom: 10 }}>
+                        {(a.contacts ?? []).length === 0 ? (
+                          <div style={{ fontSize: 12, color: '#8A7F6E' }}>
+                            등록된 담당자 연락처가 없어요. 기획사 계정에 연락처가 없는 상태입니다.
+                          </div>
+                        ) : (a.contacts ?? []).map((c, i) => (
+                          <div key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginTop: i === 0 ? 0 : 8 }}>
+                            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#241C15' }}>{c.name ?? '이름 없음'}</span>
+                            {c.phone
+                              ? <a href={`tel:${c.phone.replace(/[^0-9+]/g, '')}`} onClick={e => e.stopPropagation()}
+                                  style={{ fontSize: 12.5, color: '#D84A1E', fontWeight: 700, textDecoration: 'none' }}>{c.phone}</a>
+                              : <span style={{ fontSize: 12, color: '#b0a89c' }}>전화번호 없음</span>}
+                            {c.email && <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()}
+                              style={{ fontSize: 12, color: '#6B6355', textDecoration: 'none', wordBreak: 'break-all' }}>{c.email}</a>}
+                          </div>
+                        ))}
                       </div>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => deleteAudition(a.id)}

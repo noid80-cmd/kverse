@@ -83,7 +83,54 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+
+  // 신청 건은 담당자가 기획사에 전화해서 일정을 조율한 뒤 게시한다. 그런데
+  // 화면에 연락처가 없어서 매번 DB를 뒤져야 했다. 신청 카드에 바로 붙인다.
+  //
+  // 신청(requested) 건에 대해서만 조회한다 — 게시된 공고까지 담당자 연락처를
+  // 실어 보낼 이유가 없다. 이메일은 auth.users에 있어 서비스 롤로만 읽힌다.
+  const rows = data ?? []
+  const agencyIds = [...new Set(
+    rows.filter(r => r.status === 'requested' && r.agency_id).map(r => r.agency_id as string)
+  )]
+
+  if (agencyIds.length > 0) {
+    const { data: members } = await sb
+      .from('agency_members').select('agency_id, profile_id').in('agency_id', agencyIds)
+    const memberRows = members ?? []
+    const profileIds = [...new Set(memberRows.map(m => m.profile_id as string))]
+
+    const { data: profs } = profileIds.length
+      ? await sb.from('profiles').select('id, name, phone').in('id', profileIds)
+      : { data: [] }
+
+    const emails = new Map<string, string>()
+    await Promise.all(profileIds.map(async id => {
+      const { data: u } = await sb.auth.admin.getUserById(id)
+      if (u?.user?.email) emails.set(id, u.user.email)
+    }))
+
+    const profById = new Map((profs ?? []).map(p => [p.id as string, p]))
+    const byAgency = new Map<string, unknown[]>()
+    for (const m of memberRows) {
+      const p = profById.get(m.profile_id as string)
+      const list = byAgency.get(m.agency_id as string) ?? []
+      list.push({
+        name: (p?.name as string) ?? null,
+        phone: (p?.phone as string) ?? null,
+        email: emails.get(m.profile_id as string) ?? null,
+      })
+      byAgency.set(m.agency_id as string, list)
+    }
+
+    for (const r of rows) {
+      if (r.status === 'requested' && r.agency_id) {
+        (r as Record<string, unknown>).contacts = byAgency.get(r.agency_id as string) ?? []
+      }
+    }
+  }
+
+  return NextResponse.json(rows)
 }
 
 export async function POST(request: NextRequest) {
