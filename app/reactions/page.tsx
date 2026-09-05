@@ -444,8 +444,10 @@ function ReactionsContent() {
                     console.log('[notif] native path start')
                     // 어딘가에서 응답 없이 멈추면 사용자는 버튼이 죽은 줄 안다.
                     // 15초 안에 안 끝나면 그 사실을 화면에 알린다.
+                    // catch가 없으면 안에서 던진 게 unhandled rejection으로 새서
+                    // 버튼이 죽은 것처럼 보인다. 실제로 그렇게 한참 헤맸다.
                     const ok = await Promise.race([
-                      enableNativeNotifications(),
+                      enableNativeNotifications().catch(e => { console.log('[fcm] threw', String(e)); return false }),
                       new Promise<'timeout'>(r => setTimeout(() => r('timeout'), 15000)),
                     ])
                     console.log('[notif] native path result', ok)

@@ -10,17 +10,18 @@ import { createClient } from './supabase/client'
 
 type Messaging = typeof import('@capacitor-firebase/messaging')['FirebaseMessaging']
 
-async function messaging(): Promise<Messaging | null> {
-  // 실기기에서 [알림 켜기]가 아무 반응도 없이 멈추는 걸 추적하려고 각 단계를
-  // 찍는다. 에러도 응답도 없으면 어디서 멈췄는지가 유일한 단서다.
-  console.log('[fcm] messaging() native?', isNativeApp())
+// 플러그인을 객체로 감싸서 돌려준다. 그냥 돌려주면 안 된다 -
+// Capacitor 플러그인은 어떤 속성 접근이든 네이티브 호출로 바꾸는 프록시라,
+// async 함수가 이걸 return하면 런타임이 "thenable인가" 확인하려고 .then에
+// 접근하고, 프록시가 그걸 then()이라는 네이티브 메서드 호출로 넘겨버린다.
+// 실기기에서 "FirebaseMessaging.then() is not implemented on ios"로 터졌고,
+// 잡는 데가 없어 [알림 켜기]가 아무 반응 없는 버튼처럼 보였다.
+async function messaging(): Promise<{ fm: Messaging } | null> {
   if (!isNativeApp()) return null
   try {
     const mod = await import('@capacitor-firebase/messaging')
-    console.log('[fcm] module loaded?', !!mod?.FirebaseMessaging)
-    return mod.FirebaseMessaging
-  } catch (e) {
-    console.log('[fcm] module import failed', String(e))
+    return { fm: mod.FirebaseMessaging }
+  } catch {
     // 플러그인이 없는 빌드(구버전 앱)에서도 화면이 깨지지 않아야 한다
     return null
   }
@@ -43,7 +44,8 @@ async function saveToken(token: string) {
 
 /** 이미 허용된 상태인지 */
 export async function nativeNotifState(): Promise<'granted' | 'denied' | 'prompt' | 'unsupported'> {
-  const fm = await messaging()
+  const m = await messaging()
+  const fm = m?.fm
   if (!fm) return 'unsupported'
   try {
     const { receive } = await fm.checkPermissions()
@@ -56,8 +58,9 @@ export async function nativeNotifState(): Promise<'granted' | 'denied' | 'prompt
 /** 권한을 요청하고 토큰을 서버에 등록한다. 성공하면 true */
 export async function enableNativeNotifications(): Promise<boolean> {
   console.log('[fcm] enable start')
-  const fm = await messaging()
-  if (!fm) { console.log('[fcm] no messaging module'); return false }
+  const m = await messaging()
+  const fm = m?.fm
+  if (!fm) return false
   try {
     console.log('[fcm] requesting permissions...')
     const { receive } = await fm.requestPermissions()
@@ -82,7 +85,8 @@ export async function enableNativeNotifications(): Promise<boolean> {
  * (토큰 기준 upsert라 중복되지 않는다).
  */
 export async function refreshNativeToken(): Promise<void> {
-  const fm = await messaging()
+  const m = await messaging()
+  const fm = m?.fm
   if (!fm) return
   try {
     const { receive } = await fm.checkPermissions()
@@ -102,7 +106,8 @@ export async function refreshNativeToken(): Promise<void> {
  * 공고 알림을 눌렀는데 홈으로 떨어지면 지원까지 가는 길이 끊긴다.
  */
 export async function attachNotificationTap(navigate: (url: string) => void): Promise<void> {
-  const fm = await messaging()
+  const m = await messaging()
+  const fm = m?.fm
   if (!fm) return
   try {
     fm.addListener('notificationActionPerformed', (event) => {
