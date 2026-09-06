@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { isNativeApp } from '@/lib/capacitor'
+import { hasNativeAppleSignIn, nativeAppleSignIn, isAppleCancel } from '@/lib/appleNative'
 import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -41,6 +42,24 @@ export default function SignupPage() {
   async function handleSocialLogin(provider: 'kakao' | 'google' | 'apple') {
     if (!agreed) { setError('이용약관에 동의해주세요.'); return }
     const supabase = createClient()
+
+    // iOS 앱은 브라우저를 거치지 않는 네이티브 시트로 처리한다. 자세한 이유는
+    // lib/appleNative.ts 참고 — 웹 경로는 사파리로 새면 가입이 조용히 실패한다.
+    if (provider === 'apple' && hasNativeAppleSignIn()) {
+      try {
+        const { idToken, nonce } = await nativeAppleSignIn()
+        const { error: idError } = await supabase.auth.signInWithIdToken({
+          provider: 'apple', token: idToken, nonce,
+        })
+        if (idError) throw idError
+        router.push(`/auth/callback?role=${role}`)
+      } catch (e) {
+        if (!isAppleCancel(e)) {
+          setError(e instanceof Error ? e.message : 'Apple 로그인에 실패했어요.')
+        }
+      }
+      return
+    }
     // 네이티브 앱 + 구글/애플 로그인일 때만 커스텀 스킴 콜백을 쓴다 — iOS 쪽
     // GoogleAuthInterceptorPlugin/AppleAuthInterceptorPlugin이 이 이동을
     // ASWebAuthenticationSession으로 가로채 처리한 뒤

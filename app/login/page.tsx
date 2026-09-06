@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { isNativeApp } from '@/lib/capacitor'
+import { hasNativeAppleSignIn, nativeAppleSignIn, isAppleCancel } from '@/lib/appleNative'
 
 export default function LoginPage() {
   // 계정 삭제 직후 /login?deleted=1 로 돌아온다. 삭제가 끝났다는 걸 명확히 알린다.
@@ -109,6 +110,28 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     const supabase = createClient()
+
+    // iOS 앱에서는 브라우저를 아예 거치지 않는다. 아래 웹 경로는 애플 페이지가
+    // 웹뷰를 막아서 브라우저로 나가야 하는데, 그 이동이 새면 돌아온 코드를
+    // 아무도 받지 못해 이 화면으로만 되돌아온다(무한 루프).
+    if (provider === 'apple' && hasNativeAppleSignIn()) {
+      try {
+        const { idToken, nonce } = await nativeAppleSignIn()
+        const { error: idError } = await supabase.auth.signInWithIdToken({
+          provider: 'apple', token: idToken, nonce,
+        })
+        if (idError) throw idError
+        // 세션은 이미 섰다. 뒷정리(역할 판정·신규 알림·목적지)는 콜백 화면이
+        // 하던 것을 그대로 쓴다 — code 없이 들어가면 세션만 보고 진행한다.
+        router.push('/auth/callback')
+      } catch (e) {
+        if (!isAppleCancel(e)) {
+          setError(e instanceof Error ? e.message : 'Apple 로그인에 실패했어요.')
+        }
+        setLoading(false)
+      }
+      return
+    }
 
     // 네이티브 앱에서는 https 콜백 대신 커스텀 스킴(kpick://auth-callback)으로
     // 받는다 — iOS 쪽에서 이 이동을 ASWebAuthenticationSession으로 가로채
