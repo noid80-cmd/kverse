@@ -23,6 +23,15 @@ type Audition = {
 
 type Agency = { id: string; name: string }
 
+// 마감이 지났는데 결과가 안 들어온 회차. 7일 뒤 크론이 자동으로 닫지만,
+// 그 전에 전화해서 받아내는 게 지망생에게도 기획사에게도 낫다.
+type PendingResult = {
+  id: string; title: string; status: string; deadline: string
+  days_over: number; auto_close_in: number; waiting: number
+  agency_name: string | null
+  contacts: { name: string | null; phone: string | null; email: string | null }[]
+}
+
 const inputStyle = {
   background: '#f8f8fc', border: '1px solid #e0e0f0',
   borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#1e1b4b', width: '100%',
@@ -118,6 +127,7 @@ const emptyForm = (): FormState => ({
 export default function AdminAuditionsPage() {
   const [auditions, setAuditions] = useState<Audition[]>([])
   const [agencies, setAgencies] = useState<Agency[]>([])
+  const [pendingResults, setPendingResults] = useState<PendingResult[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState<FormState>(emptyForm())
@@ -135,10 +145,13 @@ export default function AdminAuditionsPage() {
     const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }
 
-    const [agsRes, audsRes] = await Promise.all([
+    const [agsRes, audsRes, pendRes] = await Promise.all([
       supabase.from('agencies').select('id, name').order('name'),
       fetch('/api/admin/auditions'),
+      fetch('/api/admin/pending-results'),
     ])
+
+    setPendingResults(pendRes.ok ? await pendRes.json() : [])
 
     setAgencies(agsRes.data ?? [])
 
@@ -287,6 +300,56 @@ export default function AdminAuditionsPage() {
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
         ) : (
           <>
+            {/* 마감이 지났는데 결과가 안 들어온 회차. 자동 마감은 지망생을
+                구하는 장치지 기획사를 관리하는 장치가 아니다 — 전화해서
+                받아내려면 목록이 있어야 한다. */}
+            {pendingResults.length > 0 && (
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#dc2626', marginBottom: 4 }}>
+                  결과 대기 {pendingResults.length}건
+                </div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 10, lineHeight: 1.5 }}>
+                  마감이 지났는데 기획사가 결과를 안 냈습니다. 7일이 지나면 자동으로 닫히고 그 회차 지원자는 전원 심사 종료가 됩니다.
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {pendingResults.map(r => (
+                    <div key={r.id} style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '1px solid rgba(220,38,38,0.3)' }}>
+                      <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{r.agency_name ?? '관리자 공지'}</div>
+                      <div style={{ fontWeight: 600, color: '#D84A1E', fontSize: 13, marginBottom: 8 }}>{r.title}</div>
+
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
+                        <span style={{ fontSize: 12, fontWeight: 800, color: '#dc2626', background: 'rgba(220,38,38,0.08)', padding: '3px 8px', borderRadius: 6 }}>
+                          마감 {r.days_over}일 지남
+                        </span>
+                        <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}>
+                          <Users size={12} /> {r.waiting}명 대기 중
+                        </span>
+                        <span style={{ fontSize: 12, color: r.auto_close_in <= 0 ? '#dc2626' : '#8A7F6E' }}>
+                          {r.auto_close_in > 0 ? `자동 마감까지 ${r.auto_close_in}일` : '자동 마감 대상'}
+                        </span>
+                      </div>
+
+                      <div style={{ background: '#faf9f6', border: '1px solid #ece8e0', borderRadius: 11, padding: '10px 12px' }}>
+                        {r.contacts.length === 0 ? (
+                          <div style={{ fontSize: 12, color: '#8A7F6E' }}>등록된 담당자 연락처가 없어요.</div>
+                        ) : r.contacts.map((c, i) => (
+                          <div key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginTop: i === 0 ? 0 : 8 }}>
+                            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#241C15' }}>{c.name ?? '이름 없음'}</span>
+                            {c.phone
+                              ? <a href={`tel:${c.phone.replace(/[^0-9+]/g, '')}`}
+                                  style={{ fontSize: 12.5, color: '#D84A1E', fontWeight: 700, textDecoration: 'none' }}>{c.phone}</a>
+                              : <span style={{ fontSize: 12, color: '#b0a89c' }}>전화번호 없음</span>}
+                            {c.email && <a href={`mailto:${c.email}`}
+                              style={{ fontSize: 12, color: '#6B6355', textDecoration: 'none', wordBreak: 'break-all' }}>{c.email}</a>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {requested.length > 0 && (
               <div style={{ marginBottom: 28 }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#ca8a04', marginBottom: 4 }}>

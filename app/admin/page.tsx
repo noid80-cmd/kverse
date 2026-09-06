@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import AdminNav from '@/components/layout/AdminNav'
-import { Flag, Mic2 } from 'lucide-react'
+import { Flag, Mic2, Clock } from 'lucide-react'
 
 type Stats = {
   totalUsers: number
@@ -15,6 +15,7 @@ type Stats = {
   totalAuditions: number
   pendingReports: number
   requestedAuditions: number
+  pendingResults: number
 }
 
 export default function AdminDashboardPage() {
@@ -38,6 +39,7 @@ export default function AdminDashboardPage() {
         { count: pendingReports },
         { count: requestedAuditions },
         { data: agencies },
+        pendRes,
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'talent'),
@@ -47,7 +49,10 @@ export default function AdminDashboardPage() {
         supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('auditions').select('*', { count: 'exact', head: true }).eq('status', 'requested'),
         supabase.from('agencies').select('is_verified, business_registration_url'),
+        fetch('/api/admin/pending-results'),
       ])
+
+      const pendingResults = pendRes.ok ? ((await pendRes.json()) as unknown[]).length : 0
 
       const pendingVerifications = (agencies ?? []).filter(
         a => (a as { is_verified: boolean; business_registration_url: string | null }).business_registration_url && !(a as { is_verified: boolean }).is_verified
@@ -62,6 +67,7 @@ export default function AdminDashboardPage() {
         totalAuditions: totalAuditions ?? 0,
         pendingReports: pendingReports ?? 0,
         requestedAuditions: requestedAuditions ?? 0,
+        pendingResults,
       })
       setLoading(false)
     }
@@ -115,6 +121,23 @@ export default function AdminDashboardPage() {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15 }}>처리 안 된 신고 {stats.pendingReports}건</div>
                     <div style={{ fontSize: 12, color: '#991b1b', marginTop: 2 }}>미루면 안전 문제이자 앱 심사 문제가 됩니다</div>
+                  </div>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+              </Link>
+            )}
+
+            {stats && stats.pendingResults > 0 && (
+              <Link href="/admin/auditions" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #fee2e2, #fecaca)',
+                  border: '1px solid #f87171', borderRadius: 20, padding: '18px 20px',
+                  display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12,
+                }}>
+                  <Clock size={24} strokeWidth={2} color="#dc2626" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, color: '#1e1b4b', fontSize: 15 }}>결과 대기 {stats.pendingResults}건</div>
+                    <div style={{ fontSize: 12, color: '#991b1b', marginTop: 2 }}>마감이 지났는데 기획사가 결과를 안 냈습니다. 지망생이 기다리는 중입니다</div>
                   </div>
                   <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
