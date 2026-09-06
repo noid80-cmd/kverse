@@ -105,9 +105,11 @@ export async function POST(req: NextRequest) {
   const cronSecret = (process.env.CRON_SECRET || '').trim()
   const isInternal = cronSecret.length > 0 && token === cronSecret
 
+  let callerId: string | null = null
   if (!isInternal) {
     const { data: { user } } = await adminSupabase.auth.getUser(token)
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+    callerId = user.id
   }
 
   const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '').trim()
@@ -116,6 +118,17 @@ export async function POST(req: NextRequest) {
   webpush.setVapidDetails(`mailto:${process.env.VAPID_EMAIL}`, publicKey, privateKey)
 
   const { userId, userIds, agencyId, auditionId, broadcast, title, body, url } = await req.json()
+
+  // 전체 발송은 어드민만. 로그인만 하면 누구나 broadcast를 걸 수 있었다 —
+  // 지망생 계정으로도 전 사용자에게 푸시가 나갔다. 대상을 지정한 발송은
+  // 기존대로 둔다(기획사가 지망생에게 보내는 알림 등이 여기를 탄다).
+  if (broadcast && !isInternal) {
+    const { data: me } = await adminSupabase
+      .from('profiles').select('role').eq('id', callerId).single()
+    if (me?.role !== 'admin') {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+    }
+  }
 
   // 수신자 계산은 전부 여기(서비스 롤)에서 한다. 예전엔 오디션 지원 알림의
   // 대상 담당자를 지망생 브라우저가 agency_members에서 직접 찾았는데, 그

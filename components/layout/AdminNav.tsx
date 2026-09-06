@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, LayoutDashboard, Users, Building2, Film, Mic2, Flag, Trophy } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, Building2, Film, Mic2, Flag, Trophy, Megaphone } from 'lucide-react'
 
 const adminNav = [
   { href: '/admin', label: '대시보드', Icon: LayoutDashboard },
@@ -13,6 +13,7 @@ const adminNav = [
   { href: '/admin/auditions', label: '오디션', Icon: Mic2 },
   { href: '/admin/outcomes', label: '합격 추적', Icon: Trophy },
   { href: '/admin/reports', label: '신고', Icon: Flag },
+  { href: '/admin/broadcast', label: '공지', Icon: Megaphone },
 ]
 
 const previewNav = [
