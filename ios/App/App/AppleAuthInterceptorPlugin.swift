@@ -48,7 +48,12 @@ public class AppleAuthInterceptorPlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
             guard let callbackURL = callbackURL else {
-                CAPLog.print("⚡️  AppleAuthInterceptor: no callback URL (\(error?.localizedDescription ?? "unknown error"))")
+                // 조용히 돌아가면 웹뷰는 로그인 화면에 "로그인 중..." 상태로 영원히
+                // 멈춘다 — 보는 사람 눈에는 로그인이 그냥 작동하지 않는 앱이다.
+                // 원인을 콜백 페이지로 넘겨 화면에 띄운다.
+                let reason = error?.localizedDescription ?? "unknown error"
+                CAPLog.print("⚡️  AppleAuthInterceptor: no callback URL (\(reason))")
+                self.loadCallback(query: "error=native_auth_session&error_description=\(Self.escape(reason))", fragment: nil)
                 return
             }
             self.forwardToWebView(callbackURL)
@@ -63,16 +68,28 @@ public class AppleAuthInterceptorPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func forwardToWebView(_ callbackURL: URL) {
+        let parts = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)
+        // 실패는 쿼리(?error=)로 올 때도 있고 해시(#error=)로 올 때도 있다.
+        // 해시를 버리면 콜백 페이지가 단서 없이 "세션이 안 만들어졌다"고만 말한다.
+        loadCallback(query: parts?.query, fragment: parts?.fragment)
+    }
+
+    private func loadCallback(query: String?, fragment: String?) {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "kpick.app"
         components.path = "/auth/callback"
-        components.query = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?.query
+        components.query = query
+        components.fragment = fragment
 
         guard let finalURL = components.url else { return }
         DispatchQueue.main.async { [weak self] in
             self?.bridge?.webView?.load(URLRequest(url: finalURL))
         }
+    }
+
+    private static func escape(_ s: String) -> String {
+        s.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "unknown"
     }
 }
 

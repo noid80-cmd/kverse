@@ -56,7 +56,11 @@ public class GoogleAuthInterceptorPlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
             guard let callbackURL = callbackURL else {
-                CAPLog.print("⚡️  GoogleAuthInterceptor: no callback URL (\(error?.localizedDescription ?? "unknown error"))")
+                // 조용히 돌아가면 웹뷰가 "로그인 중..." 상태로 멈춘다. 원인을
+                // 콜백 페이지로 넘겨 화면에 띄운다(AppleAuthInterceptor와 동일).
+                let reason = error?.localizedDescription ?? "unknown error"
+                CAPLog.print("⚡️  GoogleAuthInterceptor: no callback URL (\(reason))")
+                self.loadCallback(query: "error=native_auth_session&error_description=\(Self.escape(reason))", fragment: nil)
                 return
             }
             self.forwardToWebView(callbackURL)
@@ -74,16 +78,27 @@ public class GoogleAuthInterceptorPlugin: CAPPlugin, CAPBridgedPlugin {
     // 로 옮겨서 웹쪽 /auth/callback 페이지가 지금까지 하던 처리(exchangeCodeForSession)를
     // 그대로 이어받게 한다. code 외에 role 등 다른 쿼리 파라미터가 있어도 통째로 전달된다.
     private func forwardToWebView(_ callbackURL: URL) {
+        let parts = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)
+        // 실패는 쿼리(?error=)로 올 때도 있고 해시(#error=)로 올 때도 있다.
+        loadCallback(query: parts?.query, fragment: parts?.fragment)
+    }
+
+    private func loadCallback(query: String?, fragment: String?) {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "kpick.app"
         components.path = "/auth/callback"
-        components.query = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?.query
+        components.query = query
+        components.fragment = fragment
 
         guard let finalURL = components.url else { return }
         DispatchQueue.main.async { [weak self] in
             self?.bridge?.webView?.load(URLRequest(url: finalURL))
         }
+    }
+
+    private static func escape(_ s: String) -> String {
+        s.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "unknown"
     }
 }
 
