@@ -27,9 +27,12 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [isKakao, setIsKakao] = useState(false)
+  // 네이티브 Apple 로그인이 없는 구버전 앱인지. 서버 렌더에서는 알 수 없다.
+  const [legacyAppleFlow, setLegacyAppleFlow] = useState(false)
 
   useEffect(() => {
     setIsKakao(/KAKAOTALK/i.test(navigator.userAgent))
+    setLegacyAppleFlow(isNativeApp() && !hasNativeAppleSignIn())
     try {
       const remembered = localStorage.getItem('kpick-last-email')
       if (remembered) setEmail(remembered)
@@ -288,6 +291,20 @@ export default function LoginPage() {
               </svg>
               {tx.loginApple}
             </button>
+          )}
+          {/* 구버전 앱에서는 애플 로그인이 브라우저로 새면서 이 화면으로만
+              되돌아오는 경우가 있다. 새 빌드가 나갈 때까지 다른 경로를 안내한다.
+              버튼은 그대로 둔다 — 기존 계정은 되기 때문이다. */}
+          {legacyAppleFlow && (
+            <div style={{
+              padding: '10px 12px', borderRadius: 12,
+              background: 'rgba(216,74,30,0.07)', border: '1px solid rgba(216,74,30,0.18)',
+              fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6,
+            }}>
+              Apple 로그인이 끝나지 않고 이 화면으로 돌아온다면, 구글이나 이메일로 진행해주세요. 곧 해결됩니다.
+              <br />
+              <span style={{ color: '#A5765A' }}>If Apple sign-in returns you here, please use Google or email instead.</span>
+            </div>
           )}
           {!isKakao && (
             <button onClick={handleGoogle} disabled={loading} className="google-btn" style={{

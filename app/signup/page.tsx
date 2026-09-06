@@ -34,9 +34,13 @@ export default function SignupPage() {
   const [done, setDone] = useState(false)
   const [isKakao, setIsKakao] = useState(false)
   const [agreed, setAgreed] = useState(false)
+  // 네이티브 Apple 로그인이 없는 구버전 앱인지. 서버 렌더에서는 알 수 없어서
+  // 마운트 후에 판정한다.
+  const [legacyAppleFlow, setLegacyAppleFlow] = useState(false)
 
   useEffect(() => {
     setIsKakao(/KAKAOTALK/i.test(navigator.userAgent))
+    setLegacyAppleFlow(isNativeApp() && !hasNativeAppleSignIn())
   }, [])
 
   async function handleSocialLogin(provider: 'kakao' | 'google' | 'apple') {
@@ -226,6 +230,21 @@ export default function SignupPage() {
                 </svg>
                 {tx.auth.signupApple}
               </button>
+            )}
+            {/* 구버전 앱(네이티브 Apple 로그인 이전)에서는 애플 가입이 브라우저로
+                새면서 조용히 실패한다. 새 빌드가 심사를 통과할 때까지 신규 가입을
+                놓치지 않도록, 그 빌드에서만 다른 경로를 안내한다. 버튼은 그대로
+                둔다 — 기존 계정 로그인은 되기 때문이다. */}
+            {legacyAppleFlow && (
+              <div style={{
+                marginTop: -4, padding: '10px 12px', borderRadius: 12,
+                background: 'rgba(216,74,30,0.07)', border: '1px solid rgba(216,74,30,0.18)',
+                fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6,
+              }}>
+                Apple 가입이 끝나지 않고 이 화면으로 돌아온다면, 구글이나 이메일로 가입해주세요. 곧 해결됩니다.
+                <br />
+                <span style={{ color: '#A5765A' }}>If Apple sign-up returns you here, please use Google or email instead.</span>
+              </div>
             )}
             {!isKakao && (
               <button onClick={() => handleSocialLogin('google')}
