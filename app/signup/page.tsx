@@ -110,10 +110,17 @@ export default function SignupPage() {
     setLoading(false)
     if (error) { setError(error.message); return }
 
-    fetch('/api/notify-signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, role, agency_name: agencyName.trim() || undefined }),
+    // 가입 알림은 세션 토큰과 함께 보낸다. 라우트가 무인증이면 아무나
+    // 가짜 알림을 쏟아부을 수 있어서 막았다. 이름·이메일은 서버가 토큰으로
+    // 직접 읽으므로 여기서 실어 보낼 필요가 없다.
+    supabase.auth.getSession().then(({ data }) => {
+      const token = data.session?.access_token
+      if (!token) return
+      return fetch('/api/notify-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({}),
+      })
     }).catch(() => {})
 
     if (role === 'agency') { setDone(true); return }
