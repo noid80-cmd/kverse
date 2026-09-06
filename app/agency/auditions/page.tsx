@@ -129,8 +129,20 @@ export default function AgencyAuditionsPage() {
         })
       })
 
-      // 알림은 실제로 공개될 때 보낸다. 신청 단계에서 보내면 지망생이
+      // 지망생 알림은 실제로 공개될 때 보낸다. 신청 단계에서 보내면
       // 들어와도 볼 게 없다.
+      //
+      // 다만 운영자에게는 지금 알려야 한다 — 담당자가 전화해서 일정을
+      // 조율해야 게시되는 구조라, 신청을 늦게 발견하면 그만큼 오픈이 밀린다.
+      supabase.auth.getSession().then(({ data: s }) => {
+        const token = s.session?.access_token
+        if (!token) return
+        return fetch('/api/notify-audition-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ auditionId: inserted.id }),
+        })
+      }).catch(() => {})
 
       setForm({ title: '', description: '', categories: ['vocal'], mode: 'online', deadline: '' })
       setShowCreate(false)
