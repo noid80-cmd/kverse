@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
 
   // 기록은 발송 뒤에 남긴다. 순서가 반대면 발송이 실패했는데 "보냄"으로
   // 남는다 — 그러면 다음 사람이 안 보내고 넘어간다.
-  await sb.from('admin_broadcasts').insert({
+  const { error: logError } = await sb.from('admin_broadcasts').insert({
     sent_by: adminId,
     title: title.trim(),
     body: body.trim(),
@@ -117,11 +117,14 @@ export async function POST(req: NextRequest) {
     app_sent: (sent as { app?: number }).app ?? 0,
   })
 
+  // 기록 실패를 삼키면 "두 번 보내기 방지"가 조용히 무력해진다.
+  // 테이블이 아직 없을 수 있으므로 결과를 화면까지 올린다.
   return NextResponse.json({
     ok: res.ok,
     recipients: counts.people,
     web: (sent as { web?: number }).web ?? 0,
     app: (sent as { app?: number }).app ?? 0,
+    recorded: !logError,
   })
 }
 
@@ -131,11 +134,14 @@ export async function GET() {
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const sb = serviceClient()
-  const { data } = await sb
+  const { data, error } = await sb
     .from('admin_broadcasts')
     .select('id, title, body, url, recipients, web_sent, app_sent, created_at')
     .order('created_at', { ascending: false })
     .limit(20)
 
-  return NextResponse.json(data ?? [])
+  // 테이블이 아직 없으면 빈 목록으로 보이는데, 그건 "보낸 적 없음"과
+  // 구분이 안 된다. 마이그레이션을 안 돌렸다는 사실을 화면에 알린다.
+  if (error) return NextResponse.json({ missing: true, rows: [] })
+  return NextResponse.json({ missing: false, rows: data ?? [] })
 }

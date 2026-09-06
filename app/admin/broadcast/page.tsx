@@ -41,10 +41,14 @@ export default function AdminBroadcast() {
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<string>('')
   const [history, setHistory] = useState<Sent[]>([])
+  const [tableMissing, setTableMissing] = useState(false)
 
   const loadHistory = useCallback(async () => {
     const res = await fetch('/api/admin/broadcast')
-    setHistory(res.ok ? await res.json() : [])
+    if (!res.ok) { setHistory([]); return }
+    const data = await res.json()
+    setTableMissing(!!data.missing)
+    setHistory(data.rows ?? [])
   }, [])
 
   useEffect(() => {
@@ -91,7 +95,9 @@ export default function AdminBroadcast() {
       })
       const data = await res.json()
       if (!res.ok) { setResult(data.error ?? '발송에 실패했어요.'); return }
-      setResult(`발송 완료 — 웹 ${data.web}건 · 앱 ${data.app}건`)
+      setResult(data.recorded === false
+        ? `발송 완료 — 웹 ${data.web}건 · 앱 ${data.app}건 (기록에는 남지 않았습니다)`
+        : `발송 완료 — 웹 ${data.web}건 · 앱 ${data.app}건`)
       setTitle(''); setBody(''); setPreview(null)
       await loadHistory()
     } finally { setBusy(false) }
@@ -118,6 +124,22 @@ export default function AdminBroadcast() {
           알림을 켜둔 지망생 전원에게 보냅니다. 기획사 담당자는 대상에서 빠집니다.
           <strong style={{ color: '#dc2626' }}> 보낸 푸시는 취소할 수 없습니다.</strong>
         </p>
+
+        {tableMissing && (
+          <div style={{
+            background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.35)',
+            borderRadius: 14, padding: '14px 16px', marginBottom: 20,
+          }}>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#92400e', marginBottom: 4 }}>
+              발송 기록 테이블이 아직 없습니다
+            </div>
+            <div style={{ fontSize: 12.5, color: '#78350f', lineHeight: 1.6 }}>
+              공지는 보낼 수 있지만 기록이 남지 않아, 같은 공지를 두 번 보내는 걸 막지 못합니다.
+              <br />
+              <code style={{ fontSize: 11.5 }}>supabase/migration_broadcasts.sql</code> 을 SQL Editor에서 실행해주세요.
+            </div>
+          </div>
+        )}
 
         <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid #e8e8f2', marginBottom: 20 }}>
           <label style={{ fontSize: 12.5, fontWeight: 800, color: '#1e1b4b', display: 'block', marginBottom: 6 }}>제목</label>
