@@ -1,4 +1,5 @@
 import UIKit
+import UserNotifications
 import Capacitor
 import PreferencesPlugin
 import WebKit
@@ -34,7 +35,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        // 앱을 열면 아이콘 배지를 지운다.
+        //
+        // 푸시 페이로드가 badge:1을 보내는데(lib/fcm.ts) 그걸 0으로 되돌리는
+        // 곳이 어디에도 없어서, 한 번 붙은 "1"이 영영 남았다. 채팅을 읽어도
+        // 안 지워진다 — iOS 배지는 앱 안의 읽음 상태와 아무 관계가 없고,
+        // 앱이 직접 0으로 설정해야만 사라진다.
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(0)
+        } else {
+            application.applicationIconBadgeNumber = 0
+        }
+        // 알림 센터에 쌓인 것도 같이 치운다. 앱을 열어 확인했는데 목록에
+        // 그대로 남아 있으면 또 눌러보게 된다.
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
