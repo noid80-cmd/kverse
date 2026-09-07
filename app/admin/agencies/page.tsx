@@ -16,6 +16,9 @@ type Agency = {
   business_registration_number: string | null
 }
 
+const APP_STORE_URL = 'https://apps.apple.com/kr/app/id6791017827'
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=app.kpick.twa'
+
 export default function AdminAgenciesPage() {
   const [agencies, setAgencies] = useState<Agency[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,7 +27,7 @@ export default function AdminAgenciesPage() {
   const [saving, setSaving] = useState(false)
   const [viewingImg, setViewingImg] = useState<string | null>(null)
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
-  const [inviteLink, setInviteLink] = useState<{ url: string; agencyName: string; oneClick?: boolean } | null>(null)
+  const [handoff, setHandoff] = useState<{ email: string; agencyName: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [msgCopied, setMsgCopied] = useState(false)
   const logoInputRef = useRef<HTMLInputElement>(null)
@@ -86,29 +89,29 @@ export default function AdminAgenciesPage() {
     }
   }
 
-  // 초대 발급을 한 곳으로 모은다. 예전엔 "기획사 새로 등록"에만 붙어 있어서,
-  // 이미 등록된 기획사에는 링크를 다시 줄 방법이 아예 없었다 — 링크가 만료됐거나
-  // 담당자가 바뀌었거나 한 회사에서 두 명이 쓰려는 순간 막혔다.
-  async function createInvite(agencyId: string, agencyName: string) {
-    // 담당자 이메일을 여기서 받아두면 기획사는 링크를 열고 버튼 한 번만 누르면
-    // 된다(원클릭). 비워두면 기획사가 이메일·비밀번호를 직접 입력하는 기존 방식.
+  // 계정을 우리가 미리 만들어둔다.
+  //
+  // 초대 링크 방식은 "링크를 눌러야 계정이 생긴다"가 전제라, 담당자가 앱부터
+  // 깔고 로그인하면 "가입되지 않은 이메일"이 뜬다. 캐스팅 담당자는 돌아다니며
+  // 폰으로 일하는 사람들이라 앱을 먼저 깔 가능성이 높다. 명함에 이메일이
+  // 있으니 계정은 우리가 만들고, 담당자에게 남는 말은 두 줄뿐이다 —
+  // "스토어에서 Krookie 받으세요 / 이 이메일로 로그인하세요".
+  async function createAgencyAccount(agencyId: string, agencyName: string) {
     const email = (prompt(`${agencyName} 담당자 이메일
 
-넣어두면 기획사는 버튼 한 번으로 가입됩니다.
-모르면 비워두세요 — 직접 입력하는 방식으로 나갑니다.`) ?? '').trim()
-    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      alert('이메일 형식이 아니에요: ' + email)
-      return
-    }
-    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('')
-    // 만료를 명시적으로 넣는다. 기본값(7일)은 영업 주기에 비해 짧다 —
-    // 미팅에서 링크를 주고 담당자가 결재를 거쳐 여는 데 그보다 오래 걸린다.
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    const { error } = await supabase.from('agency_invites').insert({
-      agency_id: agencyId, token, expires_at: expiresAt, ...(email ? { email } : {}),
+명함의 이메일을 넣으세요. 이 주소로 계정을 만들고,
+담당자는 이 주소로 로그인합니다.`) ?? '').trim()
+    if (!email) return
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('이메일 형식이 아니에요: ' + email); return }
+
+    const res = await fetch('/api/admin/agency-account', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agencyId, email }),
     })
-    if (error) { alert('초대 링크 생성 실패: ' + error.message); return }
-    setInviteLink({ url: `${window.location.origin}/invite?token=${token}`, agencyName, oneClick: !!email })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { alert('계정 생성 실패: ' + (data.error ?? '알 수 없는 오류')); return }
+    setHandoff({ email, agencyName })
+    setAgencies(prev => prev.map(a => a.id === agencyId ? { ...a, is_verified: true } : a))
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -120,23 +123,29 @@ export default function AdminAgenciesPage() {
     }).select().single()
     if (data) {
       setAgencies(prev => [data as Agency, ...prev])
-      await createInvite(data.id, data.name)
+      await createAgencyAccount(data.id, data.name)
     }
     setName(''); setShowForm(false); setSaving(false)
   }
 
-  async function shareInvite() {
-    if (!inviteLink) return
-    // 홈 화면 추가를 권하는 이유는 편의가 아니라 세션이다. 아이콘으로 들어오면
-    // 늘 같은 브라우저 컨텍스트라 로그인이 유지된다.
-    const tail = '\n\n※ 열리는 화면을 홈 화면에 추가해두시면 다음부터 아이콘으로 바로 들어오실 수 있어요.'
-    const text = inviteLink.oneClick
-      ? `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크를 열고 [시작하기]만 누르시면 됩니다 (30일 유효):\n${inviteLink.url}${tail}`
-      : `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (30일 유효):\n${inviteLink.url}${tail}`
-    // navigator.share를 쓰면 윈도우에서 OS 공유 시트가 열리는데, 거기 카카오톡은
-    // Microsoft Store 버전만 인식한다 — 홈페이지에서 받은 카톡을 쓰는 사람에게는
-    // 멀쩡한 앱을 두고 설치하라는 창이 뜬다. 어차피 카톡 대화창에 붙여넣을 거라
-    // 문구째로 복사하는 게 빠르고 예측 가능하다.
+  // 기획사에게 보낼 안내. 담당자는 돌아다니며 폰으로 일하니 앱이 기본이고,
+  // 계정은 이미 만들어뒀으니 남는 건 "앱 받기"와 "이 이메일로 로그인"뿐이다.
+  async function copyHandoff() {
+    if (!handoff) return
+    const text = [
+      `안녕하세요! Krookie에 ${handoff.agencyName} 기획사 계정을 만들어드렸어요.`,
+      '',
+      '1) 앱을 받아주세요',
+      `   아이폰 ${APP_STORE_URL}`,
+      `   안드로이드 ${PLAY_STORE_URL}`,
+      '',
+      '2) 앱을 열고 아래 이메일로 로그인해주세요',
+      `   ${handoff.email}`,
+      '',
+      '   비밀번호는 없어도 됩니다. 로그인 화면에서',
+      '   [비밀번호를 잊으셨나요?]를 누르시면 이메일로 6자리 코드가 갑니다.',
+      '   그 코드를 넣으시면 바로 들어오실 수 있어요.',
+    ].join('\n')
     await navigator.clipboard.writeText(text)
     setMsgCopied(true)
     setTimeout(() => setMsgCopied(false), 2000)
@@ -214,51 +223,36 @@ export default function AdminAgenciesPage() {
           </button>
         </div>
 
-        {inviteLink && (
+        {handoff && (
           <div style={{
             background: 'linear-gradient(135deg, rgba(255,111,60,0.08), rgba(216,74,30,0.04))',
             border: '1px solid rgba(255,111,60,0.25)',
             borderRadius: 18, padding: '18px 20px', marginBottom: 20,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 18 }}>🎉</span>
-              <span style={{ fontWeight: 700, color: '#FF6F3C', fontSize: 14 }}>{inviteLink.agencyName} 초대 링크가 생성됐어요</span>
-              <button onClick={() => setInviteLink(null)}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ fontWeight: 800, color: '#D84A1E', fontSize: 14 }}>
+                {handoff.agencyName} 계정을 만들었어요
+              </span>
+              <button onClick={() => setHandoff(null)}
                 style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'rgba(36,28,21,0.39)', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
             </div>
             <div style={{
-              background: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: '10px 14px',
-              fontSize: 11, color: 'rgba(36,28,21,0.65)', wordBreak: 'break-all', marginBottom: 12, fontFamily: 'monospace',
+              background: '#FFFFFF', borderRadius: 12, padding: '12px 14px', marginBottom: 12,
+              fontSize: 13, color: '#241C15', border: '1px solid rgba(36,28,21,0.08)',
             }}>
-              {inviteLink.url}
+              로그인 계정 <b>{handoff.email}</b>
+              <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 6, lineHeight: 1.6 }}>
+                담당자는 앱을 받아서 이 이메일로 로그인합니다.
+                비밀번호는 필요 없고, 로그인 화면에서 코드를 받아 들어옵니다.
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={async () => {
-                  await navigator.clipboard.writeText(inviteLink.url)
-                  setCopied(true)
-                  setTimeout(() => setCopied(false), 2000)
-                }}
-                style={{
-                  flex: 1, padding: '11px', borderRadius: 12, border: '1px solid rgba(255,111,60,0.3)',
-                  background: copied ? 'rgba(34,197,94,0.12)' : 'rgba(255,111,60,0.08)',
-                  color: copied ? '#34d399' : '#FF6F3C', fontWeight: 700, fontSize: 13, cursor: 'pointer',
-                }}>
-                {copied ? '✓ 복사됨' : '링크 복사'}
-              </button>
-              <button
-                onClick={shareInvite}
-                style={{
-                  flex: 1, padding: '11px', borderRadius: 12, border: 'none',
-                  background: 'linear-gradient(135deg, #fee500, #ffd900)',
-                  color: '#1a1a00', fontWeight: 800, fontSize: 13, cursor: 'pointer',
-                }}>
-                {msgCopied ? '✓ 복사됨 — 카톡에 붙여넣으세요' : '안내 문구까지 복사'}
-              </button>
-            </div>
-            <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.26)', textAlign: 'center', marginTop: 10 }}>
-              30일 후 만료 · 1회만 사용 가능{inviteLink.oneClick ? ' · 원클릭' : ''}
-            </div>
+            <button onClick={copyHandoff} style={{
+              width: '100%', padding: '12px', borderRadius: 12, border: 'none',
+              background: msgCopied ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+              color: msgCopied ? '#16a34a' : 'white', fontWeight: 800, fontSize: 13.5, cursor: 'pointer',
+            }}>
+              {msgCopied ? '✓ 복사됨 — 카톡에 붙여넣으세요' : '카톡에 보낼 안내 문구 복사'}
+            </button>
           </div>
         )}
 
@@ -337,13 +331,13 @@ export default function AdminAgenciesPage() {
                       }}>
                       {a.is_verified ? '인증해제' : '인증'}
                     </button>
-                    <button onClick={() => createInvite(a.id, a.name)}
-                      title="이 기획사의 새 초대 링크를 만듭니다"
+                    <button onClick={() => createAgencyAccount(a.id, a.name)}
+                      title="담당자 이메일로 기획사 계정을 만듭니다"
                       style={{
                         fontSize: 12, padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(255,111,60,0.35)',
                         background: 'rgba(255,111,60,0.08)', color: '#D84A1E', fontWeight: 700, cursor: 'pointer',
                       }}>
-                      초대
+                      계정 만들기
                     </button>
                     <button onClick={() => startEdit(a)}
                       style={{

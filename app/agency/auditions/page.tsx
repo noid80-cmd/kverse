@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import AuditionSchedule from '@/components/AuditionSchedule'
+import AgencyWelcome from '@/components/AgencyWelcome'
 import Link from 'next/link'
 import { Plus, Megaphone, Users, Calendar, Trash2 } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
@@ -260,31 +261,7 @@ export default function AgencyAuditionsPage() {
           </button>
         </div>
 
-        {welcome && (
-          <div style={{
-            background: 'rgba(255,111,60,0.08)', border: '1px solid rgba(255,111,60,0.25)',
-            borderRadius: 16, padding: '16px 18px', marginBottom: 16,
-          }}>
-            <div style={{ fontSize: 14.5, fontWeight: 800, color: '#241C15', marginBottom: 6 }}>
-              시작 준비가 끝났어요
-            </div>
-            <div style={{ fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6, marginBottom: 12 }}>
-              지금은 초대 링크로 들어오신 상태라 비밀번호가 없어요.
-              한 번만 정해두시면 다음부터 이메일로 바로 로그인하실 수 있어요.
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <a href="/agency/settings" style={{
-                flex: 2, textAlign: 'center', padding: '11px', borderRadius: 12,
-                background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
-                fontSize: 13.5, fontWeight: 700, textDecoration: 'none',
-              }}>비밀번호 설정하기</a>
-              <button onClick={() => setWelcome(false)} style={{
-                flex: 1, padding: '11px', borderRadius: 12, border: '1px solid rgba(36,28,21,0.12)',
-                background: '#FFFFFF', color: '#8A7F6E', fontSize: 13.5, fontWeight: 700, cursor: 'pointer',
-              }}>나중에</button>
-            </div>
-          </div>
-        )}
+        {welcome && <AgencyWelcome onDismiss={() => setWelcome(false)} />}
 
         <div style={{ marginBottom: 20 }}>
           <AuditionSchedule />
