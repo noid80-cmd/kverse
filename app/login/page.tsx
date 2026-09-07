@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { resolveAfterAuth } from '@/lib/intent'
 import { createClient } from '@/lib/supabase/client'
@@ -40,13 +40,22 @@ export default function LoginPage() {
     } catch { /* non-critical */ }
   }, [])
 
+  const emailRef = useRef<HTMLInputElement>(null)
+  const [needEmail, setNeedEmail] = useState(false)
   const [otpSent, setOtpSent] = useState(false)
   const [otpCode, setOtpCode] = useState('')
   const [otpBusy, setOtpBusy] = useState(false)
   const [otpError, setOtpError] = useState('')
 
   async function sendOtp() {
-    if (!email.trim()) { setError(tx.loginError); return }
+    // 이메일이 비었을 때 "이메일 또는 비밀번호가 올바르지 않아요"를 띄우면
+    // 비밀번호 얘기를 하고 있어서 엉뚱하다. 지금 필요한 건 이메일 하나다.
+    if (!email.trim()) {
+      setNeedEmail(true)
+      emailRef.current?.focus()
+      return
+    }
+    setNeedEmail(false)
     setOtpBusy(true); setOtpError(''); setError('')
     // shouldCreateUser: false — 아무 이메일이나 넣어서 계정이 새로 생기면 안 된다.
     const { error: e } = await createClient().auth.signInWithOtp({
@@ -372,7 +381,7 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            <input ref={emailRef} type="email" value={email} onChange={e => { setEmail(e.target.value); setNeedEmail(false) }}
               placeholder={tx.emailPlaceholder} required className="kpick-input"
               style={{
                 width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)',
@@ -406,12 +415,18 @@ export default function LoginPage() {
               누르면 사파리가 열려서 앱 안으로 세션이 들어오지 않는다.
               코드는 앱에 직접 입력하니 브라우저를 아예 안 거친다. */}
           {!otpSent ? (
-            <p style={{ textAlign: 'center', marginTop: 14 }}>
+            <div style={{ textAlign: 'center', marginTop: 14 }}>
               <button type="button" onClick={sendOtp} disabled={otpBusy}
                 style={{ background: 'none', border: 'none', fontSize: 13, color: '#D84A1E', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
                 {otpBusy ? '보내는 중...' : tx.forgotPassword}
               </button>
-            </p>
+              {needEmail && (
+                <div style={{ fontSize: 12.5, color: '#8A4B2E', marginTop: 8, lineHeight: 1.6 }}>
+                  위에 이메일을 먼저 입력해주세요.<br />
+                  그 주소로 6자리 코드를 보내드려요.
+                </div>
+              )}
+            </div>
           ) : (
             <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 14, background: 'rgba(255,111,60,0.07)', border: '1px solid rgba(255,111,60,0.22)' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#8A4B2E', marginBottom: 10 }}>{tx.otpSentTo}</div>
