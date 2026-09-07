@@ -2,6 +2,20 @@
 // 날짜가 바뀌면 여기만 고치면 된다.
 export const AUDITION_LAUNCH = '2026-10-01'
 
+// 첫 회차만 길다 — 10/1 목요일에 열어 10/11 일요일 밤에 닫는다.
+// 그 뒤로는 매주 월요일 저녁 6시에 열려 그 주 일요일 밤 11시 59분에 닫는다.
+// 회차를 가리키는 값은 마감일 하나뿐이라, 오픈 시각은 마감일에서 되짚어 구한다.
+export const FIRST_DEADLINE = '2026-10-11'
+export const OPEN_HOUR_KST = 18
+
+/** 그 회차가 열리는 시각. 첫 회차만 예외다. */
+export function roundOpensAt(deadline: string): Date {
+  if (deadline === FIRST_DEADLINE) return new Date(`${AUDITION_LAUNCH}T00:00:00+09:00`)
+  const close = new Date(`${deadline}T00:00:00+09:00`)
+  const monday = new Date(close.getTime() - 6 * 86400_000)
+  return new Date(monday.getTime() + OPEN_HOUR_KST * 3600_000)
+}
+
 // D-day는 시분초가 아니라 "날짜 차이"로 세야 한다. 한국 기준 자정을 기준선으로
 // 삼는다 — 해외 사용자가 봐도 공고가 열리는 시점은 한국 시간이라 그게 맞다.
 function kstDayStart(ms: number): number {
