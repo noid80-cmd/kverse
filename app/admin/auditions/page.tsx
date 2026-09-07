@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
 import { Trash2, Plus, Calendar, Users, X, Pencil, Archive, RotateCcw } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
-import { roundOpensAt } from '@/lib/launch'
+import { roundOpensAt, roundDeadline, roundNoOf, currentRoundNo } from '@/lib/launch'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -54,6 +54,7 @@ function AuditionForm({
   saving: boolean
   saveLabel: string
 }) {
+  const [customDate, setCustomDate] = useState(false)
   const disabled = saving || !form.title.trim() || !form.deadline || !form.agencyId
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -102,9 +103,36 @@ function AuditionForm({
       </div>
       {/* 온라인 전용 플랫폼이라 진행방식 선택을 두지 않는다. 새 공고는 항상 'online'. */}
       <div>
-        <label style={{ fontSize: 12, color: '#ef4444', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
-        <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
-          style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
+        <label style={{ fontSize: 12, color: '#ef4444', marginBottom: 4, display: 'block', fontWeight: 700 }}>회차 *</label>
+        {/* 날짜를 직접 받지 않고 회차를 고르게 한다. 시작일을 입력받으면 1회차가
+            예외라 어긋나고(10/1 시작인데 마감은 그 주 일요일이 아니라 10/11),
+            마감일만 받으면 시작일이 안 보여서 거꾸로 느껴진다. 회차를 고르면
+            둘 다 규칙에서 나오고 화면에 같이 보인다. */}
+        <select
+          value={customDate ? 'custom' : (roundNoOf(form.deadline) ?? '')}
+          onChange={e => {
+            if (e.target.value === 'custom') { setCustomDate(true); return }
+            setCustomDate(false)
+            setForm(f => ({ ...f, deadline: roundDeadline(Number(e.target.value)) }))
+          }}
+          style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }}>
+          <option value="">회차를 고르세요</option>
+          {Array.from({ length: 9 }, (_, i) => currentRoundNo() + i).map(n => {
+            const dl = roundDeadline(n)
+            const op = roundOpensAt(dl)
+            const fmt = (d: Date) => d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short' })
+            return (
+              <option key={n} value={n}>
+                {n}회차 · {fmt(op)} 18시 ~ {fmt(new Date(`${dl}T23:59:59+09:00`))} 밤
+              </option>
+            )
+          })}
+          <option value="custom">직접 입력 (로테이션 밖 특별 공고)</option>
+        </select>
+        {customDate && (
+          <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
+            style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
+        )}
         {/* 시작일은 입력하지 않는다 — 마감일에서 규칙으로 나온다(그 주 월요일
             저녁 6시, 1회차만 10/1). 다만 보이지 않으면 불안하고, 무엇보다
             "지금 바로 열리는가"는 전체 알림이 나가느냐는 뜻이라 미리 알아야 한다. */}

@@ -42,3 +42,28 @@ export function launchDateLabel(lang: string): string {
     return AUDITION_LAUNCH
   }
 }
+
+const DAY = 86400_000
+
+/** n회차의 마감일(YYYY-MM-DD). 1회차가 FIRST_DEADLINE이고 이후 매주. */
+export function roundDeadline(n: number): string {
+  const first = new Date(`${FIRST_DEADLINE}T00:00:00+09:00`).getTime()
+  return new Date(first + (n - 1) * 7 * DAY + 9 * 3600_000).toISOString().slice(0, 10)
+}
+
+/** 지금 진행 중이거나 다음에 열릴 회차 번호 */
+export function currentRoundNo(now: number = Date.now()): number {
+  const first = new Date(`${FIRST_DEADLINE}T23:59:59+09:00`).getTime()
+  if (now <= first) return 1
+  return Math.floor((now - first) / (7 * DAY)) + 2
+}
+
+/** 마감일이 몇 회차인지. 규칙에 안 맞는 날짜면 null(특별 공고). */
+export function roundNoOf(deadline: string): number | null {
+  if (!deadline) return null
+  const first = new Date(`${FIRST_DEADLINE}T00:00:00+09:00`).getTime()
+  const t = new Date(`${deadline}T00:00:00+09:00`).getTime()
+  const diff = t - first
+  if (diff < 0 || diff % (7 * DAY) !== 0) return null
+  return diff / (7 * DAY) + 1
+}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { CalendarDays } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { FIRST_DEADLINE, daysUntilLaunch, roundOpensAt } from '@/lib/launch'
+import { daysUntilLaunch, roundOpensAt, roundDeadline, currentRoundNo } from '@/lib/launch'
 
 // 오디션은 매주 한 곳씩 순서대로 열린다 — 월요일 저녁 6시에 열려 그 주
 // 일요일 밤 11시 59분에 닫는다(1회차만 10/1 목요일에 열어 10/11에 닫는다).
@@ -23,23 +23,10 @@ const ROUNDS_SHOWN = 5
 type Round = { deadline: string; title: string; status: string; agencyName: string | null; logo: string | null }
 
 const KST = 9 * 3600_000
-const DAY = 86400_000
-
-function deadlineAt(n: number): string {
-  const first = new Date(`${FIRST_DEADLINE}T00:00:00+09:00`).getTime()
-  return new Date(first + (n - 1) * 7 * DAY + KST).toISOString().slice(0, 10)
-}
 
 function md(t: number): string {
   const d = new Date(t + KST)
   return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`
-}
-
-/** 지금 진행 중이거나 다음에 열릴 회차 번호 */
-function currentRoundNo(): number {
-  const first = new Date(`${FIRST_DEADLINE}T23:59:59+09:00`).getTime()
-  if (Date.now() <= first) return 1
-  return Math.floor((Date.now() - first) / (7 * DAY)) + 2
 }
 
 export default function AuditionSchedule({ compact = false }: { compact?: boolean }) {
@@ -55,8 +42,8 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
     supabase.from('auditions')
       .select('deadline, title, status, agency:agencies(name, logo_url)')
       .not('deadline', 'is', null)
-      .gte('deadline', deadlineAt(numbers[0]))
-      .lte('deadline', deadlineAt(numbers[numbers.length - 1]))
+      .gte('deadline', roundDeadline(numbers[0]))
+      .lte('deadline', roundDeadline(numbers[numbers.length - 1]))
       // 확정된 회차만 내보낸다. 신청(requested)은 조율이 깨지면 없던 일이 되고,
       // 멈춰둔 것(paused)은 열릴지 아직 모른다.
       .in('status', ['scheduled', 'active', 'closed'])
@@ -107,7 +94,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
 
       <div style={{ padding: '6px 0' }}>
         {numbers.map(no => {
-          const deadline = deadlineAt(no)
+          const deadline = roundDeadline(no)
           const opensAt = roundOpensAt(deadline).getTime()
           const closesAt = new Date(`${deadline}T23:59:59+09:00`).getTime()
           const round = rounds.find(r => r.deadline === deadline)
