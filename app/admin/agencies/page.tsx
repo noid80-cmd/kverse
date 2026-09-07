@@ -102,21 +102,36 @@ export default function AdminAgenciesPage() {
   // 있으니 계정은 우리가 만들고, 담당자에게 남는 말은 두 줄뿐이다 —
   // "스토어에서 Krookie 받으세요 / 이 이메일로 로그인하세요".
   async function createAgencyAccount(agencyId: string, agencyName: string) {
-    const email = (prompt(`${agencyName} 담당자 이메일
+    const current = members[agencyId] ?? []
+    const replacing = current.length > 0
+
+    const email = (prompt(
+      replacing
+        ? `${agencyName} 담당자 변경
+
+현재 담당자: ${current.join(', ')}
+새 담당자 이메일을 넣으세요.
+기존 담당자는 접근이 끊깁니다(계정은 남습니다).`
+        : `${agencyName} 담당자 이메일
 
 명함의 이메일을 넣으세요. 이 주소로 계정을 만들고,
-담당자는 이 주소로 로그인합니다.`) ?? '').trim()
+담당자는 이 주소로 로그인합니다.`,
+      replacing ? current[0] : ''
+    ) ?? '').trim()
     if (!email) return
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('이메일 형식이 아니에요: ' + email); return }
+    if (replacing && current.includes(email)) return
+    if (replacing && !confirm(`담당자를 ${email} 로 바꿉니다.
+${current.join(', ')} 는 이 기획사에 더 이상 접근할 수 없습니다.`)) return
 
     const res = await fetch('/api/admin/agency-account', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agencyId, email }),
+      body: JSON.stringify({ agencyId, email, replace: replacing }),
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) { alert('계정 생성 실패: ' + (data.error ?? '알 수 없는 오류')); return }
     setHandoff({ agencyId, email, agencyName })
-    setMembers(prev => ({ ...prev, [agencyId]: [...(prev[agencyId] ?? []), email] }))
+    setMembers(prev => ({ ...prev, [agencyId]: [email] }))
     setAgencies(prev => prev.map(a => a.id === agencyId ? { ...a, is_verified: true } : a))
   }
 
@@ -353,7 +368,7 @@ export default function AdminAgenciesPage() {
                     </button>
                     <button onClick={() => createAgencyAccount(a.id, a.name)}
                       title={(members[a.id]?.length ?? 0) > 0
-                        ? '담당자를 한 명 더 추가합니다'
+                        ? '담당자를 다른 사람으로 바꿉니다'
                         : '담당자 이메일로 기획사 계정을 만듭니다'}
                       style={{
                         fontSize: 12, padding: '8px 12px', borderRadius: 10,
@@ -363,7 +378,7 @@ export default function AdminAgenciesPage() {
                         color: (members[a.id]?.length ?? 0) > 0 ? '#8A7F6E' : '#D84A1E',
                         fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
                       }}>
-                      {(members[a.id]?.length ?? 0) > 0 ? '담당자 추가' : '계정 만들기'}
+                      {(members[a.id]?.length ?? 0) > 0 ? '담당자 변경' : '계정 만들기'}
                     </button>
                     <button onClick={() => startEdit(a)}
                       style={{

@@ -31,7 +31,7 @@ async function verifyAdmin() {
 export async function POST(req: NextRequest) {
   if (!await verifyAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { agencyId, email } = await req.json().catch(() => ({}))
+  const { agencyId, email, replace } = await req.json().catch(() => ({}))
   if (!agencyId || !email) return NextResponse.json({ error: '필수 항목이 빠졌어요' }, { status: 400 })
 
   const admin = createClient(
@@ -70,6 +70,13 @@ export async function POST(req: NextRequest) {
   const { error: upsertError } = await admin.from('profiles')
     .upsert({ id: userId, role: 'agency', name: agency.name as string })
   if (upsertError) await admin.from('profiles').update({ role: 'agency' }).eq('id', userId)
+
+  // 담당자가 바뀌면 교체한다. 추가만 하면 회사를 떠난 사람이 계속 지망생
+  // 프로필과 연락처를 본다 — 그게 계정 하나 더 만드는 것보다 큰 문제다.
+  // 계정 자체는 지우지 않는다. 소속만 끊는다.
+  if (replace) {
+    await admin.from('agency_members').delete().eq('agency_id', agencyId).neq('profile_id', userId)
+  }
 
   // 같은 기획사에 두 번 넣지 않는다.
   const { data: member } = await admin.from('agency_members')
