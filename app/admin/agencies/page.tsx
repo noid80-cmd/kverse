@@ -127,7 +127,12 @@ export default function AdminAgenciesPage() {
 
   async function shareInvite() {
     if (!inviteLink) return
-    const text = `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (30일 유효):\n${inviteLink.url}`
+    // 홈 화면 추가를 권하는 이유는 편의가 아니라 세션이다. 아이콘으로 들어오면
+    // 늘 같은 브라우저 컨텍스트라 로그인이 유지된다.
+    const tail = '\n\n※ 열리는 화면을 홈 화면에 추가해두시면 다음부터 아이콘으로 바로 들어오실 수 있어요.'
+    const text = inviteLink.oneClick
+      ? `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크를 열고 [시작하기]만 누르시면 됩니다 (30일 유효):\n${inviteLink.url}${tail}`
+      : `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (30일 유효):\n${inviteLink.url}${tail}`
     // navigator.share를 쓰면 윈도우에서 OS 공유 시트가 열리는데, 거기 카카오톡은
     // Microsoft Store 버전만 인식한다 — 홈페이지에서 받은 카톡을 쓰는 사람에게는
     // 멀쩡한 앱을 두고 설치하라는 창이 뜬다. 어차피 카톡 대화창에 붙여넣을 거라
