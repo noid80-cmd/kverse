@@ -32,11 +32,9 @@ const inputStyle = {
 
 export default function AgencyAuditionsPage() {
   const [myAuditions, setMyAuditions] = useState<Audition[]>([])
-  const [allAuditions, setAllAuditions] = useState<Audition[]>([])
   const [loading, setLoading] = useState(true)
   const [agencyId, setAgencyId] = useState<string | null>(null)
   const [agencyName, setAgencyName] = useState('')
-  const [tab, setTab] = useState<'mine' | 'all'>('mine')
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', categories: ['vocal'] as string[], mode: 'online' as 'online' | 'offline' | 'both', deadline: '' })
   const [saving, setSaving] = useState(false)
@@ -55,17 +53,12 @@ export default function AgencyAuditionsPage() {
     const { data: ag } = await supabase.from('agencies').select('name').eq('id', am.agency_id).single()
     if (ag?.name) setAgencyName(ag.name)
 
-    const [myRes, allRes] = await Promise.all([
-      supabase.from('auditions')
-        .select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name, is_verified)')
-        .eq('agency_id', am.agency_id)
-        .order('created_at', { ascending: false }),
-      supabase.from('auditions')
-        .select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name, is_verified)')
-        .or(`agency_id.neq.${am.agency_id},agency_id.is.null`)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false }),
-    ])
+    // 다른 기획사 공고는 보여주지 않는다. 로테이션이라 순번은 우리가 잡고,
+    // 기획사가 경쟁사 공고를 들여다볼 이유가 없다.
+    const myRes = await supabase.from('auditions')
+      .select('id, title, description, category, mode, deadline, status, created_at, agency_id, agency:agencies(name, is_verified)')
+      .eq('agency_id', am.agency_id)
+      .order('created_at', { ascending: false })
 
     const addCount = async (list: Omit<Audition, 'applicant_count'>[]) =>
       Promise.all(list.map(async a => {
@@ -74,13 +67,7 @@ export default function AgencyAuditionsPage() {
         return { ...a, applicant_count: count ?? 0 }
       }))
 
-    const [mine, all] = await Promise.all([
-      addCount((myRes.data ?? []) as unknown as Omit<Audition, 'applicant_count'>[]),
-      addCount((allRes.data ?? []) as unknown as Omit<Audition, 'applicant_count'>[]),
-    ])
-
-    setMyAuditions(mine)
-    setAllAuditions(all)
+    setMyAuditions(await addCount((myRes.data ?? []) as unknown as Omit<Audition, 'applicant_count'>[]))
     setLoading(false)
   }, [])
 
@@ -268,17 +255,6 @@ export default function AgencyAuditionsPage() {
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: 0, marginBottom: 20, background: '#FFFFFF', borderRadius: 14, padding: 4 }}>
-          {([['mine', `내 공고 ${myAuditions.length > 0 ? `(${myAuditions.length})` : ''}`], ['all', `전체 공고 ${allAuditions.length > 0 ? `(${allAuditions.length})` : ''}`]] as const).map(([val, label]) => (
-            <button key={val} onClick={() => setTab(val)} style={{
-              flex: 1, padding: '9px', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700,
-              cursor: 'pointer',
-              background: tab === val ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : 'transparent',
-              color: tab === val ? 'white' : '#8A7F6E',
-            }}>{label}</button>
-          ))}
-        </div>
-
         {showCreate && (
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, marginBottom: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
             <h2 style={{ fontWeight: 800, color: '#241C15', marginBottom: 16, fontSize: 16 }}>오디션 회차 신청</h2>
@@ -340,7 +316,7 @@ export default function AgencyAuditionsPage() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>불러오는 중...</div>
-        ) : renderList(tab === 'mine' ? myAuditions : allAuditions, tab === 'mine')}
+        ) : renderList(myAuditions, true)}
       </div>
       <AgencyNav />
     </div>
