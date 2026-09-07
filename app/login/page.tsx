@@ -40,6 +40,34 @@ export default function LoginPage() {
     } catch { /* non-critical */ }
   }, [])
 
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [otpBusy, setOtpBusy] = useState(false)
+  const [otpError, setOtpError] = useState('')
+
+  async function sendOtp() {
+    if (!email.trim()) { setError(tx.loginError); return }
+    setOtpBusy(true); setOtpError(''); setError('')
+    // shouldCreateUser: false — 아무 이메일이나 넣어서 계정이 새로 생기면 안 된다.
+    const { error: e } = await createClient().auth.signInWithOtp({
+      email: email.trim(), options: { shouldCreateUser: false },
+    })
+    setOtpBusy(false)
+    if (e) { setOtpError(/not found|signups not allowed|User not found/i.test(e.message) ? tx.otpNoAccount : e.message); return }
+    setOtpSent(true)
+  }
+
+  async function verifyOtp() {
+    setOtpBusy(true); setOtpError('')
+    const { error: e } = await createClient().auth.verifyOtp({
+      email: email.trim(), token: otpCode, type: 'email',
+    })
+    setOtpBusy(false)
+    if (e) { setOtpError(tx.otpWrong); return }
+    try { localStorage.setItem('kpick-last-email', email.trim()) } catch { /* non-critical */ }
+    router.push('/auth/callback')
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError(''); setLoading(true)
@@ -369,6 +397,40 @@ export default function LoginPage() {
               {loading ? tx.loggingIn : tx.loginBtn}
             </button>
           </form>
+
+          {/* 비밀번호 없이 들어오는 길.
+              초대 링크로 시작한 기획사 계정에는 비밀번호가 없다. 세션이 끊기면
+              들어올 방법이 사라지는데, 매번 비밀번호를 재설정하게 할 수는 없다.
+              링크가 아니라 6자리 코드인 이유는 앱 때문이다 — 메일의 링크를
+              누르면 사파리가 열려서 앱 안으로 세션이 들어오지 않는다.
+              코드는 앱에 직접 입력하니 브라우저를 아예 안 거친다. */}
+          {!otpSent ? (
+            <p style={{ textAlign: 'center', marginTop: 14 }}>
+              <button type="button" onClick={sendOtp} disabled={otpBusy}
+                style={{ background: 'none', border: 'none', fontSize: 13, color: '#D84A1E', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
+                {otpBusy ? '보내는 중...' : tx.otpSwitch}
+              </button>
+            </p>
+          ) : (
+            <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 14, background: 'rgba(255,111,60,0.07)', border: '1px solid rgba(255,111,60,0.22)' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#8A4B2E', marginBottom: 10 }}>{tx.otpSentTo}</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  inputMode="numeric" autoComplete="one-time-code" placeholder={tx.otpCode}
+                  style={{ flex: 1, minWidth: 0, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 12, padding: '12px 14px', fontSize: 16, letterSpacing: 2, color: '#241C15', outline: 'none', boxSizing: 'border-box' }} />
+                <button type="button" onClick={verifyOtp} disabled={otpBusy || otpCode.length < 6}
+                  style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: otpBusy || otpCode.length < 6 ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                  {tx.otpVerify}
+                </button>
+              </div>
+              {otpError && <div style={{ fontSize: 12.5, color: '#DC2626', marginTop: 8 }}>{otpError}</div>}
+              <button type="button" onClick={sendOtp} disabled={otpBusy}
+                style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, fontSize: 12, color: '#8A7F6E', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+                코드 다시 받기
+              </button>
+            </div>
+          )}
+
           <p style={{ textAlign: 'center', marginTop: 14 }}>
             <Link href="/forgot-password" style={{ fontSize: 13, color: 'rgba(36,28,21,0.5)', fontWeight: 600, textDecoration: 'none' }}>
               {tx.forgotPassword}
