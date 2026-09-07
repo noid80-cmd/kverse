@@ -130,8 +130,13 @@ function AuditionForm({
           <option value="custom">직접 입력 (로테이션 밖 특별 공고)</option>
         </select>
         {customDate && (
-          <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
-            style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
+          <>
+            <div style={{ fontSize: 11.5, color: '#8A7F6E', fontWeight: 700, marginTop: 2, marginBottom: -2 }}>
+              마감일 · 오픈은 그 주 월요일 저녁 6시입니다
+            </div>
+            <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
+              style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
+          </>
         )}
         {/* 시작일은 입력하지 않는다 — 마감일에서 규칙으로 나온다(그 주 월요일
             저녁 6시, 1회차만 10/1). 다만 보이지 않으면 불안하고, 무엇보다
