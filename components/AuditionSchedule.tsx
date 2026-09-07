@@ -98,8 +98,12 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
           const opensAt = roundOpensAt(deadline).getTime()
           const closesAt = new Date(`${deadline}T23:59:59+09:00`).getTime()
           const round = rounds.find(r => r.deadline === deadline)
-          const live = now >= opensAt && now <= closesAt && round?.status !== 'closed'
-          const past = now > closesAt || round?.status === 'closed'
+          // 공고가 있으면 상태를 따른다. 시계로만 판단하면 [지금 열기]로 앞당겼을 때
+          // 목록에는 "지원하기"가 뜨는데 일정표는 "예정"이라고 말한다 — 보는 사람은
+          // 뭐가 맞는지 알 수 없다. 상태가 진실이고, 시계는 공고가 아직 없는
+          // 회차에만 쓴다.
+          const past = round ? round.status === 'closed' || now > closesAt : now > closesAt
+          const live = !past && (round ? round.status === 'active' : now >= opensAt)
 
           const initials = (round?.agencyName ?? '').slice(0, 2)
 
