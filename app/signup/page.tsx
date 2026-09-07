@@ -241,9 +241,9 @@ export default function SignupPage() {
                 background: 'rgba(216,74,30,0.07)', border: '1px solid rgba(216,74,30,0.18)',
                 fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6,
               }}>
-                Apple 가입이 끝나지 않고 이 화면으로 돌아온다면, 구글이나 이메일로 가입해주세요. 곧 해결됩니다.
+                Apple·구글 가입이 끝나지 않고 이 화면으로 돌아온다면, 아래 이메일로 진행해주세요. 곧 해결됩니다.
                 <br />
-                <span style={{ color: '#A5765A' }}>If Apple sign-up returns you here, please use Google or email instead.</span>
+                <span style={{ color: '#A5765A' }}>If Apple or Google returns you here without signing you in, please use email below.</span>
               </div>
             )}
             {!isKakao && (
