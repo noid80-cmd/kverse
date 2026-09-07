@@ -257,13 +257,14 @@ export default function AgencyAuditionsPage() {
       <div className="max-w-lg mx-auto px-4 pt-10">
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15' }}>오디션 공고</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', flexShrink: 0 }}>오디션 공고</h1>
           <button onClick={() => setShowCreate(v => !v)} style={{
             display: 'flex', alignItems: 'center', gap: 6, border: 'none', cursor: 'pointer',
             background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
-            borderRadius: 14, padding: '10px 16px', fontSize: 14, fontWeight: 700,
+            borderRadius: 14, padding: '10px 14px', fontSize: 13.5, fontWeight: 700,
+            whiteSpace: 'nowrap', flexShrink: 0,
           }}>
-            <Plus size={16} strokeWidth={2.5} /> 오디션 신청
+            <Plus size={16} strokeWidth={2.5} /> 오디션 공고 신청하기
           </button>
         </div>
 
@@ -280,7 +281,7 @@ export default function AgencyAuditionsPage() {
 
         {showCreate && (
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, marginBottom: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
-            <h2 style={{ fontWeight: 800, color: '#241C15', marginBottom: 16, fontSize: 16 }}>새 오디션 공고</h2>
+            <h2 style={{ fontWeight: 800, color: '#241C15', marginBottom: 16, fontSize: 16 }}>오디션 회차 신청</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 8, cursor: 'default' }}>
                 <span style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '2px 8px', borderRadius: 6, fontWeight: 700, flexShrink: 0 }}>기획사</span>
@@ -312,23 +313,25 @@ export default function AgencyAuditionsPage() {
               {/* Krookie는 온라인 전용 오디션 플랫폼이라 진행방식 선택을 두지 않는다.
                   mode 컬럼은 기존 공고 때문에 남겨두고 새 공고는 항상 'online'으로 만든다. */}
               <div>
-                <label style={{ fontSize: 12, color: '#DC2626', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
+                <label style={{ fontSize: 12, color: '#DC2626', marginBottom: 4, display: 'block', fontWeight: 700 }}>시작 희망일 *</label>
                 <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
                   style={{ ...inputStyle, colorScheme: 'dark', border: `1px solid ${form.deadline ? 'rgba(36,28,21,0.13)' : 'rgba(248,113,113,0.5)'}` }} />
               </div>
+              <p style={{ fontSize: 12.5, color: '#8A7F6E', lineHeight: 1.6, margin: '4px 0 0' }}>
+                오디션은 매주 한 곳씩 순서대로 열립니다. 신청해주시면 담당자가
+                연락드려 회차를 잡아드리고, 그때 공고가 열리며 지망생에게 알림이 갑니다.
+              </p>
               <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                 <button onClick={() => setShowCreate(false)} style={{
                   flex: 1, background: '#FFFFFF', border: 'none', borderRadius: 12, padding: 12,
                   fontSize: 14, fontWeight: 600, cursor: 'pointer', color: '#8A7F6E',
+                  whiteSpace: 'nowrap',
                 }}>취소</button>
-                <p style={{ fontSize: 12.5, color: '#8A7F6E', lineHeight: 1.6, margin: '0 0 12px' }}>
-                  신청하시면 담당자가 연락드려 일정을 조율합니다.
-                  조율이 끝나면 공고가 열리고, 그때 지망생에게 알림이 갑니다.
-                </p>
                 <button onClick={createAudition} disabled={saving || !form.title.trim() || !form.deadline} style={{
                   flex: 2, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
                   border: 'none', borderRadius: 12, padding: 12, fontSize: 14, fontWeight: 700,
                   cursor: 'pointer', opacity: saving || !form.title.trim() || !form.deadline ? 0.5 : 1,
+                  whiteSpace: 'nowrap',
                 }}>{saving ? '보내는 중...' : '신청 보내기'}</button>
               </div>
             </div>
