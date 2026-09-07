@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
 import { Trash2, Plus, Calendar, Users, X, Pencil, Archive, RotateCcw } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
+import { roundOpensAt } from '@/lib/launch'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -230,7 +231,7 @@ export default function AdminAuditionsPage() {
   }
 
   // 마감된 공고는 앱 목록에서 빠지지만 기록과 지원 내역은 남는다(삭제와 다름)
-  async function setStatus(id: string, status: 'active' | 'closed') {
+  async function setStatus(id: string, status: 'active' | 'closed' | 'scheduled' | 'paused') {
     const res = await fetch('/api/admin/auditions', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
@@ -265,8 +266,12 @@ export default function AdminAuditionsPage() {
   // 기획사가 올린 신청. 일정은 앱이 정하는 게 아니라 담당자가 연락해서
   // 정하므로, 여기서는 "연락할 목록"으로만 쓰인다. 조율이 끝나면 게시한다.
   const requested = auditions.filter(a => a.status === 'requested')
-  const active = auditions.filter(a => a.status !== 'requested' && !isInactive(a))
-  const expired = auditions.filter(a => a.status !== 'requested' && isInactive(a))
+  // 예약된 회차. 오픈 시각이 되면 크론이 알아서 열고 알림까지 보낸다.
+  // 열리기 전에는 여기서 멈추거나 앞당길 수 있다.
+  const upcoming = auditions.filter(a => a.status === 'scheduled' || a.status === 'paused')
+  const scheduledLike = (a: Audition) => a.status === 'requested' || a.status === 'scheduled' || a.status === 'paused'
+  const active = auditions.filter(a => !scheduledLike(a) && !isInactive(a))
+  const expired = auditions.filter(a => !scheduledLike(a) && isInactive(a))
 
   return (
     <>
@@ -404,6 +409,51 @@ export default function AdminAuditionsPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {upcoming.length > 0 && (
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#D84A1E', marginBottom: 4 }}>
+                  예약된 회차 {upcoming.length}건
+                </div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 10, lineHeight: 1.5 }}>
+                  오픈 시각이 되면 자동으로 열리고 지망생에게 알림이 갑니다. 그 전에는 멈추거나 바로 열 수 있어요.
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {upcoming.map(a => {
+                    const paused = a.status === 'paused'
+                    const opens = a.deadline ? roundOpensAt(a.deadline) : null
+                    return (
+                      <div key={a.id} style={{
+                        background: '#fff', borderRadius: 16, padding: '14px 16px',
+                        border: `1px solid ${paused ? 'rgba(36,28,21,0.15)' : 'rgba(216,74,30,0.3)'}`,
+                        opacity: paused ? 0.7 : 1,
+                      }}>
+                        <div onClick={() => { setDetail(a); setEditing(false) }} style={{ cursor: 'pointer' }}>
+                          <div style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 15 }}>{a.agency?.name ?? '관리자 공지'}</div>
+                          <div style={{ fontWeight: 600, color: '#D84A1E', fontSize: 13, marginBottom: 6 }}>{a.title}</div>
+                          <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 12 }}>
+                            {paused ? '멈춤 — 자동으로 열리지 않아요' : opens
+                              ? `${opens.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' })} 오픈 예정`
+                              : '오픈 시각 미정'}
+                            {a.deadline && ` · ~${a.deadline} 마감`}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => setStatus(a.id, paused ? 'scheduled' : 'paused')}
+                            style={{ flex: 1, padding: '10px', borderRadius: 11, border: '1px solid rgba(36,28,21,0.15)', background: '#FFFFFF', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                            {paused ? '예약 다시 켜기' : '예약 멈춤'}
+                          </button>
+                          <button onClick={() => publishAudition(a)}
+                            style={{ flex: 1, padding: '10px', borderRadius: 11, border: 'none', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                            지금 열기
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}

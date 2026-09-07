@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/close-auditions",
-      "schedule": "0 0 * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/deadline-reminders",

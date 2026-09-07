@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { roundOpensAt } from '@/lib/launch'
 
 function serviceClient() {
   return createClient(
@@ -142,6 +143,12 @@ export async function POST(request: NextRequest) {
 
   const translations = await autoTranslate(body.title, body.description ?? null)
 
+  // 회차가 열릴 시각이 아직 안 왔으면 예약으로 넣는다. 순번을 미리 등록해두고
+  // 월요일 저녁 6시에 크론이 열어준다(api/cron/close-auditions). 사람이 그 시각에
+  // 앉아서 게시 버튼을 누르고 있을 수는 없다.
+  const opensAt = body.deadline ? roundOpensAt(body.deadline).getTime() : 0
+  const scheduled = opensAt > Date.now()
+
   const { error } = await sb.from('auditions').insert({
     agency_id: body.agency_id ?? null,
     title: body.title,
@@ -149,24 +156,28 @@ export async function POST(request: NextRequest) {
     category: body.category,
     mode: body.mode,
     deadline: body.deadline,
-    status: 'active',
+    status: scheduled ? 'scheduled' : 'active',
     ...(translations ? { translations } : {}),
   })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  fetch(`${new URL(request.url).origin}/api/push`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${admin.token}` },
-    body: JSON.stringify({
-      broadcast: true,
-      title: '새 오디션 공고',
-      body: `${body.title} 오디션이 올라왔어요!`,
-      url: '/dashboard/auditions',
-    }),
-  }).catch(() => {})
+  // 알림은 실제로 열릴 때 나가야 한다. 예약분은 크론이 열면서 보낸다 —
+  // 여기서 미리 보내면 "올라왔어요"를 누르고 들어갔는데 아무것도 없다.
+  if (!scheduled) {
+    fetch(`${new URL(request.url).origin}/api/push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${admin.token}` },
+      body: JSON.stringify({
+        broadcast: true,
+        title: '새 오디션 공고',
+        body: `${body.title} 오디션이 올라왔어요!`,
+        url: '/dashboard/auditions',
+      }),
+    }).catch(() => {})
+  }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, scheduled, opensAt: scheduled ? new Date(opensAt).toISOString() : null })
 }
 
 export async function PATCH(request: NextRequest) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { roundOpensAt } from '@/lib/launch'
 
 // 마감 후 7일이 지나도록 결과가 안 들어온 회차를 자동으로 닫는다.
 //
@@ -90,6 +91,35 @@ export async function GET(req: NextRequest) {
   const cutoff = new Date(Date.now() - GRACE_DAYS * 86400_000).toISOString().slice(0, 10)
   const origin = new URL(req.url).origin
 
+  // ── 0. 오픈 시각이 된 예약 회차를 연다
+  //
+  // 매주 월요일 저녁 6시에 사람이 앉아서 게시 버튼을 누르고 있을 수는 없다.
+  // 순번을 미리 등록해두면 여기서 열고 알림까지 보낸다. 'paused'는 건드리지
+  // 않는다 — 멈춰둔 건 이유가 있어서 멈춘 것이다.
+  const { data: pending } = await admin
+    .from('auditions').select('id, title, deadline')
+    .eq('status', 'scheduled')
+    .not('deadline', 'is', null)
+
+  const toOpen = (pending ?? []).filter(a => roundOpensAt(a.deadline as string).getTime() <= Date.now())
+  if (!dry && toOpen.length > 0) {
+    await admin.from('auditions').update({ status: 'active' })
+      .in('id', toOpen.map(a => a.id as string))
+    await Promise.allSettled(toOpen.map(a =>
+      fetch(`${origin}/api/push`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
+        body: JSON.stringify({
+          broadcast: true,
+          title: '새 오디션이 열렸어요',
+          body: a.title as string,
+          url: '/dashboard/auditions',
+        }),
+      })
+    ))
+  }
+  const opened = toOpen.map(a => ({ title: a.title, deadline: a.deadline }))
+
   // ── 1. 아직 유예 안에 있는 회차: 기획사를 데려온다
   const reminders = await collectPendingReviews(today, cutoff)
   if (!dry) {
@@ -115,7 +145,7 @@ export async function GET(req: NextRequest) {
 
   const auditionIds = (overdue ?? []).map(a => a.id as string)
   if (auditionIds.length === 0) {
-    return NextResponse.json({ ok: true, dry, auditions: 0, closed: 0, reminders })
+    return NextResponse.json({ ok: true, dry, opened, auditions: 0, closed: 0, reminders })
   }
 
   const { data: stale } = await admin
@@ -129,7 +159,7 @@ export async function GET(req: NextRequest) {
   if (dry) {
     return NextResponse.json({
       ok: true, dry: true, today, cutoff,
-      reminders,
+      opened, reminders,
       auditions: auditionIds.length,
       closed: rows.length,
     })
@@ -142,7 +172,7 @@ export async function GET(req: NextRequest) {
     .in('id', auditionIds).neq('status', 'closed')
 
   if (rows.length === 0) {
-    return NextResponse.json({ ok: true, auditions: auditionIds.length, closed: 0, reminders })
+    return NextResponse.json({ ok: true, opened, auditions: auditionIds.length, closed: 0, reminders })
   }
 
   const now = new Date().toISOString()
@@ -171,6 +201,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    opened,
     auditions: auditionIds.length,
     closed: rows.length,
     notified: talentIds.length,

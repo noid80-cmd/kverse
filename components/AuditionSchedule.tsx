@@ -61,9 +61,9 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
       .not('deadline', 'is', null)
       .gte('deadline', deadlines[0])
       .lte('deadline', deadlines[deadlines.length - 1])
-      // 신청 단계(requested)는 아직 확정이 아니다. 확정 전에 이름이 뜨면
-      // 조율이 깨졌을 때 없던 일이 된다.
-      .neq('status', 'requested')
+      // 확정된 회차만 내보낸다. 신청(requested)은 조율이 깨지면 없던 일이 되고,
+      // 멈춰둔 것(paused)은 열릴지 아직 모른다.
+      .in('status', ['scheduled', 'active', 'closed'])
       .then(({ data }) => {
         setRounds((data ?? []).map(r => ({
           deadline: r.deadline as string,
