@@ -232,7 +232,19 @@ export default function AdminAuditionsPage() {
     })
     setSaving(false)
     if (!res.ok) { const e = await res.json(); alert('저장 실패: ' + e.error); return }
-    sendPush({ broadcast: true, title: '새 오디션 공고', body: `${form.title.trim()} 오디션이 올라왔어요!`, url: '/dashboard/auditions' })
+
+    // 알림은 서버가 보낸다. 여기서 또 보내면 예약으로 들어간 공고에도 알림이
+    // 나가서, 지망생은 "올라왔어요"를 누르고 들어갔는데 아무것도 없다.
+    // (실제로 그렇게 나갔다. 서버만 막고 이쪽을 못 봤다.)
+    const result = await res.json().catch(() => ({}))
+    if (result.scheduled) {
+      const at = result.opensAt
+        ? new Date(result.opensAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' })
+        : '오픈 시각'
+      alert(`예약했어요.
+${at}에 자동으로 열리고 그때 알림이 나갑니다.`)
+    }
+
     setForm(emptyForm())
     setShowCreate(false)
     load()
