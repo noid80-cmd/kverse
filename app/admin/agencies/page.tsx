@@ -142,7 +142,7 @@ export default function AdminAgenciesPage() {
       `   ${handoff.email}`,
       '',
       '   비밀번호는 없어도 됩니다. 로그인 화면에서',
-      '   [비밀번호를 잊으셨나요?]를 누르시면 이메일로 6자리 코드가 갑니다.',
+      '   [비밀번호를 잊으셨나요?]를 누르시면 이메일로 인증 코드가 갑니다.',
       '   그 코드를 넣으시면 바로 들어오실 수 있어요.',
     ].join('\n')
     await navigator.clipboard.writeText(text)
