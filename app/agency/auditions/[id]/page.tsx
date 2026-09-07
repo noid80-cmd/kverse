@@ -80,9 +80,9 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     setPassMessage(
       `안녕하세요 ${name}님! ${agencyName || '저희 기획사'}입니다.
 ` +
-      `"${audition?.title ?? '오디션'}"에 지원해 주신 영상 인상 깊게 봤습니다 😊
+      `"${audition?.title ?? '오디션'}" 1차 합격을 축하드려요 🎉
 ` +
-      `다음 단계 안내드리고 싶은데, 편하게 말씀 나눠요!`
+      `지원해 주신 영상 인상 깊게 봤습니다. 다음 단계 안내드릴게요!`
     )
   }
 
