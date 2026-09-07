@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import AuditionSchedule from '@/components/AuditionSchedule'
 import BottomNav from '@/components/layout/BottomNav'
 import AuditionCountdown from '@/components/AuditionCountdown'
 import { daysUntilLaunch } from '@/lib/launch'
@@ -302,6 +303,12 @@ export default function TalentAuditionsPage() {
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15' }}>{tx.auditions.title}</h1>
         </div>
         <p style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 20 }}>{tx.auditions.pageDesc}</p>
+      </div>
+
+      {/* 매주 한 곳씩 돌아간다는 리듬을 보여준다. 지금 열린 공고가 하나뿐이라
+          "이게 전부인가" 싶어 보이는데, 다음 주에도 온다는 걸 알아야 다시 온다. */}
+      <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 20 }}>
+        <AuditionSchedule compact />
       </div>
 
       {/* Featured audition card */}

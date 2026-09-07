@@ -57,7 +57,9 @@ function InviteContent() {
     const supabase = createClient()
     await supabase.auth.signInWithPassword({ email: data.email, password: data.password })
     setDone(true)
-    setTimeout(() => { window.location.href = '/agency/auditions' }, 1200)
+    // welcome=1 이면 첫 화면에서 비밀번호 설정을 한 번 안내한다. 원클릭 계정은
+    // 비밀번호가 없어서 세션이 끊기면 다시 들어올 방법이 없다(초대 링크는 1회용).
+    setTimeout(() => { window.location.href = '/agency/auditions?welcome=1' }, 1200)
   }
 
   async function handleSubmit(e: React.FormEvent) {

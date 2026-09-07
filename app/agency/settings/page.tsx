@@ -6,6 +6,7 @@ import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Upload, Building2, Bell, BellOff, BellRing, X } from 'lucide-react'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
+import PasswordInput from '@/components/PasswordInput'
 
 type Agency = {
   id: string
@@ -23,6 +24,22 @@ const inputStyle = {
 }
 
 export default function AgencySettingsPage() {
+  const [newPw, setNewPw] = useState('')
+  const [newPw2, setNewPw2] = useState('')
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  // 로그인 상태라 메일 왕복 없이 바로 바꿀 수 있다.
+  async function savePassword() {
+    if (newPw.length < 6 || newPw !== newPw2) return
+    setPwSaving(true); setPwMsg(null)
+    const { error } = await createClient().auth.updateUser({ password: newPw })
+    setPwSaving(false)
+    if (error) { setPwMsg({ ok: false, text: error.message }); return }
+    setNewPw(''); setNewPw2('')
+    setPwMsg({ ok: true, text: '저장했어요. 다음부터 이 비밀번호로 로그인하세요.' })
+  }
+
   const [agency, setAgency] = useState<Agency | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -226,6 +243,35 @@ export default function AgencySettingsPage() {
       </div>
 
       <div className="max-w-lg mx-auto px-4">
+        {/* 초대 링크로 시작한 계정은 비밀번호를 만든 적이 없다. 세션이 끊기면
+            다시 들어올 방법이 없고, 초대 링크는 1회용이라 재사용도 안 된다.
+            여기서 바로 정하게 한다 — 로그인 상태라 메일을 거칠 필요가 없다. */}
+        <div style={{
+          marginTop: 16, background: '#FFFFFF', borderRadius: 18, padding: '20px',
+          border: '1px solid rgba(36,28,21,0.08)',
+        }}>
+          <div style={{ fontWeight: 800, color: '#241C15', fontSize: 15, marginBottom: 6 }}>로그인 비밀번호</div>
+          <div style={{ fontSize: 12.5, color: '#8A7F6E', lineHeight: 1.6, marginBottom: 14 }}>
+            초대 링크로 시작하셨다면 비밀번호가 없습니다. 여기서 정해두시면
+            다음부터 이메일과 비밀번호로 바로 로그인할 수 있어요.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <PasswordInput value={newPw} onChange={e => setNewPw(e.target.value)}
+              placeholder="새 비밀번호 (6자 이상)" autoComplete="new-password"
+              style={{ width: '100%', background: 'rgba(36,28,21,0.04)', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 12, padding: '12px 14px', fontSize: 14, color: '#241C15', boxSizing: 'border-box' }} />
+            <PasswordInput value={newPw2} onChange={e => setNewPw2(e.target.value)}
+              placeholder="한 번 더 입력" autoComplete="new-password"
+              style={{ width: '100%', background: 'rgba(36,28,21,0.04)', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 12, padding: '12px 14px', fontSize: 14, color: '#241C15', boxSizing: 'border-box' }} />
+            {pwMsg && <div style={{ fontSize: 12.5, color: pwMsg.ok ? '#16a34a' : '#DC2626' }}>{pwMsg.text}</div>}
+            <button onClick={savePassword} disabled={pwSaving || newPw.length < 6 || newPw !== newPw2} style={{
+              width: '100%', padding: '12px', borderRadius: 12, border: 'none',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              opacity: pwSaving || newPw.length < 6 || newPw !== newPw2 ? 0.5 : 1,
+            }}>{pwSaving ? '저장 중...' : '비밀번호 저장'}</button>
+          </div>
+        </div>
+
         <div style={{ marginTop: 16, marginBottom: 100 }}>
           <button onClick={async () => {
             const supabase = createClient()
