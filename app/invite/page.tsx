@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import PasswordInput from '@/components/PasswordInput'
 
 function InviteContent() {
   const searchParams = useSearchParams()
@@ -207,8 +208,8 @@ function InviteContent() {
 
             <div>
               <label style={{ fontSize: 11, color: 'rgba(36,28,21,0.45)', display: 'block', marginBottom: 6, fontWeight: 600, letterSpacing: 0.5 }}>비밀번호</label>
-              <input
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
+              <PasswordInput
+                value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="6자 이상" required
                 style={inputStyle}
               />
@@ -216,8 +217,8 @@ function InviteContent() {
 
             <div>
               <label style={{ fontSize: 11, color: 'rgba(36,28,21,0.45)', display: 'block', marginBottom: 6, fontWeight: 600, letterSpacing: 0.5 }}>비밀번호 확인</label>
-              <input
-                type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
+              <PasswordInput
+                value={confirm} onChange={e => setConfirm(e.target.value)}
                 placeholder="비밀번호 재입력" required
                 style={inputStyle}
               />

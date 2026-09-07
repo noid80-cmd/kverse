@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { isNativeApp } from '@/lib/capacitor'
 import { hasNativeAppleSignIn, nativeAppleSignIn, isAppleCancel } from '@/lib/appleNative'
+import PasswordInput from '@/components/PasswordInput'
 import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -310,7 +311,7 @@ export default function SignupPage() {
             )}
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder={tx.auth.emailPlaceholder} required style={inputStyle} />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+            <PasswordInput value={password} onChange={e => setPassword(e.target.value)}
               placeholder={tx.auth.passwordMinPlaceholder} minLength={6} required style={inputStyle} />
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#5A4F42', cursor: 'pointer' }}>
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />

@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { AuthShell, authInputStyle, authSubmitStyle } from '@/components/AuthShell'
+import PasswordInput from '@/components/PasswordInput'
 
 type Stage = 'verifying' | 'form' | 'invalid' | 'done'
 
@@ -106,10 +107,10 @@ export default function ResetPasswordPage() {
 
       {stage === 'form' && (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+          <PasswordInput value={password} onChange={e => setPassword(e.target.value)}
             placeholder={tx.newPasswordPlaceholder} required autoFocus
             autoComplete="new-password" className="kpick-input" style={authInputStyle} />
-          <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
+          <PasswordInput value={confirm} onChange={e => setConfirm(e.target.value)}
             placeholder={tx.newPasswordConfirm} required
             autoComplete="new-password" className="kpick-input" style={authInputStyle} />
           {error && <p style={{ color: '#DC2626', fontSize: 13, textAlign: 'center', margin: 0 }}>{error}</p>}

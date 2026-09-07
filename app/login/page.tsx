@@ -9,6 +9,7 @@ import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { isNativeApp } from '@/lib/capacitor'
 import { hasNativeAppleSignIn, nativeAppleSignIn, isAppleCancel } from '@/lib/appleNative'
+import PasswordInput from '@/components/PasswordInput'
 
 export default function LoginPage() {
   // 계정 삭제 직후 /login?deleted=1 로 돌아온다. 삭제가 끝났다는 걸 명확히 알린다.
@@ -349,7 +350,7 @@ export default function LoginPage() {
                 borderRadius: 14, padding: '14px 18px', fontSize: 15, color: '#241C15',
                 outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
               }} />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+            <PasswordInput value={password} onChange={e => setPassword(e.target.value)}
               placeholder={tx.passwordPlaceholder} required className="kpick-input"
               style={{
                 width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)',
