@@ -85,6 +85,21 @@ export default function AdminAgenciesPage() {
     }
   }
 
+  // 초대 발급을 한 곳으로 모은다. 예전엔 "기획사 새로 등록"에만 붙어 있어서,
+  // 이미 등록된 기획사에는 링크를 다시 줄 방법이 아예 없었다 — 링크가 만료됐거나
+  // 담당자가 바뀌었거나 한 회사에서 두 명이 쓰려는 순간 막혔다.
+  async function createInvite(agencyId: string, agencyName: string) {
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('')
+    // 만료를 명시적으로 넣는다. 기본값(7일)은 영업 주기에 비해 짧다 —
+    // 미팅에서 링크를 주고 담당자가 결재를 거쳐 여는 데 그보다 오래 걸린다.
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    const { error } = await supabase.from('agency_invites').insert({
+      agency_id: agencyId, token, expires_at: expiresAt,
+    })
+    if (error) { alert('초대 링크 생성 실패: ' + error.message); return }
+    setInviteLink({ url: `${window.location.origin}/invite?token=${token}`, agencyName })
+  }
+
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
@@ -94,18 +109,14 @@ export default function AdminAgenciesPage() {
     }).select().single()
     if (data) {
       setAgencies(prev => [data as Agency, ...prev])
-      // 초대 토큰 생성
-      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2,'0')).join('')
-      await supabase.from('agency_invites').insert({ agency_id: data.id, token })
-      const url = `${window.location.origin}/invite?token=${token}`
-      setInviteLink({ url, agencyName: data.name })
+      await createInvite(data.id, data.name)
     }
     setName(''); setShowForm(false); setSaving(false)
   }
 
   async function shareInvite() {
     if (!inviteLink) return
-    const text = `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (7일 유효):\n${inviteLink.url}`
+    const text = `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (30일 유효):\n${inviteLink.url}`
     if (navigator.share) {
       await navigator.share({ title: `Krookie — ${inviteLink.agencyName} 초대`, text, url: inviteLink.url })
     } else {
@@ -230,7 +241,7 @@ export default function AdminAgenciesPage() {
               </button>
             </div>
             <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.26)', textAlign: 'center', marginTop: 10 }}>
-              7일 후 만료 · 1회만 사용 가능
+              30일 후 만료 · 1회만 사용 가능
             </div>
           </div>
         )}
@@ -309,6 +320,14 @@ export default function AdminAgenciesPage() {
                         boxShadow: a.is_verified ? 'none' : '0 2px 8px rgba(34,197,94,0.3)',
                       }}>
                       {a.is_verified ? '인증해제' : '인증'}
+                    </button>
+                    <button onClick={() => createInvite(a.id, a.name)}
+                      title="이 기획사의 새 초대 링크를 만듭니다"
+                      style={{
+                        fontSize: 12, padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(255,111,60,0.35)',
+                        background: 'rgba(255,111,60,0.08)', color: '#D84A1E', fontWeight: 700, cursor: 'pointer',
+                      }}>
+                      초대
                     </button>
                     <button onClick={() => startEdit(a)}
                       style={{

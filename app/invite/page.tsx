@@ -9,6 +9,7 @@ function InviteContent() {
   const token = searchParams.get('token')
 
   const [agency, setAgency] = useState<{ id: string; name: string } | null>(null)
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [pageError, setPageError] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,6 +27,7 @@ function InviteContent() {
         if (data.alreadyUsed) { window.location.href = '/login'; return }
         if (data.error) { setPageError(data.error); return }
         setAgency(data.agency)
+        setExpiresAt(data.expiresAt ?? null)
       })
       .catch(() => setPageError('네트워크 오류가 발생했어요'))
       .finally(() => setLoading(false))
@@ -170,7 +172,9 @@ function InviteContent() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 20, fontSize: 12, color: 'rgba(36,28,21,0.26)' }}>
-          이 초대 링크는 7일간 유효해요
+          {expiresAt
+            ? `이 초대 링크는 ${new Date(expiresAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}까지 유효해요`
+            : '이 초대 링크는 한 번만 사용할 수 있어요'}
         </div>
       </div>
 

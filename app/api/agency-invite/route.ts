@@ -19,9 +19,11 @@ export async function GET(req: NextRequest) {
 
   if (!data) return NextResponse.json({ error: '유효하지 않은 초대예요' }, { status: 404 })
   if (data.used_at) return NextResponse.json({ error: '이미 사용된 초대예요', alreadyUsed: true }, { status: 400 })
-  if (new Date(data.expires_at) < new Date()) return NextResponse.json({ error: '만료된 초대예요 (7일 경과)' }, { status: 400 })
+  // 유효기간은 발급할 때 정한다. 여기서 "7일"처럼 못박아두면 기간을 바꿨을 때
+  // 화면만 옛날 이야기를 하게 된다.
+  if (new Date(data.expires_at) < new Date()) return NextResponse.json({ error: '만료된 초대예요' }, { status: 400 })
 
-  return NextResponse.json({ agency: (data as any).agencies })
+  return NextResponse.json({ agency: (data as any).agencies, expiresAt: data.expires_at })
 }
 
 export async function POST(req: NextRequest) {
