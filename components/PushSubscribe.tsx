@@ -54,7 +54,15 @@ export async function doSubscribe() {
 
 // 아이폰 사파리 탭에는 알림을 켤 방법 자체가 없다. 같은 배너를 쓰되
 // 내용을 바꿔서 '앱 설치' 또는 '홈 화면 추가'로 안내한다.
-type Mode = 'permission' | 'ios'
+type Mode = 'permission' | 'ios' | 'app'
+
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=app.kpick.twa'
+
+/** 안드로이드면 Play, 아니면 App Store */
+function storeUrl(): string {
+  if (typeof navigator === 'undefined') return APP_STORE_URL
+  return /Android/i.test(navigator.userAgent) ? PLAY_STORE_URL : APP_STORE_URL
+}
 
 const APP_STORE_URL = 'https://apps.apple.com/kr/app/id6791017827'
 
@@ -96,6 +104,17 @@ export default function PushSubscribe() {
     if (Notification.permission !== 'default') {
       // 이미 결정된 경우 — granted면 조용히 재등록
       if (Notification.permission === 'granted') doSubscribe().catch(() => {})
+
+      // 거부한 사람에게는 웹으로 알림 갈 길이 영영 없다. 브라우저 설정을
+      // 찾아 들어가 바꾸라고 하는 건 아무도 안 한다. 그 사람에게 남은 길은
+      // 앱뿐이라 여기서만 앱을 권한다.
+      //
+      // 아직 결정 안 한 사람에게는 권하지 않는다 — 알림 허용은 한 번 누르면
+      // 끝이고 앱 설치는 몇 단계다. 되는 길을 두고 어려운 길로 보낼 이유가 없다.
+      if (Notification.permission === 'denied' && !recentlyDismissed) {
+        setMode('app')
+        setTimeout(() => setShow(true), 1500)
+      }
       return
     }
     if (recentlyDismissed) return
@@ -167,7 +186,9 @@ export default function PushSubscribe() {
           <div>
             <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>기획사 알림 받기</div>
             <div style={{ fontSize: 13, color: '#8A7F6E' }}>
-              {mode === 'ios' ? '한 단계만 더 하면 받을 수 있어요' : '놓치면 아쉬운 연락이 올 수 있어요'}
+              {mode === 'ios' ? '한 단계만 더 하면 받을 수 있어요'
+                : mode === 'app' ? '앱으로 받으면 놓치지 않아요'
+                : '놓치면 아쉬운 연락이 올 수 있어요'}
             </div>
           </div>
         </div>
@@ -185,7 +206,18 @@ export default function PushSubscribe() {
           ))}
         </div>
 
-        {mode === 'ios' ? (
+        {mode === 'app' ? (
+          <a href={storeUrl()} target="_blank" rel="noopener noreferrer" onClick={handleDismiss} style={{
+            display: 'block', width: '100%', padding: '15px', boxSizing: 'border-box',
+            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
+            border: 'none', borderRadius: 16, textAlign: 'center', textDecoration: 'none',
+            color: 'white', fontSize: 16, fontWeight: 700,
+            cursor: 'pointer', marginBottom: 10,
+            boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
+          }}>
+            앱 받기
+          </a>
+        ) : mode === 'ios' ? (
           <>
             <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={handleDismiss} style={{
               display: 'block', width: '100%', padding: '15px', boxSizing: 'border-box',
