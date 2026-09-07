@@ -65,7 +65,8 @@ export default function LoginPage() {
     setOtpBusy(false)
     if (e) { setOtpError(tx.otpWrong); return }
     try { localStorage.setItem('kpick-last-email', email.trim()) } catch { /* non-critical */ }
-    router.push('/auth/callback')
+    // 들어온 김에 비밀번호를 만들어둔다. 그래야 다음부터 그냥 로그인한다.
+    router.push('/account/password')
   }
 
   async function handleLogin(e: React.FormEvent) {
@@ -408,7 +409,7 @@ export default function LoginPage() {
             <p style={{ textAlign: 'center', marginTop: 14 }}>
               <button type="button" onClick={sendOtp} disabled={otpBusy}
                 style={{ background: 'none', border: 'none', fontSize: 13, color: '#D84A1E', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
-                {otpBusy ? '보내는 중...' : tx.otpSwitch}
+                {otpBusy ? '보내는 중...' : tx.forgotPassword}
               </button>
             </p>
           ) : (
@@ -431,11 +432,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          <p style={{ textAlign: 'center', marginTop: 14 }}>
-            <Link href="/forgot-password" style={{ fontSize: 13, color: 'rgba(36,28,21,0.5)', fontWeight: 600, textDecoration: 'none' }}>
-              {tx.forgotPassword}
-            </Link>
-          </p>
           <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(36,28,21,0.45)', marginTop: 14 }}>
             로그인 시 <a href="/terms" target="_blank" style={{ color: 'rgba(36,28,21,0.6)', textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</a>에 동의하는 것으로 간주됩니다.
           </p>
