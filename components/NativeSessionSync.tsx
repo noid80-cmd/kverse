@@ -13,7 +13,7 @@ const REFRESH_KEY = 'kpick-native-refresh-token'
 // 되돌리고, 단순 백그라운드 복귀는 마지막 화면 그대로 유지한다.
 function sectionHome(pathname: string): string | null {
   if (pathname.startsWith('/admin/') && pathname !== '/admin') return '/admin'
-  if (pathname.startsWith('/agency/') && pathname !== '/agency/discover') return '/agency/discover'
+  if (pathname.startsWith('/agency/') && pathname !== '/agency/auditions') return '/agency/auditions'
   if (pathname.startsWith('/dashboard/') && pathname !== '/dashboard') return '/dashboard'
   return null
 }

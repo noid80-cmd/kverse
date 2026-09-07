@@ -77,7 +77,7 @@ export default function DashboardPage() {
 
       const { data: roleData } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       if (roleData?.role === 'admin') setIsAdmin(true)
-      if (roleData?.role === 'agency') { window.location.replace('/agency/discover'); return }
+      if (roleData?.role === 'agency') { window.location.replace('/agency/auditions'); return }
 
       const [{ data: prof }, { data: vids, count: vCount }, { count: bCount }, { data: convs, count: cCount }, { data: auds }, { count: agCount }, { data: apps }] = await Promise.all([
         supabase.from('profiles').select('name, avatar_url, bio').eq('id', user.id).single(),

@@ -57,7 +57,7 @@ function InviteContent() {
     const supabase = createClient()
     await supabase.auth.signInWithPassword({ email: data.email, password: data.password })
     setDone(true)
-    setTimeout(() => { window.location.href = '/agency/discover' }, 1200)
+    setTimeout(() => { window.location.href = '/agency/auditions' }, 1200)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -78,7 +78,7 @@ function InviteContent() {
     const supabase = createClient()
     await supabase.auth.signInWithPassword({ email, password })
     setDone(true)
-    setTimeout(() => { window.location.href = '/agency/discover' }, 1800)
+    setTimeout(() => { window.location.href = '/agency/auditions' }, 1800)
   }
 
   const inputStyle: React.CSSProperties = {

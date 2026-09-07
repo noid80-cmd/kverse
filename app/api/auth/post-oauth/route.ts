@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
     }
 
     const finalDest = role === 'admin' ? '/admin'
-      : isNewUser && role === 'agency' ? '/onboarding?next=/agency/discover'
-      : role === 'agency' ? '/agency/discover'
+      : isNewUser && role === 'agency' ? '/onboarding?next=/agency/auditions'
+      : role === 'agency' ? '/agency/auditions'
       : isNewUser ? '/onboarding'
       : '/dashboard'
 

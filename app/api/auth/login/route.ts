@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     const role = profile?.role ?? 'talent'
-    const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/discover' : '/dashboard'
+    const href = role === 'admin' ? '/admin/users' : role === 'agency' ? '/agency/auditions' : '/dashboard'
 
     return NextResponse.json({
       href,

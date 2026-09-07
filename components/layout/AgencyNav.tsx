@@ -7,8 +7,10 @@ import { createClient } from '@/lib/supabase/client'
 import { Compass, Bookmark, MessageCircle, Megaphone, Settings } from 'lucide-react'
 
 const agencyNav = [
-  { href: '/agency/discover', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
+  // 오디션이 먼저다. 이 앱은 오디션 플랫폼이고, 기획사가 여기 들어오는 이유도
+  // 자기 공고에 누가 지원했는지 보려는 것이다. 커버 영상 탐색은 그다음이다.
   { href: '/agency/auditions', label: '오디션', icon: <Megaphone size={22} strokeWidth={1.8} /> },
+  { href: '/agency/discover', label: '탐색', icon: <Compass size={22} strokeWidth={1.8} /> },
   { href: '/agency/talents', label: '관심', icon: <Bookmark size={22} strokeWidth={1.8} /> },
   { href: '/agency/contacts', label: '채팅', icon: <MessageCircle size={22} strokeWidth={1.8} /> },
   { href: '/agency/settings', label: '설정', icon: <Settings size={22} strokeWidth={1.8} /> },
