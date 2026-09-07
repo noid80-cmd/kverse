@@ -26,6 +26,7 @@ export default function AdminAgenciesPage() {
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
   const [inviteLink, setInviteLink] = useState<{ url: string; agencyName: string; oneClick?: boolean } | null>(null)
   const [copied, setCopied] = useState(false)
+  const [msgCopied, setMsgCopied] = useState(false)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [logoTarget, setLogoTarget] = useState<string | null>(null)
   const [logoUploading, setLogoUploading] = useState<string | null>(null)
@@ -127,13 +128,13 @@ export default function AdminAgenciesPage() {
   async function shareInvite() {
     if (!inviteLink) return
     const text = `안녕하세요! Krookie에 ${inviteLink.agencyName} 기획사 계정을 만들어드렸어요.\n아래 링크로 가입해주세요 (30일 유효):\n${inviteLink.url}`
-    if (navigator.share) {
-      await navigator.share({ title: `Krookie — ${inviteLink.agencyName} 초대`, text, url: inviteLink.url })
-    } else {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+    // navigator.share를 쓰면 윈도우에서 OS 공유 시트가 열리는데, 거기 카카오톡은
+    // Microsoft Store 버전만 인식한다 — 홈페이지에서 받은 카톡을 쓰는 사람에게는
+    // 멀쩡한 앱을 두고 설치하라는 창이 뜬다. 어차피 카톡 대화창에 붙여넣을 거라
+    // 문구째로 복사하는 게 빠르고 예측 가능하다.
+    await navigator.clipboard.writeText(text)
+    setMsgCopied(true)
+    setTimeout(() => setMsgCopied(false), 2000)
   }
 
   // 기획사는 소개글을 안 쓴다. 자기가 원하는 걸 얻는 데 필요 없는 일이라
@@ -247,7 +248,7 @@ export default function AdminAgenciesPage() {
                   background: 'linear-gradient(135deg, #fee500, #ffd900)',
                   color: '#1a1a00', fontWeight: 800, fontSize: 13, cursor: 'pointer',
                 }}>
-                카카오톡으로 보내기
+                {msgCopied ? '✓ 복사됨 — 카톡에 붙여넣으세요' : '안내 문구까지 복사'}
               </button>
             </div>
             <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.26)', textAlign: 'center', marginTop: 10 }}>
