@@ -44,7 +44,7 @@ type FormState = {
 }
 
 function AuditionForm({
-  form, setForm, agencies, onCancel, onSave, saving, saveLabel,
+  form, setForm, agencies, onCancel, onSave, saving, saveLabel, takenRounds,
 }: {
   form: FormState
   setForm: (fn: (f: FormState) => FormState) => void
@@ -53,8 +53,9 @@ function AuditionForm({
   onSave: () => void
   saving: boolean
   saveLabel: string
+  // 이미 배정된 회차 (마감일 → 기획사명). 회차당 한 곳이라 고를 수 없게 막는다.
+  takenRounds: Map<string, string>
 }) {
-  const [customDate, setCustomDate] = useState(false)
   const disabled = saving || !form.title.trim() || !form.deadline || !form.agencyId
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -108,36 +109,28 @@ function AuditionForm({
             예외라 어긋나고(10/1 시작인데 마감은 그 주 일요일이 아니라 10/11),
             마감일만 받으면 시작일이 안 보여서 거꾸로 느껴진다. 회차를 고르면
             둘 다 규칙에서 나오고 화면에 같이 보인다. */}
+        {/* 회차당 한 곳이고 새치기도 없다.
+            "이번 주는 당신 회사만"이 로테이션을 파는 논리인데, 한 주에 둘을
+            얹으면 그 약속을 우리가 깨는 것이고 제일 먼저 아는 사람이 그 주
+            기획사다. 그래서 이미 배정된 회차는 아예 고를 수 없게 막는다. */}
         <select
-          value={customDate ? 'custom' : (roundNoOf(form.deadline) ?? '')}
-          onChange={e => {
-            if (e.target.value === 'custom') { setCustomDate(true); return }
-            setCustomDate(false)
-            setForm(f => ({ ...f, deadline: roundDeadline(Number(e.target.value)) }))
-          }}
+          value={roundNoOf(form.deadline) ?? ''}
+          onChange={e => setForm(f => ({ ...f, deadline: roundDeadline(Number(e.target.value)) }))}
           style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }}>
           <option value="">회차를 고르세요</option>
           {Array.from({ length: 9 }, (_, i) => currentRoundNo() + i).map(n => {
             const dl = roundDeadline(n)
             const op = roundOpensAt(dl)
             const fmt = (d: Date) => d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short' })
+            const taken = takenRounds.get(dl)
             return (
-              <option key={n} value={n}>
+              <option key={n} value={n} disabled={!!taken}>
                 {n}회차 · {fmt(op)} 18시 ~ {fmt(new Date(`${dl}T23:59:59+09:00`))} 밤
+                {taken ? ` — ${taken} 배정됨` : ''}
               </option>
             )
           })}
-          <option value="custom">직접 입력 (로테이션 밖 특별 공고)</option>
         </select>
-        {customDate && (
-          <>
-            <div style={{ fontSize: 11.5, color: '#8A7F6E', fontWeight: 700, marginTop: 2, marginBottom: -2 }}>
-              마감일 · 오픈은 그 주 월요일 저녁 6시입니다
-            </div>
-            <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
-              style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
-          </>
-        )}
         {/* 시작일은 입력하지 않는다 — 마감일에서 규칙으로 나온다(그 주 월요일
             저녁 6시, 1회차만 10/1). 다만 보이지 않으면 불안하고, 무엇보다
             "지금 바로 열리는가"는 전체 알림이 나가느냐는 뜻이라 미리 알아야 한다. */}
@@ -315,6 +308,13 @@ export default function AdminAuditionsPage() {
   const isInactive = (a: Audition) => a.status === 'closed' || isExpired(a.deadline)
   // 기획사가 올린 신청. 일정은 앱이 정하는 게 아니라 담당자가 연락해서
   // 정하므로, 여기서는 "연락할 목록"으로만 쓰인다. 조율이 끝나면 게시한다.
+  // 이미 회차가 잡힌 마감일 → 기획사명. 신청(requested)은 아직 배정이 아니다.
+  const takenRounds = new Map<string, string>()
+  for (const a of auditions) {
+    if (a.status === 'requested' || !a.deadline) continue
+    takenRounds.set(a.deadline, a.agency?.name ?? a.title)
+  }
+
   const requested = auditions.filter(a => a.status === 'requested')
   // 예약된 회차. 오픈 시각이 되면 크론이 알아서 열고 알림까지 보낸다.
   // 열리기 전에는 여기서 멈추거나 앞당길 수 있다.
@@ -343,7 +343,7 @@ export default function AdminAuditionsPage() {
         {showCreate && (
           <div style={{ background: '#fff', borderRadius: 20, padding: 20, marginBottom: 20, border: '1px solid #e0e0f0' }}>
             <h2 style={{ fontWeight: 800, color: '#1e1b4b', marginBottom: 16, fontSize: 16 }}>새 오디션 공고</h2>
-            <AuditionForm
+            <AuditionForm takenRounds={takenRounds}
               form={form} setForm={setForm} agencies={agencies}
               onCancel={() => setShowCreate(false)} onSave={createAudition}
               saving={saving} saveLabel="공고 올리기"
@@ -568,7 +568,7 @@ export default function AdminAuditionsPage() {
           {editing ? (
             <>
               <h2 style={{ fontWeight: 800, color: '#1e1b4b', marginBottom: 16, fontSize: 16, paddingRight: 32 }}>공고 수정</h2>
-              <AuditionForm
+              <AuditionForm takenRounds={takenRounds}
                 form={editForm} setForm={setEditForm} agencies={agencies}
                 onCancel={() => setEditing(false)} onSave={saveEdit}
                 saving={editSaving} saveLabel="수정 완료"

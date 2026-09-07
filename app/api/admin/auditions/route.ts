@@ -146,6 +146,20 @@ export async function POST(request: NextRequest) {
   // 회차가 열릴 시각이 아직 안 왔으면 예약으로 넣는다. 순번을 미리 등록해두고
   // 월요일 저녁 6시에 크론이 열어준다(api/cron/close-auditions). 사람이 그 시각에
   // 앉아서 게시 버튼을 누르고 있을 수는 없다.
+  // 회차당 한 곳이다. 화면에서 막아두긴 했지만 여기서도 막는다 —
+  // 새치기가 한 번 일어나면 그 주 기획사와의 약속이 깨지고, 그건 되돌릴 수 없다.
+  if (body.deadline) {
+    const { data: taken } = await sb.from('auditions')
+      .select('id, title, agency:agencies(name)')
+      .eq('deadline', body.deadline)
+      .neq('status', 'requested')
+      .limit(1)
+    if (taken && taken.length > 0) {
+      const who = (taken[0] as unknown as { agency?: { name?: string } }).agency?.name ?? taken[0].title
+      return NextResponse.json({ error: `이 회차에는 이미 ${who} 공고가 있습니다. 회차당 한 곳만 가능합니다.` }, { status: 409 })
+    }
+  }
+
   const opensAt = body.deadline ? roundOpensAt(body.deadline).getTime() : 0
   const scheduled = opensAt > Date.now()
 
