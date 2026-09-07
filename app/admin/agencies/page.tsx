@@ -28,7 +28,6 @@ export default function AdminAgenciesPage() {
   const [viewingImg, setViewingImg] = useState<string | null>(null)
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
   const [handoff, setHandoff] = useState<{ email: string; agencyName: string } | null>(null)
-  const [copied, setCopied] = useState(false)
   const [msgCopied, setMsgCopied] = useState(false)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [logoTarget, setLogoTarget] = useState<string | null>(null)
