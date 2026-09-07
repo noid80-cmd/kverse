@@ -24,7 +24,7 @@ export default function AdminAgenciesPage() {
   const [saving, setSaving] = useState(false)
   const [viewingImg, setViewingImg] = useState<string | null>(null)
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
-  const [inviteLink, setInviteLink] = useState<{ url: string; agencyName: string } | null>(null)
+  const [inviteLink, setInviteLink] = useState<{ url: string; agencyName: string; oneClick?: boolean } | null>(null)
   const [copied, setCopied] = useState(false)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [logoTarget, setLogoTarget] = useState<string | null>(null)
@@ -89,15 +89,25 @@ export default function AdminAgenciesPage() {
   // 이미 등록된 기획사에는 링크를 다시 줄 방법이 아예 없었다 — 링크가 만료됐거나
   // 담당자가 바뀌었거나 한 회사에서 두 명이 쓰려는 순간 막혔다.
   async function createInvite(agencyId: string, agencyName: string) {
+    // 담당자 이메일을 여기서 받아두면 기획사는 링크를 열고 버튼 한 번만 누르면
+    // 된다(원클릭). 비워두면 기획사가 이메일·비밀번호를 직접 입력하는 기존 방식.
+    const email = (prompt(`${agencyName} 담당자 이메일
+
+넣어두면 기획사는 버튼 한 번으로 가입됩니다.
+모르면 비워두세요 — 직접 입력하는 방식으로 나갑니다.`) ?? '').trim()
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      alert('이메일 형식이 아니에요: ' + email)
+      return
+    }
     const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('')
     // 만료를 명시적으로 넣는다. 기본값(7일)은 영업 주기에 비해 짧다 —
     // 미팅에서 링크를 주고 담당자가 결재를 거쳐 여는 데 그보다 오래 걸린다.
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     const { error } = await supabase.from('agency_invites').insert({
-      agency_id: agencyId, token, expires_at: expiresAt,
+      agency_id: agencyId, token, expires_at: expiresAt, ...(email ? { email } : {}),
     })
     if (error) { alert('초대 링크 생성 실패: ' + error.message); return }
-    setInviteLink({ url: `${window.location.origin}/invite?token=${token}`, agencyName })
+    setInviteLink({ url: `${window.location.origin}/invite?token=${token}`, agencyName, oneClick: !!email })
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -241,7 +251,7 @@ export default function AdminAgenciesPage() {
               </button>
             </div>
             <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.26)', textAlign: 'center', marginTop: 10 }}>
-              30일 후 만료 · 1회만 사용 가능
+              30일 후 만료 · 1회만 사용 가능{inviteLink.oneClick ? ' · 원클릭' : ''}
             </div>
           </div>
         )}

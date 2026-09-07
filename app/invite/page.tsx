@@ -10,6 +10,9 @@ function InviteContent() {
 
   const [agency, setAgency] = useState<{ id: string; name: string } | null>(null)
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
+  // 어드민이 담당자 이메일까지 넣어둔 초대는 입력할 게 없다 — 버튼 하나로 끝난다.
+  const [inviteEmail, setInviteEmail] = useState<string | null>(null)
+  const [needsLogin, setNeedsLogin] = useState(false)
   const [pageError, setPageError] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,10 +31,33 @@ function InviteContent() {
         if (data.error) { setPageError(data.error); return }
         setAgency(data.agency)
         setExpiresAt(data.expiresAt ?? null)
+        setInviteEmail(data.email ?? null)
       })
       .catch(() => setPageError('네트워크 오류가 발생했어요'))
       .finally(() => setLoading(false))
   }, [token])
+
+  // 원클릭: 서버가 계정을 만들고 임시 비밀번호를 한 번만 돌려준다.
+  // 그걸로 즉시 로그인시키고 버린다 — 기획사는 아무것도 입력하지 않는다.
+  async function handleOneClick() {
+    setSubmitting(true); setFormError('')
+    const res = await fetch('/api/agency-invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setFormError(data.error)
+      if (data.alreadyRegistered) setNeedsLogin(true)
+      setSubmitting(false)
+      return
+    }
+    const supabase = createClient()
+    await supabase.auth.signInWithPassword({ email: data.email, password: data.password })
+    setDone(true)
+    setTimeout(() => { window.location.href = '/agency/discover' }, 1200)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -114,7 +140,50 @@ function InviteContent() {
           <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.45)' }}>기획사 계정을 만들어주세요</div>
         </div>
 
-        {/* 폼 */}
+        {/* 원클릭 — 어드민이 담당자 이메일을 넣어둔 경우 */}
+        {inviteEmail ? (
+          <div style={{
+            background: 'rgba(36,28,21,0.04)', borderRadius: 24, padding: '28px 24px',
+            border: '1px solid rgba(36,28,21,0.09)',
+          }}>
+            <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.45)', marginBottom: 6, fontWeight: 600, letterSpacing: 0.5 }}>로그인 계정</div>
+            <div style={{ ...inputStyle, color: 'rgba(36,28,21,0.65)', background: 'rgba(36,28,21,0.03)', marginBottom: 18 }}>
+              {inviteEmail}
+            </div>
+
+            {formError && (
+              <div style={{ color: '#DC2626', fontSize: 13, textAlign: 'center', padding: '8px 0' }}>{formError}</div>
+            )}
+
+            {needsLogin ? (
+              <a href="/login" style={{
+                display: 'block', textAlign: 'center', width: '100%', padding: '15px', borderRadius: 14,
+                background: 'linear-gradient(135deg, #D84A1E 0%, #FF6F3C 100%)',
+                color: 'white', fontSize: 16, fontWeight: 700, textDecoration: 'none',
+                boxShadow: '0 4px 20px rgba(255,111,60,0.35)', boxSizing: 'border-box',
+              }}>
+                로그인하러 가기
+              </a>
+            ) : (
+              <button type="button" onClick={handleOneClick} disabled={submitting} style={{
+                width: '100%', padding: '15px', borderRadius: 14, border: 'none',
+                background: 'linear-gradient(135deg, #D84A1E 0%, #FF6F3C 100%)',
+                color: 'white', fontSize: 16, fontWeight: 700,
+                cursor: submitting ? 'default' : 'pointer',
+                opacity: submitting ? 0.7 : 1,
+                boxShadow: '0 4px 20px rgba(255,111,60,0.35)',
+              }}>
+                {submitting ? '준비 중...' : '시작하기'}
+              </button>
+            )}
+
+            <div style={{ fontSize: 12, color: 'rgba(36,28,21,0.4)', textAlign: 'center', marginTop: 12, lineHeight: 1.6 }}>
+              비밀번호는 따로 만들지 않아도 돼요.<br />
+              나중에 필요하면 로그인 화면에서 설정할 수 있어요.
+            </div>
+          </div>
+        ) : (
+        /* 폼 — 이메일을 모르는 초대는 기획사가 직접 입력한다 */
         <div style={{
           background: 'rgba(36,28,21,0.04)', borderRadius: 24, padding: '28px 24px',
           border: '1px solid rgba(36,28,21,0.09)',
@@ -170,6 +239,7 @@ function InviteContent() {
             </button>
           </form>
         </div>
+        )}
 
         <div style={{ textAlign: 'center', marginTop: 20, fontSize: 12, color: 'rgba(36,28,21,0.26)' }}>
           {expiresAt
