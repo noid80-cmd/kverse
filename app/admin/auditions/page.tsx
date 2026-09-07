@@ -105,6 +105,23 @@ function AuditionForm({
         <label style={{ fontSize: 12, color: '#ef4444', marginBottom: 4, display: 'block', fontWeight: 700 }}>마감일 *</label>
         <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
           style={{ ...inputStyle, border: `1px solid ${form.deadline ? '#e0e0f0' : '#fca5a5'}` }} />
+        {/* 시작일은 입력하지 않는다 — 마감일에서 규칙으로 나온다(그 주 월요일
+            저녁 6시, 1회차만 10/1). 다만 보이지 않으면 불안하고, 무엇보다
+            "지금 바로 열리는가"는 전체 알림이 나가느냐는 뜻이라 미리 알아야 한다. */}
+        {form.deadline && (() => {
+          const opens = roundOpensAt(form.deadline)
+          const now = opens.getTime() <= Date.now()
+          return (
+            <div style={{
+              marginTop: -4, marginBottom: 4, fontSize: 12.5, lineHeight: 1.6,
+              color: now ? '#DC2626' : '#8A7F6E',
+            }}>
+              {now
+                ? '오픈 시각이 이미 지나서 올리는 즉시 공개되고 전체 알림이 나갑니다.'
+                : `오픈 ${opens.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' })} · 그때까지 예약 상태로 숨겨집니다`}
+            </div>
+          )
+        })()}
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button onClick={onCancel} style={{
