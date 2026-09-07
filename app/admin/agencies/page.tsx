@@ -27,7 +27,7 @@ export default function AdminAgenciesPage() {
   const [saving, setSaving] = useState(false)
   const [viewingImg, setViewingImg] = useState<string | null>(null)
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
-  const [handoff, setHandoff] = useState<{ email: string; agencyName: string } | null>(null)
+  const [handoff, setHandoff] = useState<{ agencyId: string; email: string; agencyName: string } | null>(null)
   const [msgCopied, setMsgCopied] = useState(false)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [logoTarget, setLogoTarget] = useState<string | null>(null)
@@ -109,7 +109,7 @@ export default function AdminAgenciesPage() {
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) { alert('계정 생성 실패: ' + (data.error ?? '알 수 없는 오류')); return }
-    setHandoff({ email, agencyName })
+    setHandoff({ agencyId, email, agencyName })
     setAgencies(prev => prev.map(a => a.id === agencyId ? { ...a, is_verified: true } : a))
   }
 
@@ -195,6 +195,10 @@ export default function AdminAgenciesPage() {
     <div className="min-h-screen pb-10" style={{ background: '#FFF8E7' }}>
       <AdminNav />
 
+      {/* 목록 안에 두면 "인증 대기" 탭이 비었을 때 DOM에 없어서 로고 버튼이
+          아무 일도 안 한다. 항상 렌더되는 자리에 둔다. */}
+      <input ref={logoInputRef} type="file" accept="image/*" onChange={onLogoSelected} style={{ display: 'none' }} />
+
       <div className="max-w-2xl mx-auto px-4 pt-8">
         <div className="flex items-center justify-between mb-6">
           <h1 style={{ fontSize: 22, fontWeight: 900, color: '#241C15' }}>기획사 관리 <span style={{ fontSize: 14, color: '#8A7F6E', fontWeight: 500 }}>({agencies.length}개)</span></h1>
@@ -245,6 +249,19 @@ export default function AdminAgenciesPage() {
                 비밀번호는 필요 없고, 로그인 화면에서 코드를 받아 들어옵니다.
               </div>
             </div>
+            {/* 로고는 명함과 같이 받는다. 계정을 만든 자리에서 바로 올릴 수 있어야
+                한다 — 목록으로 돌아가 탭을 바꿔 찾아 들어가게 하면 나중으로 미룬다. */}
+            <button onClick={() => pickLogo(handoff.agencyId)} style={{
+              width: '100%', padding: '11px', borderRadius: 12, marginBottom: 8,
+              border: '1px solid rgba(36,28,21,0.14)', background: '#FFFFFF',
+              color: '#241C15', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            }}>
+              {logoUploading === handoff.agencyId
+                ? '로고 올리는 중...'
+                : agencies.find(a => a.id === handoff.agencyId)?.logo_url
+                ? '✓ 로고 등록됨 — 다시 올리기'
+                : '로고 올리기'}
+            </button>
             <button onClick={copyHandoff} style={{
               width: '100%', padding: '12px', borderRadius: 12, border: 'none',
               background: msgCopied ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
@@ -281,13 +298,6 @@ export default function AdminAgenciesPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <input
-              ref={logoInputRef}
-              type="file"
-              accept="image/*"
-              onChange={onLogoSelected}
-              style={{ display: 'none' }}
-            />
             {displayed.map(a => (
               <div key={a.id} style={{
                 background: '#FFFFFF', borderRadius: 18, padding: '18px 20px',
