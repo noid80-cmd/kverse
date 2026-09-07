@@ -80,3 +80,30 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, email, agencyName: agency.name, existed: !!authError })
 }
+
+// 어느 기획사에 담당자가 있는지 화면이 알아야 한다. 없으면 이미 계정이 있는
+// 곳에 또 만들게 된다. 이메일은 auth.users에 있어서 브라우저에서는 못 읽는다.
+export async function GET() {
+  if (!await verifyAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  const [{ data: members }, { data: list }] = await Promise.all([
+    admin.from('agency_members').select('agency_id, profile_id'),
+    admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+  ])
+
+  const emailOf = new Map((list?.users ?? []).map(u => [u.id, u.email ?? '']))
+  const byAgency: Record<string, string[]> = {}
+  for (const m of members ?? []) {
+    const aid = m.agency_id as string
+    const email = emailOf.get(m.profile_id as string)
+    if (!email) continue
+    ;(byAgency[aid] ??= []).push(email)
+  }
+  return NextResponse.json(byAgency)
+}

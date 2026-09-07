@@ -29,6 +29,8 @@ export default function AdminAgenciesPage() {
   const [tab, setTab] = useState<'pending' | 'all'>('pending')
   const [handoff, setHandoff] = useState<{ agencyId: string; email: string; agencyName: string } | null>(null)
   const [msgCopied, setMsgCopied] = useState(false)
+  // 기획사별 담당자 이메일. 없는 곳이 "계정 만들기" 대상이다.
+  const [members, setMembers] = useState<Record<string, string[]>>({})
   const logoInputRef = useRef<HTMLInputElement>(null)
   const [logoTarget, setLogoTarget] = useState<string | null>(null)
   const [logoUploading, setLogoUploading] = useState<string | null>(null)
@@ -43,6 +45,10 @@ export default function AdminAgenciesPage() {
 
       const { data } = await supabase.from('agencies').select('*').order('created_at', { ascending: false })
       setAgencies((data as Agency[]) ?? [])
+      fetch('/api/admin/agency-account')
+        .then(r => (r.ok ? r.json() : {}))
+        .then(setMembers)
+        .catch(() => {})
       setLoading(false)
     }
     load()
@@ -110,6 +116,7 @@ export default function AdminAgenciesPage() {
     const data = await res.json().catch(() => ({}))
     if (!res.ok) { alert('계정 생성 실패: ' + (data.error ?? '알 수 없는 오류')); return }
     setHandoff({ agencyId, email, agencyName })
+    setMembers(prev => ({ ...prev, [agencyId]: [...(prev[agencyId] ?? []), email] }))
     setAgencies(prev => prev.map(a => a.id === agencyId ? { ...a, is_verified: true } : a))
   }
 
@@ -328,6 +335,10 @@ export default function AdminAgenciesPage() {
                         <span style={{ fontSize: 11, background: 'rgba(251,191,36,0.12)', color: '#fbbf24', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>심사대기</span>
                       )}
                     </div>
+                    <div style={{ fontSize: 12, marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+                      color: (members[a.id]?.length ?? 0) > 0 ? '#8A7F6E' : '#D84A1E', fontWeight: (members[a.id]?.length ?? 0) > 0 ? 400 : 700 }}>
+                      {(members[a.id]?.length ?? 0) > 0 ? members[a.id].join(', ') : '담당자 없음'}
+                    </div>
                     {a.description && <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{a.description}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
@@ -341,12 +352,18 @@ export default function AdminAgenciesPage() {
                       {a.is_verified ? '인증해제' : '인증'}
                     </button>
                     <button onClick={() => createAgencyAccount(a.id, a.name)}
-                      title="담당자 이메일로 기획사 계정을 만듭니다"
+                      title={(members[a.id]?.length ?? 0) > 0
+                        ? '담당자를 한 명 더 추가합니다'
+                        : '담당자 이메일로 기획사 계정을 만듭니다'}
                       style={{
-                        fontSize: 12, padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(255,111,60,0.35)',
-                        background: 'rgba(255,111,60,0.08)', color: '#D84A1E', fontWeight: 700, cursor: 'pointer',
+                        fontSize: 12, padding: '8px 12px', borderRadius: 10,
+                        border: (members[a.id]?.length ?? 0) > 0
+                          ? '1px solid rgba(36,28,21,0.12)' : '1px solid rgba(255,111,60,0.35)',
+                        background: (members[a.id]?.length ?? 0) > 0 ? '#FFFFFF' : 'rgba(255,111,60,0.08)',
+                        color: (members[a.id]?.length ?? 0) > 0 ? '#8A7F6E' : '#D84A1E',
+                        fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
                       }}>
-                      계정 만들기
+                      {(members[a.id]?.length ?? 0) > 0 ? '담당자 추가' : '계정 만들기'}
                     </button>
                     <button onClick={() => startEdit(a)}
                       style={{
