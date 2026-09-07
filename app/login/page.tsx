@@ -423,7 +423,7 @@ export default function LoginPage() {
               {needEmail && (
                 <div style={{ fontSize: 12.5, color: '#8A4B2E', marginTop: 8, lineHeight: 1.6 }}>
                   위에 이메일을 먼저 입력해주세요.<br />
-                  그 주소로 6자리 코드를 보내드려요.
+                  그 주소로 인증 코드를 보내드려요.
                 </div>
               )}
             </div>
@@ -431,11 +431,11 @@ export default function LoginPage() {
             <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 14, background: 'rgba(255,111,60,0.07)', border: '1px solid rgba(255,111,60,0.22)' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#8A4B2E', marginBottom: 10 }}>{tx.otpSentTo}</div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <input value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                <input value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   inputMode="numeric" autoComplete="one-time-code" placeholder={tx.otpCode}
                   style={{ flex: 1, minWidth: 0, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 12, padding: '12px 14px', fontSize: 16, letterSpacing: 2, color: '#241C15', outline: 'none', boxSizing: 'border-box' }} />
-                <button type="button" onClick={verifyOtp} disabled={otpBusy || otpCode.length < 6}
-                  style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: otpBusy || otpCode.length < 6 ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                <button type="button" onClick={verifyOtp} disabled={otpBusy || otpCode.length < 4}
+                  style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: otpBusy || otpCode.length < 4 ? 0.5 : 1, whiteSpace: 'nowrap' }}>
                   {tx.otpVerify}
                 </button>
               </div>
