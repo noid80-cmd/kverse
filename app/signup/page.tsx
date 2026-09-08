@@ -46,7 +46,7 @@ export default function SignupPage() {
   }, [])
 
   async function handleSocialLogin(provider: 'kakao' | 'google' | 'apple') {
-    if (!agreed) { setError('이용약관에 동의해주세요.'); return }
+    if (!agreed) { setError(tx.auth.termsRequired); return }
     const supabase = createClient()
 
     // iOS 앱은 브라우저를 거치지 않는 네이티브 시트로 처리한다. 자세한 이유는
@@ -61,7 +61,7 @@ export default function SignupPage() {
         router.push(`/auth/callback?role=${role}`)
       } catch (e) {
         if (!isAppleCancel(e)) {
-          setError(e instanceof Error ? e.message : 'Apple 로그인에 실패했어요.')
+          setError(e instanceof Error ? e.message : tx.auth.appleLoginFailed)
         }
       }
       return
@@ -95,7 +95,7 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: file.name, contentType: file.type }),
       })
-      if (!res.ok) throw new Error('업로드 URL 생성 실패')
+      if (!res.ok) throw new Error(tx.videos.uploadPrepFailed)
       const { url, publicUrl } = await res.json()
       const ok = await new Promise<boolean>(resolve => {
         const xhr = new XMLHttpRequest()
@@ -105,10 +105,10 @@ export default function SignupPage() {
         xhr.onerror = () => resolve(false)
         xhr.send(file)
       })
-      if (!ok) throw new Error('업로드 실패')
+      if (!ok) throw new Error(tx.videos.uploadFailed)
       setBizRegUrl(publicUrl)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : '업로드 실패')
+      setError(e instanceof Error ? e.message : tx.videos.uploadFailed)
       setBizRegFile(null)
     }
     setUploading(false)
@@ -116,7 +116,7 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
-    if (!agreed) { setError('이용약관에 동의해주세요.'); return }
+    if (!agreed) { setError(tx.auth.termsRequired); return }
     if (role === 'agency' && !bizRegUrl) { setError(tx.auth.bizRegRequired); return }
     setError(''); setLoading(true)
     const supabase = createClient()
@@ -220,7 +220,7 @@ export default function SignupPage() {
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#5A4F42', cursor: 'pointer', marginBottom: 2 }}>
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
               <span>
-                <Link href="/terms" target="_blank" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</Link>에 동의합니다 (필수)
+                {tx.auth.termsAgreeLabel.split('{terms}')[0]}<Link href="/terms" target="_blank" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'underline' }}>{tx.auth.termsLink}</Link>{tx.auth.termsAgreeLabel.split('{terms}')[1]}
               </span>
             </label>
             {!isKakao && (
@@ -243,13 +243,13 @@ export default function SignupPage() {
                 background: 'rgba(216,74,30,0.07)', border: '1px solid rgba(216,74,30,0.18)',
                 fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6,
               }}>
-                앱을 업데이트하면 Apple·구글 가입이 정상 동작합니다.
+                {tx.auth.updateAppSignup}
                 <a href={storeUrl()} target="_blank" rel="noopener noreferrer"
                   style={{ color: '#D84A1E', fontWeight: 800, textDecoration: 'underline', marginLeft: 4 }}>
-                  업데이트하기
+                  {tx.auth.updateBtn}
                 </a>
                 <br />
-                지금 바로 가입하시려면 아래 이메일로 진행해주세요.
+                {tx.auth.useEmailSignup}
                 <br />
                 <span style={{ color: '#A5765A' }}>Update the app to fix Apple/Google sign-up, or use email below.</span>
               </div>
@@ -323,7 +323,7 @@ export default function SignupPage() {
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#5A4F42', cursor: 'pointer' }}>
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
               <span>
-                <Link href="/terms" target="_blank" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</Link>에 동의합니다 (필수)
+                {tx.auth.termsAgreeLabel.split('{terms}')[0]}<Link href="/terms" target="_blank" style={{ color: '#D84A1E', fontWeight: 700, textDecoration: 'underline' }}>{tx.auth.termsLink}</Link>{tx.auth.termsAgreeLabel.split('{terms}')[1]}
               </span>
             </label>
             {error && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{error}</p>}

@@ -6,6 +6,8 @@ import { checkContactAccess } from '@/lib/contactGate'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 import Link from 'next/link'
 import { Heart, Video, MessageCircle, Lock } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
@@ -26,6 +28,8 @@ type VideoItem = { id: string; title: string; thumbnail_url: string | null; view
 
 export default function TalentPublicProfilePage() {
   const talentNav = useTalentNav()
+  const { lang } = useLang()
+  const tx = useT(lang)
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [talent, setTalent] = useState<Talent | null>(null)
@@ -49,11 +53,11 @@ export default function TalentPublicProfilePage() {
       setMyRole(profile?.role ?? 'talent')
 
       const isAgency = profile?.role === 'agency'
-      // 자기소개는 심사 재료라 기획사에게 항상 보여준다. 연락처는 전용 칸에
-      // 따로 있고, 자격이 확인된 뒤에만 가져온다.
+      // 편집 화면의 두 덩어리와 같은 경계다. 사진·이름·특기·자기소개는 누구나,
+      // 신상/신체는 기획사만. 연락처는 전용 칸에 따로 있고 자격 확인 후에만 가져온다.
       const profileFields = isAgency
         ? 'id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality'
-        : 'id, name, avatar_url'
+        : 'id, name, avatar_url, bio, skills'
 
       const [{ data: t }, { data: v }] = await Promise.all([
         supabase.from('profiles').select(profileFields).eq('id', id).single(),
@@ -113,11 +117,11 @@ export default function TalentPublicProfilePage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>불러오는 중...</div>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>{tx.common.loading}</div>
   )
 
   if (!talent) return (
-    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>프로필을 찾을 수 없어요</div>
+    <div style={{ minHeight: '100vh', background: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8A7F6E' }}>{tx.talent.notFound}</div>
   )
 
   return (
@@ -126,7 +130,7 @@ export default function TalentPublicProfilePage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
-          <span style={{ fontSize: 18, fontWeight: 900, color: '#241C15', flex: 1 }}>프로필</span>
+          <span style={{ fontSize: 18, fontWeight: 900, color: '#241C15', flex: 1 }}>{tx.talent.profileTitle}</span>
           <ReportBlockMenu targetType="profile" targetId={talent.id} reportedUserId={talent.id} myId={myId}
             onBlocked={() => router.push('/explore')} />
         </div>
@@ -148,8 +152,8 @@ export default function TalentPublicProfilePage() {
               <div style={{ fontWeight: 900, color: '#241C15', fontSize: 22, marginBottom: 4 }}>{talent.name}</div>
               <div style={{ fontSize: 14, color: '#8A7F6E' }}>
                 {[
-                  getAge(talent.birth_date) && `${getAge(talent.birth_date)}세`,
-                  talent.gender === 'male' ? '남성' : talent.gender === 'female' ? '여성' : null,
+                  getAge(talent.birth_date) && tx.talent.age.replace('{n}', String(getAge(talent.birth_date))),
+                  talent.gender === 'male' ? tx.profile.genderMale : talent.gender === 'female' ? tx.profile.genderFemale : null,
                   talent.nationality,
                 ].filter(Boolean).join(' · ')}
               </div>
@@ -163,7 +167,7 @@ export default function TalentPublicProfilePage() {
             </div>
           )}
 
-          {myRole === 'agency' && talent.skills?.length > 0 && (
+          {talent.skills?.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: talent.bio ? 16 : 0 }}>
               {talent.skills.map(s => (
                 <span key={s} style={{ fontSize: 13, background: 'rgba(216,74,30,0.12)', color: '#a78bfa', padding: '5px 12px', borderRadius: 20, fontWeight: 700 }}>{s}</span>
@@ -171,7 +175,7 @@ export default function TalentPublicProfilePage() {
             </div>
           )}
 
-          {myRole === 'agency' && talent.bio && (
+          {talent.bio && (
             <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.7, background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', margin: '0 0 10px' }}>{talent.bio}</p>
           )}
           {myRole === 'agency' && (canContact ? (
@@ -219,10 +223,10 @@ export default function TalentPublicProfilePage() {
         )}
 
         {/* 영상 목록 */}
-        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#241C15', marginBottom: 14 }}>올린 영상 {videos.length}개</h2>
+        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#241C15', marginBottom: 14 }}>{tx.videos.videosCount.replace('{n}', String(videos.length))}</h2>
         {videos.length === 0 ? (
           <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 32, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)', color: '#8A7F6E', fontSize: 14 }}>
-            아직 올린 영상이 없어요
+            {tx.videos.noVideos}
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -243,7 +247,7 @@ export default function TalentPublicProfilePage() {
                     <div style={{ fontWeight: 700, color: '#241C15', fontSize: 14, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <span style={{ fontSize: 11, background: 'rgba(255,111,60,0.12)', color: '#D84A1E', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>{categoryLabel[v.category] ?? v.category}</span>
-                      <span style={{ fontSize: 12, color: '#8A7F6E' }}>조회 {v.view_count}회</span>
+                      <span style={{ fontSize: 12, color: '#8A7F6E' }}>{v.view_count} {tx.videos.views}</span>
                       <span style={{ fontSize: 12, color: '#8A7F6E', display: 'flex', alignItems: 'center', gap: 3 }}>
                         <Heart size={11} strokeWidth={2} color="#f43f5e" fill="#f43f5e" /> {v.like_count}
                       </span>

@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { resolveAfterAuth } from '@/lib/intent'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 export default function AuthCallback() {
   return (
@@ -16,7 +18,9 @@ export default function AuthCallback() {
 function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [message, setMessage] = useState('로그인 처리 중...')
+  const { lang } = useLang()
+  const tx = useT(lang).auth
+  const [message, setMessage] = useState(tx.processing)
   const [detail, setDetail] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
 
@@ -52,7 +56,7 @@ function AuthCallbackContent() {
     async function run() {
       const authError = readAuthError()
       if (authError) {
-        fail('로그인이 완료되지 않았어요', authError)
+        fail(tx.loginIncomplete, authError)
         return
       }
 
@@ -78,7 +82,7 @@ function AuthCallbackContent() {
       }
 
       if (!session) {
-        fail('로그인에 실패했어요', `${exchangeError ?? '세션이 만들어지지 않았어요'}
+        fail(tx.loginFailed, `${exchangeError ?? tx.loginIncomplete}
 ${env}`)
         return
       }
@@ -113,7 +117,7 @@ ${env}`)
         {failed && detail && (
           <>
             <div style={{ marginTop: 14, fontSize: 13, color: '#8A7F6E', lineHeight: 1.6 }}>
-              아래 내용을 캡처해서 보내주시면 바로 확인할 수 있어요.
+              {tx.sendScreenshot}
             </div>
             <div style={{
               marginTop: 10, padding: '12px 14px', borderRadius: 12,
@@ -129,7 +133,7 @@ ${env}`)
               background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#FFFFFF',
               fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer',
             }}>
-              다시 시도하기
+              {tx.retry}
             </button>
           </>
         )}

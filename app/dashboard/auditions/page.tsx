@@ -139,9 +139,9 @@ export default function TalentAuditionsPage() {
   }, [load])
 
   async function cancelApplication(auditionId: string) {
-    if (!confirm('지원을 취소할까요?')) return
+    if (!confirm(tx.auditions.cancelConfirm)) return
     const { error } = await supabase.from('audition_applications').delete().eq('audition_id', auditionId).eq('talent_id', myId)
-    if (error) { alert('취소 실패: ' + error.message); return }
+    if (error) { alert(tx.auditions.cancelFailed + ': ' + error.message); return }
     setApplicationMap(prev => { const next = { ...prev }; delete next[auditionId]; return next })
     setPlayingAuditionId(null)
   }
@@ -187,7 +187,7 @@ export default function TalentAuditionsPage() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'create', filename: file.name, contentType: file.type || 'video/mp4', totalParts }),
     })
-    if (!createRes.ok) { setError('업로드 준비 실패'); return null }
+    if (!createRes.ok) { setError(tx.videos.uploadPrepFailed); return null }
     const { uploadId, key, publicUrl, partUrls } = await createRes.json()
 
     for (let i = 0; i < totalParts; i++) {
@@ -208,7 +208,7 @@ export default function TalentAuditionsPage() {
         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
       }
       if (!ok) {
-        setError('업로드 실패')
+        setError(tx.videos.uploadFailed)
         fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
         return null
       }
@@ -218,7 +218,7 @@ export default function TalentAuditionsPage() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'complete', key, uploadId }),
     })
-    if (!completeRes.ok) { setError('업로드 완료 실패'); return null }
+    if (!completeRes.ok) { setError(tx.videos.uploadCompleteFailed); return null }
     return publicUrl
   }
 
@@ -273,7 +273,7 @@ export default function TalentAuditionsPage() {
       status: 'pending',
     })
 
-    if (dbErr) { setError('지원 실패: ' + dbErr.message); setSubmitting(false); return }
+    if (dbErr) { setError(tx.auditions.applyFailed + ': ' + dbErr.message); setSubmitting(false); return }
 
     setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
@@ -371,7 +371,7 @@ export default function TalentAuditionsPage() {
                   color: appStatus === 'pending' ? '#fbbf24' : appStatus ? 'white' : canApply ? 'white' : '#8A7F6E',
                   boxShadow: canApply && !appStatus ? '0 4px 16px rgba(255,111,60,0.3)' : 'none',
                 }}>
-                {appStatus === 'pending' ? tx.auditions.review : appStatus === 'invited' ? tx.auditions.checkChat : canApply ? `${tx.auditions.apply} →` : firstActive.mode === 'offline' ? '📍 오프라인 오디션' : tx.auditions.expiredPost}
+                {appStatus === 'pending' ? tx.auditions.review : appStatus === 'invited' ? tx.auditions.checkChat : canApply ? `${tx.auditions.apply} →` : firstActive.mode === 'offline' ? `📍 ${tx.auditions.offlineAudition}` : tx.auditions.expiredPost}
               </button>
             </div>
           </div>
@@ -486,7 +486,7 @@ export default function TalentAuditionsPage() {
                       ...(expandedId === a.id ? { whiteSpace: 'pre-wrap' } : { overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }),
                     }}>
                     {displayDesc}
-                    {expandedId !== a.id && <span style={{ color: '#8A7F6E' }}> 더보기</span>}
+                    {expandedId !== a.id && <span style={{ color: '#8A7F6E' }}> {tx.common.more}</span>}
                   </div>
                 )}
                 {a.deadline && (
@@ -670,7 +670,7 @@ export default function TalentAuditionsPage() {
                     const f = e.target.files?.[0] ?? null
                     if (!f) { setNewFile(null); setError(''); return }
                     if (f.size > 500 * 1024 * 1024) {
-                      setError('파일 크기는 500MB 이하여야 합니다')
+                      setError(tx.videos.fileTooBig.replace('{n}', '500'))
                       e.target.value = ''
                       return
                     }
@@ -680,7 +680,7 @@ export default function TalentAuditionsPage() {
                     vid.onloadedmetadata = () => {
                       URL.revokeObjectURL(url)
                       if (vid.duration > 300) {
-                        setError('영상 길이는 5분 이하여야 합니다')
+                        setError(tx.videos.videoTooLong)
                         e.target.value = ''
                         return
                       }

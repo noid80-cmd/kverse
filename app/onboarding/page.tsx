@@ -7,6 +7,8 @@ import { isNativeApp } from '@/lib/capacitor'
 import { enableNativeNotifications } from '@/lib/pushNative'
 import { createClient } from '@/lib/supabase/client'
 import { peekSignupIntent, clearSignupIntent } from '@/lib/intent'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 // 공고를 보고 들어와 가입한 사람인지 남긴다. 이미 값이 있으면 덮지 않는다
 // (첫 유입 경로가 알고 싶은 것이지 마지막 경로가 아니다).
@@ -67,6 +69,8 @@ export default function OnboardingPage() {
 function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { lang } = useLang()
+  const tx = useT(lang)
   // 공개 공고에서 넘어온 경우 URL이 아니라 localStorage에 목적지가 들어있다
   const intent = typeof window !== 'undefined' ? peekSignupIntent() : {}
   const nextPath = searchParams.get('next') ?? intent.next ?? '/dashboard'
@@ -173,12 +177,12 @@ function OnboardingContent() {
             </div>
 
             <h1 style={{ fontSize: 26, fontWeight: 900, color: '#241C15', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>
-              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : <>매주 새로운 오디션에<br />지원하세요</>}
+              {isAgency ? '숨은 인재를 가장 먼저 발견하세요' : tx.auth.tagline}
             </h1>
             <p style={{ fontSize: 15, color: '#8A7F6E', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
               {isAgency
                 ? <>전세계 K-pop 팬들의 커버 영상에서<br />다음 스타를 찾아보세요</>
-                : <>기획사가 직접 여는 온라인 오디션.<br />갖고 있는 영상으로 지원하세요</>}
+                : tx.onboarding.introSub}
             </p>
 
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
@@ -189,9 +193,9 @@ function OnboardingContent() {
                     { Icon: MessageCircle, text: '채팅으로 소통 — 마음에 든 지망생과 바로 연락' },
                   ]
                 : [
-                    { Icon: ClipboardList, text: '매주 새 오디션 — 기획사가 직접 열어요' },
-                    { Icon: Video, text: '영상으로 지원 — 갖고 있는 영상이면 충분해요' },
-                    { Icon: Star, text: '결과는 앱으로 — 커버 영상을 올려두면 기획사가 먼저 찾아오기도 해요' },
+                    { Icon: ClipboardList, text: tx.onboarding.introPoint1 },
+                    { Icon: Video, text: tx.onboarding.introPoint2 },
+                    { Icon: Star, text: tx.onboarding.introPoint3 },
                   ]
               ).map(item => (
                 <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#FFFFFF', borderRadius: 14, border: '1px solid rgba(36,28,21,0.09)' }}>
@@ -202,7 +206,7 @@ function OnboardingContent() {
             </div>
 
             <button onClick={goFromIntro} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,111,60,0.35)' }}>
-              다음 →
+              {tx.common.next} →
             </button>
           </>
         )}
@@ -217,9 +221,9 @@ function OnboardingContent() {
               </svg>
             </div>
 
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#241C15', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>홈 화면에 추가하세요</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#241C15', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>{tx.onboarding.installTitle}</h1>
             <p style={{ fontSize: 15, color: '#8A7F6E', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
-              앱처럼 빠르게 열고<br />기획사 알림도 바로 받을 수 있어요
+              {tx.onboarding.installSub}
             </p>
 
             {isIOS && (
@@ -234,8 +238,8 @@ function OnboardingContent() {
                     </svg>
                   </div>
                   <div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#241C15', marginBottom: 3 }}>1단계</p>
-                    <p style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.5 }}>하단 가운데 <span style={{ color: '#D84A1E', fontWeight: 700 }}>공유 버튼</span>을 탭하세요</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#241C15', marginBottom: 3 }}>{tx.onboarding.step1Label}</p>
+                    <p style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.5 }}>{tx.onboarding.iosStep1}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
@@ -245,8 +249,8 @@ function OnboardingContent() {
                     </svg>
                   </div>
                   <div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#241C15', marginBottom: 3 }}>2단계</p>
-                    <p style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.5 }}><span style={{ color: '#D84A1E', fontWeight: 700 }}>홈 화면에 추가</span>를 선택하세요</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#241C15', marginBottom: 3 }}>{tx.onboarding.step2Label}</p>
+                    <p style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.5 }}>{tx.onboarding.iosStep2}</p>
                   </div>
                 </div>
               </div>
@@ -254,22 +258,22 @@ function OnboardingContent() {
 
             {isAndroid && !installed && deferredPrompt && (
               <button onClick={handleAndroidInstall} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', marginBottom: 12, boxShadow: '0 4px 16px rgba(255,111,60,0.35)' }}>
-                홈 화면에 추가하기
+                {tx.onboarding.installBtn}
               </button>
             )}
 
             {isAndroid && installed && (
               <div style={{ width: '100%', padding: '15px', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 16, textAlign: 'center', color: '#4ade80', fontSize: 15, fontWeight: 700, marginBottom: 12 }}>
-                ✓ 홈 화면에 추가됐어요
+                ✓ {tx.onboarding.installed}
               </div>
             )}
 
             <button onClick={goToStep2} style={{ width: '100%', padding: '15px', background: isIOS || installed ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : '#FFFFFF', border: isIOS || installed ? 'none' : '1px solid rgba(36,28,21,0.1)', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: isIOS || installed ? '0 4px 16px rgba(255,111,60,0.35)' : 'none', marginBottom: 12 }}>
-              {isIOS ? '추가했어요 →' : installed ? '다음 →' : '다음 →'}
+              {isIOS ? `${tx.onboarding.iosDone} \u2192` : `${tx.common.next} \u2192`}
             </button>
 
             <button onClick={finish} style={{ background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: '8px' }}>
-              나중에
+              {tx.onboarding.later}
             </button>
           </>
         )}
@@ -280,11 +284,11 @@ function OnboardingContent() {
               <Bell size={36} strokeWidth={1.6} color="white" />
             </div>
 
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#241C15', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>알림을 켜두세요</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#241C15', marginBottom: 12, textAlign: 'center', wordBreak: 'keep-all' }}>{tx.onboarding.notifTitle}</h1>
             <p style={{ fontSize: 15, color: '#8A7F6E', textAlign: 'center', lineHeight: 1.6, marginBottom: 32, wordBreak: 'keep-all' }}>
               {isAgency
                 ? <>지망생이 지원하거나<br />답장을 보내면 바로 알려드려요</>
-                : <>기획사가 관심을 보이거나<br />채팅을 보내면 바로 알려드려요</>}
+                : tx.onboarding.notifSub}
             </p>
 
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
@@ -295,9 +299,9 @@ function OnboardingContent() {
                     { Icon: Video, text: '북마크한 지망생이 새 영상을 올렸을 때' },
                   ]
                 : [
-                    { Icon: Star, text: '기획사가 내 영상에 관심을 표시했을 때' },
-                    { Icon: MessageCircle, text: '기획사 담당자가 채팅을 보냈을 때' },
-                    { Icon: ClipboardList, text: '새 오디션 공고가 올라왔을 때' },
+                    { Icon: Star, text: tx.onboarding.notifPoint1 },
+                    { Icon: MessageCircle, text: tx.onboarding.notifPoint2 },
+                    { Icon: ClipboardList, text: tx.onboarding.notifPoint3 },
                   ]
               ).map(item => (
                 <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#FFFFFF', borderRadius: 14, border: '1px solid rgba(36,28,21,0.09)' }}>
@@ -311,19 +315,19 @@ function OnboardingContent() {
               <>
                 <div style={{ width: '100%', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 16, padding: '16px', marginBottom: 16, textAlign: 'center' }}>
                   <BellOff size={20} color="#DC2626" style={{ margin: '0 auto 8px' }} />
-                  <p style={{ fontSize: 13, color: '#fca5a5', margin: 0 }}>알림이 차단되어 있어요<br />설정 앱에서 직접 허용해주세요</p>
+                  <p style={{ fontSize: 13, color: '#fca5a5', margin: 0 }}>{tx.profile.notifDescBlocked}<br />{tx.onboarding.notifDeniedHelp}</p>
                 </div>
                 <button onClick={finish} style={{ width: '100%', padding: '15px', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.1)', borderRadius: 16, color: '#8A7F6E', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
-                  나중에 설정하기
+                  {tx.onboarding.setLater}
                 </button>
               </>
             ) : (
               <>
                 <button onClick={handleNotif} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer', marginBottom: 12, boxShadow: '0 4px 16px rgba(255,111,60,0.35)' }}>
-                  알림 켜기
+                  {tx.profile.notifTurnOn}
                 </button>
                 <button onClick={finish} style={{ background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: '8px' }}>
-                  나중에
+                  {tx.onboarding.later}
                 </button>
               </>
             )}

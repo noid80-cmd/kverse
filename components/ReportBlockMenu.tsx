@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Flag, ShieldOff, MoreVertical } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
-
-const REASONS_KO = ['부적절한 콘텐츠', '괴롭힘/혐오 발언', '스팸/사기', '저작권 침해', '기타']
-const REASONS_EN = ['Inappropriate content', 'Harassment / hate speech', 'Spam / scam', 'Copyright infringement', 'Other']
+import { useT } from '@/lib/i18n/translations'
 
 export default function ReportBlockMenu({
   targetType,
@@ -32,8 +30,9 @@ export default function ReportBlockMenu({
   variant?: 'plain' | 'circle'
 }) {
   const { lang } = useLang()
+  const tx = useT(lang)
   const isKo = lang === 'ko'
-  const reasons = isKo ? REASONS_KO : REASONS_EN
+  const reasons = [tx.report.reason1, tx.report.reason2, tx.report.reason3, tx.report.reason4, tx.report.reason5]
   const router = useRouter()
   const supabase = createClient()
   const [open, setOpen] = useState(false)
@@ -84,7 +83,7 @@ export default function ReportBlockMenu({
   }
 
   async function handleBlock() {
-    if (!confirm(isKo ? '이 사용자를 차단하시겠어요? 이후 이 사용자의 콘텐츠가 더 이상 보이지 않아요.' : 'Block this user? Their content will no longer be shown to you.')) return
+    if (!confirm(tx.report.blockConfirm)) return
     setSubmitting(true)
     await supabase.from('blocked_users').insert({ blocker_id: myId, blocked_id: reportedUserId })
     // 차단은 운영진에게도 자동으로 신고 큐를 통해 알림 — Apple 1.2 요구사항
@@ -106,7 +105,7 @@ export default function ReportBlockMenu({
 
   return (
     <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-      <button onClick={e => { e.stopPropagation(); setOpen(v => !v) }} aria-label={isKo ? '더보기' : 'more'}
+      <button onClick={e => { e.stopPropagation(); setOpen(v => !v) }} aria-label={tx.common.more}
         style={variant === 'circle'
           ? { width: 46, height: 46, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: iconColor, padding: 0 }
           : { background: tone === 'dark' ? 'rgba(0,0,0,0.45)' : 'none', backdropFilter: tone === 'dark' ? 'blur(4px)' : undefined, borderRadius: tone === 'dark' ? 8 : 0, border: 'none', padding: 6, cursor: 'pointer', color: iconColor, display: 'flex' }}>
@@ -122,18 +121,18 @@ export default function ReportBlockMenu({
             <>
               <button onClick={() => setMode('report')}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'none', border: 'none', borderRadius: 10, cursor: 'pointer', fontSize: 14, color: '#241C15', fontWeight: 600, textAlign: 'left' }}>
-                <Flag size={16} strokeWidth={1.8} /> {isKo ? '신고하기' : 'Report'}
+                <Flag size={16} strokeWidth={1.8} /> {tx.report.report}
               </button>
               <button onClick={handleBlock} disabled={submitting}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'none', border: 'none', borderRadius: 10, cursor: 'pointer', fontSize: 14, color: '#DC2626', fontWeight: 600, textAlign: 'left' }}>
-                <ShieldOff size={16} strokeWidth={1.8} /> {isKo ? '사용자 차단' : 'Block user'}
+                <ShieldOff size={16} strokeWidth={1.8} /> {tx.report.blockUser}
               </button>
             </>
           )}
           {mode === 'report' && !done && (
             <div style={{ padding: 4 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 6, padding: '0 8px' }}>
-                {isKo ? '신고 사유를 선택하세요' : 'Select a reason'}
+                {tx.report.selectReason}
               </div>
               {reasons.map(r => (
                 <button key={r} onClick={() => submitReport(r)} disabled={submitting}
@@ -145,7 +144,7 @@ export default function ReportBlockMenu({
           )}
           {done && (
             <div style={{ padding: '14px 12px', fontSize: 13, color: '#22c55e', fontWeight: 700, textAlign: 'center' }}>
-              {isKo ? '신고가 접수되었어요' : 'Report submitted'}
+              {tx.report.submitted}
             </div>
           )}
         </div>

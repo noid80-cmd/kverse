@@ -9,6 +9,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
 import {BellOff, BellRing, X, Lock, Globe } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
+import { COUNTRY_GROUPS, countryLabel, regionLabel } from '@/lib/countries'
 import { useT, type Lang } from '@/lib/i18n/translations'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
 
@@ -107,7 +108,7 @@ function formatPhone(v: string) {
     const file = e.target.files?.[0]
     if (!file || !form?.userId) return
     setAvatarUploading(true)
-    setAvatarStatus({ msg: '1/3 변환 중...', ok: true })
+    setAvatarStatus({ msg: tx.profile.avatarStep1, ok: true })
 
     try {
       const jpegBlob = await new Promise<Blob>((resolve, reject) => {
@@ -121,37 +122,37 @@ function formatPhone(v: string) {
           canvas.width = Math.round(img.width * scale)
           canvas.height = Math.round(img.height * scale)
           const ctx = canvas.getContext('2d')
-          if (!ctx) { reject(new Error('캔버스 오류')); return }
+          if (!ctx) { reject(new Error(tx.profile.avatarFailed)); return }
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-          canvas.toBlob(b => b ? resolve(b) : reject(new Error('변환 실패')), 'image/jpeg', 0.85)
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error(tx.profile.avatarFailed)), 'image/jpeg', 0.85)
         }
-        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('이미지 로드 실패')) }
+        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error(tx.profile.avatarFailed)) }
         img.src = blobUrl
       })
 
-      setAvatarStatus({ msg: `2/3 업로드 중... (${Math.round(jpegBlob.size / 1024)}KB)`, ok: true })
+      setAvatarStatus({ msg: `${tx.profile.avatarStep2} (${Math.round(jpegBlob.size / 1024)}KB)`, ok: true })
 
       const urlRes = await fetch('/api/r2-upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: `avatar_${form.userId}_${Date.now()}.jpg`, contentType: 'image/jpeg' }),
       })
-      if (!urlRes.ok) throw new Error(`URL 요청 실패 (${urlRes.status})`)
+      if (!urlRes.ok) throw new Error(`${tx.profile.avatarFailed} (${urlRes.status})`)
       const { url: presignedUrl, publicUrl } = await urlRes.json()
 
       const uploadRes = await fetch(presignedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: jpegBlob })
-      if (!uploadRes.ok) throw new Error(`R2 업로드 실패 (${uploadRes.status})`)
+      if (!uploadRes.ok) throw new Error(`${tx.profile.avatarFailed} (${uploadRes.status})`)
 
-      setAvatarStatus({ msg: '3/3 DB 저장 중...', ok: true })
+      setAvatarStatus({ msg: tx.profile.avatarStep3, ok: true })
 
       const { data: { user: currentUser } } = await supabase.auth.getUser()
-      if (!currentUser) throw new Error('세션 만료 — 다시 로그인')
+      if (!currentUser) throw new Error(tx.profile.sessionExpired)
 
       const { error: dbError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
         .eq('id', currentUser.id)
-      if (dbError) throw new Error('DB 오류: ' + dbError.message)
+      if (dbError) throw new Error(tx.profile.avatarFailed + ': ' + dbError.message)
 
       setForm(f => f ? { ...f, avatarUrl: publicUrl } : f)
       try {
@@ -164,10 +165,10 @@ function formatPhone(v: string) {
         }
       } catch {}
 
-      setAvatarStatus({ msg: '✓ 완료! 홈으로 이동 중...', ok: true })
+      setAvatarStatus({ msg: '✓ ' + tx.profile.avatarDone, ok: true })
       setTimeout(() => { window.location.href = '/dashboard' }, 2000)
     } catch (err: any) {
-      setAvatarStatus({ msg: '✗ ' + (err.message ?? '오류'), ok: false })
+      setAvatarStatus({ msg: '✗ ' + (err.message ?? tx.common.error), ok: false })
     }
 
     setAvatarUploading(false)
@@ -206,7 +207,7 @@ function formatPhone(v: string) {
     }).eq('id', form.userId)
 
     setSaving(false)
-    if (error) { setSaveError('저장 실패: ' + error.message) }
+    if (error) { setSaveError(tx.profile.saveFailed + ': ' + error.message) }
     else { setSaved(true); setIsDirty(false); router.refresh() }
   }
 
@@ -264,102 +265,22 @@ function formatPhone(v: string) {
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(255,111,60,0.07)', border: '1px solid rgba(255,111,60,0.15)', borderRadius: 12 }}>
-            <span style={{ fontSize: 15 }}>🏢</span>
-            <span style={{ fontSize: 12, color: '#D84A1E', fontWeight: 600 }}>{tx.profile.bodyInfoNote}</span>
+          {/* 공개 범위가 다른 칸을 한 화면에 섞어두면 어디까지 보이는지 칸마다
+              다시 확인해야 한다. "누구나 보는 것"과 "기획사만 보는 것"을 두
+              덩어리로 완전히 갈라놓고, 공개 범위는 덩어리마다 한 번만 적는다. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 4 }}>
+            <Globe size={16} strokeWidth={2.2} color="#2F7A4F" />
+            <span style={{ fontSize: 16, fontWeight: 900, color: '#241C15' }}>{tx.profile.publicProfile}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#2F7A4F', background: 'rgba(47,122,79,0.1)', padding: '3px 8px', borderRadius: 6 }}>{tx.profile.publicBadge}</span>
           </div>
+          <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-8px 0 0', lineHeight: 1.5 }}>
+            {tx.profile.publicDesc}
+          </p>
 
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.basicInfo}</p>
-            <div className="flex flex-col gap-3">
-              <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
-                placeholder={tx.profile.nameRequired} required style={inputStyle} />
-              <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>{tx.profile.birthDate}</span>
-                <input type="date" value={birthDate} onChange={e => updateForm(f => ({ ...f, birthDate: e.target.value }))}
-                  style={{ border: 'none', outline: 'none', fontSize: 15, color: '#241C15', background: 'transparent', width: '100%', padding: 0, colorScheme: 'dark' }} />
-              </div>
-              <select value={gender} onChange={e => updateForm(f => ({ ...f, gender: e.target.value }))} style={inputStyle}>
-                <option value="">{tx.profile.selectGender}</option>
-                <option value="male">{tx.profile.genderMale}</option>
-                <option value="female">{tx.profile.genderFemale}</option>
-                <option value="other">{tx.profile.genderOther}</option>
-              </select>
-              <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
-                <option value="">{tx.profile.selectNationality}</option>
-                <optgroup label="아시아">
-                  <option value="대한민국">대한민국</option>
-                  <option value="조선민주주의인민공화국">북한</option>
-                  <option value="중국">중국</option>
-                  <option value="일본">일본</option>
-                  <option value="대만">대만</option>
-                  <option value="홍콩">홍콩</option>
-                  <option value="태국">태국</option>
-                  <option value="베트남">베트남</option>
-                  <option value="필리핀">필리핀</option>
-                  <option value="인도네시아">인도네시아</option>
-                  <option value="말레이시아">말레이시아</option>
-                  <option value="싱가포르">싱가포르</option>
-                  <option value="미얀마">미얀마</option>
-                  <option value="캄보디아">캄보디아</option>
-                  <option value="몽골">몽골</option>
-                  <option value="인도">인도</option>
-                  <option value="파키스탄">파키스탄</option>
-                  <option value="방글라데시">방글라데시</option>
-                  <option value="카자흐스탄">카자흐스탄</option>
-                  <option value="우즈베키스탄">우즈베키스탄</option>
-                </optgroup>
-                <optgroup label="북미/남미">
-                  <option value="미국">미국</option>
-                  <option value="캐나다">캐나다</option>
-                  <option value="멕시코">멕시코</option>
-                  <option value="브라질">브라질</option>
-                  <option value="아르헨티나">아르헨티나</option>
-                  <option value="콜롬비아">콜롬비아</option>
-                  <option value="칠레">칠레</option>
-                  <option value="페루">페루</option>
-                </optgroup>
-                <optgroup label="유럽">
-                  <option value="영국">영국</option>
-                  <option value="프랑스">프랑스</option>
-                  <option value="독일">독일</option>
-                  <option value="스페인">스페인</option>
-                  <option value="이탈리아">이탈리아</option>
-                  <option value="포르투갈">포르투갈</option>
-                  <option value="네덜란드">네덜란드</option>
-                  <option value="벨기에">벨기에</option>
-                  <option value="스웨덴">스웨덴</option>
-                  <option value="노르웨이">노르웨이</option>
-                  <option value="덴마크">덴마크</option>
-                  <option value="핀란드">핀란드</option>
-                  <option value="폴란드">폴란드</option>
-                  <option value="러시아">러시아</option>
-                  <option value="우크라이나">우크라이나</option>
-                </optgroup>
-                <optgroup label="오세아니아/중동/아프리카">
-                  <option value="호주">호주</option>
-                  <option value="뉴질랜드">뉴질랜드</option>
-                  <option value="사우디아라비아">사우디아라비아</option>
-                  <option value="아랍에미리트">아랍에미리트</option>
-                  <option value="이스라엘">이스라엘</option>
-                  <option value="터키">터키</option>
-                  <option value="이란">이란</option>
-                  <option value="이집트">이집트</option>
-                  <option value="남아프리카공화국">남아프리카공화국</option>
-                  <option value="나이지리아">나이지리아</option>
-                </optgroup>
-              </select>
-            </div>
-          </div>
-
-          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12 }}>{tx.profile.bodyInfo}</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
-                placeholder={tx.profile.heightPlaceholder} style={inputStyle} />
-              <input type="number" value={weight} onChange={e => updateForm(f => ({ ...f, weight: e.target.value }))}
-                placeholder={tx.profile.weightPlaceholder} style={inputStyle} />
-            </div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.nameLabel}</p>
+            <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
+              placeholder={tx.profile.nameRequired} required style={inputStyle} />
           </div>
 
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
@@ -379,42 +300,80 @@ function formatPhone(v: string) {
           </div>
 
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0 }}>{tx.profile.aboutMe}</p>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#2F7A4F', fontWeight: 700, background: 'rgba(47,122,79,0.08)', padding: '3px 8px', borderRadius: 6 }}><Globe size={11} strokeWidth={2.2} /> 누구나 볼 수 있어요</span>
-            </div>
-            {/* 주의는 칸 위에 둔다. 아래에 두면 다 쓰고 나서야 읽는다.
-                placeholder에 "기획사 담당자에게"라고 적혀 있어서 기획사만 본다고
-                읽혔고, 그래서 여기에 연락처를 적는 일이 생겼다. */}
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: '0 0 8px' }}>{tx.profile.aboutMe}</p>
+            {/* 주의는 칸 위에 둔다. 아래에 두면 다 쓰고 나서야 읽는다. */}
             <p style={{ fontSize: 12, color: '#8A7F6E', margin: '0 0 10px', lineHeight: 1.5 }}>
-              지망생·기획사 누구나 볼 수 있는 글이에요. <strong style={{ color: '#D84A1E' }}>연락처는 여기 적지 말고 아래 칸에</strong> 적어주세요.
+              <strong style={{ color: '#D84A1E' }}>{tx.profile.bioWarnStrong}</strong> {tx.profile.bioWarnRest}
             </p>
             <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
               placeholder={tx.profile.bioPlaceholderLong} rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
           </div>
 
-          {/* 연락처 — 지망생이 자기소개에 인스타를 적는 건 적을 데가 없어서다.
-              칸을 만들어주고 "1차 합격한 곳만 본다"를 알려주면 거기 쓴다. */}
-          <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0 }}>연락처</p>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#D84A1E', fontWeight: 700, background: 'rgba(216,74,30,0.08)', padding: '3px 8px', borderRadius: 6 }}>
-                <Lock size={11} strokeWidth={2.2} /> 1차 합격한 기획사만
-              </span>
+          <div style={{ height: 1, background: 'rgba(36,28,21,0.1)', margin: '14px 0 4px' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <Lock size={16} strokeWidth={2.2} color="#D84A1E" />
+            <span style={{ fontSize: 16, fontWeight: 900, color: '#241C15' }}>{tx.profile.applyInfo}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#D84A1E', background: 'rgba(216,74,30,0.09)', padding: '3px 8px', borderRadius: 6 }}>{tx.profile.applyBadge}</span>
+          </div>
+          <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-8px 0 0', lineHeight: 1.5 }}>
+            {tx.profile.applyDesc}
+          </p>
+
+          <div style={{ background: 'rgba(255,111,60,0.05)', border: '1px solid rgba(255,111,60,0.16)', borderRadius: 24, padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+            <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.basicInfo}</p>
+              <div className="flex flex-col gap-3">
+                <div style={{ ...inputStyle, padding: '10px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>{tx.profile.birthDate}</span>
+                  <input type="date" value={birthDate} onChange={e => updateForm(f => ({ ...f, birthDate: e.target.value }))}
+                    style={{ border: 'none', outline: 'none', fontSize: 15, color: '#241C15', background: 'transparent', width: '100%', padding: 0, colorScheme: 'dark' }} />
+                </div>
+                <select value={gender} onChange={e => updateForm(f => ({ ...f, gender: e.target.value }))} style={inputStyle}>
+                  <option value="">{tx.profile.selectGender}</option>
+                  <option value="male">{tx.profile.genderMale}</option>
+                  <option value="female">{tx.profile.genderFemale}</option>
+                  <option value="other">{tx.profile.genderOther}</option>
+                </select>
+                <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
+                  <option value="">{tx.profile.selectNationality}</option>
+                  {COUNTRY_GROUPS.map(g => (
+                    <optgroup key={g.region} label={regionLabel(g.region, lang)}>
+                      {g.items.map(c => (
+                        <option key={c.code} value={c.ko}>{countryLabel(c, lang)}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
             </div>
-            <p style={{ fontSize: 12, color: '#8A7F6E', margin: '0 0 12px', lineHeight: 1.5 }}>
-              여기 적은 건 1차 합격시킨 기획사에게만 보여요. 다른 사람에게는 보이지 않습니다.
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
-              <input type="text" value={instagram}
-                onChange={e => updateForm(f => ({ ...f, instagram: e.target.value }))}
-                placeholder="인스타그램 아이디" style={{ ...inputStyle, flex: 1 }} />
+
+            <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12 }}>{tx.profile.bodyInfo}</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <input type="number" value={height} onChange={e => updateForm(f => ({ ...f, height: e.target.value }))}
+                  placeholder={tx.profile.heightPlaceholder} style={inputStyle} />
+                <input type="number" value={weight} onChange={e => updateForm(f => ({ ...f, weight: e.target.value }))}
+                  placeholder={tx.profile.weightPlaceholder} style={inputStyle} />
+              </div>
             </div>
-            <input type="text" inputMode="text" value={phone}
-              onChange={e => updateForm(f => ({ ...f, phone: formatPhone(e.target.value) }))}
-              placeholder="카톡 아이디나 전화번호 (선택)" style={inputStyle} />
+
+            {/* 지망생이 자기소개에 인스타를 적는 건 적을 데가 없어서다. 칸을 만들어주면 거기 쓴다. */}
+            <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: '0 0 12px' }}>{tx.profile.contact}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
+                <input type="text" value={instagram}
+                  onChange={e => updateForm(f => ({ ...f, instagram: e.target.value }))}
+                  placeholder={tx.profile.instaPlaceholder} style={{ ...inputStyle, flex: 1 }} />
+              </div>
+              <input type="text" inputMode="text" value={phone}
+                onChange={e => updateForm(f => ({ ...f, phone: formatPhone(e.target.value) }))}
+                placeholder={tx.profile.phonePlaceholder} style={inputStyle} />
+            </div>
+
           </div>
 
           {saveError && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{saveError}</p>}
@@ -430,9 +389,9 @@ function formatPhone(v: string) {
           <button type="button" onClick={() => setNotifModal(true)}
             style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(36,28,21,0.1)', color: notifPerm === 'denied' ? '#DC2626' : '#8A7F6E', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             {notifPerm === 'denied' ? <BellOff size={17} strokeWidth={1.8} /> : <BellRing size={17} strokeWidth={1.8} />}
-            알림 설정
+            {tx.profile.notifSettings}
             <span style={{ fontSize: 12, fontWeight: 600, marginLeft: 'auto', color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
-              {notifPerm === 'granted' ? '켜짐' : notifPerm === 'denied' ? '차단됨' : '꺼짐'}
+              {notifPerm === 'granted' ? tx.profile.notifStateOn : notifPerm === 'denied' ? tx.profile.notifStateBlocked : tx.profile.notifStateOff}
             </span>
           </button>
 
@@ -470,20 +429,20 @@ function formatPhone(v: string) {
                   }
                 </div>
                 <div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>알림 설정</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>{tx.profile.notifSettings}</div>
                   <div style={{ fontSize: 13, color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
-                    {notifPerm === 'granted' ? '알림이 켜져 있어요' : notifPerm === 'denied' ? '알림이 차단되어 있어요' : '알림이 꺼져 있어요'}
+                    {notifPerm === 'granted' ? tx.profile.notifDescOn : notifPerm === 'denied' ? tx.profile.notifDescBlocked : tx.profile.notifDescOff}
                   </div>
                 </div>
               </div>
 
               {notifPerm === 'denied' ? (
                 <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                  <p style={{ fontSize: 14, color: '#fca5a5', fontWeight: 700, marginBottom: 10 }}>브라우저 설정에서 직접 허용해주세요</p>
+                  <p style={{ fontSize: 14, color: '#fca5a5', fontWeight: 700, marginBottom: 10 }}>{tx.profile.notifAllowManually}</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { label: 'Chrome', desc: '주소창 왼쪽 자물쇠 🔒 → 알림 → 허용' },
-                      { label: 'Safari (iOS)', desc: '설정 앱 → Safari → kpick.app → 알림 허용' },
+                      { label: 'Chrome', desc: tx.profile.notifChromeGuide },
+                      { label: 'Safari (iOS)', desc: tx.profile.notifSafariGuide },
                     ].map(item => (
                       <div key={item.label}>
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{item.label}</span>
@@ -495,7 +454,7 @@ function formatPhone(v: string) {
               ) : notifPerm === 'granted' ? (
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ background: 'rgba(255,111,60,0.08)', border: '1px solid rgba(255,111,60,0.2)', borderRadius: 16, padding: '16px 18px' }}>
-                    <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
+                    <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>{tx.profile.notifGrantedInfo}</p>
                   </div>
                   {/* 끌 방법이 없으면 받기 싫은 사람은 앱을 지운다. OS 권한 자체는
                       되돌릴 수 없지만, 발송 주소를 지우면 실제로 멈춘다. */}
@@ -508,7 +467,7 @@ function formatPhone(v: string) {
                     border: '1px solid rgba(36,28,21,0.14)', background: '#FFFFFF',
                     color: '#8A7F6E', fontSize: 14, fontWeight: 700, cursor: 'pointer',
                   }}>
-                    알림 끄기
+                    {tx.profile.notifTurnOff}
                   </button>
                 </div>
               ) : (
@@ -521,19 +480,19 @@ function formatPhone(v: string) {
                         new Promise<'timeout'>(r => setTimeout(() => r('timeout'), 15000)),
                       ])
                       if (ok === 'timeout') {
-                        setNotifError('알림 설정이 응답하지 않아요. 앱을 껐다 켜고 다시 시도해주세요.')
+                        setNotifError(tx.profile.notifTimeout)
                         return
                       }
                       setNotifPerm(ok ? 'granted' : 'denied')
-                      if (!ok) setNotifError('알림을 켜지 못했어요. 아이폰 설정 → 알림 → Krookie에서 허용해주세요.')
+                      if (!ok) setNotifError(tx.profile.notifIosFail)
                       return
                     }
                     try {
                       const perm = await Notification.requestPermission()
                       setNotifPerm(perm)
-                      if (perm !== 'granted') setNotifError('브라우저에서 알림이 차단됐어요.')
+                      if (perm !== 'granted') setNotifError(tx.profile.notifBrowserBlocked)
                     } catch {
-                      setNotifError('이 브라우저에서는 알림을 켤 수 없어요.')
+                      setNotifError(tx.profile.notifUnsupported)
                     }
                   }} style={{
                     width: '100%', padding: '15px',
@@ -541,7 +500,7 @@ function formatPhone(v: string) {
                     border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer',
                     boxShadow: '0 4px 16px rgba(255,111,60,0.35)',
                   }}>
-                    알림 켜기
+                    {tx.profile.notifTurnOn}
                   </button>
                   {notifError && (
                     <p style={{ fontSize: 13, color: '#DC2626', textAlign: 'center', margin: '10px 0 0', lineHeight: 1.5 }}>
@@ -552,7 +511,7 @@ function formatPhone(v: string) {
               )}
 
               <button onClick={() => setNotifModal(false)} style={{ width: '100%', padding: '13px', background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                닫기
+                {tx.common.close}
               </button>
             </div>
           </>

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { Bell, X, Share, PlusSquare, Star, MessageCircle, ClipboardList } from 'lucide-react'
 import { isNativeApp, isIosWebTab } from '@/lib/capacitor'
 import { enableNativeNotifications, nativeNotifState, refreshNativeToken } from '@/lib/pushNative'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -67,6 +69,8 @@ function storeUrl(): string {
 const APP_STORE_URL = 'https://apps.apple.com/kr/app/id6791017827'
 
 export default function PushSubscribe() {
+  const { lang } = useLang()
+  const tx = useT(lang)
   const [show, setShow] = useState(false)
   const [mode, setMode] = useState<Mode>('permission')
   const [showHomeGuide, setShowHomeGuide] = useState(false)
@@ -188,20 +192,20 @@ export default function PushSubscribe() {
             <Bell size={24} strokeWidth={1.8} color="white" />
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>기획사 알림 받기</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>{tx.push.title}</div>
             <div style={{ fontSize: 13, color: '#8A7F6E' }}>
-              {mode === 'ios' ? '한 단계만 더 하면 받을 수 있어요'
-                : mode === 'app' ? '앱으로 받으면 놓치지 않아요'
-                : '놓치면 아쉬운 연락이 올 수 있어요'}
+              {mode === 'ios' ? tx.push.subIos
+                : mode === 'app' ? tx.push.subApp
+                : tx.push.subWeb}
             </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
           {[
-            { Icon: Star, text: '기획사가 내 영상에 관심을 표시했을 때' },
-            { Icon: MessageCircle, text: '기획사 담당자가 채팅을 보냈을 때' },
-            { Icon: ClipboardList, text: '새 오디션 공고가 올라왔을 때' },
+            { Icon: Star, text: tx.onboarding.notifPoint1 },
+            { Icon: MessageCircle, text: tx.onboarding.notifPoint2 },
+            { Icon: ClipboardList, text: tx.onboarding.notifPoint3 },
           ].map(({ Icon, text }) => (
             <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Icon size={17} strokeWidth={1.8} color="#D84A1E" style={{ flexShrink: 0 }} />
@@ -219,7 +223,7 @@ export default function PushSubscribe() {
             cursor: 'pointer', marginBottom: 10,
             boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
           }}>
-            앱 받기
+            {tx.push.getApp}
           </a>
         ) : mode === 'ios' ? (
           <>
@@ -231,7 +235,7 @@ export default function PushSubscribe() {
               cursor: 'pointer', marginBottom: 10,
               boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
             }}>
-              앱 설치하고 알림 받기
+              {tx.push.installAndNotify}
             </a>
 
             <button onClick={() => setShowHomeGuide(v => !v)} style={{
@@ -240,7 +244,7 @@ export default function PushSubscribe() {
               color: '#6B6355', fontSize: 14, fontWeight: 600,
               cursor: 'pointer', marginBottom: showHomeGuide ? 12 : 10,
             }}>
-              앱 없이 홈 화면에 추가하기
+              {tx.push.addToHomeInstead}
             </button>
 
             {showHomeGuide && (
@@ -251,14 +255,14 @@ export default function PushSubscribe() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Share size={16} strokeWidth={1.8} color="#8A7F6E" style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: '#6B6355' }}>사파리 아래쪽 공유 버튼을 누르고</span>
+                  <span style={{ fontSize: 13, color: '#6B6355' }}>{tx.onboarding.iosStep1}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <PlusSquare size={16} strokeWidth={1.8} color="#8A7F6E" style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: '#6B6355' }}>[홈 화면에 추가]를 선택하세요</span>
+                  <span style={{ fontSize: 13, color: '#6B6355' }}>{tx.onboarding.iosStep2}</span>
                 </div>
                 <div style={{ fontSize: 12, color: '#8A7F6E', paddingLeft: 26 }}>
-                  홈 화면에서 열면 알림을 켤 수 있어요
+                  {tx.push.homeScreenHint}
                 </div>
               </div>
             )}
@@ -272,7 +276,7 @@ export default function PushSubscribe() {
             cursor: 'pointer', marginBottom: 10,
             boxShadow: '0 4px 16px rgba(216,74,30,0.3)',
           }}>
-            알림 켜기
+            {tx.profile.notifTurnOn}
           </button>
         )}
 
@@ -282,7 +286,7 @@ export default function PushSubscribe() {
           color: '#8A7F6E', fontSize: 14, fontWeight: 600,
           cursor: 'pointer',
         }}>
-          나중에
+          {tx.onboarding.later}
         </button>
       </div>
 

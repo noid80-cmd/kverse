@@ -169,7 +169,7 @@ export default function LoginPage() {
         router.push('/auth/callback')
       } catch (e) {
         if (!isAppleCancel(e)) {
-          setError(e instanceof Error ? e.message : 'Apple 로그인에 실패했어요.')
+          setError(e instanceof Error ? e.message : tx.appleLoginFailed)
         }
         setLoading(false)
       }
@@ -196,7 +196,7 @@ export default function LoginPage() {
 
     if (oauthError || !data?.url) {
       setLoading(false)
-      setError(oauthError?.message ?? '로그인을 시작하지 못했어요. 다시 시도해주세요.')
+      setError(oauthError?.message ?? tx.oauthStartFailed)
       return
     }
 
@@ -302,8 +302,8 @@ export default function LoginPage() {
               background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)',
               fontSize: 14, fontWeight: 700, color: '#15803D', lineHeight: 1.6,
             }}>
-              계정이 삭제되었습니다.<br />
-              <span style={{ fontWeight: 500, fontSize: 13 }}>그동안 이용해 주셔서 감사합니다.</span>
+              {tx.accountDeleted}<br />
+              <span style={{ fontWeight: 500, fontSize: 13 }}>{tx.accountDeletedThanks}</span>
             </div>
           )}
           <p style={{ fontSize: 13, color: 'rgba(36,28,21,0.55)', fontWeight: 500, letterSpacing: 0.3 }}>
@@ -341,13 +341,13 @@ export default function LoginPage() {
               background: 'rgba(216,74,30,0.07)', border: '1px solid rgba(216,74,30,0.18)',
               fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6,
             }}>
-              앱을 업데이트하면 Apple·구글 로그인이 정상 동작합니다.
+              {tx.updateAppLogin}
               <a href={storeUrl()} target="_blank" rel="noopener noreferrer"
                 style={{ color: '#D84A1E', fontWeight: 800, textDecoration: 'underline', marginLeft: 4 }}>
-                업데이트하기
+                {tx.updateBtn}
               </a>
               <br />
-              지금 바로 들어가시려면 아래 이메일로 진행해주세요.
+              {tx.useEmailLogin}
               <br />
               <span style={{ color: '#A5765A' }}>Update the app to fix Apple/Google sign-in, or use email below.</span>
             </div>
@@ -425,12 +425,12 @@ export default function LoginPage() {
             <div style={{ textAlign: 'center', marginTop: 14 }}>
               <button type="button" onClick={sendOtp} disabled={otpBusy}
                 style={{ background: 'none', border: 'none', fontSize: 13, color: '#D84A1E', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
-                {otpBusy ? '보내는 중...' : tx.forgotPassword}
+                {otpBusy ? tx.sending : tx.forgotPassword}
               </button>
               {needEmail && (
                 <div style={{ fontSize: 12.5, color: '#8A4B2E', marginTop: 8, lineHeight: 1.6 }}>
-                  위에 이메일을 먼저 입력해주세요.<br />
-                  그 주소로 인증 코드를 보내드려요.
+                  {tx.otpEnterEmail}<br />
+                  {tx.otpWillSend}
                 </div>
               )}
             </div>
@@ -449,13 +449,13 @@ export default function LoginPage() {
               {otpError && <div style={{ fontSize: 12.5, color: '#DC2626', marginTop: 8 }}>{otpError}</div>}
               <button type="button" onClick={sendOtp} disabled={otpBusy}
                 style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, fontSize: 12, color: '#8A7F6E', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                코드 다시 받기
+                {tx.otpResend}
               </button>
             </div>
           )}
 
           <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(36,28,21,0.45)', marginTop: 14 }}>
-            로그인 시 <a href="/terms" target="_blank" style={{ color: 'rgba(36,28,21,0.6)', textDecoration: 'underline' }}>이용약관 및 커뮤니티 가이드라인</a>에 동의하는 것으로 간주됩니다.
+            {tx.termsOnLogin.split('{terms}')[0]}<a href="/terms" target="_blank" style={{ color: 'rgba(36,28,21,0.6)', textDecoration: 'underline' }}>{tx.termsLink}</a>{tx.termsOnLogin.split('{terms}')[1]}
           </p>
         </div>
 

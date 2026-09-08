@@ -6,6 +6,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { sendPush } from '@/lib/notify'
 import { Trash2, Building2, Link2, ArrowUp } from 'lucide-react'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 type Message = { id: string; content: string; sender_id: string; created_at: string; is_read: boolean }
 type Conversation = {
@@ -21,6 +23,8 @@ type AgencyCard = {
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const { lang } = useLang()
+  const tx = useT(lang)
   const [conv, setConv] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[] | null>(null)
   const [input, setInput] = useState('')
@@ -106,13 +110,13 @@ export default function ChatPage() {
     if (error) {
       setMessages(prev => (prev ?? []).filter(m => m.id !== tempId))
       setInput(content)
-      alert('전송 실패: ' + error.message)
+      alert(tx.chat.sendFailed + ': ' + error.message)
     } else if (conv) {
       const recipientId = myId === conv.talent_id ? conv.agency_member_id : conv.talent_id
       if (!activeUsers.has(recipientId)) {
         const senderName = myId === conv.talent_id
-          ? (conv.talent?.name ?? '지망생')
-          : (agencyCard?.name || conv.agency_member?.name || '기획사')
+          ? (conv.talent?.name ?? tx.common.talent)
+          : (agencyCard?.name || conv.agency_member?.name || tx.auditions.agencyLabel)
         sendPush({ userId: recipientId, title: `💬 ${senderName}`, body: content.length > 60 ? content.slice(0, 60) + '...' : content, url: `/chat/${id}` })
       }
     }
@@ -126,7 +130,7 @@ export default function ChatPage() {
   }
 
   async function deleteConversation() {
-    if (!confirm('내 채팅 목록에서 삭제할까요?')) return
+    if (!confirm(tx.reactions.deleteConfirm)) return
     setDeleting(true)
     const isAgency = conv && myId === conv.agency_member_id
     await supabase.from('conversations')
@@ -187,7 +191,7 @@ export default function ChatPage() {
               {conv && myId === conv.talent_id && agencyCard ? agencyCard.name : other?.name ?? '...'}
             </span>
             {agencyCard?.is_verified && conv && myId === conv.talent_id && (
-              <span style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+              <span style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>{tx.common.verified}</span>
             )}
           </div>
           {conv && myId === conv.talent_id && agencyCard && other?.name && (
@@ -207,7 +211,7 @@ export default function ChatPage() {
           )}
           <button onClick={deleteConversation} disabled={deleting}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: 10, color: '#8A7F6E', display: 'flex', alignItems: 'center' }}
-            title="대화 삭제">
+            title={tx.chat.deleteChat}>
             <Trash2 size={18} strokeWidth={2} />
           </button>
         </div>
@@ -237,10 +241,10 @@ export default function ChatPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
                   <span style={{ fontWeight: 900, color: '#241C15', fontSize: 16 }}>{agencyCard.name}</span>
                   {agencyCard.is_verified && (
-                    <span style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>인증</span>
+                    <span style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>{tx.common.verified}</span>
                   )}
                 </div>
-                <div style={{ fontSize: 11, color: '#D84A1E', fontWeight: 600 }}>기획사</div>
+                <div style={{ fontSize: 11, color: '#D84A1E', fontWeight: 600 }}>{tx.auditions.agencyLabel}</div>
               </div>
             </div>
             {agencyCard.description && (
@@ -256,7 +260,7 @@ export default function ChatPage() {
         )}
 
         {messages !== null && messages.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#8A7F6E', fontSize: 13, marginTop: 40 }}>첫 메시지를 보내보세요</div>
+          <div style={{ textAlign: 'center', color: '#8A7F6E', fontSize: 13, marginTop: 40 }}>{tx.chat.firstMessage}</div>
         )}
         {(messages ?? []).map(msg => {
           const isMine = msg.sender_id === myId
@@ -282,7 +286,7 @@ export default function ChatPage() {
               {isSelected && (
                 <button onClick={e => { e.stopPropagation(); deleteMessage(msg.id) }}
                   style={{ marginTop: 4, fontSize: 12, color: '#DC2626', background: '#FFFFFF', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 700 }}>
-                  삭제
+                  {tx.common.delete}
                 </button>
               )}
             </div>
@@ -300,14 +304,14 @@ export default function ChatPage() {
       }}>
         <input value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-          placeholder="메시지 입력..."
+          placeholder={tx.chat.inputPlaceholder}
           style={{ flex: 1, background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.12)', borderRadius: 22, padding: '11px 16px', fontSize: 15, color: '#241C15', outline: 'none' }}
         />
         {/* 빈 상태의 배경이 흰색인데 화살표도 흰색이라, 아무것도 입력하지 않은
             대화방에서는 버튼이 통째로 사라져 보였다. 처음 들어온 사람 눈엔
             보낼 방법이 없는 화면이다. */}
         <button onClick={sendMessage} disabled={!input.trim() || sending}
-          aria-label="보내기"
+          aria-label={tx.chat.send}
           style={{
             width: 44, height: 44, borderRadius: 14, border: 'none', flexShrink: 0,
             cursor: input.trim() ? 'pointer' : 'default',

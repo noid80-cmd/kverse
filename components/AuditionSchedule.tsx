@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { CalendarDays } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { daysUntilLaunch, roundOpensAt, roundDeadline, currentRoundNo } from '@/lib/launch'
+import { useLang } from '@/lib/i18n/context'
+import { useT } from '@/lib/i18n/translations'
 
 // 오디션은 매주 한 곳씩 순서대로 열린다 — 월요일 저녁 6시에 열려 그 주
 // 일요일 밤 11시 59분에 닫는다(1회차만 10/1 목요일에 열어 10/11에 닫는다).
@@ -30,6 +32,8 @@ function md(t: number): string {
 }
 
 export default function AuditionSchedule({ compact = false }: { compact?: boolean }) {
+  const { lang } = useLang()
+  const tx = useT(lang)
   const [rounds, setRounds] = useState<Round[]>([])
   const [loaded, setLoaded] = useState(false)
 
@@ -52,7 +56,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
           const ag = (r as unknown as { agency?: { name?: string; logo_url?: string } }).agency
           return {
             deadline: r.deadline as string,
-            title: (r.title as string) ?? '오디션',
+            title: (r.title as string) ?? tx.schedule.audition,
             status: (r.status as string) ?? 'active',
             agencyName: ag?.name ?? null,
             logo: ag?.logo_url ?? null,
@@ -79,7 +83,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
           <CalendarDays size={17} strokeWidth={2} color="#D84A1E" />
-          <span style={{ fontSize: 15.5, fontWeight: 900, color: '#241C15', letterSpacing: -0.2 }}>오디션 일정</span>
+          <span style={{ fontSize: 15.5, fontWeight: 900, color: '#241C15', letterSpacing: -0.2 }}>{tx.schedule.title}</span>
           {daysLeft > 0 && (
             <span style={{
               marginLeft: 'auto', fontSize: 11.5, fontWeight: 800, color: '#D84A1E',
@@ -88,7 +92,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
           )}
         </div>
         <div style={{ fontSize: 12.5, color: '#8A7F6E', lineHeight: 1.55 }}>
-          매주 한 곳씩 · 월요일 저녁 6시 오픈 → 일요일 밤 마감
+          {tx.schedule.rhythm}
         </div>
       </div>
 
@@ -120,7 +124,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
                   fontSize: 11, fontWeight: 800, letterSpacing: 0.2,
                   color: live ? '#D84A1E' : past ? '#B0A89C' : '#8A7F6E', marginBottom: 1,
                 }}>
-                  {no}회차
+                  {tx.schedule.round.replace('{n}', String(no))}
                 </div>
                 <div style={{
                   fontSize: 13.5, fontWeight: 800,
@@ -160,7 +164,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
                   </>
                 ) : (
                   <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.32)' }}>
-                    {loaded ? '공고 준비 중' : ' '}
+                    {loaded ? tx.schedule.preparing : ' '}
                   </div>
                 )}
               </div>
@@ -171,7 +175,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
                   fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 7, flexShrink: 0,
                   background: past ? 'rgba(36,28,21,0.05)' : live ? 'rgba(34,197,94,0.13)' : 'rgba(255,111,60,0.12)',
                   color: past ? '#A69C8E' : live ? '#16a34a' : '#D84A1E',
-                }}>{past ? '마감' : live ? '진행 중' : '예정'}</span>
+                }}>{past ? tx.schedule.closed : live ? tx.schedule.live : tx.schedule.upcoming}</span>
               )}
             </div>
           )

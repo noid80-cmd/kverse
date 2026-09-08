@@ -156,7 +156,7 @@ function ReactionsContent() {
   async function deleteConv(convId: string) {
     if (!confirm(tx.reactions.deleteConfirm)) return
     const { error } = await supabase.from('conversations').update({ deleted_by_talent: true }).eq('id', convId)
-    if (error) { alert('삭제 실패: ' + error.message); return }
+    if (error) { alert(tx.common.deleteFailed + ': ' + error.message); return }
     setPageData(prev => {
       if (!prev) return prev
       const newData = { ...prev, convs: prev.convs.filter(c => c.id !== convId) }
@@ -258,7 +258,7 @@ function ReactionsContent() {
                   {tx.reactions.offerTitle}
                 </div>
                 <div style={{ fontSize: 17, fontWeight: 900, color: '#241C15', marginBottom: 10 }}>
-                  {o.agency?.name ?? '기획사'}
+                  {o.agency?.name ?? tx.auditions.agencyLabel}
                 </div>
                 <p style={{ fontSize: 14, color: '#5c5245', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: '0 0 12px' }}>
                   {o.message}
@@ -408,20 +408,20 @@ function ReactionsContent() {
                 }
               </div>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>알림 설정</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#241C15', marginBottom: 3 }}>{tx.profile.notifSettings}</div>
                 <div style={{ fontSize: 13, color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
-                  {notifPerm === 'granted' ? '알림이 켜져 있어요' : notifPerm === 'denied' ? '알림이 차단되어 있어요' : '알림이 꺼져 있어요'}
+                  {notifPerm === 'granted' ? tx.profile.notifDescOn : notifPerm === 'denied' ? tx.profile.notifDescBlocked : tx.profile.notifDescOff}
                 </div>
               </div>
             </div>
 
             {notifPerm === 'denied' ? (
               <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                <p style={{ fontSize: 14, color: '#fca5a5', fontWeight: 700, marginBottom: 10 }}>브라우저 설정에서 직접 허용해주세요</p>
+                <p style={{ fontSize: 14, color: '#fca5a5', fontWeight: 700, marginBottom: 10 }}>{tx.profile.notifAllowManually}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {[
-                    { label: 'Chrome', desc: '주소창 왼쪽 자물쇠 🔒 → 알림 → 허용' },
-                    { label: 'Safari (iOS)', desc: '설정 앱 → Safari → kpick.app → 알림 허용' },
+                    { label: 'Chrome', desc: tx.profile.notifChromeGuide },
+                    { label: 'Safari (iOS)', desc: tx.profile.notifSafariGuide },
                   ].map(item => (
                     <div key={item.label}>
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{item.label}</span>
@@ -432,7 +432,7 @@ function ReactionsContent() {
               </div>
             ) : notifPerm === 'granted' ? (
               <div style={{ background: 'rgba(255,111,60,0.08)', border: '1px solid rgba(255,111,60,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
+                <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>{tx.profile.notifGrantedInfo}</p>
               </div>
             ) : (
               <div style={{ marginBottom: 20 }}>
@@ -450,20 +450,20 @@ function ReactionsContent() {
                       new Promise<'timeout'>(r => setTimeout(() => r('timeout'), 15000)),
                     ])
                     if (ok === 'timeout') {
-                      setNotifError('알림 설정이 응답하지 않아요. 앱을 껐다 켜고 다시 시도해주세요.')
+                      setNotifError(tx.profile.notifTimeout)
                       return
                     }
                     setNotifPerm(ok ? 'granted' : 'denied')
-                    if (!ok) setNotifError('알림을 켜지 못했어요. 아이폰 설정 → 알림 → Krookie에서 허용해주세요.')
+                    if (!ok) setNotifError(tx.profile.notifIosFail)
                     return
                   }
                   try {
                     const perm = await Notification.requestPermission()
                     setNotifPerm(perm)
                     if (perm === 'granted') doSubscribe().catch(() => {})
-                    else setNotifError('브라우저에서 알림이 차단됐어요.')
+                    else setNotifError(tx.profile.notifBrowserBlocked)
                   } catch {
-                    setNotifError('이 브라우저에서는 알림을 켤 수 없어요.')
+                    setNotifError(tx.profile.notifUnsupported)
                   }
                 }} style={{
                   width: '100%', padding: '15px',
@@ -471,7 +471,7 @@ function ReactionsContent() {
                   border: 'none', borderRadius: 16, color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer',
                   boxShadow: '0 4px 16px rgba(255,111,60,0.35)',
                 }}>
-                  알림 켜기
+                  {tx.profile.notifTurnOn}
                 </button>
                 {notifError && (
                   <p style={{ fontSize: 13, color: '#DC2626', textAlign: 'center', margin: '10px 0 0', lineHeight: 1.5 }}>
@@ -482,7 +482,7 @@ function ReactionsContent() {
             )}
 
             <button onClick={() => setNotifModal(false)} style={{ width: '100%', padding: '13px', background: 'none', border: 'none', color: '#8A7F6E', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-              닫기
+              {tx.common.close}
             </button>
           </div>
         </>

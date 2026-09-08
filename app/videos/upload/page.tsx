@@ -58,7 +58,7 @@ export default function UploadPage() {
       setFacingMode('environment')
       setRecordMode(true)
     } catch {
-      setError('카메라 접근 권한이 필요해요.')
+      setError(tx.videos.cameraPermission)
     }
   }, [])
 
@@ -204,7 +204,7 @@ export default function UploadPage() {
     })
     if (!createRes.ok) {
       const err = await createRes.json().catch(() => ({}))
-      setError('업로드 준비 실패: ' + (err.error ?? `HTTP ${createRes.status}`))
+      setError(tx.videos.uploadPrepFailed + ': ' + (err.error ?? `HTTP ${createRes.status}`))
       return null
     }
     const { uploadId, key, publicUrl, partUrls } = await createRes.json()
@@ -227,7 +227,7 @@ export default function UploadPage() {
         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
       }
       if (!ok) {
-        setError('업로드 실패')
+        setError(tx.videos.uploadFailed)
         fetch('/api/r2-multipart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'abort', key, uploadId }) })
         return null
       }
@@ -240,7 +240,7 @@ export default function UploadPage() {
     })
     if (!completeRes.ok) {
       const err = await completeRes.json().catch(() => ({}))
-      setError('업로드 완료 실패: ' + (err.error ?? `HTTP ${completeRes.status}`))
+      setError(tx.videos.uploadCompleteFailed + ': ' + (err.error ?? `HTTP ${completeRes.status}`))
       return null
     }
     return publicUrl
@@ -248,7 +248,7 @@ export default function UploadPage() {
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
-    if (!file) { setError('영상 파일을 선택해주세요.'); return }
+    if (!file) { setError(tx.auditions.selectVideoError); return }
     setError(''); setUploading(true); setProgress(5)
 
     const supabase = createClient()
@@ -301,7 +301,7 @@ export default function UploadPage() {
     })
 
     setProgress(100)
-    if (dbError) { setError('저장 실패: ' + dbError.message); setUploading(false); return }
+    if (dbError) { setError(tx.profile.saveFailed + ': ' + dbError.message); setUploading(false); return }
 
     const { data: bms } = await supabase.from('bookmarks').select('agency_member_id').eq('talent_id', user.id).is('cancelled_at', null)
     if (bms && bms.length > 0) {
@@ -360,7 +360,7 @@ export default function UploadPage() {
               }
             </button>
             <div style={{ fontSize: 11, color: 'rgba(36,28,21,0.65)', fontWeight: 600 }}>
-              {recording ? '탭하면 중지' : '탭하면 녹화'}
+              {recording ? tx.videos.tapToStop : tx.videos.tapToRecord}
             </div>
           </div>
 
@@ -391,7 +391,7 @@ export default function UploadPage() {
           <input ref={fileRef} type="file" accept="video/*" onChange={e => {
             const f = e.target.files?.[0] ?? null
             if (f && f.size > MAX_SIZE_BYTES) {
-              setError(`파일 크기가 너무 커요. ${MAX_SIZE_MB}MB 이하로 올려주세요.`)
+              setError(tx.videos.fileTooBig.replace('{n}', String(MAX_SIZE_MB)))
               setFile(null); e.target.value = ''
             } else {
               setError(''); setFile(f)
@@ -404,9 +404,9 @@ export default function UploadPage() {
               <video src={preview} controls playsInline
                 style={{ width: '100%', display: 'block', background: '#000', maxHeight: 340, objectFit: 'contain' }} />
               <div style={{ display: 'flex', borderTop: '1px solid rgba(36,28,21,0.09)' }}>
-                <button type="button" onClick={startCamera} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(36,28,21,0.09)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>다시 촬영</button>
-                <button type="button" onClick={() => fileRef.current?.click()} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(36,28,21,0.09)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>파일 선택</button>
-                <button type="button" onClick={() => { setFile(null); setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null }) }} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>취소</button>
+                <button type="button" onClick={startCamera} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(36,28,21,0.09)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>{tx.videos.retake}</button>
+                <button type="button" onClick={() => fileRef.current?.click()} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderRight: '1px solid rgba(36,28,21,0.09)', color: '#8A7F6E', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>{tx.videos.selectFile}</button>
+                <button type="button" onClick={() => { setFile(null); setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null }) }} style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>{tx.common.cancel}</button>
               </div>
             </div>
           ) : (
@@ -420,8 +420,8 @@ export default function UploadPage() {
                 <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D84A1E' }}>
                   <Camera size={22} strokeWidth={1.8} />
                 </div>
-                지금 촬영하기
-                <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>후면 카메라로 녹화</span>
+                {tx.videos.recordNow}
+                <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>{tx.videos.rearCamera}</span>
               </button>
               <button type="button" onClick={() => fileRef.current?.click()} style={{
                 flex: 1, padding: '28px 12px', borderRadius: 20,
@@ -432,8 +432,8 @@ export default function UploadPage() {
                 <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(36,28,21,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Upload size={20} strokeWidth={1.8} />
                 </div>
-                파일 선택
-                <span style={{ fontSize: 11, color: '#C9B79E', fontWeight: 600 }}>갤러리에서 올리기</span>
+                {tx.videos.selectFile}
+                <span style={{ fontSize: 11, color: '#C9B79E', fontWeight: 600 }}>{tx.videos.fromGallery}</span>
               </button>
             </div>
           )}
@@ -494,7 +494,7 @@ export default function UploadPage() {
                 <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', transition: 'width 0.3s', borderRadius: 3 }} />
               </div>
               <p style={{ fontSize: 12, color: '#8A7F6E', marginTop: 6, textAlign: 'center' }}>
-                {stage === 'compressing' ? '영상 최적화 중...' : `${tx.videos.uploading} ${progress}%`}
+                {stage === 'compressing' ? tx.videos.optimizing : `${tx.videos.uploading} ${progress}%`}
               </p>
             </div>
           )}
