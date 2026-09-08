@@ -121,8 +121,8 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
     sendPush({
       userId: talentId,
-      title: '1차 합격 🎉',
-      body: `${agencyName || '기획사'}에서 메시지가 왔어요. 확인해보세요.`,
+      msgKey: 'passed',
+      params: { agency: agencyName || '기획사' },
       url: `/chat/${convId}`,
     })
 
@@ -155,8 +155,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
       if (!a.talent?.id) return
       sendPush({
         userId: a.talent.id,
-        title: '이번 회차 심사가 끝났어요',
-        body: '다음 오디션이 곧 열려요. 준비해두신 영상으로 바로 지원할 수 있어요.',
+        msgKey: 'reviewDone',
         url: '/dashboard/auditions',
       })
     })

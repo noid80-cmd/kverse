@@ -184,8 +184,8 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${admin.token}` },
       body: JSON.stringify({
         broadcast: true,
-        title: '새 오디션 공고',
-        body: `${body.title} 오디션이 올라왔어요!`,
+        msgKey: 'newAuditionPosted',
+        params: { title: body.title },
         url: '/dashboard/auditions',
       }),
     }).catch(() => {})

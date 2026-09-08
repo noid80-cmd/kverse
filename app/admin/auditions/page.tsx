@@ -302,8 +302,8 @@ ${at}에 자동으로 열리고 그때 알림이 나갑니다.`)
     await setStatus(a.id, 'active')
     sendPush({
       broadcast: true,
-      title: '새 오디션이 열렸어요',
-      body: a.title,
+      msgKey: 'newAudition',
+      params: { title: a.title },
       url: '/dashboard/auditions',
     })
   }

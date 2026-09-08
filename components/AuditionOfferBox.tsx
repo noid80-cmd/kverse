@@ -83,8 +83,8 @@ export default function AuditionOfferBox({
     setOpen(false)
     sendPush({
       userId: talentId,
-      title: '오디션 제안이 왔어요 🎬',
-      body: `${agencyName || '기획사'}에서 오디션 제안을 보냈어요.`,
+      msgKey: 'offer',
+      params: { agency: agencyName || '기획사' },
       url: '/reactions?tab=offers',
     })
   }

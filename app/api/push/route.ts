@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { sendFcm, fcmHealth } from '@/lib/fcm'
+import { DEFAULT_PUSH_LANG, isPushKey, normalizeLang, renderPush } from '@/lib/i18n/push'
+import type { Lang } from '@/lib/i18n/translations'
 
 export const dynamic = 'force-dynamic'
 
@@ -117,7 +119,7 @@ export async function POST(req: NextRequest) {
 
   webpush.setVapidDetails(`mailto:${process.env.VAPID_EMAIL}`, publicKey, privateKey)
 
-  const { userId, userIds, agencyId, auditionId, broadcast, title, body, url } = await req.json()
+  const { userId, userIds, agencyId, auditionId, broadcast, msgKey, params, title, body, url } = await req.json()
 
   // 전체 발송은 어드민만. 로그인만 하면 누구나 broadcast를 걸 수 있었다 —
   // 지망생 계정으로도 전 사용자에게 푸시가 나갔다. 대상을 지정한 발송은
@@ -171,20 +173,20 @@ export async function POST(req: NextRequest) {
 
   // 웹 푸시 구독과 앱(FCM) 토큰은 대상이 겹치지 않는다 — 스토어 앱에는 웹
   // 푸시가 아예 없고, 브라우저에는 FCM 토큰이 없다. 대상자 목록만 같다.
-  type Sub = { id: string; subscription: unknown }
-  type Tok = { id: string; token: string }
+  type Sub = { id: string; user_id: string; subscription: unknown }
+  type Tok = { id: string; user_id: string; token: string }
   const subs: Sub[] = []
   const tokens: Tok[] = []
 
   if (broadcast) {
     const [s, t] = await Promise.all([
       collect<Sub>((from, to) => {
-        let q = adminSupabase.from('push_subscriptions').select('id, subscription')
+        let q = adminSupabase.from('push_subscriptions').select('id, user_id, subscription')
         if (excludeIds.length > 0) q = q.not('user_id', 'in', `(${excludeIds.join(',')})`)
         return q.order('id').range(from, to)
       }),
       collect<Tok>((from, to) => {
-        let q = adminSupabase.from('device_tokens').select('id, token')
+        let q = adminSupabase.from('device_tokens').select('id, user_id, token')
         if (excludeIds.length > 0) q = q.not('user_id', 'in', `(${excludeIds.join(',')})`)
         return q.order('id').range(from, to)
       }),
@@ -195,10 +197,10 @@ export async function POST(req: NextRequest) {
     for (const ids of chunked(targetIds, ID_CHUNK)) {
       const [s, t] = await Promise.all([
         collect<Sub>((from, to) => adminSupabase
-          .from('push_subscriptions').select('id, subscription')
+          .from('push_subscriptions').select('id, user_id, subscription')
           .in('user_id', ids).order('id').range(from, to)),
         collect<Tok>((from, to) => adminSupabase
-          .from('device_tokens').select('id, token')
+          .from('device_tokens').select('id, user_id, token')
           .in('user_id', ids).order('id').range(from, to)),
       ])
       subs.push(...s)
@@ -208,13 +210,62 @@ export async function POST(req: NextRequest) {
   console.log('[push]', broadcast ? 'broadcast' : `대상 ${targetIds?.length ?? 0}명`,
     '- web:', subs.length, 'app:', tokens.length)
 
-  const payload = JSON.stringify({ title, body, url })
-  const [sent, fcm] = await Promise.all([
-    subs.length ? sendToSubs(subs, payload, publicKey, privateKey) : Promise.resolve(0),
-    tokens.length
-      ? sendFcm(tokens.map((t) => t.token), { title, body, url })
-      : Promise.resolve({ sent: 0, failed: 0, deadTokens: [] as string[] }),
-  ])
+  // 문구를 키로 받은 경우에만 언어별로 나눈다. 채팅 내용이나 관리자 공지처럼
+  // 사람이 쓴 글은 번역할 것이 없어서 예전처럼 한 덩어리로 보낸다.
+  type Batch = { title: string; body: string; subs: Sub[]; tokens: Tok[] }
+  let batches: Batch[]
+
+  if (isPushKey(msgKey)) {
+    const uids = [...new Set([...subs, ...tokens].map((r) => r.user_id).filter(Boolean))]
+    const langOf = new Map<string, Lang>()
+    for (const ids of chunked(uids, ID_CHUNK)) {
+      // lang 컬럼이 아직 없는 환경에서 전체 발송이 죽으면 안 된다 — 그 경우
+      // 조회만 실패하고 모두 기본 언어로 간다.
+      const { data, error } = await adminSupabase.from('profiles').select('id, lang').in('id', ids)
+      if (error) { console.warn('[push] lang 조회 실패, 기본 언어로 발송:', error.message); break }
+      for (const row of (data ?? []) as { id: string; lang: string | null }[]) {
+        langOf.set(row.id, normalizeLang(row.lang))
+      }
+    }
+
+    const byLang = new Map<Lang, Batch>()
+    const bucket = (uid: string) => {
+      const lang = langOf.get(uid) ?? DEFAULT_PUSH_LANG
+      let b = byLang.get(lang)
+      if (!b) {
+        const msg = renderPush(msgKey, lang, params ?? {})
+        b = { title: msg.title, body: msg.body, subs: [], tokens: [] }
+        byLang.set(lang, b)
+      }
+      return b
+    }
+    for (const sub of subs) bucket(sub.user_id).subs.push(sub)
+    for (const tok of tokens) bucket(tok.user_id).tokens.push(tok)
+    batches = [...byLang.values()]
+    console.log('[push]', msgKey, '언어', [...byLang.keys()].join(','))
+  } else {
+    batches = [{ title, body, subs, tokens }]
+  }
+
+  const results = await Promise.all(batches.map(async (b) => {
+    const payload = JSON.stringify({ title: b.title, body: b.body, url })
+    return Promise.all([
+      b.subs.length ? sendToSubs(b.subs, payload, publicKey, privateKey) : Promise.resolve(0),
+      b.tokens.length
+        ? sendFcm(b.tokens.map((t) => t.token), { title: b.title, body: b.body, url })
+        : Promise.resolve({ sent: 0, failed: 0, deadTokens: [] as string[] }),
+    ])
+  }))
+
+  const sent = results.reduce((n, [web]) => n + web, 0)
+  const fcm = results.reduce(
+    (acc, [, f]) => ({
+      sent: acc.sent + f.sent,
+      failed: acc.failed + f.failed,
+      deadTokens: [...acc.deadTokens, ...f.deadTokens],
+    }),
+    { sent: 0, failed: 0, deadTokens: [] as string[] },
+  )
 
   // 죽은 토큰을 안 지우면 계속 쌓여 발송이 느려진다
   if (fcm.deadTokens.length > 0) {

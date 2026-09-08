@@ -113,17 +113,20 @@ export async function GET(req: NextRequest) {
 
   // 같은 문구를 받을 사람끼리 묶어서 한 번에 보낸다. 보통 공고가 한 개라
   // 그룹도 한두 개다.
-  const groups = new Map<string, { title: string; body: string; ids: string[] }>()
+  // 문구는 서버가 수신자 언어로 만든다. 여기서는 "같은 내용을 받을 사람"만
+  // 묶으면 되므로, 완성된 문장이 아니라 재료로 묶는다.
+  type Group = { msgKey: 'deadlineToday' | 'deadlineTomorrow'; first: string; moreCount: number; ids: string[] }
+  const groups = new Map<string, Group>()
   for (const [uid, mine] of pending) {
     const urgent = mine.today.length > 0
     const list = urgent ? mine.today : mine.tomorrow
-    const extra = list.length > 1 ? ` 외 ${list.length - 1}개` : ''
-    const title = urgent ? '오늘 밤 마감이에요' : '내일 마감이에요'
-    const body = urgent
-      ? `${list[0]}${extra} 지원이 오늘 밤 11시 59분에 마감돼요.`
-      : `${list[0]}${extra} 지원, 내일까지예요. 영상 하나면 지원할 수 있어요.`
-    const key = `${title}|${body}`
-    if (!groups.has(key)) groups.set(key, { title, body, ids: [] })
+    const g: Omit<Group, 'ids'> = {
+      msgKey: urgent ? 'deadlineToday' : 'deadlineTomorrow',
+      first: list[0],
+      moreCount: list.length - 1,
+    }
+    const key = `${g.msgKey}|${g.first}|${g.moreCount}`
+    if (!groups.has(key)) groups.set(key, { ...g, ids: [] })
     groups.get(key)!.ids.push(uid)
   }
 
@@ -131,7 +134,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ok: true, dry: true, today, tomorrow,
       auditions: auditions.map(a => ({ title: a.title, deadline: a.deadline })),
-      groups: [...groups.values()].map(g => ({ title: g.title, body: g.body, 대상: g.ids.length })),
+      groups: [...groups.values()].map(g => ({ msgKey: g.msgKey, first: g.first, 외: g.moreCount, 대상: g.ids.length })),
       notified: pending.size,
     })
   }
@@ -143,8 +146,8 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
       body: JSON.stringify({
         userIds: g.ids,
-        title: g.title,
-        body: g.body,
+        msgKey: g.msgKey,
+        params: { first: g.first, moreCount: g.moreCount },
         url: '/dashboard/auditions',
       }),
     })

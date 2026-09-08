@@ -103,7 +103,7 @@ export default function TalentPublicProfilePage() {
     if (data) {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
-      sendPush({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' })
+      sendPush({ userId: id, msgKey: 'chatRequest', params: { agency: agName }, url: '/reactions' })
       router.push(`/chat/${data.id}`)
       return
     }

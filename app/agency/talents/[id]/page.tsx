@@ -124,7 +124,7 @@ export default function TalentProfilePage() {
     } else {
       await supabase.from('bookmarks').insert({ agency_member_id: myId, talent_id: id })
       setBookmarked(true)
-      sendPush({ userId: id, title: '관심 기획사 +1', body: `${agencyName}이(가) 관심 지망생으로 등록했어요`, url: '/reactions?tab=bookmarks' })
+      sendPush({ userId: id, msgKey: 'bookmarked', params: { agency: agencyName }, url: '/reactions?tab=bookmarks' })
     }
   }
 
@@ -136,7 +136,7 @@ export default function TalentProfilePage() {
     if (data) {
       const { data: ag } = await supabase.from('agency_members').select('agencies(name)').eq('profile_id', myId).single()
       const agName = (ag?.agencies as unknown as { name: string } | null)?.name ?? '기획사'
-      sendPush({ userId: id, title: '채팅 요청', body: `${agName}에서 채팅을 시작했어요`, url: '/reactions' })
+      sendPush({ userId: id, msgKey: 'chatRequest', params: { agency: agName }, url: '/reactions' })
       router.push(`/chat/${data.id}`)
       return
     }

@@ -111,8 +111,8 @@ export async function GET(req: NextRequest) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
         body: JSON.stringify({
           broadcast: true,
-          title: '새 오디션이 열렸어요',
-          body: a.title as string,
+          msgKey: 'newAudition',
+          params: { title: a.title as string },
           url: '/dashboard/auditions',
         }),
       })
@@ -192,8 +192,7 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
       body: JSON.stringify({
         userId,
-        title: '이번 회차 심사가 끝났어요',
-        body: '다음 오디션이 곧 열려요. 준비해두신 영상으로 바로 지원할 수 있어요.',
+        msgKey: 'reviewDone',
         url: '/dashboard/auditions',
       }),
     })
