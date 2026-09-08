@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { isNativeAppAsync } from '@/lib/capacitor'
 import Link from 'next/link'
-import { LANGS, LANG_LABELS, type Lang } from '@/lib/i18n/translations'
+import { LANGS, LANG_LABELS, useT, type Lang } from '@/lib/i18n/translations'
+import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/stores'
 import LiveTicker from '@/components/LiveTicker'
 import AuditionCountdown from '@/components/AuditionCountdown'
 import WelcomeCarousel from '@/components/WelcomeCarousel'
@@ -220,6 +221,7 @@ export default function LandingClient({ stats = {} }: { stats?: LiveStats }) {
   const [showWelcome, setShowWelcome] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const tx = t[lang]
+  const tg = useT(lang)
   const ticker = fillTicker(lang, stats)
 
   function changeLang(l: Lang) {
@@ -435,6 +437,22 @@ export default function LandingClient({ stats = {} }: { stats?: LiveStats }) {
             <Link href="/signup" style={{ background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', fontWeight: 700, fontSize: 17, padding: '18px 48px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 4px 24px rgba(216,74,30,0.35)', display: 'inline-block' }}>
               {tx.ctaStart}
             </Link>
+
+            {/* SNS 프로필 링크가 이 페이지로 들어온다. 앱을 받으러 온 사람이
+                여기서 갈 곳이 없으면 그대로 나간다. */}
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 13, color: '#8A7F6E', fontWeight: 600 }}>{tg.push.getApp}</span>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'inline-block', padding: '13px 26px', borderRadius: 14, background: '#241C15', color: '#FFF8E7', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
+                  App Store
+                </a>
+                <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'inline-block', padding: '13px 26px', borderRadius: 14, background: '#241C15', color: '#FFF8E7', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
+                  Google Play
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 
