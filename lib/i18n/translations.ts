@@ -279,7 +279,7 @@ const t = {
     genderOther:     ['기타', 'Other', 'その他', '其他', '其他', 'อื่นๆ', 'Lainnya', 'Khác', 'Iba pa', 'Otro'],
     heightPlaceholder: ['키 (cm)', 'Height (cm)', '身長 (cm)', '身高 (cm)', '身高 (cm)', 'ส่วนสูง (cm)', 'Tinggi (cm)', 'Chiều cao (cm)', 'Taas (cm)', 'Altura (cm)'],
     weightPlaceholder: ['몸무게 (kg)', 'Weight (kg)', '体重 (kg)', '体重 (kg)', '體重 (kg)', 'น้ำหนัก (kg)', 'Berat (kg)', 'Cân nặng (kg)', 'Timbang (kg)', 'Peso (kg)'],
-    bioPlaceholderLong: ['기획사 담당자에게 나를 소개해보세요', 'Introduce yourself to agencies', '事務所の担当者に自己紹介してください', '向经纪公司介绍自己', '向經紀公司介紹自己', 'แนะนำตัวเองให้ค่ายเพลงรู้จัก', 'Perkenalkan dirimu ke agensi', 'Giới thiệu bản thân với các công ty', 'Ipakilala ang iyong sarili sa mga ahensya', 'Preséntate a las agencias'],
+    bioPlaceholderLong: ['어떤 음악을 하는지, 무엇을 준비하고 있는지 적어보세요', 'What music do you make? What are you working on?', 'どんな音楽をしているか、何を準備しているか書いてください', '写下你做什么音乐、正在准备什么', '寫下你做什麼音樂、正在準備什麼', 'เขียนว่าคุณทำเพลงแบบไหน กำลังเตรียมอะไรอยู่', 'Tulis musik apa yang kamu buat dan apa yang sedang kamu siapkan', 'Bạn làm nhạc gì, đang chuẩn bị điều gì?', 'Anong musika ang ginagawa mo? Ano ang inihahanda mo?', 'Cuéntanos qué música haces y qué estás preparando'],
     saving:          ['저장 중...', 'Saving...', '保存中...', '保存中...', '儲存中...', 'กำลังบันทึก...', 'Menyimpan...', 'Đang lưu...', 'Nag-i-save...', 'Guardando...'],
     saveDone:        ['✓ 저장완료', '✓ Saved', '✓ 保存完了', '✓ 已保存', '✓ 已儲存', '✓ บันทึกแล้ว', '✓ Tersimpan', '✓ Đã lưu', '✓ Nai-save', '✓ Guardado'],
     saveBtn:         ['저장', 'Save', '保存', '保存', '儲存', 'บันทึก', 'Simpan', 'Lưu', 'I-save', 'Guardar'],

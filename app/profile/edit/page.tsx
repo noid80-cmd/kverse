@@ -381,14 +381,17 @@ function formatPhone(v: string) {
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0 }}>{tx.profile.aboutMe}</p>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#2F7A4F', fontWeight: 700, background: 'rgba(47,122,79,0.08)', padding: '3px 8px', borderRadius: 6 }}><Globe size={11} strokeWidth={2.2} /> 전체 공개</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#2F7A4F', fontWeight: 700, background: 'rgba(47,122,79,0.08)', padding: '3px 8px', borderRadius: 6 }}><Globe size={11} strokeWidth={2.2} /> 누구나 볼 수 있어요</span>
             </div>
+            {/* 주의는 칸 위에 둔다. 아래에 두면 다 쓰고 나서야 읽는다.
+                placeholder에 "기획사 담당자에게"라고 적혀 있어서 기획사만 본다고
+                읽혔고, 그래서 여기에 연락처를 적는 일이 생겼다. */}
+            <p style={{ fontSize: 12, color: '#8A7F6E', margin: '0 0 10px', lineHeight: 1.5 }}>
+              지망생·기획사 누구나 볼 수 있는 글이에요. <strong style={{ color: '#D84A1E' }}>연락처는 여기 적지 말고 아래 칸에</strong> 적어주세요.
+            </p>
             <textarea value={bio} onChange={e => updateForm(f => ({ ...f, bio: e.target.value }))}
               placeholder={tx.profile.bioPlaceholderLong} rows={4}
               style={{ ...inputStyle, resize: 'none' }} />
-            <p style={{ fontSize: 12, color: '#8A7F6E', margin: '8px 0 0', lineHeight: 1.5 }}>
-              연락처는 아래 칸에 적어주세요. 여기 적으면 누구나 볼 수 있어요.
-            </p>
           </div>
 
           {/* 연락처 — 지망생이 자기소개에 인스타를 적는 건 적을 데가 없어서다.
