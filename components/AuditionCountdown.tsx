@@ -24,13 +24,31 @@ export default function AuditionCountdown({ variant = 'notify' }: { variant?: 'n
   // 마운트 후에 계산한다.
   useEffect(() => { setDays(daysUntilLaunch()) }, [])
 
+  // 알림 상태는 이 화면 밖에서도 바뀐다. 앱을 처음 열 때 뜨는 팝업에서 켜거나,
+  // iOS 설정에서 직접 바꾸기도 한다. 처음 한 번만 확인하면 켜고 나서도 계속
+  // "알림 켜기"가 남는다 — 앱은 웹뷰가 살아 있어서 나갔다 와도 다시 확인하지
+  // 않는다. 그래서 화면이 다시 보일 때와 다른 곳에서 켰을 때 같이 확인한다.
   useEffect(() => {
     if (variant !== 'notify') return
-    if (isNativeApp()) {
-      nativeNotifState().then(s => setNotifyOn(s === 'granted')).catch(() => {})
-      return
+
+    function check() {
+      if (isNativeApp()) {
+        nativeNotifState().then(s => setNotifyOn(s === 'granted')).catch(() => {})
+        return
+      }
+      if (typeof Notification !== 'undefined') setNotifyOn(Notification.permission === 'granted')
     }
-    if (typeof Notification !== 'undefined') setNotifyOn(Notification.permission === 'granted')
+
+    check()
+    const onVisible = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', check)
+    window.addEventListener('kpick-notif-changed', check)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', check)
+      window.removeEventListener('kpick-notif-changed', check)
+    }
   }, [variant])
 
   async function handleNotify() {
@@ -42,6 +60,7 @@ export default function AuditionCountdown({ variant = 'notify' }: { variant?: 'n
       }
       await doSubscribe()
       setNotifyOn(true)
+      window.dispatchEvent(new Event('kpick-notif-changed'))
     } catch { /* 실패해도 카운트다운은 계속 보여준다 */ }
     setBusy(false)
   }

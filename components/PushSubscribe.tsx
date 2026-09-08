@@ -125,12 +125,16 @@ export default function PushSubscribe() {
 
   async function handleAllow() {
     setShow(false)
+    // 켠 사실을 다른 화면에도 알린다. 홈의 알림 카드는 처음 뜰 때 한 번만
+    // 권한을 확인해서, 여기서 켜도 계속 "알림 켜기"인 채로 남아 있었다.
     if (isNativeApp()) {
       await enableNativeNotifications()
+      window.dispatchEvent(new Event('kpick-notif-changed'))
       return
     }
     const perm = await Notification.requestPermission()
     if (perm === 'granted') doSubscribe().catch(() => {})
+    window.dispatchEvent(new Event('kpick-notif-changed'))
   }
 
   function handleDismiss() {
