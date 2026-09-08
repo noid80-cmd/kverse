@@ -6,6 +6,7 @@ import { checkContactAccess } from '@/lib/contactGate'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
+import { COUNTRY_GROUPS, countryLabel } from '@/lib/countries'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import Link from 'next/link'
@@ -25,6 +26,16 @@ type Talent = {
   skills: string[]; nationality: string | null
 }
 type VideoItem = { id: string; title: string; thumbnail_url: string | null; view_count: number; like_count: number; category: string }
+
+// 국적은 DB에 한글로 저장돼 있다. 보는 사람의 언어로 바꿔 보여준다.
+function nationalityLabel(ko: string | null, lang: string): string | null {
+  if (!ko) return null
+  for (const g of COUNTRY_GROUPS) {
+    const hit = g.items.find(c => c.ko === ko)
+    if (hit) return countryLabel(hit, lang)
+  }
+  return ko
+}
 
 export default function TalentPublicProfilePage() {
   const talentNav = useTalentNav()
@@ -57,7 +68,7 @@ export default function TalentPublicProfilePage() {
       // 신상/신체는 기획사만. 연락처는 전용 칸에 따로 있고 자격 확인 후에만 가져온다.
       const profileFields = isAgency
         ? 'id, name, avatar_url, bio, birth_date, gender, height, weight, skills, nationality'
-        : 'id, name, avatar_url, bio, skills'
+        : 'id, name, avatar_url, bio, skills, nationality'
 
       const [{ data: t }, { data: v }] = await Promise.all([
         supabase.from('profiles').select(profileFields).eq('id', id).single(),
@@ -154,7 +165,7 @@ export default function TalentPublicProfilePage() {
                 {[
                   getAge(talent.birth_date) && tx.talent.age.replace('{n}', String(getAge(talent.birth_date))),
                   talent.gender === 'male' ? tx.profile.genderMale : talent.gender === 'female' ? tx.profile.genderFemale : null,
-                  talent.nationality,
+                  nationalityLabel(talent.nationality, lang),
                 ].filter(Boolean).join(' · ')}
               </div>
             </div>

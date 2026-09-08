@@ -279,8 +279,22 @@ function formatPhone(v: string) {
 
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.nameLabel}</p>
-            <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
-              placeholder={tx.profile.nameRequired} required style={inputStyle} />
+            <div className="flex flex-col gap-3">
+              <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
+                placeholder={tx.profile.nameRequired} required style={inputStyle} />
+              {/* 국적은 어느 나라 지망생인지 알아보는 값이라 지원서가 아니라
+                  프로필에 속한다. 생년월일·성별과 달리 신상이라 할 것도 없다. */}
+              <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
+                <option value="">{tx.profile.selectNationality}</option>
+                {COUNTRY_GROUPS.map(g => (
+                  <optgroup key={g.region} label={regionLabel(g.region, lang)}>
+                    {g.items.map(c => (
+                      <option key={c.code} value={c.ko}>{countryLabel(c, lang)}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div style={{ background: '#FFFFFF', borderRadius: 20, padding: 20, border: '1px solid rgba(36,28,21,0.09)' }}>
@@ -336,16 +350,6 @@ function formatPhone(v: string) {
                   <option value="male">{tx.profile.genderMale}</option>
                   <option value="female">{tx.profile.genderFemale}</option>
                   <option value="other">{tx.profile.genderOther}</option>
-                </select>
-                <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
-                  <option value="">{tx.profile.selectNationality}</option>
-                  {COUNTRY_GROUPS.map(g => (
-                    <optgroup key={g.region} label={regionLabel(g.region, lang)}>
-                      {g.items.map(c => (
-                        <option key={c.code} value={c.ko}>{countryLabel(c, lang)}</option>
-                      ))}
-                    </optgroup>
-                  ))}
                 </select>
               </div>
             </div>
