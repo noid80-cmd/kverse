@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { isNativeApp } from '@/lib/capacitor'
 import { hasNativeAppleSignIn, nativeAppleSignIn, isAppleCancel } from '@/lib/appleNative'
 import PasswordInput from '@/components/PasswordInput'
+import { storeUrl } from '@/lib/stores'
 import { Mic2, Building2, Mail, Upload, CheckCircle } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
@@ -242,9 +243,15 @@ export default function SignupPage() {
                 background: 'rgba(216,74,30,0.07)', border: '1px solid rgba(216,74,30,0.18)',
                 fontSize: 12.5, color: '#8A4B2E', lineHeight: 1.6,
               }}>
-                Apple·구글 가입이 끝나지 않고 이 화면으로 돌아온다면, 아래 이메일로 진행해주세요. 곧 해결됩니다.
+                앱을 업데이트하면 Apple·구글 가입이 정상 동작합니다.
+                <a href={storeUrl()} target="_blank" rel="noopener noreferrer"
+                  style={{ color: '#D84A1E', fontWeight: 800, textDecoration: 'underline', marginLeft: 4 }}>
+                  업데이트하기
+                </a>
                 <br />
-                <span style={{ color: '#A5765A' }}>If Apple or Google returns you here without signing you in, please use email below.</span>
+                지금 바로 가입하시려면 아래 이메일로 진행해주세요.
+                <br />
+                <span style={{ color: '#A5765A' }}>Update the app to fix Apple/Google sign-up, or use email below.</span>
               </div>
             )}
             {!isKakao && (
