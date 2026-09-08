@@ -295,7 +295,7 @@ export default function TalentAuditionsPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4 kv-safe-top">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
           <button onClick={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(36,28,21,0.09)', border: '1px solid rgba(36,28,21,0.1)', color: '#241C15', cursor: 'pointer', flexShrink: 0 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>

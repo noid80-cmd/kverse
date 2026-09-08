@@ -37,7 +37,7 @@ export default function VideosPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4 kv-safe-top">
 
         <div className="flex items-center justify-between mb-6">
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15' }}>{tx.videos.myVideos}</h1>

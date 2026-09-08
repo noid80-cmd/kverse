@@ -29,3 +29,19 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true })
 }
+
+// 알림을 끈다. 브라우저 구독은 기기에서 해지하고, 서버에 남은 행도 지운다 —
+// 서버에 남아 있으면 해지된 주소로 계속 쏘게 된다.
+export async function DELETE(req: NextRequest) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getSession()).data.session?.user
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const { endpoint } = await req.json().catch(() => ({}))
+  if (endpoint) {
+    await adminSupabase.from('push_subscriptions').delete().eq('subscription->>endpoint', endpoint)
+  } else {
+    await adminSupabase.from('push_subscriptions').delete().eq('user_id', user.id)
+  }
+  return NextResponse.json({ ok: true })
+}

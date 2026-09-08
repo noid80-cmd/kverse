@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
+import { turnOffNotifications } from '@/lib/pushNative'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Upload, Building2, Bell, BellOff, BellRing, X } from 'lucide-react'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
@@ -127,7 +128,7 @@ export default function AgencySettingsPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4 kv-safe-top">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
           <button onClick={() => router.back()} style={{ fontSize: 22, color: '#8A7F6E', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>←</button>
@@ -304,6 +305,19 @@ export default function AgencySettingsPage() {
                 <BellRing size={32} color="#D84A1E" style={{ margin: '0 auto 12px' }} />
                 <p style={{ fontSize: 15, fontWeight: 700, color: '#241C15', marginBottom: 6 }}>알림이 켜져 있어요</p>
                 <p style={{ fontSize: 13, color: '#8A7F6E' }}>새 지원자, 채팅 알림을 받고 있습니다</p>
+                {/* 끌 방법이 없으면 받기 싫은 사람은 앱을 지운다. OS 권한 자체는
+                    되돌릴 수 없지만, 발송 주소를 지우면 실제로 멈춘다. */}
+                <button onClick={async () => {
+                  await turnOffNotifications()
+                  setNotifPerm('default')
+                  window.dispatchEvent(new Event('kpick-notif-changed'))
+                }} style={{
+                  width: '100%', marginTop: 16, padding: '12px', borderRadius: 12,
+                  border: '1px solid rgba(36,28,21,0.14)', background: '#FFFFFF',
+                  color: '#8A7F6E', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                }}>
+                  알림 끄기
+                </button>
               </div>
             )}
             {notifPerm === 'denied' && (

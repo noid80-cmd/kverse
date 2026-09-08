@@ -46,7 +46,7 @@ export default function AgencyTalentsPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4 kv-safe-top">
 
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', marginBottom: 6 }}>관심 지망생</h1>
         <p style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 20 }}>북마크한 영상 {bookmarks.length}개</p>

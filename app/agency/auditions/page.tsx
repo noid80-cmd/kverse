@@ -247,7 +247,7 @@ export default function AgencyAuditionsPage() {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4 kv-safe-top">
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', flexShrink: 0 }}>오디션 공고</h1>

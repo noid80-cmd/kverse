@@ -288,7 +288,10 @@ export default function ExplorePage() {
   return (
     <>
       {/* ── Grid view ── */}
-      <div style={{ background: '#FFF8E7', minHeight: '100dvh', paddingBottom: 88 }}>
+      {/* 하단 탭이 화면에 고정돼 있어서 그 높이만큼 비워야 마지막 카드가 안 잘린다.
+          홈 인디케이터가 있는 기기는 거기에 안전영역이 더 붙는다 — 88px만 주니
+          영상 제목 줄이 탭 아래로 숨었다(실측). */}
+      <div style={{ background: '#FFF8E7', minHeight: '100dvh', paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}>
 
         {/* Sticky header */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,248,231,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(36,28,21,0.08)', padding: 'var(--safe-top) 16px 12px' }}>
@@ -355,14 +358,19 @@ export default function ExplorePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 8px 9px 10px' }}>
                       {v.talent ? (
                         <>
-                          <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,111,60,0.25)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {v.talent.avatar_url
-                              ? <img src={v.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              : <Mic size={13} strokeWidth={1.8} color="#D84A1E" />}
-                          </div>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: '#241C15', minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {v.talent.name ?? tx.common.talent}
-                          </span>
+                          {/* 이름을 눌러 프로필로 간다. 카드 전체는 영상 재생이라
+                              이 부분에서 클릭이 위로 새지 않게 막는다. */}
+                          <Link href={`/talent/${v.talent.id}`} onClick={e => e.stopPropagation()}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1, textDecoration: 'none' }}>
+                            <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,111,60,0.25)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {v.talent.avatar_url
+                                ? <img src={v.talent.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                : <Mic size={13} strokeWidth={1.8} color="#D84A1E" />}
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#241C15', minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {v.talent.name ?? tx.common.talent}
+                            </span>
+                          </Link>
                           <ReportBlockMenu targetType="video" targetId={v.id} reportedUserId={v.talent.id}
                             myId={myId} onBlocked={() => load()} />
                         </>

@@ -112,3 +112,42 @@ export async function attachNotificationTap(navigate: (url: string) => void): Pr
     // 리스너 등록 실패가 앱 사용을 막으면 안 된다
   }
 }
+
+/**
+ * 알림을 끈다.
+ *
+ * OS 권한 자체는 앱이 되돌릴 수 없다. 대신 우리가 가진 발송 주소를 지운다 —
+ * 토큰과 구독이 없으면 보낼 곳이 없으므로 알림은 실제로 멈춘다. 사용자에게는
+ * 그게 "껐다"의 의미다. 다시 켜는 것도 앱 안에서 된다.
+ */
+export async function turnOffNotifications(): Promise<void> {
+  if (isNativeApp()) {
+    const m = await messaging()
+    const fm = m?.fm
+    if (!fm) return
+    try {
+      const { token } = await fm.getToken()
+      if (token) {
+        await fetch('/api/device-token', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
+          body: JSON.stringify({ token }),
+        })
+      }
+      await fm.deleteToken()
+    } catch { /* 토큰을 못 읽어도 아래 웹 구독 정리는 시도한다 */ }
+    return
+  }
+
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration()
+    const sub = await reg?.pushManager.getSubscription()
+    const endpoint = sub?.endpoint
+    if (sub) await sub.unsubscribe()
+    await fetch('/api/push/subscribe', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint }),
+    })
+  } catch { /* 이미 해지돼 있어도 문제되지 않는다 */ }
+}

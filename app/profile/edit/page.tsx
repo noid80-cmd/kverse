@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { isNativeApp } from '@/lib/capacitor'
-import { enableNativeNotifications, nativeNotifState } from '@/lib/pushNative'
+import { enableNativeNotifications, nativeNotifState, turnOffNotifications } from '@/lib/pushNative'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
@@ -225,7 +225,7 @@ function formatPhone(v: string) {
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
-      <div className="max-w-lg mx-auto px-4 pt-10">
+      <div className="max-w-lg mx-auto px-4 kv-safe-top">
 
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#241C15', marginBottom: 24 }}>{tx.profile.myProfile}</h1>
 
@@ -490,8 +490,23 @@ function formatPhone(v: string) {
                   </div>
                 </div>
               ) : notifPerm === 'granted' ? (
-                <div style={{ background: 'rgba(255,111,60,0.08)', border: '1px solid rgba(255,111,60,0.2)', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                  <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ background: 'rgba(255,111,60,0.08)', border: '1px solid rgba(255,111,60,0.2)', borderRadius: 16, padding: '16px 18px' }}>
+                    <p style={{ fontSize: 14, color: '#D84A1E', margin: 0 }}>기획사 관심, 채팅, 오디션 공고 알림을 받고 있어요.</p>
+                  </div>
+                  {/* 끌 방법이 없으면 받기 싫은 사람은 앱을 지운다. OS 권한 자체는
+                      되돌릴 수 없지만, 발송 주소를 지우면 실제로 멈춘다. */}
+                  <button onClick={async () => {
+                    await turnOffNotifications()
+                    setNotifPerm('default')
+                    window.dispatchEvent(new Event('kpick-notif-changed'))
+                  }} style={{
+                    width: '100%', marginTop: 12, padding: '12px', borderRadius: 12,
+                    border: '1px solid rgba(36,28,21,0.14)', background: '#FFFFFF',
+                    color: '#8A7F6E', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                    알림 끄기
+                  </button>
                 </div>
               ) : (
                 <div style={{ marginBottom: 20 }}>

@@ -47,3 +47,9 @@ select option { background: #FFFFFF; color: #241C15; }
   user-select: none;
 }
 .kv-live-ticker::-webkit-scrollbar { display: none; }
+
+/* 화면 맨 위 여백.
+   pt-10(40px)만 주면 아이폰 17처럼 다이내믹 아일랜드가 큰 기기에서 제목이
+   카메라에 가린다(실측). 안전영역만큼 밀되, 브라우저에서는 안전영역이
+   작으므로 기존 40px 아래로는 내려가지 않게 한다. */
+.kv-safe-top { padding-top: max(40px, calc(var(--safe-top) + 8px)); }
