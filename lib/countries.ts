@@ -11,7 +11,6 @@ export const COUNTRY_GROUPS: { region: string; items: Country[] }[] = [
     region: '142', // Asia
     items: [
       { ko: '대한민국', code: 'KR' },
-      { ko: '조선민주주의인민공화국', code: 'KP' },
       { ko: '중국', code: 'CN' },
       { ko: '일본', code: 'JP' },
       { ko: '대만', code: 'TW' },
