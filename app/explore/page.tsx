@@ -8,6 +8,7 @@ import Link from 'next/link'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
 import Image from 'next/image'
 import { Heart, Volume2, VolumeX, Mic, Music, Clock } from 'lucide-react'
+import { setNowPlaying, clearNowPlaying } from '@/lib/mediaSession'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -31,6 +32,10 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   rap:    'linear-gradient(135deg, #FF9A5C, #E06A2E)',
   other:  'linear-gradient(135deg, #7FA0C4, #4E6E96)',
 }
+// 스와이프 화면 위쪽 띠(뒤로가기 + 카테고리)의 높이. 영상이 이 아래에서
+// 시작해야 얼굴이 버튼에 가리지 않는다.
+const SWIPE_HEADER_H = 48
+
 const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #6BA8E0, #3D6EB8)',
   'linear-gradient(135deg, #C58EE0, #8B4FC4)',
@@ -89,6 +94,9 @@ function SwipeCard({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  // 화면에 떠 있는 카드가 어느 것인지 이벤트 핸들러에서도 알아야 한다.
+  // state로 두면 리스너가 옛 값을 붙든다.
+  const activeRef = useRef(false)
   const [paused, setPaused] = useState(false)
   const [buffering, setBuffering] = useState(false)
 
@@ -97,10 +105,12 @@ function SwipeCard({
     if (!el) return
     const obs = new IntersectionObserver(([entry]) => {
       if (!videoRef.current) return
+      activeRef.current = entry.isIntersecting
       if (entry.isIntersecting) {
         if (videoRef.current.readyState < 3) setBuffering(true)
         videoRef.current.play().catch(() => {})
         setPaused(false)
+        setNowPlaying(video)
       } else {
         videoRef.current.pause()
         videoRef.current.currentTime = 0
@@ -109,7 +119,28 @@ function SwipeCard({
     }, { threshold: 0.7 })
     obs.observe(el)
     return () => obs.disconnect()
-  }, [])
+  }, [video])
+
+  // 앱을 나갔다 오면 WKWebView가 영상을 멈춰둔 채 돌려준다. 사용자 눈에는
+  // 화면만 멈춰 있고 다시 누를 곳도 마땅치 않아 고장으로 보인다. 돌아온
+  // 시점에 보고 있던 카드면 다시 틀어준다.
+  useEffect(() => {
+    async function resume() {
+      const el = videoRef.current
+      if (!el || document.hidden || !activeRef.current || paused) return
+      // 백그라운드에서 디코더를 뺏기면 소스가 통째로 풀려 있기도 하다
+      if (el.readyState === 0) el.load()
+      try { await el.play() } catch { /* 자동재생이 막히면 탭으로 재생한다 */ }
+    }
+    document.addEventListener('visibilitychange', resume)
+    window.addEventListener('pageshow', resume)
+    window.addEventListener('focus', resume)
+    return () => {
+      document.removeEventListener('visibilitychange', resume)
+      window.removeEventListener('pageshow', resume)
+      window.removeEventListener('focus', resume)
+    }
+  }, [paused])
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted
@@ -126,7 +157,7 @@ function SwipeCard({
   }
 
   return (
-    <div ref={containerRef} style={{ height: '100dvh', scrollSnapAlign: 'start', position: 'relative', background: '#000', flexShrink: 0, overflow: 'hidden' }}>
+    <div ref={containerRef} style={{ height: '100dvh', scrollSnapAlign: 'start', position: 'relative', background: '#000', flexShrink: 0, overflow: 'hidden', boxSizing: 'border-box', paddingTop: `calc(var(--safe-top) + ${SWIPE_HEADER_H}px)` }}>
       {video.video_url ? (
         <video ref={videoRef} src={video.video_url} poster={video.thumbnail_url ?? undefined}
           loop muted={muted} playsInline preload="auto"
@@ -272,6 +303,11 @@ export default function ExplorePage() {
     return () => { document.body.style.overflow = '' }
   }, [swipeIdx])
 
+  // 목록으로 나오면 재생 중인 것이 없다 — 잠금화면 카드도 같이 내린다
+  useEffect(() => {
+    if (swipeIdx === null) clearNowPlaying()
+  }, [swipeIdx])
+
   async function toggleLike(videoId: string) {
     if (!myId) return
     if (liked.has(videoId)) {
@@ -402,20 +438,22 @@ export default function ExplorePage() {
       {/* ── Swipe overlay ── */}
       {swipeIdx !== null && (
         <div ref={swipeContainerRef} style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#000', overflowY: 'scroll', scrollSnapType: 'y mandatory' }}>
-          {/* Back button */}
-          <button
-            onClick={() => setSwipeIdx(null)}
-            style={{ position: 'fixed', top: 'var(--safe-top)', left: 16, zIndex: 120, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-          </button>
+          {/* 뒤로가기와 카테고리를 한 줄에 담는다. 각각 따로 띄워두면 높이가
+              달라서(40px 원형 버튼 vs 30px 알약) 화살표만 살짝 올라가 보인다. */}
+          <div style={{ position: 'fixed', top: 'var(--safe-top)', left: 0, right: 0, height: SWIPE_HEADER_H, zIndex: 120, display: 'flex', alignItems: 'center', gap: 8, padding: '0 16px', boxSizing: 'border-box' }}>
+            <button
+              onClick={() => setSwipeIdx(null)}
+              style={{ flexShrink: 0, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+            </button>
 
-          {/* Category pills */}
-          <div style={{ position: 'fixed', top: 'var(--safe-top)', left: 64, right: 16, zIndex: 120, display: 'flex', gap: 8, overflowX: 'auto' }}>
-            {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
-              <button key={c} onClick={() => { setCategory(c); setSwipeIdx(null) }} style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)', background: category === c ? 'rgba(255,111,60,0.85)' : 'rgba(0,0,0,0.5)', color: 'white', boxShadow: category === c ? '0 2px 8px rgba(255,111,60,0.4)' : 'none' }}>
-                {c === 'all' ? tx.explore.allCategories : categoryLabels[c]}
-              </button>
-            ))}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto' }}>
+              {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (
+                <button key={c} onClick={() => { setCategory(c); setSwipeIdx(null) }} style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', backdropFilter: 'blur(8px)', background: category === c ? 'rgba(255,111,60,0.85)' : 'rgba(0,0,0,0.5)', color: 'white', boxShadow: category === c ? '0 2px 8px rgba(255,111,60,0.4)' : 'none' }}>
+                  {c === 'all' ? tx.explore.allCategories : categoryLabels[c]}
+                </button>
+              ))}
+            </div>
           </div>
 
           {videos.map((v, i) => (
