@@ -12,8 +12,9 @@ type Video = {
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
 }
+// status = 어드민 검수 상태. 공개범위(visibility)와 헷갈리지 않게 '공개'라는 단어를 쓰지 않는다.
 const statusLabel: Record<string, string> = {
-  active: '공개', processing: '검토중', hidden: '숨김', deleted: '삭제됨'
+  active: '정상', processing: '검토중', hidden: '숨김', deleted: '삭제됨'
 }
 // 공개범위는 status가 아니라 visibility 컬럼이 결정한다. null은 전체공개로 취급(피드 쿼리와 동일).
 const visibilityLabel: Record<string, string> = {
@@ -122,9 +123,10 @@ export default function AdminVideosPage() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                    <div style={{ fontSize: 10, color: '#8A7F6E', fontWeight: 700, textAlign: 'center' }}>검수</div>
                     <select value={v.status} onChange={e => setStatus(v.id, e.target.value)}
                       style={{ fontSize: 12, padding: '5px 8px', borderRadius: 8, border: '1px solid #e0e0f0', background: '#f8f7ff', color: statusColor[v.status], fontWeight: 700 }}>
-                      <option value="active">공개</option>
+                      <option value="active">정상</option>
                       <option value="processing">검토중</option>
                       <option value="hidden">숨김</option>
                       <option value="deleted">삭제</option>
