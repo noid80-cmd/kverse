@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
 
 type Video = {
-  id: string; title: string; status: string; view_count: number; is_featured: boolean; created_at: string; category: string
+  id: string; title: string; status: string; visibility: string | null; view_count: number; is_featured: boolean; created_at: string; category: string
   talent: { name: string } | null
 }
 
@@ -14,6 +14,15 @@ const categoryLabel: Record<string, string> = {
 }
 const statusLabel: Record<string, string> = {
   active: '공개', processing: '검토중', hidden: '숨김', deleted: '삭제됨'
+}
+// 공개범위는 status가 아니라 visibility 컬럼이 결정한다. null은 전체공개로 취급(피드 쿼리와 동일).
+const visibilityLabel: Record<string, string> = {
+  public: '전체공개', agency_only: '기획사만', private: '비공개'
+}
+const visibilityStyle: Record<string, { bg: string; fg: string }> = {
+  public: { bg: '#f0f0f8', fg: '#8A7F6E' },
+  agency_only: { bg: '#eef2ff', fg: '#4f46e5' },
+  private: { bg: '#fdecea', fg: '#D84A1E' },
 }
 const statusColor: Record<string, string> = {
   active: '#22c55e', processing: '#f59e0b', hidden: '#94a3b8', deleted: '#ef4444'
@@ -34,7 +43,7 @@ export default function AdminVideosPage() {
       if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }
 
       const { data } = await supabase.from('videos').select(`
-        id, title, status, view_count, is_featured, created_at, category,
+        id, title, status, visibility, view_count, is_featured, created_at, category,
         talent:profiles!talent_id(name)
       `).order('created_at', { ascending: false })
       setVideos((data as unknown as Video[]) ?? [])
@@ -43,19 +52,27 @@ export default function AdminVideosPage() {
     load()
   }, [])
 
+  // RLS가 막으면 Supabase는 에러 없이 0행을 처리하고 끝난다.
+  // .select()로 실제 반영된 행을 돌려받아 확인하지 않으면 화면만 바뀌고 서버는 그대로다.
   async function setStatus(id: string, status: string) {
-    await supabase.from('videos').update({ status }).eq('id', id)
+    const { data, error } = await supabase.from('videos').update({ status }).eq('id', id).select('id')
+    if (error) { alert('상태 변경 실패: ' + error.message); return }
+    if (!data?.length) { alert('상태가 변경되지 않았습니다. 권한 정책을 확인해주세요.'); return }
     setVideos(prev => prev.map(v => v.id === id ? { ...v, status } : v))
   }
 
   async function toggleFeatured(id: string, current: boolean) {
-    await supabase.from('videos').update({ is_featured: !current }).eq('id', id)
+    const { data, error } = await supabase.from('videos').update({ is_featured: !current }).eq('id', id).select('id')
+    if (error) { alert('추천 변경 실패: ' + error.message); return }
+    if (!data?.length) { alert('추천 설정이 변경되지 않았습니다. 권한 정책을 확인해주세요.'); return }
     setVideos(prev => prev.map(v => v.id === id ? { ...v, is_featured: !current } : v))
   }
 
   async function deleteVideo(id: string, title: string) {
     if (!confirm(`"${title}" 영상을 완전히 삭제할까요? 이 작업은 되돌릴 수 없습니다.`)) return
-    await supabase.from('videos').delete().eq('id', id)
+    const { data, error } = await supabase.from('videos').delete().eq('id', id).select('id')
+    if (error) { alert('삭제 실패: ' + error.message); return }
+    if (!data?.length) { alert('삭제되지 않았습니다. 삭제 권한 정책을 확인해주세요.'); return }
     setVideos(prev => prev.filter(v => v.id !== id))
   }
 
@@ -96,6 +113,11 @@ export default function AdminVideosPage() {
                       <span style={{ fontSize: 12, color: '#8A7F6E' }}>{v.talent?.name ?? '?'}</span>
                       <span style={{ fontSize: 11, background: '#f0f0f8', color: '#D84A1E', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>{categoryLabel[v.category]}</span>
                       <span style={{ fontSize: 12, color: '#8A7F6E' }}>조회 {v.view_count}</span>
+                      {(() => {
+                        const vis = v.visibility ?? 'public'
+                        const st = visibilityStyle[vis] ?? visibilityStyle.public
+                        return <span style={{ fontSize: 11, background: st.bg, color: st.fg, padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>{visibilityLabel[vis] ?? vis}</span>
+                      })()}
                       {v.is_featured && <span style={{ fontSize: 11, background: '#fef9c3', color: '#d97706', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>⭐추천</span>}
                     </div>
                   </div>
