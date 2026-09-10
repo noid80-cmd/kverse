@@ -533,6 +533,7 @@ export function useT(lang: Lang) {
     explore: Object.fromEntries(Object.entries(t.explore).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.explore, string>,
     profile: Object.fromEntries(Object.entries(t.profile).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.profile, string>,
     push: Object.fromEntries(Object.entries(t.push).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.push, string>,
+    bug: Object.fromEntries(Object.entries(t.bug).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.bug, string>,
     account: Object.fromEntries(Object.entries(t.account).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.account, string>,
     report: Object.fromEntries(Object.entries(t.report).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.report, string>,
     schedule: Object.fromEntries(Object.entries(t.schedule).map(([k, v]) => [k, get(v, lang)])) as Record<keyof typeof t.schedule, string>,

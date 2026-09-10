@@ -7,6 +7,7 @@ import { turnOffNotifications } from '@/lib/pushNative'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Upload, Building2, Bell, BellOff, BellRing, X } from 'lucide-react'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
+import BugReport from '@/components/BugReport'
 import PasswordInput from '@/components/PasswordInput'
 
 type Agency = {
@@ -288,6 +289,8 @@ export default function AgencySettingsPage() {
           <div style={{ marginTop: 10 }}>
             <DeleteAccountButton />
           </div>
+
+          <BugReport />
         </div>
       </div>
 

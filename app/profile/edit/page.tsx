@@ -12,6 +12,7 @@ import { useLang } from '@/lib/i18n/context'
 import { COUNTRY_GROUPS, countryLabel, regionLabel } from '@/lib/countries'
 import { useT, type Lang } from '@/lib/i18n/translations'
 import DeleteAccountButton from '@/components/DeleteAccountButton'
+import BugReport from '@/components/BugReport'
 
 const inputStyle = {
   width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
@@ -405,6 +406,8 @@ function formatPhone(v: string) {
           </button>
 
           <DeleteAccountButton />
+
+          <BugReport />
         </form>
 
         {notifModal && (
