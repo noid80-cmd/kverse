@@ -1,9 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
+
+type Mine = {
+  id: string
+  message: string
+  admin_reply: string | null
+  resolved_at: string | null
+  created_at: string
+}
 
 // 눈에 띄지 않되 찾으면 있는 자리에 둔다. 평소엔 글자 버튼 하나로 접혀 있고,
 // 누르면 그 자리에서 펼쳐진다 — 새 화면으로 보내면 쓰다 만 내용이 날아간다.
@@ -15,6 +23,25 @@ export default function BugReport() {
   const [sending, setSending] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
+  const [mine, setMine] = useState<Mine[]>([])
+
+  // 내가 보낸 신고는 RLS상 본인에게 보인다(user_id = auth.uid()).
+  const loadMine = useCallback(async () => {
+    const supabase = createClient()
+    const uid = (await supabase.auth.getSession()).data.session?.user?.id
+    if (!uid) return
+    const { data } = await supabase.from('bug_reports')
+      .select('id, message, admin_reply, resolved_at, created_at')
+      .eq('user_id', uid).order('created_at', { ascending: false }).limit(5)
+    setMine((data as Mine[]) ?? [])
+  }, [])
+
+  // 답장 푸시는 ?bug=1 로 데려온다. 열자마자 답장이 보여야 알림이 헛되지 않는다.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('bug') === '1') setOpen(true)
+  }, [])
+
+  useEffect(() => { if (open) loadMine() }, [open, loadMine])
 
   async function send() {
     const message = text.trim()
@@ -32,7 +59,8 @@ export default function BugReport() {
       })
       if (!res.ok) { setError(tx.bug.failed); setSending(false); return }
       setDone(true); setText('')
-      setTimeout(() => { setDone(false); setOpen(false) }, 2600)
+      loadMine()
+      setTimeout(() => setDone(false), 2600)
     } catch {
       setError(tx.bug.failed)
     }
@@ -88,6 +116,39 @@ export default function BugReport() {
           fontSize: 13, fontWeight: 800,
         }}>{sending ? tx.bug.sending : tx.bug.send}</button>
       </div>
+
+      {mine.length > 0 && (
+        <div style={{ marginTop: 16, borderTop: '1px solid rgba(36,28,21,0.09)', paddingTop: 12 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#8A7F6E', marginBottom: 8 }}>{tx.bug.mine}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {mine.map(m => (
+              <div key={m.id} style={{ background: '#FFF8E7', borderRadius: 12, padding: '10px 12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <span style={{
+                    fontSize: 10.5, fontWeight: 800, padding: '2px 7px', borderRadius: 6,
+                    background: m.resolved_at ? 'rgba(21,128,61,0.12)' : 'rgba(36,28,21,0.08)',
+                    color: m.resolved_at ? '#15803D' : '#8A7F6E',
+                  }}>{m.resolved_at ? tx.bug.statusDone : tx.bug.statusOpen}</span>
+                  <span style={{ fontSize: 10.5, color: '#8A7F6E', marginLeft: 'auto' }}>
+                    {new Date(m.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12.5, color: '#241C15', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {m.message}
+                </div>
+                {m.admin_reply && (
+                  <div style={{ marginTop: 8, borderLeft: '2px solid #D84A1E', paddingLeft: 9 }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 800, color: '#D84A1E', marginBottom: 2 }}>{tx.bug.reply}</div>
+                    <div style={{ fontSize: 12.5, color: '#241C15', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {m.admin_reply}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

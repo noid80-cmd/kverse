@@ -53,6 +53,10 @@ const M = {
     title: ['내일 마감이에요', 'Closes tomorrow', '明日が締切です', '明天截止', '明天截止', 'ปิดรับพรุ่งนี้', 'Tutup besok', 'Đóng vào ngày mai', 'Sasara bukas', 'Cierra mañana'],
     body: ['{first}{more} 지원, 내일까지예요. 영상 하나면 지원할 수 있어요.', 'Applications for {first}{more} close tomorrow. One video is all you need.', '{first}{more}の応募は明日まで。動画1本で応募できます。', '{first}{more} 的报名到明天为止,一个视频就能报名。', '{first}{more} 的報名到明天為止,一支影片就能報名。', 'สมัคร {first}{more} ได้ถึงพรุ่งนี้ ใช้วิดีโอเดียวก็สมัครได้', 'Pendaftaran {first}{more} sampai besok. Cukup satu video.', 'Ứng tuyển {first}{more} đến hết ngày mai. Chỉ cần một video.', 'Hanggang bukas ang application para sa {first}{more}. Isang video lang ang kailangan.', 'Las postulaciones a {first}{more} cierran mañana. Solo necesitas un video.'],
   },
+  bugReplied: {
+    title: ['신고에 답장이 왔어요', 'We replied to your report', 'ご報告に返信しました', '你的反馈有回复了', '你的回報有回覆了', 'มีคำตอบสำหรับรายงานของคุณ', 'Laporanmu sudah dibalas', 'Đã có phản hồi cho báo cáo của bạn', 'May sagot na sa report mo', 'Respondimos a tu reporte'],
+    body: ['보내주신 버그 신고를 확인했어요. 눌러서 답장을 읽어보세요.', 'We looked into the bug you reported. Tap to read our reply.', 'お送りいただいた不具合を確認しました。タップして返信をご覧ください。', '我们已经查看了你反馈的问题,点击查看回复。', '我們已經查看了你回報的問題,點擊查看回覆。', 'เราตรวจสอบปัญหาที่คุณแจ้งแล้ว แตะเพื่ออ่านคำตอบ', 'Kami sudah memeriksa bug yang kamu laporkan. Ketuk untuk membaca balasannya.', 'Chúng tôi đã xem lỗi bạn báo. Nhấn để đọc phản hồi.', 'Tiningnan namin ang bug na na-report mo. I-tap para basahin ang sagot.', 'Revisamos el error que reportaste. Toca para leer la respuesta.'],
+  },
 } satisfies Record<string, Msg>
 
 export type PushKey = keyof typeof M

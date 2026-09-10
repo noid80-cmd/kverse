@@ -464,6 +464,10 @@ const t = {
     sent:        ['보냈어요. 감사합니다!', 'Sent. Thank you!', '送信しました。ありがとうございます！', '已发送,谢谢!', '已傳送,謝謝!', 'ส่งแล้ว ขอบคุณ!', 'Terkirim. Terima kasih!', 'Đã gửi. Cảm ơn bạn!', 'Naipadala na. Salamat!', '¡Enviado. Gracias!'],
     failed:      ['전송에 실패했어요.', 'We could not send that.', '送信できませんでした。', '发送失败。', '傳送失敗。', 'ส่งไม่สำเร็จ', 'Gagal mengirim.', 'Không gửi được.', 'Hindi naipadala.', 'No se pudo enviar.'],
     close:       ['닫기', 'Close', '閉じる', '关闭', '關閉', 'ปิด', 'Tutup', 'Đóng', 'Isara', 'Cerrar'],
+    mine:        ['내가 보낸 신고', 'Your reports', '送信した報告', '我发送的反馈', '我送出的回報', 'รายงานของคุณ', 'Laporan kamu', 'Báo cáo của bạn', 'Mga report mo', 'Tus reportes'],
+    statusOpen:  ['확인 중', 'Looking into it', '確認中', '处理中', '處理中', 'กำลังตรวจสอบ', 'Sedang diperiksa', 'Đang xem xét', 'Tinitingnan pa', 'En revisión'],
+    statusDone:  ['처리됨', 'Resolved', '対応済み', '已处理', '已處理', 'จัดการแล้ว', 'Selesai', 'Đã xử lý', 'Naayos na', 'Resuelto'],
+    reply:       ['답장', 'Reply', '返信', '回复', '回覆', 'คำตอบ', 'Balasan', 'Phản hồi', 'Sagot', 'Respuesta'],
   },
   account: {
     deleteAccount: ['계정 삭제', 'Delete account', 'アカウント削除', '删除账号', '刪除帳號', 'ลบบัญชี', 'Hapus akun', 'Xóa tài khoản', 'I-delete ang account', 'Eliminar cuenta'],

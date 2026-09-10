@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { sendPush } from '@/lib/notify'
 import AdminNav from '@/components/layout/AdminNav'
 
 type Bug = {
@@ -11,6 +12,8 @@ type Bug = {
   message: string
   page: string | null
   user_agent: string | null
+  admin_reply: string | null
+  replied_at: string | null
   resolved_at: string | null
   created_at: string
 }
@@ -19,12 +22,18 @@ const roleLabel: Record<string, string> = {
   talent: '지망생', agency: '기획사', admin: '관리자',
 }
 
+// 답장을 읽는 자리는 각자의 설정 화면이다. ?bug=1 이면 신고 칸이 펼쳐진 채로 열린다.
+function replyUrl(role: string | null) {
+  return role === 'agency' ? '/agency/settings?bug=1' : '/profile/edit?bug=1'
+}
+
 export default function AdminBugsPage() {
   const [bugs, setBugs] = useState<Bug[]>([])
   const [names, setNames] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'open' | 'all'>('open')
   const [busy, setBusy] = useState<string | null>(null)
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
   const supabase = createClient()
 
   async function load() {
@@ -34,7 +43,7 @@ export default function AdminBugsPage() {
     if (me?.role !== 'admin') { window.location.href = '/dashboard'; return }
 
     let q = supabase.from('bug_reports')
-      .select('id, user_id, role, message, page, user_agent, resolved_at, created_at')
+      .select('id, user_id, role, message, page, user_agent, admin_reply, replied_at, resolved_at, created_at')
       .order('created_at', { ascending: false })
     if (filter === 'open') q = q.is('resolved_at', null)
     const { data } = await q
@@ -54,15 +63,33 @@ export default function AdminBugsPage() {
 
   // RLS가 막으면 Supabase는 에러 없이 0행을 처리하고 끝난다.
   // .select()로 실제 반영된 행을 확인하지 않으면 화면만 바뀌고 서버는 그대로다.
+  async function write(id: string, patch: Partial<Bug>) {
+    const { data, error } = await supabase.from('bug_reports').update(patch).eq('id', id).select('id')
+    if (error) { alert('변경 실패: ' + error.message); return false }
+    if (!data?.length) { alert('변경된 내용이 없습니다 (권한 확인 필요)'); return false }
+    return true
+  }
+
+  // 답장을 보내고 완료 처리한다. 알림은 답장을 쓸 때만 나간다 —
+  // "읽었음" 표시로 누른 건에까지 알림이 가면 앱이 고치지도 않은 걸 고쳤다고 말하게 된다.
+  async function replyAndResolve(b: Bug) {
+    const reply = (drafts[b.id] ?? '').trim()
+    if (!reply) return
+    setBusy(b.id)
+    const now = new Date().toISOString()
+    const ok = await write(b.id, { admin_reply: reply, replied_at: now, resolved_at: now })
+    if (ok && b.user_id) {
+      await sendPush({ userId: b.user_id, msgKey: 'bugReplied', url: replyUrl(b.role) })
+    }
+    setBusy(null)
+    if (ok) { setDrafts(d => ({ ...d, [b.id]: '' })); load() }
+  }
+
   async function toggleResolved(b: Bug) {
     setBusy(b.id)
-    const { data, error } = await supabase.from('bug_reports')
-      .update({ resolved_at: b.resolved_at ? null : new Date().toISOString() })
-      .eq('id', b.id).select('id')
+    const ok = await write(b.id, { resolved_at: b.resolved_at ? null : new Date().toISOString() })
     setBusy(null)
-    if (error) { alert('변경 실패: ' + error.message); return }
-    if (!data?.length) { alert('변경된 내용이 없습니다 (권한 확인 필요)'); return }
-    load()
+    if (ok) load()
   }
 
   return (
@@ -97,7 +124,7 @@ export default function AdminBugsPage() {
             {bugs.map(b => (
               <div key={b.id} style={{
                 background: '#fff', borderRadius: 16, padding: '14px 16px',
-                border: '1px solid #e8e8f2', opacity: b.resolved_at ? 0.6 : 1,
+                border: '1px solid #e8e8f2', opacity: b.resolved_at ? 0.7 : 1,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: '#1e1b4b' }}>
@@ -125,14 +152,45 @@ export default function AdminBugsPage() {
                   {b.user_agent && <div>기기: {b.user_agent}</div>}
                 </div>
 
-                <button onClick={() => toggleResolved(b)} disabled={busy === b.id}
-                  style={{
-                    marginTop: 10, fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 9,
-                    border: '1px solid #e0e0f0', background: b.resolved_at ? '#fff' : '#f8f7ff',
-                    color: b.resolved_at ? '#8A7F6E' : '#D84A1E', cursor: 'pointer',
-                  }}>
-                  {busy === b.id ? '...' : b.resolved_at ? '미처리로 되돌리기' : '처리 완료'}
-                </button>
+                {b.admin_reply ? (
+                  <div style={{ marginTop: 10, background: '#f8f7ff', border: '1px solid #e8e8f2', borderRadius: 12, padding: '10px 12px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#D84A1E', marginBottom: 4 }}>보낸 답장</div>
+                    <div style={{ fontSize: 13, color: '#241C15', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{b.admin_reply}</div>
+                  </div>
+                ) : (
+                  <textarea
+                    value={drafts[b.id] ?? ''} onChange={e => setDrafts(d => ({ ...d, [b.id]: e.target.value }))}
+                    rows={2} maxLength={500} placeholder="답장 (비워두면 알림이 가지 않습니다)"
+                    style={{
+                      width: '100%', boxSizing: 'border-box', resize: 'vertical', marginTop: 10,
+                      background: '#f8f7ff', border: '1px solid #e0e0f0', borderRadius: 11,
+                      padding: '9px 11px', fontSize: 13, color: '#241C15', outline: 'none',
+                      lineHeight: 1.6, fontFamily: 'inherit',
+                    }} />
+                )}
+
+                <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+                  {!b.admin_reply && (
+                    <button onClick={() => replyAndResolve(b)}
+                      disabled={busy === b.id || !(drafts[b.id] ?? '').trim() || !b.user_id}
+                      style={{
+                        fontSize: 12, fontWeight: 800, padding: '7px 13px', borderRadius: 9, border: 'none',
+                        background: (drafts[b.id] ?? '').trim() && b.user_id ? '#D84A1E' : '#e8e8f2',
+                        color: (drafts[b.id] ?? '').trim() && b.user_id ? '#fff' : '#8A7F6E',
+                        cursor: (drafts[b.id] ?? '').trim() && b.user_id ? 'pointer' : 'default',
+                      }}>
+                      {busy === b.id ? '보내는 중...' : '답장 보내고 완료'}
+                    </button>
+                  )}
+                  <button onClick={() => toggleResolved(b)} disabled={busy === b.id}
+                    style={{
+                      fontSize: 12, fontWeight: 700, padding: '7px 13px', borderRadius: 9,
+                      border: '1px solid #e0e0f0', background: '#fff',
+                      color: '#8A7F6E', cursor: 'pointer',
+                    }}>
+                    {b.resolved_at ? '미처리로 되돌리기' : '그냥 완료'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

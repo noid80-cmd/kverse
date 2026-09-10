@@ -18,6 +18,11 @@ create table if not exists public.bug_reports (
   created_at timestamptz not null default now()
 );
 
+-- 답장 (2026-09-10). 처리했다고 관리자 화면에만 표시하면 신고한 사람은
+-- 아무것도 못 받는다 — 답장을 남기고 신고자에게 푸시로 알린다.
+alter table public.bug_reports add column if not exists admin_reply text;
+alter table public.bug_reports add column if not exists replied_at timestamptz;
+
 alter table public.bug_reports enable row level security;
 
 drop policy if exists "bug_reports_select" on public.bug_reports;
