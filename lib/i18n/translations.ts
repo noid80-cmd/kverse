@@ -454,6 +454,17 @@ const t = {
   },
 
   // ── 계정 삭제 ────────────────────────────────────────
+  bug: {
+    entry:       ['버그 신고', 'Report a bug', '不具合を報告', '报告问题', '回報問題', 'แจ้งปัญหา', 'Laporkan bug', 'Báo lỗi', 'Mag-report ng bug', 'Reportar un error'],
+    title:       ['버그 신고', 'Report a bug', '不具合を報告', '报告问题', '回報問題', 'แจ้งปัญหา', 'Laporkan bug', 'Báo lỗi', 'Mag-report ng bug', 'Reportar un error'],
+    desc:        ['어떤 화면에서 무엇이 안 됐는지 적어주시면 큰 도움이 돼요.', 'Tell us what went wrong and where — it really helps.', 'どの画面で何ができなかったか教えてください。', '请说明在哪个页面、发生了什么问题。', '請說明在哪個畫面、發生了什麼問題。', 'บอกเราหน่อยว่าหน้าไหนและเกิดอะไรขึ้น', 'Ceritakan di layar mana dan apa yang terjadi.', 'Hãy cho chúng tôi biết lỗi xảy ra ở đâu và thế nào.', 'Sabihin kung saan at ano ang nangyari.', 'Cuéntanos qué falló y dónde.'],
+    placeholder: ['예) 영상 업로드가 안 돼요', 'e.g. Video upload does not work', '例）動画をアップロードできません', '例）视频无法上传', '例）影片無法上傳', 'เช่น อัปโหลดวิดีโอไม่ได้', 'mis. Video tidak bisa diunggah', 'vd) Không tải video lên được', 'hal.) Hindi ma-upload ang video', 'p. ej. No puedo subir el video'],
+    send:        ['보내기', 'Send', '送信', '发送', '傳送', 'ส่ง', 'Kirim', 'Gửi', 'Ipadala', 'Enviar'],
+    sending:     ['보내는 중...', 'Sending...', '送信中...', '发送中...', '傳送中...', 'กำลังส่ง...', 'Mengirim...', 'Đang gửi...', 'Ipinapadala...', 'Enviando...'],
+    sent:        ['보냈어요. 감사합니다!', 'Sent. Thank you!', '送信しました。ありがとうございます！', '已发送,谢谢!', '已傳送,謝謝!', 'ส่งแล้ว ขอบคุณ!', 'Terkirim. Terima kasih!', 'Đã gửi. Cảm ơn bạn!', 'Naipadala na. Salamat!', '¡Enviado. Gracias!'],
+    failed:      ['전송에 실패했어요.', 'We could not send that.', '送信できませんでした。', '发送失败。', '傳送失敗。', 'ส่งไม่สำเร็จ', 'Gagal mengirim.', 'Không gửi được.', 'Hindi naipadala.', 'No se pudo enviar.'],
+    close:       ['닫기', 'Close', '閉じる', '关闭', '關閉', 'ปิด', 'Tutup', 'Đóng', 'Isara', 'Cerrar'],
+  },
   account: {
     deleteAccount: ['계정 삭제', 'Delete account', 'アカウント削除', '删除账号', '刪除帳號', 'ลบบัญชี', 'Hapus akun', 'Xóa tài khoản', 'I-delete ang account', 'Eliminar cuenta'],
     deleteWord:    ['삭제', 'DELETE', '削除', '删除', '刪除', 'ลบ', 'HAPUS', 'XOA', 'DELETE', 'ELIMINAR'],
