@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { CalendarDays } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { daysUntilLaunch, roundOpensAt, roundDeadline, currentRoundNo } from '@/lib/launch'
+import { daysUntilLaunch, roundOpensAt, roundDeadline, currentRoundNo, roundClosesAt } from '@/lib/launch'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -100,7 +100,7 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
         {numbers.map(no => {
           const deadline = roundDeadline(no)
           const opensAt = roundOpensAt(deadline).getTime()
-          const closesAt = new Date(`${deadline}T23:59:59+09:00`).getTime()
+          const closesAt = roundClosesAt(deadline).getTime()
           const round = rounds.find(r => r.deadline === deadline)
           // 공고가 있으면 상태를 따른다. 시계로만 판단하면 [지금 열기]로 앞당겼을 때
           // 목록에는 "지원하기"가 뜨는데 일정표는 "예정"이라고 말한다 — 보는 사람은

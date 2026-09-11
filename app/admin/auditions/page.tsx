@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AdminNav from '@/components/layout/AdminNav'
 import { Trash2, Plus, Calendar, Users, X, Pencil, Archive, RotateCcw } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
-import { roundOpensAt, roundDeadline, roundNoOf, currentRoundNo } from '@/lib/launch'
+import { roundOpensAt, roundDeadline, roundNoOf, currentRoundNo, roundClosesAt } from '@/lib/launch'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -125,7 +125,7 @@ function AuditionForm({
             const taken = takenRounds.get(dl)
             return (
               <option key={n} value={n} disabled={!!taken}>
-                {n}회차 · {fmt(op)} 18시 ~ {fmt(new Date(`${dl}T23:59:59+09:00`))} 밤
+                {n}회차 · {fmt(op)} 18시 ~ {fmt(roundClosesAt(dl))} 21시
                 {taken ? ` — ${taken} 배정됨` : ''}
               </option>
             )

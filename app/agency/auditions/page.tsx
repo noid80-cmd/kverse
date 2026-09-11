@@ -8,6 +8,7 @@ import AgencyWelcome from '@/components/AgencyWelcome'
 import Link from 'next/link'
 import { Plus, Megaphone, Users, Calendar, Trash2 } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
+import { isRoundClosed } from '@/lib/launch'
 
 const categoryLabel: Record<string, string> = {
   vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타'
@@ -87,9 +88,9 @@ export default function AgencyAuditionsPage() {
     setDeleting(null)
   }
 
-  const today = new Date().toISOString().slice(0, 10)
+  // 마감은 날짜가 아니라 시각으로 본다 — 일요일 저녁 9시다.
   function isExpired(deadline: string | null) {
-    return !!deadline && deadline < today
+    return isRoundClosed(deadline)
   }
 
   async function createAudition() {

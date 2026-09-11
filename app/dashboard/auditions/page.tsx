@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AuditionSchedule from '@/components/AuditionSchedule'
 import BottomNav from '@/components/layout/BottomNav'
 import AuditionCountdown from '@/components/AuditionCountdown'
-import { daysUntilLaunch } from '@/lib/launch'
+import { daysUntilLaunch, isRoundClosed, isRoundNotOpenYet } from '@/lib/launch'
 import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -50,9 +50,10 @@ function getAuditionDesc(a: Audition, lang: string) {
 }
 
 type MyVideo = { id: string; title: string; thumbnail_url: string | null; video_url: string; category: string }
-const today = new Date().toISOString().slice(0, 10)
+// 마감은 날짜가 아니라 시각으로 본다. 날짜만 견주면 그날 자정까지 열려 있어
+// 실제로 "밤 12시 마감"이 됐다 — 정해진 건 일요일 저녁 9시다.
 function isExpired(deadline: string | null) {
-  return !!deadline && deadline < today
+  return isRoundClosed(deadline)
 }
 // 마감일이 지난 것과 운영자가 마감 처리한 것을 함께 '끝난 공고'로 본다
 function isDone(a: Audition) {
@@ -100,20 +101,24 @@ export default function TalentAuditionsPage() {
     const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
       supabase.from('auditions')
         .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, is_verified, logo_url)')
-        .in('status', ['active', 'closed'])
+        // 'scheduled' 도 받아온다. 크론이 열어주기를 기다리면 최대 한 시간
+        // 늦게 보인다 — 화면에서 시각을 직접 보고 정각에 띄운다.
+        .in('status', ['active', 'closed', 'scheduled'])
         .order('created_at', { ascending: false }),
       supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
       supabase.from('videos').select('id, title, thumbnail_url, video_url, category')
         .eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }),
     ])
 
-    setAuditions((auds as unknown as Audition[]) ?? [])
+    // 아직 열릴 시각이 안 된 회차는 감춘다(월요일 저녁 6시에 정확히 열린다).
+    const visible = ((auds as unknown as Audition[]) ?? []).filter(a => !isRoundNotOpenYet(a.deadline))
+    setAuditions(visible)
     const map: Record<string, AppInfo> = {}
     myApps?.forEach(a => { map[a.audition_id] = { status: a.status, videoUrl: a.video_url, thumbnailUrl: a.thumbnail_url } })
     setApplicationMap(map)
     setMyVideos((vids as unknown as MyVideo[]) ?? [])
     setLoading(false)
-    return (auds as unknown as Audition[]) ?? []
+    return visible
   }, [])
 
   // 공개 공고 페이지의 '지원하기'가 /dashboard/auditions?id=<공고>로 보낸다.

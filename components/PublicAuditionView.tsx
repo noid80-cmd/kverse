@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/i18n/context'
+import { LANGS } from '@/lib/i18n/translations'
+import { roundClosesAt } from '@/lib/launch'
 import { createClient } from '@/lib/supabase/client'
 import { setSignupIntent } from '@/lib/intent'
 import { BadgeCheck, CalendarDays, Monitor, MapPin, Shuffle, ArrowRight } from 'lucide-react'
@@ -29,47 +31,64 @@ function translationKey(lang: string): string | null {
   return 'en'
 }
 
-// 공개 페이지에서만 쓰는 문구라 기존 사전을 늘리지 않고 여기서 관리한다
-const COPY = {
-  ko: {
-    open: '모집 중', closed: '마감',
-    dday: (n: number) => (n === 0 ? '오늘 마감' : `마감 D-${n}`),
-    deadline: '마감일', category: '분야', mode: '진행 방식',
-    online: '온라인', offline: '오프라인', both: '온라인 + 오프라인',
-    apply: '지원하기', applyClosed: '마감된 오디션입니다',
-    applyOffline: '현장에서 진행되는 오디션입니다',
-    offlineNote: '이 공고는 온라인 지원을 받지 않습니다. 지원 방법은 공고 내용을 확인해주세요.',
-    how: '지원 방법',
-    steps: ['Krookie 가입 (30초)', '갖고 있는 영상 선택 또는 새로 업로드', '지원 완료 — 결과는 앱으로 알려드립니다'],
-    note: '이미 갖고 있는 커버 영상으로 지원할 수 있습니다. 새로 촬영하지 않아도 됩니다.',
-    otherLink: '다른 오디션 보기',
-    vocal: '보컬', dance: '댄스', acting: '연기', rap: '랩', other: '기타',
-  },
-  en: {
-    open: 'Now accepting', closed: 'Closed',
-    dday: (n: number) => (n === 0 ? 'Closes today' : `${n} days left`),
-    deadline: 'Deadline', category: 'Category', mode: 'Format',
-    online: 'Online', offline: 'In person', both: 'Online + In person',
-    apply: 'Apply now', applyClosed: 'This audition has closed',
-    applyOffline: 'Held in person',
-    offlineNote: 'This audition does not accept online applications. See the posting for how to apply.',
-    how: 'How to apply',
-    steps: ['Sign up for Krookie (30 seconds)', 'Pick a video you already have, or upload a new one', 'Done — you will hear back in the app'],
-    note: 'You can apply with a cover video you already have. No new filming required.',
-    otherLink: 'Browse other auditions',
-    vocal: 'Vocal', dance: 'Dance', acting: 'Acting', rap: 'Rap', other: 'Other',
-  },
+// 공개 페이지에서만 쓰는 문구라 기존 사전을 늘리지 않고 여기서 관리한다.
+// 순서는 lib/i18n/translations.ts 의 LANGS 와 같다.
+//
+// 예전엔 ko/en 둘뿐이라 한국어가 아니면 전부 영어로 떨어졌다. 이 페이지가
+// 홍보 링크의 착륙지점이라 그 자리에서 언어가 맞아야 한다.
+const COPY_T = {
+  open:        ['모집 중', 'Now accepting', '募集中', '招募中', '招募中', 'เปิดรับสมัคร', 'Sedang dibuka', 'Đang nhận hồ sơ', 'Bukás na', 'Convocatoria abierta'],
+  closed:      ['마감', 'Closed', '締切', '已截止', '已截止', 'ปิดรับแล้ว', 'Ditutup', 'Đã đóng', 'Sarado', 'Cerrada'],
+  ddayToday:   ['오늘 마감', 'Closes today', '本日締切', '今天截止', '今天截止', 'ปิดรับวันนี้', 'Ditutup hari ini', 'Đóng hôm nay', 'Sarado ngayon', 'Cierra hoy'],
+  ddayLeft:    ['마감 D-{n}', '{n} days left', '締切まで{n}日', '还剩 {n} 天', '還剩 {n} 天', 'เหลืออีก {n} วัน', 'Sisa {n} hari', 'Còn {n} ngày', '{n} araw na lang', 'Quedan {n} días'],
+  deadline:    ['마감', 'Deadline', '締切', '截止时间', '截止時間', 'ปิดรับ', 'Batas waktu', 'Hạn chót', 'Deadline', 'Cierre'],
+  category:    ['분야', 'Category', '分野', '类别', '類別', 'ประเภท', 'Kategori', 'Hạng mục', 'Kategorya', 'Categoría'],
+  mode:        ['진행 방식', 'Format', '実施方法', '形式', '形式', 'รูปแบบ', 'Format', 'Hình thức', 'Format', 'Formato'],
+  online:      ['온라인', 'Online', 'オンライン', '线上', '線上', 'ออนไลน์', 'Online', 'Trực tuyến', 'Online', 'En línea'],
+  offline:     ['오프라인', 'In person', '対面', '线下', '線下', 'พบตัวจริง', 'Tatap muka', 'Trực tiếp', 'Harapan', 'Presencial'],
+  both:        ['온라인 + 오프라인', 'Online + In person', 'オンライン+対面', '线上+线下', '線上+線下', 'ออนไลน์ + พบตัวจริง', 'Online + tatap muka', 'Trực tuyến + trực tiếp', 'Online + harapan', 'En línea + presencial'],
+  apply:       ['지원하기', 'Apply now', '応募する', '立即报名', '立即報名', 'สมัครเลย', 'Daftar sekarang', 'Ứng tuyển ngay', 'Mag-apply na', 'Postular ahora'],
+  applyClosed: ['마감된 오디션입니다', 'This audition has closed', 'このオーディションは締め切りました', '该试镜已截止', '該試鏡已截止', 'ออดิชันนี้ปิดรับแล้ว', 'Audisi ini sudah ditutup', 'Buổi thử vai này đã đóng', 'Sarado na ang audisyong ito', 'Esta audición ya cerró'],
+  applyOffline:['현장에서 진행되는 오디션입니다', 'Held in person', '対面で行われるオーディションです', '该试镜为线下进行', '該試鏡為線下進行', 'ออดิชันนี้จัดแบบพบตัวจริง', 'Audisi ini digelar tatap muka', 'Buổi thử vai này diễn ra trực tiếp', 'Ginaganap ito nang harapan', 'Esta audición es presencial'],
+  offlineNote: ['이 공고는 온라인 지원을 받지 않습니다. 지원 방법은 공고 내용을 확인해주세요.', 'This audition does not accept online applications. See the posting for how to apply.', 'この募集はオンライン応募を受け付けていません。応募方法は募集内容をご確認ください。', '该招募不接受线上报名，报名方式请查看公告内容。', '該招募不接受線上報名，報名方式請查看公告內容。', 'ประกาศนี้ไม่รับสมัครออนไลน์ กรุณาดูวิธีสมัครในรายละเอียดประกาศ', 'Lowongan ini tidak menerima pendaftaran online. Lihat isi pengumuman untuk cara mendaftar.', 'Thông báo này không nhận hồ sơ trực tuyến. Vui lòng xem nội dung thông báo để biết cách ứng tuyển.', 'Hindi tumatanggap ng online application ang audisyong ito. Tingnan ang paskil para sa paraan ng pag-apply.', 'Esta convocatoria no acepta postulaciones en línea. Consulta el anuncio para saber cómo postular.'],
+  how:         ['지원 방법', 'How to apply', '応募方法', '报名方式', '報名方式', 'วิธีสมัคร', 'Cara mendaftar', 'Cách ứng tuyển', 'Paano mag-apply', 'Cómo postular'],
+  step1:       ['Krookie 가입 (30초)', 'Sign up for Krookie (30 seconds)', 'Krookie に登録（30秒）', '注册 Krookie（30秒）', '註冊 Krookie（30秒）', 'สมัคร Krookie (30 วินาที)', 'Daftar Krookie (30 detik)', 'Đăng ký Krookie (30 giây)', 'Mag-sign up sa Krookie (30 segundo)', 'Regístrate en Krookie (30 segundos)'],
+  step2:       ['갖고 있는 영상 선택 또는 새로 업로드', 'Pick a video you already have, or upload a new one', '手持ちの動画を選ぶか、新しくアップロード', '选择已有视频或上传新视频', '選擇已有影片或上傳新影片', 'เลือกวิดีโอที่มีอยู่ หรืออัปโหลดใหม่', 'Pilih video yang sudah ada, atau unggah baru', 'Chọn video có sẵn hoặc tải lên video mới', 'Pumili ng video na mayroon ka na, o mag-upload ng bago', 'Elige un video que ya tengas o sube uno nuevo'],
+  step3:       ['지원 완료 — 결과는 앱으로 알려드립니다', 'Done — you will hear back in the app', '応募完了 — 結果はアプリでお知らせします', '报名完成 — 结果将在应用内通知', '報名完成 — 結果將在應用內通知', 'สมัครเสร็จ — แจ้งผลทางแอป', 'Selesai — hasilnya kami beri tahu lewat aplikasi', 'Hoàn tất — kết quả sẽ được báo qua ứng dụng', 'Tapos na — sa app namin sasabihin ang resulta', 'Listo: te avisaremos en la app'],
+  note:        ['이미 갖고 있는 커버 영상으로 지원할 수 있습니다. 새로 촬영하지 않아도 됩니다.', 'You can apply with a cover video you already have. No new filming required.', 'すでにあるカバー動画で応募できます。撮り直す必要はありません。', '可以用已有的翻唱视频报名，无需重新拍摄。', '可以用已有的翻唱影片報名，無需重新拍攝。', 'สมัครด้วยวิดีโอคัฟเวอร์ที่มีอยู่ได้เลย ไม่ต้องถ่ายใหม่', 'Bisa mendaftar dengan video cover yang sudah ada. Tidak perlu syuting ulang.', 'Bạn có thể ứng tuyển bằng video cover có sẵn. Không cần quay lại.', 'Puwede kang mag-apply gamit ang cover video na mayroon ka na. Hindi na kailangang mag-shoot ulit.', 'Puedes postular con un video cover que ya tengas. No hace falta grabar de nuevo.'],
+  otherLink:   ['다른 오디션 보기', 'Browse other auditions', 'ほかのオーディションを見る', '查看其他试镜', '查看其他試鏡', 'ดูออดิชันอื่น', 'Lihat audisi lain', 'Xem các buổi thử vai khác', 'Tingnan ang ibang audisyon', 'Ver otras audiciones'],
+  vocal:       ['보컬', 'Vocal', 'ボーカル', '声乐', '聲樂', 'ร้องเพลง', 'Vokal', 'Thanh nhạc', 'Vocal', 'Vocal'],
+  dance:       ['댄스', 'Dance', 'ダンス', '舞蹈', '舞蹈', 'เต้น', 'Dance', 'Nhảy', 'Sayaw', 'Baile'],
+  acting:      ['연기', 'Acting', '演技', '表演', '表演', 'การแสดง', 'Akting', 'Diễn xuất', 'Pag-arte', 'Actuación'],
+  rap:         ['랩', 'Rap', 'ラップ', '说唱', '饒舌', 'แร็ป', 'Rap', 'Rap', 'Rap', 'Rap'],
+  other:       ['기타', 'Other', 'その他', '其他', '其他', 'อื่น ๆ', 'Lainnya', 'Khác', 'Iba pa', 'Otro'],
 } as const
 
 function copyFor(lang: string) {
-  return lang === 'ko' ? COPY.ko : COPY.en
+  const i = Math.max(0, (LANGS as readonly string[]).indexOf(lang))
+  // 사전에 없는 언어는 영어로 떨어진다(색인 1).
+  const pick = (a: readonly string[]) => a[i] ?? a[1]
+  return {
+    open: pick(COPY_T.open), closed: pick(COPY_T.closed),
+    dday: (n: number) => (n === 0 ? pick(COPY_T.ddayToday) : pick(COPY_T.ddayLeft).replace('{n}', String(n))),
+    deadline: pick(COPY_T.deadline), category: pick(COPY_T.category), mode: pick(COPY_T.mode),
+    online: pick(COPY_T.online), offline: pick(COPY_T.offline), both: pick(COPY_T.both),
+    apply: pick(COPY_T.apply), applyClosed: pick(COPY_T.applyClosed), applyOffline: pick(COPY_T.applyOffline),
+    offlineNote: pick(COPY_T.offlineNote), how: pick(COPY_T.how),
+    steps: [pick(COPY_T.step1), pick(COPY_T.step2), pick(COPY_T.step3)],
+    note: pick(COPY_T.note), otherLink: pick(COPY_T.otherLink),
+    vocal: pick(COPY_T.vocal), dance: pick(COPY_T.dance), acting: pick(COPY_T.acting),
+    rap: pick(COPY_T.rap), other: pick(COPY_T.other),
+  }
 }
 
+// 남은 날을 한국 시각 기준으로 센다. 보는 사람이 어느 나라에 있든 마감은
+// 한국 일요일 저녁 9시라서, 기기 시간대로 세면 하루씩 어긋난다.
 function daysUntil(deadline: string) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const end = new Date(`${deadline}T00:00:00`)
-  return Math.round((end.getTime() - today.getTime()) / 86400000)
+  const close = roundClosesAt(deadline).getTime()
+  const now = Date.now()
+  if (now >= close) return -1
+  return Math.ceil((close - now) / 86400000) - 1
 }
 
 export default function PublicAuditionView({ audition }: { audition: PublicAudition }) {

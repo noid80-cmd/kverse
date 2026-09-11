@@ -47,7 +47,7 @@ const M = {
   },
   deadlineToday: {
     title: ['오늘 밤 마감이에요', 'Closes tonight', '今夜が締切です', '今晚截止', '今晚截止', 'ปิดรับคืนนี้', 'Tutup malam ini', 'Đóng tối nay', 'Sasara ngayong gabi', 'Cierra esta noche'],
-    body: ['{first}{more} 지원이 오늘 밤 11시 59분에 마감돼요.', 'Applications for {first}{more} close tonight at 11:59pm.', '{first}{more}の応募は今夜23時59分に締め切ります。', '{first}{more} 的报名将在今晚 23:59 截止。', '{first}{more} 的報名將在今晚 23:59 截止。', 'การสมัคร {first}{more} จะปิดคืนนี้เวลา 23:59 น.', 'Pendaftaran {first}{more} ditutup malam ini pukul 23.59.', 'Đơn ứng tuyển {first}{more} đóng lúc 23:59 tối nay.', 'Sasara ang application para sa {first}{more} ngayong gabi, 11:59pm.', 'Las postulaciones a {first}{more} cierran hoy a las 23:59.'],
+    body: ['{first}{more} 지원이 오늘 저녁 9시에 마감돼요.', 'Applications for {first}{more} close today at 9pm KST.', '{first}{more}の応募は本日21時（韓国時間）に締め切ります。', '{first}{more} 的报名将在今天 21:00（韩国时间）截止。', '{first}{more} 的報名將在今天 21:00（韓國時間）截止。', 'การสมัคร {first}{more} จะปิดวันนี้เวลา 21:00 น. (เวลาเกาหลี)', 'Pendaftaran {first}{more} ditutup hari ini pukul 21.00 WK.', 'Đơn ứng tuyển {first}{more} đóng lúc 21:00 hôm nay (giờ Hàn Quốc).', 'Sasara ang application para sa {first}{more} ngayong 9pm KST.', 'Las postulaciones a {first}{more} cierran hoy a las 21:00 (hora de Corea).'],
   },
   deadlineTomorrow: {
     title: ['내일 마감이에요', 'Closes tomorrow', '明日が締切です', '明天截止', '明天截止', 'ปิดรับพรุ่งนี้', 'Tutup besok', 'Đóng vào ngày mai', 'Sasara bukas', 'Cierra mañana'],
