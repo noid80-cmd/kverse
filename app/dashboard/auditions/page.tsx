@@ -5,11 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import AuditionSchedule from '@/components/AuditionSchedule'
 import BottomNav from '@/components/layout/BottomNav'
 import AuditionCountdown from '@/components/AuditionCountdown'
+import AuditionHero from '@/components/AuditionHero'
 import { daysUntilLaunch, isRoundClosed, isRoundNotOpenYet } from '@/lib/launch'
 import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Megaphone, Video, CheckCircle, X } from 'lucide-react'
+import { Megaphone, Video, CheckCircle, X, ArrowUpDown } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { sendPush } from '@/lib/notify'
@@ -298,6 +299,10 @@ export default function TalentAuditionsPage() {
     setModalAudition(null)
   }
 
+  // 히어로에 세울 이번 회차. 아래 일정표·목록이 같은 회차를 두 번 보여주지
+  // 않도록 여기서 한 번만 고른다.
+  const featured = loading ? undefined : auditions.find(a => !isDone(a))
+
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
       <div className="max-w-lg mx-auto px-4 kv-safe-top">
@@ -310,95 +315,45 @@ export default function TalentAuditionsPage() {
         <p style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 20 }}>{tx.auditions.pageDesc}</p>
       </div>
 
-      {/* 매주 한 곳씩 돌아간다는 리듬을 보여준다. 지금 열린 공고가 하나뿐이라
-          "이게 전부인가" 싶어 보이는데, 다음 주에도 온다는 걸 알아야 다시 온다. */}
-      <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 20 }}>
-        <AuditionSchedule compact />
+      {/* 화면을 열면 이번 회차 하나가 먼저 온다. 지망생이 앱을 다시 여는
+          이유는 날짜가 아니라 "이번 주는 어디가 열렸나"다. 공고가 아직
+          없으면 같은 자리에서 오픈까지 남은 날을 센다 — 카운트다운이 화면에
+          두 번 나오지 않게, 세는 곳은 늘 여기 하나다. */}
+      {!loading && (featured || daysUntilLaunch() >= 0) && (
+        <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 22 }}>
+          {featured
+            ? <AuditionHero
+                audition={featured}
+                appStatus={applicationMap[featured.id]?.status}
+                onApply={() => openModal(featured)}
+              />
+            : <AuditionCountdown />}
+        </div>
+      )}
+
+      {/* 매주 한 곳씩 돌아간다는 리듬. 위에서 이번 회차를 이미 보여줬으면
+          여기서는 다음 회차들만 잇는다. 세 줄로 줄인 건 다섯 줄이 전부
+          "준비 중"이면 준비 중이 주인공이 되기 때문이다. */}
+      <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 24 }}>
+        <AuditionSchedule compact limit={3} skipDeadline={featured?.deadline} />
       </div>
 
-      {/* Featured audition card */}
-      {!loading && (() => {
-        const firstActive = auditions.find(a => !isDone(a))
-        if (!firstActive) return null
-        const appInfo = applicationMap[firstActive.id]
-        const appStatus = appInfo?.status
-        const canApply = !appStatus && firstActive.mode !== 'offline'
-        const agencyInitials = (firstActive.agency?.name ?? '??').slice(0, 2).toUpperCase()
-        return (
-          <div style={{ padding: '0 16px 24px' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #FFEDE0 0%, #FFD9BC 100%)',
-              borderRadius: 24, padding: '22px 20px', position: 'relative', overflow: 'hidden',
-              border: '1px solid rgba(255,111,60,0.15)',
-            }}>
-              {/* Glow decorations */}
-              <div style={{ position: 'absolute', right: -30, top: -30, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,111,60,0.06)', pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', right: 40, top: 20, opacity: 0.18, pointerEvents: 'none' }}>
-                <svg width="80" height="80" viewBox="0 0 100 100">
-                  <path d="M50 4 L57 43 L96 50 L57 57 L50 96 L43 57 L4 50 L43 43 Z" fill="#FF6F3C"/>
-                </svg>
-              </div>
-              {/* FEATURED badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#FF6F3C', borderRadius: 20, padding: '5px 12px', marginBottom: 16, fontSize: 11, fontWeight: 800, color: 'white', letterSpacing: 0.5 }}>
-                ✦ FEATURED
-              </div>
-              {/* Agency + title */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', background: firstActive.agency?.logo_url ? '#FFFFFF' : 'rgba(36,28,21,0.13)', border: '1.5px solid rgba(36,28,21,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {firstActive.agency?.logo_url
-                    ? <img src={firstActive.agency.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    : <span style={{ fontSize: 15, fontWeight: 900, color: '#241C15' }}>{agencyInitials}</span>}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.65)', marginBottom: 2 }}>{firstActive.agency?.name ?? tx.auditions.adminNotice}</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: '#241C15', lineHeight: 1.2 }}>{getAuditionTitle(firstActive, lang)}</div>
-                </div>
-              </div>
-              {/* Tags + deadline */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
-                {firstActive.category.split(',').map(c => (
-                  <span key={c} style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(255,111,60,0.15)', border: '1px solid rgba(255,111,60,0.3)', color: '#D84A1E', fontSize: 12, fontWeight: 700 }}>
-                    {categoryLabels[c] ?? c}
-                  </span>
-                ))}
-                {firstActive.deadline && (
-                  <span style={{ padding: '5px 12px', borderRadius: 20, background: 'rgba(36,28,21,0.09)', color: 'rgba(36,28,21,0.65)', fontSize: 12, fontWeight: 600 }}>
-                    {tx.auditions.deadline} {firstActive.deadline}
-                  </span>
-                )}
-              </div>
-              {/* Apply button */}
-              <button
-                onClick={() => canApply && openModal(firstActive)}
-                style={{
-                  width: '100%', padding: '13px', borderRadius: 16, border: 'none', fontSize: 15, fontWeight: 700, cursor: canApply ? 'pointer' : 'default',
-                  background: appStatus === 'pending' ? 'rgba(251,191,36,0.15)' : appStatus === 'invited' ? 'linear-gradient(135deg,#22c55e,#16a34a)' : canApply ? 'linear-gradient(135deg,#D84A1E,#FF6F3C)' : 'rgba(36,28,21,0.08)',
-                  color: appStatus === 'pending' ? '#fbbf24' : appStatus ? 'white' : canApply ? 'white' : '#8A7F6E',
-                  boxShadow: canApply && !appStatus ? '0 4px 16px rgba(255,111,60,0.3)' : 'none',
-                }}>
-                {appStatus === 'pending' ? tx.auditions.review : appStatus === 'invited' ? tx.auditions.checkChat : canApply ? `${tx.auditions.apply} →` : firstActive.mode === 'offline' ? `📍 ${tx.auditions.offlineAudition}` : tx.auditions.expiredPost}
-              </button>
-            </div>
-          </div>
-        )
-      })()}
-
       <div className="max-w-lg mx-auto px-4">
-        {/* More opportunities header */}
-        {!loading && auditions.filter(a => !isDone(a)).length > 1 && (
-          <div style={{ fontSize: 17, fontWeight: 800, color: '#241C15', marginBottom: 16 }}>More Opportunities</div>
+        {/* 목록에 둘 이상 있을 때만 제목과 정렬이 의미를 갖는다. 한 건뿐인데
+            제목·정렬이 붙어 있으면 카드 하나를 표처럼 보이게 만든다. */}
+        {!loading && auditions.filter(a => !isDone(a) && a.id !== featured?.id).length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <span style={{ fontSize: 15, fontWeight: 900, color: '#241C15' }}>{tx.auditions.otherPosts}</span>
+            <button onClick={() => setSortBy(s => s === 'recent' ? 'deadline' : 'recent')} style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 12, fontWeight: 700, color: '#D84A1E', flexShrink: 0, fontFamily: 'inherit',
+            }}>
+              <ArrowUpDown size={13} strokeWidth={2.2} />
+              {sortBy === 'recent' ? tx.auditions.sortLatest : tx.auditions.sortDeadline}
+            </button>
+          </div>
         )}
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div />
-          <button onClick={() => setSortBy(s => s === 'recent' ? 'deadline' : 'recent')} style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 12, fontWeight: 700, color: '#D84A1E', flexShrink: 0,
-          }}>
-            ↕ {sortBy === 'recent' ? tx.auditions.sortLatest : tx.auditions.sortDeadline}
-          </button>
-        </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 48, color: '#8A7F6E' }}>{tx.common.loading}</div>
@@ -406,7 +361,7 @@ export default function TalentAuditionsPage() {
           // 화면에 실제로 남는 게 있는지로 판단해야 한다. 불러온 개수로 보면,
           // 아래에서 걸러지는 지난 공고가 여기선 "있다"로 잡혀서
           // 카운트다운도 빈 화면 안내도 없는 하얀 탭이 나온다.
-          daysUntilLaunch() >= 0 ? <AuditionCountdown /> : (
+          daysUntilLaunch() >= 0 ? null : (
             <div style={{ background: 'rgba(36,28,21,0.05)', borderRadius: 20, padding: 40, textAlign: 'center', border: '1.5px dashed rgba(36,28,21,0.1)' }}>
               <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(255,111,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', color: '#D84A1E' }}>
                 <Megaphone size={22} strokeWidth={1.8} />
@@ -415,7 +370,7 @@ export default function TalentAuditionsPage() {
             </div>
           )
         ) : (() => {
-          const firstActiveId = auditions.find(a => !isDone(a))?.id
+          const firstActiveId = featured?.id
           const sortAuditions = (list: Audition[]) => {
             if (sortBy === 'deadline') {
               return [...list].sort((a, b) => {

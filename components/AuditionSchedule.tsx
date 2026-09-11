@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CalendarDays } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { daysUntilLaunch, roundOpensAt, roundDeadline, currentRoundNo, roundClosesAt } from '@/lib/launch'
 import { useLang } from '@/lib/i18n/context'
@@ -13,14 +12,15 @@ import { useT } from '@/lib/i18n/translations'
 //
 // 처음엔 달력처럼 매주 일요일을 기계적으로 찍었는데, 그러면 존재하지 않는
 // 회차까지 줄이 생기고(9/28–10/4와 10/1–10/11이 겹쳤다) 무엇보다 목록이
-// 메모장처럼 보였다. 회차는 날짜가 아니라 순번이다. 1회차부터 세고, 각 줄이
-// 곧 "누가 언제"를 말하게 한다.
+// 메모장처럼 보였다. 회차는 날짜가 아니라 순번이다.
 //
-// 아직 순번이 안 잡힌 회차는 비워두지 않고 "공고 준비 중"으로 표시한다.
-// 빈 칸은 서비스가 멈춘 것처럼 보이지만, 준비 중은 주기가 돌고 있다는 뜻이다.
+// 그 다음 판이 표였다. 회차·기간·상태를 같은 무게로 줄 세우니 눈이 멈출 곳이
+// 없어 공지사항처럼 읽혔다. 지금은 선 하나로 잇는다 — 지나온 회차, 지금,
+// 앞으로. 같은 정보인데 읽는 방향이 생긴다.
+//
+// 아직 순번이 안 잡힌 회차는 비워두지 않고 로고 실루엣으로 표시한다.
+// 빈 칸은 서비스가 멈춘 것처럼 보이지만, 실루엣은 아직 안 밝힌 것으로 읽힌다.
 // 없는 기획사 이름을 지어내지는 않는다 — 확정된 회차만 이름이 나온다.
-
-const ROUNDS_SHOWN = 5
 
 type Round = { deadline: string; title: string; status: string; agencyName: string | null; logo: string | null }
 
@@ -31,23 +31,37 @@ function md(t: number): string {
   return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`
 }
 
-export default function AuditionSchedule({ compact = false }: { compact?: boolean }) {
+export default function AuditionSchedule({
+  compact = false, limit = 5, skipDeadline,
+}: {
+  compact?: boolean
+  /** 몇 회차까지 보여줄지. 화면 위에 히어로가 있으면 짧게 — 다섯 줄이 전부
+   *  "준비 중"이면 준비 중이 주인공이 된다. */
+  limit?: number
+  /** 이미 다른 곳(히어로)에 크게 나온 회차는 빼고 센다. */
+  skipDeadline?: string | null
+}) {
   const { lang } = useLang()
   const tx = useT(lang)
   const [rounds, setRounds] = useState<Round[]>([])
   const [loaded, setLoaded] = useState(false)
 
-  // 지난 회차 하나를 같이 보여준다. 방금 끝난 게 뭐였는지가 다음 회차의 근거다.
-  const startNo = Math.max(1, currentRoundNo() - 1)
-  const numbers = Array.from({ length: ROUNDS_SHOWN }, (_, i) => startNo + i)
+  // 히어로가 이번 회차를 이미 보여주고 있으면 그 다음 회차부터 센다.
+  // 그렇지 않으면 지난 회차 하나를 같이 보여준다 — 방금 끝난 게 뭐였는지가
+  // 다음 회차의 근거이고, 앱이 실제로 돌고 있다는 증거다.
+  const cur = currentRoundNo()
+  const startNo = skipDeadline ? cur + 1 : Math.max(1, cur - 1)
+  const numbers = Array.from({ length: limit }, (_, i) => startNo + i)
+  const first = numbers[0]
+  const last = numbers[numbers.length - 1]
 
   useEffect(() => {
     const supabase = createClient()
     supabase.from('auditions')
       .select('deadline, title, status, agency:agencies(name, logo_url)')
       .not('deadline', 'is', null)
-      .gte('deadline', roundDeadline(numbers[0]))
-      .lte('deadline', roundDeadline(numbers[numbers.length - 1]))
+      .gte('deadline', roundDeadline(first))
+      .lte('deadline', roundDeadline(last))
       // 확정된 회차만 내보낸다. 신청(requested)은 조율이 깨지면 없던 일이 되고,
       // 멈춰둔 것(paused)은 열릴지 아직 모른다.
       .in('status', ['scheduled', 'active', 'closed'])
@@ -64,39 +78,31 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
         }))
         setLoaded(true)
       })
-    // numbers는 렌더마다 같은 값이라 의존성에 넣지 않는다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [first, last])
 
   const daysLeft = daysUntilLaunch()
   const now = Date.now()
 
   return (
-    <div style={{
-      background: '#FFFFFF', borderRadius: 20, overflow: 'hidden',
-      border: '1px solid rgba(36,28,21,0.08)',
-    }}>
-      <div style={{
-        padding: compact ? '16px 18px 14px' : '18px 20px 16px',
-        borderBottom: '1px solid rgba(36,28,21,0.06)',
-        background: 'linear-gradient(135deg, rgba(255,111,60,0.07), rgba(255,111,60,0.02))',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-          <CalendarDays size={17} strokeWidth={2} color="#D84A1E" />
-          <span style={{ fontSize: 15.5, fontWeight: 900, color: '#241C15', letterSpacing: -0.2 }}>{tx.schedule.title}</span>
-          {daysLeft > 0 && (
-            <span style={{
-              marginLeft: 'auto', fontSize: 11.5, fontWeight: 800, color: '#D84A1E',
-              background: 'rgba(216,74,30,0.1)', padding: '3px 9px', borderRadius: 8,
-            }}>D-{daysLeft}</span>
-          )}
-        </div>
-        <div style={{ fontSize: 12.5, color: '#8A7F6E', lineHeight: 1.55 }}>
-          {tx.schedule.rhythm}
-        </div>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 2px 12px' }}>
+        <span style={{ fontSize: 14.5, fontWeight: 900, color: '#241C15', letterSpacing: -0.2 }}>
+          {skipDeadline ? tx.auditions.nextRounds : tx.schedule.title}
+        </span>
+        {/* 카운트다운은 화면에 한 번만 나온다. 위 히어로가 이미 세고 있으면
+            여기서는 말하지 않는다 — 같은 말을 두 번 하면 둘 다 약해진다. */}
+        {!skipDeadline && daysLeft >= 0 && (
+          <span style={{ fontSize: 12.5, color: '#8A7F6E', fontWeight: 700 }}>D-{daysLeft}</span>
+        )}
       </div>
 
-      <div style={{ padding: '6px 0' }}>
+      <div style={{ position: 'relative', paddingLeft: 30 }}>
+        {/* 회차를 잇는 선 */}
+        <div style={{
+          position: 'absolute', left: 9, top: 16, bottom: 18, width: 2, background: 'rgba(36,28,21,0.1)',
+        }} />
+
         {numbers.map(no => {
           const deadline = roundDeadline(no)
           const opensAt = roundOpensAt(deadline).getTime()
@@ -108,75 +114,83 @@ export default function AuditionSchedule({ compact = false }: { compact?: boolea
           // 회차에만 쓴다.
           const past = round ? round.status === 'closed' || now > closesAt : now > closesAt
           const live = !past && (round ? round.status === 'active' : now >= opensAt)
-
           const initials = (round?.agencyName ?? '').slice(0, 2)
 
           return (
-            <div key={no} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '12px 16px',
-              background: live ? 'rgba(255,111,60,0.06)' : 'transparent',
-              borderLeft: `3px solid ${live ? '#FF6F3C' : 'transparent'}`,
-            }}>
-              {/* 회차 + 기간 */}
-              <div style={{ width: 88, flexShrink: 0 }}>
-                <div style={{
-                  fontSize: 11, fontWeight: 800, letterSpacing: 0.2,
-                  color: live ? '#D84A1E' : past ? '#B0A89C' : '#8A7F6E', marginBottom: 1,
-                }}>
-                  {tx.schedule.round.replace('{n}', String(no))}
-                </div>
-                <div style={{
-                  fontSize: 13.5, fontWeight: 800,
-                  color: past ? '#B0A89C' : live ? '#D84A1E' : '#241C15',
-                }}>
-                  {md(opensAt)}–{md(closesAt)}
-                </div>
-              </div>
+            <div key={no} style={{ position: 'relative', marginBottom: 2 }}>
+              {/* 노드 — 지금 회차만 크고 색이 있다 */}
+              <div style={{
+                position: 'absolute',
+                left: live ? -25 : -22, top: live ? 13 : 17,
+                width: live ? 16 : 10, height: live ? 16 : 10, borderRadius: '50%',
+                background: live ? '#FF6F3C' : past ? 'rgba(36,28,21,0.22)' : '#FFF8E7',
+                border: live ? '3px solid #FFF8E7' : `2px solid ${past ? 'rgba(36,28,21,0.22)' : 'rgba(36,28,21,0.18)'}`,
+                boxShadow: live ? '0 0 0 3px rgba(255,111,60,0.28)' : 'none',
+              }} />
 
-              {/* 기획사 */}
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 9 }}>
-                {round ? (
-                  <>
-                    <div style={{
-                      width: 30, height: 30, borderRadius: 9, flexShrink: 0, overflow: 'hidden',
-                      background: round.logo ? '#FFFFFF' : 'rgba(255,111,60,0.12)',
-                      border: '1px solid rgba(36,28,21,0.08)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      opacity: past ? 0.55 : 1,
-                    }}>
-                      {round.logo
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '11px 0',
+              }}>
+                <div style={{ width: 78, flexShrink: 0 }}>
+                  <div style={{
+                    fontSize: 10.5, fontWeight: 800, letterSpacing: 0.2, marginBottom: 1,
+                    color: live ? '#D84A1E' : past ? '#B0A89C' : '#8A7F6E',
+                  }}>
+                    {tx.schedule.round.replace('{n}', String(no))}
+                  </div>
+                  <div style={{
+                    fontSize: 12.5, fontWeight: 800,
+                    color: past ? '#B0A89C' : live ? '#D84A1E' : '#241C15',
+                  }}>
+                    {md(opensAt)}–{md(closesAt)}
+                  </div>
+                </div>
+
+                {/* 기획사 — 확정 전에는 실루엣으로 둔다 */}
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 9, flexShrink: 0, overflow: 'hidden', position: 'relative',
+                    background: round ? (round.logo ? '#FFFFFF' : 'rgba(255,111,60,0.12)') : 'rgba(36,28,21,0.06)',
+                    border: round ? '1px solid rgba(36,28,21,0.08)' : 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    opacity: past ? 0.55 : 1,
+                  }}>
+                    {round
+                      ? (round.logo
                         ? <img src={round.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        : <span style={{ fontSize: 11, fontWeight: 900, color: '#D84A1E' }}>{initials}</span>}
-                    </div>
+                        : <span style={{ fontSize: 10.5, fontWeight: 900, color: '#D84A1E' }}>{initials}</span>)
+                      : <span style={{
+                        position: 'absolute', inset: 7, borderRadius: '50%', background: 'rgba(36,28,21,0.13)',
+                      }} />}
+                  </div>
+                  {round ? (
                     <div style={{ minWidth: 0 }}>
                       <div style={{
                         fontSize: 13.5, fontWeight: 800, color: past ? '#8A7F6E' : '#241C15',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>{round.agencyName ?? round.title}</div>
-                      {round.agencyName && (
+                      {round.agencyName && !compact && (
                         <div style={{
                           fontSize: 11.5, color: '#8A7F6E', marginTop: 1,
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>{round.title}</div>
                       )}
                     </div>
-                  </>
-                ) : (
-                  <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.32)' }}>
-                    {loaded ? tx.schedule.preparing : ' '}
-                  </div>
+                  ) : (
+                    <div style={{ fontSize: 13, color: 'rgba(36,28,21,0.34)', fontWeight: 600 }}>
+                      {loaded ? tx.schedule.preparing : ' '}
+                    </div>
+                  )}
+                </div>
+
+                {round && (past || live) && (
+                  <span style={{
+                    fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 7, flexShrink: 0,
+                    background: past ? 'rgba(36,28,21,0.05)' : 'rgba(34,197,94,0.13)',
+                    color: past ? '#A69C8E' : '#16a34a',
+                  }}>{past ? tx.schedule.closed : tx.schedule.live}</span>
                 )}
               </div>
-
-              {/* 상태 */}
-              {round && (
-                <span style={{
-                  fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 7, flexShrink: 0,
-                  background: past ? 'rgba(36,28,21,0.05)' : live ? 'rgba(34,197,94,0.13)' : 'rgba(255,111,60,0.12)',
-                  color: past ? '#A69C8E' : live ? '#16a34a' : '#D84A1E',
-                }}>{past ? tx.schedule.closed : live ? tx.schedule.live : tx.schedule.upcoming}</span>
-              )}
             </div>
           )
         })}

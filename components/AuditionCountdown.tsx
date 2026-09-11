@@ -16,6 +16,7 @@ import { nativeNotifState } from '@/lib/pushNative'
 export default function AuditionCountdown({ variant = 'notify' }: { variant?: 'notify' | 'signup' }) {
   const { lang } = useLang()
   const tx = useT(lang).auditions
+  const sx = useT(lang).schedule
   const [days, setDays] = useState<number | null>(null)
   const [notifyOn, setNotifyOn] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -71,64 +72,87 @@ export default function AuditionCountdown({ variant = 'notify' }: { variant?: 'n
 
   return (
     <div style={{
-      background: '#FFFFFF', borderRadius: 18, padding: '26px 20px',
-      border: '1px solid rgba(36,28,21,0.06)', textAlign: 'center',
+      borderRadius: 26, padding: 22, color: '#FFFFFF', position: 'relative', overflow: 'hidden',
+      background: 'linear-gradient(150deg, #E2541F 0%, #C0350F 62%, #8E2508 100%)',
+      boxShadow: '0 12px 30px rgba(216,74,30,0.22)',
     }}>
+      {/* 진행 중인 회차 히어로와 같은 자리, 같은 옷이다. 공고가 열리면 이
+          카드가 사라지고 그 자리에 기획사가 들어온다 — 화면이 바뀌는 게
+          아니라 주인공이 도착하는 것으로 읽힌다. */}
       <div style={{
-        width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.1)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 14px', color: '#D84A1E',
-      }}>
-        <Megaphone size={20} strokeWidth={1.6} />
+        position: 'absolute', right: -56, top: -70, width: 210, height: 210, borderRadius: '50%',
+        background: 'rgba(255,255,255,0.09)', pointerEvents: 'none',
+      }} />
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.18)',
+          padding: '6px 12px', borderRadius: 999, fontSize: 12.5, fontWeight: 800,
+        }}>
+          <Megaphone size={14} strokeWidth={2.2} />
+          {tx.countdownLabel}
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.78)' }}>{dateLabel}</span>
       </div>
 
-      <div style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 600, letterSpacing: 0.3 }}>
-        {tx.countdownLabel}
-      </div>
       <div style={{
-        fontSize: 44, fontWeight: 900, lineHeight: 1.1, letterSpacing: -1.5,
-        color: '#D84A1E', margin: '4px 0 10px',
+        fontSize: 58, fontWeight: 800, lineHeight: 1.05, letterSpacing: -2,
+        margin: '16px 0 6px', position: 'relative', zIndex: 1, fontVariantNumeric: 'tabular-nums',
       }}>
         {days === 0 ? 'D-DAY' : `D-${days}`}
       </div>
-      <div style={{ fontSize: 14, color: '#4A4438', fontWeight: 600, lineHeight: 1.6, wordBreak: 'keep-all' }}>
+      <div style={{
+        fontSize: 13.5, color: 'rgba(255,255,255,0.84)', fontWeight: 500, lineHeight: 1.6,
+        wordBreak: 'keep-all', position: 'relative', zIndex: 1,
+      }}>
         {days === 0 ? tx.countdownToday : tx.countdownDesc.replace('{date}', dateLabel)}
+      </div>
+
+      {/* 아직 안 밝힌 것이지 비어 있는 게 아니다. 실루엣이 그 차이를 만든다. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 13, margin: '18px 0 16px', position: 'relative', zIndex: 1 }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 17, background: 'rgba(255,255,255,0.16)', flexShrink: 0,
+          position: 'relative',
+        }}>
+          <span style={{ position: 'absolute', inset: 13, borderRadius: '50%', background: 'rgba(255,255,255,0.22)' }} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'rgba(255,255,255,0.88)' }}>{sx.preparing}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.72)', marginTop: 2, fontWeight: 500 }}>
+            {tx.countdownNotifyDesc}
+          </div>
+        </div>
       </div>
 
       {variant === 'signup' ? (
         <Link href="/signup" style={{
-          display: 'block', marginTop: 20, padding: '14px',
-          background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
-          borderRadius: 14, color: 'white', fontSize: 15, fontWeight: 700,
-          textDecoration: 'none', boxShadow: '0 4px 16px rgba(216,74,30,0.28)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 15,
+          background: '#FFFFFF', borderRadius: 16, color: '#C0350F', fontSize: 16, fontWeight: 900,
+          textDecoration: 'none', position: 'relative', zIndex: 1,
         }}>{tx.countdownSignup}</Link>
       ) : notifyOn ? (
         <div style={{
-          marginTop: 20, padding: '13px 14px', borderRadius: 14,
-          background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          padding: '13px 14px', borderRadius: 16, background: 'rgba(255,255,255,0.16)',
+          border: '1px solid rgba(255,255,255,0.3)', position: 'relative', zIndex: 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
         }}>
-          <BellRing size={16} strokeWidth={1.8} color="#15803D" />
+          <BellRing size={16} strokeWidth={2} />
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#15803D' }}>{tx.countdownNotifyOn}</div>
-            <div style={{ fontSize: 11, color: '#4A7C59' }}>{tx.countdownNotifyOnDesc}</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800 }}>{tx.countdownNotifyOn}</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.78)' }}>{tx.countdownNotifyOnDesc}</div>
           </div>
         </div>
       ) : (
-        <>
-          <button onClick={handleNotify} disabled={busy} style={{
-            width: '100%', marginTop: 20, padding: '14px',
-            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)',
-            border: 'none', borderRadius: 14, color: 'white', fontSize: 15, fontWeight: 700,
-            cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1,
-            boxShadow: '0 4px 16px rgba(216,74,30,0.28)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}>
-            <Bell size={16} strokeWidth={2} />
-            {tx.countdownNotify}
-          </button>
-          <div style={{ fontSize: 11, color: '#8A7F6E', marginTop: 9 }}>{tx.countdownNotifyDesc}</div>
-        </>
+        <button onClick={handleNotify} disabled={busy} style={{
+          width: '100%', padding: 15, background: '#FFFFFF', border: 'none', borderRadius: 16,
+          color: '#C0350F', fontSize: 16, fontWeight: 900, fontFamily: 'inherit',
+          cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.75 : 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          position: 'relative', zIndex: 1,
+        }}>
+          <Bell size={17} strokeWidth={2.2} />
+          {tx.countdownNotify}
+        </button>
       )}
     </div>
   )
