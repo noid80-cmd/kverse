@@ -148,7 +148,7 @@ export default function AdminBroadcast() {
 
           <label style={{ fontSize: 12.5, fontWeight: 800, color: '#1e1b4b', display: 'block', marginBottom: 6 }}>내용</label>
           <textarea value={body} onChange={e => edit(setBody)(e.target.value)} maxLength={120} rows={3}
-            placeholder="예) 이번 회차는 일요일 밤 11시 59분에 마감돼요."
+            placeholder="예) 이번 회차는 일요일 저녁 9시에 마감돼요."
             style={{ ...inputStyle, marginBottom: 16, resize: 'vertical', fontFamily: 'inherit' }} />
 
           <label style={{ fontSize: 12.5, fontWeight: 800, color: '#1e1b4b', display: 'block', marginBottom: 6 }}>누르면 갈 화면</label>
