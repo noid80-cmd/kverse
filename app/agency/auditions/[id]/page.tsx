@@ -72,7 +72,16 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   // 마지막에 추려서 정한다. 기획사 안에서만 보인다.
   async function updateStatus(appId: string, status: 'skip' | 'pending' | 'on_hold') {
     setUpdating(appId)
-    await supabase.from('audition_applications').update({ status }).eq('id', appId)
+    // 쓰기 결과를 보고 나서 화면을 바꾼다. RLS 가 막으면 update 는 0행을
+    // 처리하고 조용히 끝나는데, 먼저 화면을 바꿔두면 "보류해 뒀다"고 믿게
+    // 된다 — 실제로 그렇게 나왔다(2026-09-11 점검).
+    const { data: done, error } = await supabase.from('audition_applications')
+      .update({ status }).eq('id', appId).select('id')
+    if (error || !done || done.length === 0) {
+      alert('상태를 바꾸지 못했어요. 권한이 없거나 연결이 끊겼을 수 있어요.')
+      setUpdating(null)
+      return
+    }
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
     setUpdating(null)
   }
@@ -120,7 +129,13 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
     // 메시지가 실제로 나간 뒤에 합격 처리한다. 순서가 바뀌면 메시지 전송이
     // 실패했을 때 "합격했는데 아무 말 없음" 상태가 그대로 남는다.
-    await supabase.from('audition_applications').update({ status: 'invited' }).eq('id', appId)
+    const { data: passed, error: passErr } = await supabase.from('audition_applications')
+      .update({ status: 'invited' }).eq('id', appId).select('id')
+    if (passErr || !passed || passed.length === 0) {
+      alert('합격 처리를 저장하지 못했어요. 메시지는 이미 보냈으니 잠시 후 다시 눌러주세요.')
+      setUpdating(null)
+      return
+    }
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status: 'invited' } : a))
 
     sendPush({
@@ -146,9 +161,14 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
     setClosing(true)
     const now = new Date().toISOString()
-    await supabase.from('audition_applications')
+    const { data: closed, error: closeErr } = await supabase.from('audition_applications')
       .update({ status: 'rejected', decided_at: now, auto_decided: false })
-      .in('id', remaining.map(a => a.id))
+      .in('id', remaining.map(a => a.id)).select('id')
+    if (closeErr || !closed || closed.length === 0) {
+      alert('정리하지 못했어요. 권한이 없거나 연결이 끊겼을 수 있어요.')
+      setClosing(false)
+      return
+    }
 
     setApps(prev => prev.map(a =>
       (a.status === 'pending' || a.status === 'skip' || a.status === 'on_hold') ? { ...a, status: 'rejected' } : a))
