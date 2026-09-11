@@ -246,6 +246,8 @@ const t = {
     unitMin:         ['분', 'min', '分', '分', '分', 'นาที', 'mnt', 'phút', 'min', 'min'],
     onlyOne:         ['이번 주에 열린 곳은 여기 한 곳입니다', 'This is the only agency open this week', '今週開いているのはここ一社だけです', '本周只有这一家开放', '本週只有這一家開放', 'สัปดาห์นี้เปิดรับเพียงค่ายเดียว', 'Hanya agensi ini yang buka minggu ini', 'Tuần này chỉ có một công ty mở', 'Ito lang ang bukas ngayong linggo', 'Esta es la única agencia abierta esta semana'],
     otherPosts:      ['다른 공고', 'Other postings', 'ほかの公募', '其他公告', '其他公告', 'ประกาศอื่น', 'Pengumuman lain', 'Thông báo khác', 'Iba pang posting', 'Otras convocatorias'],
+    opensOn:         ['{date} 오픈', 'Opens {date}', '{date} 公開', '{date} 开放', '{date} 開放', 'เปิด {date}', 'Buka {date}', 'Mở {date}', 'Bubukas {date}', 'Abre el {date}'],
+    firstUp:         ['가장 먼저 열리는 곳', 'First one up', '最初に開くのは', '最先开放的公司', '最先開放的公司', 'ค่ายแรกที่เปิด', 'Yang pertama buka', 'Công ty mở đầu tiên', 'Unang magbubukas', 'La primera en abrir'],
     nextRounds:      ['다음 회차', 'Coming up', '次回以降', '接下来', '接下來', 'รอบถัดไป', 'Berikutnya', 'Đợt tiếp theo', 'Susunod', 'Próximas rondas'],
     title:           ['오디션 공고', 'Auditions', 'オーディション', '试镜公告', '試鏡公告', 'ออดิชัน', 'Audisi', 'Thử vai', 'Mga Audisyon', 'Audiciones'],
     noAuditions:     ['현재 열린 오디션이 없어요', 'No open auditions', '開催中のオーディションはありません', '目前没有试镜', '目前沒有試鏡', 'ไม่มีออดิชันที่เปิดรับ', 'Tidak ada audisi terbuka', 'Không có buổi thử vai', 'Walang bukas na audisyon', 'No hay audiciones abiertas'],

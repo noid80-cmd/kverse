@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Bell, BellRing, Megaphone } from 'lucide-react'
+import { Bell, Megaphone } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
-import { daysUntilLaunch, launchDateLabel } from '@/lib/launch'
+import { daysUntilLaunch, launchDateLabel, roundOpensAt, roundNoOf } from '@/lib/launch'
+import { createClient } from '@/lib/supabase/client'
 import { doSubscribe } from '@/components/PushSubscribe'
 import { isNativeApp } from '@/lib/capacitor'
 import { nativeNotifState } from '@/lib/pushNative'
@@ -28,6 +29,46 @@ export default function AuditionCountdown({
   const [days, setDays] = useState<number | null>(null)
   const [notifyOn, setNotifyOn] = useState(false)
   const [busy, setBusy] = useState(false)
+
+  // 오픈 전이라도 어디가 열리는지는 정해져 있다. 그걸 안 보여주고 D-day만
+  // 크게 띄우면, 처음 들어온 사람 눈에는 아무것도 없는 앱이다. 기다릴 이유는
+  // 숫자가 아니라 이름이 만든다 — "19일 남았다"가 아니라 "미스틱스토리가
+  // 열린다"여야 한다. 지원은 정해진 시각에 열리고, 이름은 지금부터 건다.
+  type NextUp = { name: string; logo: string | null; no: number | null; opensAt: Date }
+  const [next, setNext] = useState<NextUp | null>(null)
+
+  useEffect(() => {
+    const today = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10)
+    createClient()
+      .from('auditions')
+      .select('deadline, agency:agencies(name, logo_url)')
+      .in('status', ['scheduled', 'active'])
+      .not('deadline', 'is', null)
+      .gte('deadline', today)
+      .order('deadline', { ascending: true })
+      .limit(1)
+      .then(({ data }) => {
+        const row = data?.[0] as unknown as
+          { deadline: string; agency?: { name?: string; logo_url?: string } } | undefined
+        if (!row?.agency?.name) return
+        setNext({
+          name: row.agency.name,
+          logo: row.agency.logo_url ?? null,
+          no: roundNoOf(row.deadline),
+          opensAt: roundOpensAt(row.deadline),
+        })
+      })
+  }, [])
+
+  function openLabel(at: Date) {
+    try {
+      return new Intl.DateTimeFormat(lang === 'zh-TW' ? 'zh-TW' : lang, {
+        month: 'long', day: 'numeric', timeZone: 'Asia/Seoul',
+      }).format(at)
+    } catch {
+      return at.toISOString().slice(0, 10)
+    }
+  }
 
   // 남은 일수는 서버와 클라이언트의 시각이 달라 hydration 경고가 나기 쉬워서
   // 마운트 후에 계산한다.
@@ -91,12 +132,37 @@ export default function AuditionCountdown({
           }}>
             {days === 0 ? 'D-DAY' : `D-${days}`}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 700 }}>{tx.countdownLabel}</div>
-            <div style={{ fontSize: 13, color: '#241C15', fontWeight: 700, marginTop: 2, wordBreak: 'keep-all' }}>
-              {days === 0 ? tx.countdownToday : tx.countdownDesc.replace('{date}', dateLabel)}
+          {next ? (
+            <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 11, flexShrink: 0, overflow: 'hidden',
+                background: next.logo ? '#FFFFFF' : 'rgba(255,111,60,0.12)',
+                border: '1px solid rgba(36,28,21,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {next.logo
+                  ? <img src={next.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  : <span style={{ fontSize: 11, fontWeight: 900, color: '#D84A1E' }}>{next.name.slice(0, 2)}</span>}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{
+                  fontSize: 14, color: '#241C15', fontWeight: 900, letterSpacing: -0.3,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>{next.name}</div>
+                <div style={{ fontSize: 11.5, color: '#8A7F6E', fontWeight: 600, marginTop: 1 }}>
+                  {next.no ? `${sx.round.replace('{n}', String(next.no))} · ` : ''}
+                  {tx.opensOn.replace('{date}', openLabel(next.opensAt))}
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 700 }}>{tx.countdownLabel}</div>
+              <div style={{ fontSize: 13, color: '#241C15', fontWeight: 700, marginTop: 2, wordBreak: 'keep-all' }}>
+                {days === 0 ? tx.countdownToday : tx.countdownDesc.replace('{date}', dateLabel)}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 알림은 아직 안 켠 사람에게만 묻는다. 켠 사람에게 다시 묻는 건
@@ -155,19 +221,43 @@ export default function AuditionCountdown({
         {days === 0 ? tx.countdownToday : tx.countdownDesc.replace('{date}', dateLabel)}
       </div>
 
-      {/* 아직 안 밝힌 것이지 비어 있는 게 아니다. 실루엣이 그 차이를 만든다. */}
+      {/* 어디가 열리는지 정해졌으면 이름을 건다. 아직이면 실루엣으로 둔다 —
+          빈 칸은 멈춘 것처럼 보이지만 실루엣은 아직 안 밝힌 것으로 읽힌다. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 13, margin: '18px 0 16px', position: 'relative', zIndex: 1 }}>
         <div style={{
-          width: 52, height: 52, borderRadius: 17, background: 'rgba(255,255,255,0.16)', flexShrink: 0,
-          position: 'relative',
+          width: 56, height: 56, borderRadius: 18, flexShrink: 0, position: 'relative', overflow: 'hidden',
+          background: next?.logo ? '#FFFFFF' : 'rgba(255,255,255,0.16)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <span style={{ position: 'absolute', inset: 13, borderRadius: '50%', background: 'rgba(255,255,255,0.22)' }} />
+          {next?.logo
+            ? <img src={next.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            : next
+              ? <span style={{ fontSize: 15, fontWeight: 900 }}>{next.name.slice(0, 3)}</span>
+              : <span style={{ position: 'absolute', inset: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.22)' }} />}
         </div>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'rgba(255,255,255,0.88)' }}>{sx.preparing}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.72)', marginTop: 2, fontWeight: 500 }}>
-            {tx.countdownNotifyDesc}
-          </div>
+          {next ? (
+            <>
+              <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.72)', fontWeight: 700, marginBottom: 2 }}>
+                {tx.firstUp}
+              </div>
+              <div style={{
+                fontSize: 19, fontWeight: 900, letterSpacing: -0.4, lineHeight: 1.2,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>{next.name}</div>
+              <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.8)', marginTop: 3, fontWeight: 600 }}>
+                {next.no ? `${sx.round.replace('{n}', String(next.no))} · ` : ''}
+                {tx.opensOn.replace('{date}', openLabel(next.opensAt))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'rgba(255,255,255,0.88)' }}>{sx.preparing}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.72)', marginTop: 2, fontWeight: 500 }}>
+                {tx.countdownNotifyDesc}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -178,17 +268,10 @@ export default function AuditionCountdown({
           textDecoration: 'none', position: 'relative', zIndex: 1,
         }}>{tx.countdownSignup}</Link>
       ) : notifyOn ? (
-        <div style={{
-          padding: '13px 14px', borderRadius: 16, background: 'rgba(255,255,255,0.16)',
-          border: '1px solid rgba(255,255,255,0.3)', position: 'relative', zIndex: 1,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
-        }}>
-          <BellRing size={16} strokeWidth={2} />
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 13.5, fontWeight: 800 }}>{tx.countdownNotifyOn}</div>
-            <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.78)' }}>{tx.countdownNotifyOnDesc}</div>
-          </div>
-        </div>
+        // 이미 켠 사람에게 "켜져 있어요"를 다시 말해줄 이유가 없다. 화면에서
+        // 가장 좋은 자리를 확인 문구가 차지하고 있었다 — 그 자리는 비워두는
+        // 편이 낫고, 정작 알림을 켜야 할 사람에게 버튼이 더 크게 보인다.
+        null
       ) : (
         <button onClick={handleNotify} disabled={busy} style={{
           width: '100%', padding: 15, background: '#FFFFFF', border: 'none', borderRadius: 16,
