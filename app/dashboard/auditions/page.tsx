@@ -332,10 +332,13 @@ export default function TalentAuditionsPage() {
       )}
 
       {/* 매주 한 곳씩 돌아간다는 리듬. 위에서 이번 회차를 이미 보여줬으면
-          여기서는 다음 회차들만 잇는다. 세 줄로 줄인 건 다섯 줄이 전부
-          "준비 중"이면 준비 중이 주인공이 되기 때문이다. */}
+          여기서는 다음 회차들만 잇는다.
+          한때 세 줄로 줄여뒀다 — 다섯 줄이 전부 "준비 중"이면 준비 중이
+          주인공이 되기 때문이었다. 이제 회차마다 기획사가 들어차서, 줄이
+          길수록 채워지는 게 보인다. 아직 안 정해진 한 줄은 그대로 두는 게
+          낫다. 하나씩 채워지는 과정 자체가 다음 주를 기다리게 만든다. */}
       <div className="max-w-lg mx-auto px-4" style={{ marginBottom: 24 }}>
-        <AuditionSchedule compact limit={3} skipDeadline={featured?.deadline} />
+        <AuditionSchedule compact limit={5} skipDeadline={featured?.deadline} />
       </div>
 
       <div className="max-w-lg mx-auto px-4">
