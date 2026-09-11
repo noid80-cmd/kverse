@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AgencyNav from '@/components/layout/AgencyNav'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Video, CheckCircle, XCircle, Send, Gavel } from 'lucide-react'
+import { Video, CheckCircle, XCircle, Send, Gavel, PauseCircle } from 'lucide-react'
 import { sendPush } from '@/lib/notify'
 
 type Application = {
@@ -36,6 +36,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   const [passTarget, setPassTarget] = useState<{ appId: string; talentId: string; name: string } | null>(null)
   const [passMessage, setPassMessage] = useState('')
   const [closing, setClosing] = useState(false)
+  const [onlyHold, setOnlyHold] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -66,7 +67,10 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
     load()
   }, [])
 
-  async function updateStatus(appId: string, status: 'skip' | 'pending') {
+  // 'on_hold'(보류)는 알림을 보내지 않는다. 합격도 불합격도 아닌, 아직 정하지
+  // 않은 자리다. 백 명을 넘겨 보다가 "다시 보고 싶다" 싶은 사람을 담아 두고
+  // 마지막에 추려서 정한다. 기획사 안에서만 보인다.
+  async function updateStatus(appId: string, status: 'skip' | 'pending' | 'on_hold') {
     setUpdating(appId)
     await supabase.from('audition_applications').update({ status }).eq('id', appId)
     setApps(prev => prev.map(a => a.id === appId ? { ...a, status } : a))
@@ -135,7 +139,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   // '불합격' 버튼을 한 번도 누르지 않는다. 미성년자에게 불합격을 공식 기록으로
   // 남기는 부담이 곧 결과 입력을 미루는 이유가 되기 때문이다.
   async function closeReview() {
-    const remaining = apps.filter(a => a.status === 'pending' || a.status === 'skip')
+    const remaining = apps.filter(a => a.status === 'pending' || a.status === 'skip' || a.status === 'on_hold')
     if (remaining.length === 0) return
     if (!confirm(`선택하지 않은 ${remaining.length}명의 심사를 종료합니다.
 지망생에게는 "이번 회차 심사가 끝났어요"로 전달됩니다.`)) return
@@ -147,7 +151,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
       .in('id', remaining.map(a => a.id))
 
     setApps(prev => prev.map(a =>
-      (a.status === 'pending' || a.status === 'skip') ? { ...a, status: 'rejected' } : a))
+      (a.status === 'pending' || a.status === 'skip' || a.status === 'on_hold') ? { ...a, status: 'rejected' } : a))
 
     // 결과를 안 알려주면 다음 회차에 안 온다 — 매주 여는 구조에서 그게 가장
     // 빠른 죽음이다. 다만 '불합격'이라는 단어는 쓰지 않고 다음 회차로 넘긴다.
@@ -169,13 +173,17 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
   const statusBadge = (s: string) => {
     if (s === 'invited') return { bg: '#dcfce7', color: '#16a34a', label: '1차 합격' }
+    if (s === 'on_hold') return { bg: '#fef3c7', color: '#b45309', label: '보류' }
     if (s === 'skip') return { bg: '#f0f0f8', color: '#94a3b8', label: '패스' }
     if (s === 'rejected') return { bg: '#f0f0f8', color: '#94a3b8', label: '심사 종료' }
     return { bg: '#fef9c3', color: '#ca8a04', label: '검토중' }
   }
 
   const passedCount = apps.filter(a => a.status === 'invited').length
-  const pendingCount = apps.filter(a => a.status === 'pending' || a.status === 'skip').length
+  const holdCount = apps.filter(a => a.status === 'on_hold').length
+  // 아직 결과가 안 정해진 사람. 보류도 여기 든다.
+  const pendingCount = apps.filter(a => a.status === 'pending' || a.status === 'skip' || a.status === 'on_hold').length
+  const shownApps = onlyHold ? apps.filter(a => a.status === 'on_hold') : apps
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#f0f0f8' }}>
@@ -195,8 +203,23 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
         <div style={{ fontSize: 13, color: '#8A7F6E', marginBottom: 16, fontWeight: 600 }}>
           지원자 {apps.length}명
           {passedCount > 0 && <span style={{ color: '#16a34a' }}> · 1차 합격 {passedCount}명</span>}
+          {holdCount > 0 && <span style={{ color: '#b45309' }}> · 보류 {holdCount}명</span>}
           {pendingCount > 0 && <span style={{ color: '#ca8a04' }}> · 검토중 {pendingCount}명</span>}
         </div>
+
+        {/* 보류해 둔 사람만 추려 본다. 백 명을 넘겨 본 뒤 다시 훑는 자리다. */}
+        {holdCount > 0 && (
+          <button onClick={() => setOnlyHold(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14,
+              background: onlyHold ? '#fef3c7' : '#fff', color: onlyHold ? '#b45309' : '#8A7F6E',
+              border: `1px solid ${onlyHold ? '#fcd34d' : '#e8e8f2'}`, borderRadius: 999,
+              padding: '8px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            }}>
+            <PauseCircle size={14} strokeWidth={2} />
+            {onlyHold ? `보류 ${holdCount}명만 보는 중` : `보류 ${holdCount}명만 보기`}
+          </button>
+        )}
 
         {pendingCount > 0 && (
           <div style={{ background: '#fff', border: '1px solid #e8e8f2', borderRadius: 18, padding: '16px 18px', marginBottom: 18 }}>
@@ -228,7 +251,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {apps.map(a => {
+            {shownApps.map(a => {
               const badge = statusBadge(a.status)
               const age = getAge(a.talent?.birth_date ?? null)
               return (
@@ -291,16 +314,48 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                         <button onClick={() => updateStatus(a.id, 'skip')}
                           disabled={updating === a.id}
                           style={{
-                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
                             background: '#f0f0f8', color: '#94a3b8', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
                           <XCircle size={15} strokeWidth={2} /> 패스
                         </button>
+                        {/* 보류는 결정이 아니다. 지망생에게는 아무것도 안 나간다. */}
+                        <button onClick={() => updateStatus(a.id, 'on_hold')}
+                          disabled={updating === a.id}
+                          style={{
+                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            background: '#fef3c7', color: '#b45309', border: 'none', borderRadius: 12,
+                            padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                          }}>
+                          <PauseCircle size={15} strokeWidth={2} /> 보류
+                        </button>
                         <button onClick={() => openPass(a.id, a.talent?.id ?? '', a.talent?.name ?? '')}
                           disabled={updating === a.id}
                           style={{
-                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                            flex: 1.2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', border: 'none', borderRadius: 12,
+                            padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                          }}>
+                          <CheckCircle size={15} strokeWidth={2} /> 1차 합격
+                        </button>
+                      </div>
+                    ) : a.status === 'on_hold' ? (
+                      // 보류해 둔 사람은 여기서 바로 합격시킬 수 있어야 한다 —
+                      // 되돌린 뒤 다시 누르게 하면 한 단계가 헛돈다.
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => updateStatus(a.id, 'pending')}
+                          disabled={updating === a.id}
+                          style={{
+                            flex: 1, background: 'none', border: '1px solid #e0e0f0', borderRadius: 12,
+                            padding: '10px', fontSize: 13, fontWeight: 600, color: '#94a3b8', cursor: 'pointer',
+                          }}>
+                          보류 해제
+                        </button>
+                        <button onClick={() => openPass(a.id, a.talent?.id ?? '', a.talent?.name ?? '')}
+                          disabled={updating === a.id}
+                          style={{
+                            flex: 1.2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
                             background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', border: 'none', borderRadius: 12,
                             padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                           }}>
