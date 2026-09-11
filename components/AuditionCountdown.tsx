@@ -35,7 +35,7 @@ export default function AuditionCountdown({
   // 크게 띄우면, 처음 들어온 사람 눈에는 아무것도 없는 앱이다. 기다릴 이유는
   // 숫자가 아니라 이름이 만든다 — "19일 남았다"가 아니라 "미스틱스토리가
   // 열린다"여야 한다. 지원은 정해진 시각에 열리고, 이름은 지금부터 건다.
-  type NextUp = { name: string; nameEn: string | null; logo: string | null; no: number | null; opensAt: Date }
+  type NextUp = { name: string; name_en: string | null; logo: string | null; no: number | null; opensAt: Date }
   const [next, setNext] = useState<NextUp | null>(null)
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function AuditionCountdown({
         if (!row?.agency?.name) return
         setNext({
           name: row.agency.name,
-          nameEn: row.agency.name_en ?? null,
+          name_en: row.agency.name_en ?? null,
           logo: row.agency.logo_url ?? null,
           no: roundNoOf(row.deadline),
           opensAt: roundOpensAt(row.deadline),
