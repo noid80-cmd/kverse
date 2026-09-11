@@ -131,7 +131,9 @@ export default function AuditionSchedule({
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 10, padding: '11px 0',
               }}>
-                <div style={{ width: 78, flexShrink: 0 }}>
+                {/* 날짜 폭은 가장 긴 조합("10/19–10/25")이 한 줄에 들어가야 한다.
+                    78px에서는 그 한 회차만 두 줄로 접혀 줄이 어긋나 보였다. */}
+                <div style={{ width: 90, flexShrink: 0 }}>
                   <div style={{
                     fontSize: 10.5, fontWeight: 800, letterSpacing: 0.2, marginBottom: 1,
                     color: live ? '#D84A1E' : past ? '#B0A89C' : '#8A7F6E',
@@ -139,7 +141,7 @@ export default function AuditionSchedule({
                     {tx.schedule.round.replace('{n}', String(no))}
                   </div>
                   <div style={{
-                    fontSize: 12.5, fontWeight: 800,
+                    fontSize: 12.5, fontWeight: 800, whiteSpace: 'nowrap',
                     color: past ? '#B0A89C' : live ? '#D84A1E' : '#241C15',
                   }}>
                     {md(opensAt)}–{md(closesAt)}
