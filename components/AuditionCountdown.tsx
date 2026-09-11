@@ -7,6 +7,7 @@ import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { daysUntilLaunch, launchDateLabel, roundOpensAt, roundNoOf } from '@/lib/launch'
 import { createClient } from '@/lib/supabase/client'
+import { agencyName, agencyInitials } from '@/lib/agencyName'
 import { doSubscribe } from '@/components/PushSubscribe'
 import { isNativeApp } from '@/lib/capacitor'
 import { nativeNotifState } from '@/lib/pushNative'
@@ -34,14 +35,14 @@ export default function AuditionCountdown({
   // 크게 띄우면, 처음 들어온 사람 눈에는 아무것도 없는 앱이다. 기다릴 이유는
   // 숫자가 아니라 이름이 만든다 — "19일 남았다"가 아니라 "미스틱스토리가
   // 열린다"여야 한다. 지원은 정해진 시각에 열리고, 이름은 지금부터 건다.
-  type NextUp = { name: string; logo: string | null; no: number | null; opensAt: Date }
+  type NextUp = { name: string; nameEn: string | null; logo: string | null; no: number | null; opensAt: Date }
   const [next, setNext] = useState<NextUp | null>(null)
 
   useEffect(() => {
     const today = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10)
     createClient()
       .from('auditions')
-      .select('deadline, agency:agencies(name, logo_url)')
+      .select('deadline, agency:agencies(name, name_en, logo_url)')
       .in('status', ['scheduled', 'active'])
       .not('deadline', 'is', null)
       .gte('deadline', today)
@@ -49,10 +50,11 @@ export default function AuditionCountdown({
       .limit(1)
       .then(({ data }) => {
         const row = data?.[0] as unknown as
-          { deadline: string; agency?: { name?: string; logo_url?: string } } | undefined
+          { deadline: string; agency?: { name?: string; name_en?: string; logo_url?: string } } | undefined
         if (!row?.agency?.name) return
         setNext({
           name: row.agency.name,
+          nameEn: row.agency.name_en ?? null,
           logo: row.agency.logo_url ?? null,
           no: roundNoOf(row.deadline),
           opensAt: roundOpensAt(row.deadline),
@@ -142,13 +144,13 @@ export default function AuditionCountdown({
               }}>
                 {next.logo
                   ? <img src={next.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  : <span style={{ fontSize: 11, fontWeight: 900, color: '#D84A1E' }}>{next.name.slice(0, 2)}</span>}
+                  : <span style={{ fontSize: 11, fontWeight: 900, color: '#D84A1E' }}>{agencyInitials(next, lang, 2)}</span>}
               </div>
               <div style={{ minWidth: 0 }}>
                 <div style={{
                   fontSize: 14, color: '#241C15', fontWeight: 900, letterSpacing: -0.3,
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>{next.name}</div>
+                }}>{agencyName(next, lang)}</div>
                 <div style={{ fontSize: 11.5, color: '#8A7F6E', fontWeight: 600, marginTop: 1 }}>
                   {next.no ? `${sx.round.replace('{n}', String(next.no))} · ` : ''}
                   {tx.opensOn.replace('{date}', openLabel(next.opensAt))}
@@ -232,7 +234,7 @@ export default function AuditionCountdown({
           {next?.logo
             ? <img src={next.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             : next
-              ? <span style={{ fontSize: 15, fontWeight: 900 }}>{next.name.slice(0, 3)}</span>
+              ? <span style={{ fontSize: 15, fontWeight: 900 }}>{agencyInitials(next, lang)}</span>
               : <span style={{ position: 'absolute', inset: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.22)' }} />}
         </div>
         <div style={{ minWidth: 0 }}>
@@ -244,7 +246,7 @@ export default function AuditionCountdown({
               <div style={{
                 fontSize: 19, fontWeight: 900, letterSpacing: -0.4, lineHeight: 1.2,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>{next.name}</div>
+              }}>{agencyName(next, lang)}</div>
               <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.8)', marginTop: 3, fontWeight: 600 }}>
                 {next.no ? `${sx.round.replace('{n}', String(next.no))} · ` : ''}
                 {tx.opensOn.replace('{date}', openLabel(next.opensAt))}

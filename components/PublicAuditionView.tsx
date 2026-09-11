@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { agencyName } from '@/lib/agencyName'
 import { useLang } from '@/lib/i18n/context'
 import { LANGS } from '@/lib/i18n/translations'
 import { roundClosesAt, roundOpensAt, isRoundNotOpenYet } from '@/lib/launch'
@@ -18,6 +19,7 @@ export type PublicAudition = {
   deadline: string | null
   status: string
   agencyName: string | null
+  agencyNameEn?: string | null
   agencyVerified: boolean
   agencyLogo: string | null
   translations: Record<string, { title?: string; description?: string }> | null
@@ -167,7 +169,9 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
                 <img src={audition.agencyLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </span>
             )}
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#8A7F6E' }}>{audition.agencyName}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#8A7F6E' }}>
+              {agencyName({ name: audition.agencyName, name_en: audition.agencyNameEn }, lang) || audition.agencyName}
+            </span>
             {audition.agencyVerified && <BadgeCheck size={15} strokeWidth={2.2} color="#FF6F3C" />}
           </div>
         )}

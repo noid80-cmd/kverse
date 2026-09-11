@@ -10,6 +10,7 @@ import { daysUntilLaunch, isRoundClosed, isRoundNotOpenYet } from '@/lib/launch'
 import LiveTicker from '@/components/LiveTicker'
 import Link from 'next/link'
 import { Plus, Megaphone, Bookmark, MessageCircle, User, ChevronRight, Play } from 'lucide-react'
+import { agencyName } from '@/lib/agencyName'
 import { useLang } from '@/lib/i18n/context'
 import { useT, LANG_LABELS, LANGS, type Lang } from '@/lib/i18n/translations'
 
@@ -87,7 +88,7 @@ export default function DashboardPage() {
         // 'scheduled' 도 받아온다 — 크론이 열어주기를 기다리면 최대 한 시간
         // 늦게 뜬다. 여는 시각과 닫는 시각은 아래에서 직접 본다.
         // 날짜로 거르면 마감일 21시가 지나도 종일 남는다.
-        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name, logo_url)')
+        supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name, name_en, logo_url)')
           .in('status', ['active', 'scheduled'])
           .order('created_at', { ascending: false }).limit(8),
         // 참여 기획사 수는 실제로 센다. 예전엔 티커에 16이 박혀 있었는데 초대만
@@ -321,7 +322,7 @@ export default function DashboardPage() {
                             {getAuditionDisplayTitle(a, lang)}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 12, color: '#8A7F6E' }}>{a.agency?.name ?? tx.auditions.agencyLabel}</span>
+                            <span style={{ fontSize: 12, color: '#8A7F6E' }}>{agencyName(a.agency, lang) || tx.auditions.agencyLabel}</span>
                             {a.category.split(',').map(c => (
                               <span key={c} style={{ fontSize: 10, color: '#D84A1E', background: 'rgba(255,111,60,0.12)', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>
                                 {categoryLabel[c.trim()] ?? c.trim()}

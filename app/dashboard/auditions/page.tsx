@@ -11,6 +11,7 @@ import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Megaphone, Video, CheckCircle, X, ArrowUpDown } from 'lucide-react'
+import { agencyName } from '@/lib/agencyName'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { sendPush } from '@/lib/notify'
@@ -28,7 +29,7 @@ type Audition = {
   deadline: string | null
   status: string
   created_at: string
-  agency: { name: string; is_verified: boolean; logo_url: string | null } | null
+  agency: { name: string; name_en?: string | null; is_verified: boolean; logo_url: string | null } | null
   translations?: AuditionTranslations | null
 }
 
@@ -101,7 +102,7 @@ export default function TalentAuditionsPage() {
 
     const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
       supabase.from('auditions')
-        .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, is_verified, logo_url)')
+        .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, name_en, is_verified, logo_url)')
         // 'scheduled' 도 받아온다. 크론이 열어주기를 기다리면 최대 한 시간
         // 늦게 보인다 — 화면에서 시각을 직접 보고 정각에 띄운다.
         .in('status', ['active', 'closed', 'scheduled'])
@@ -429,7 +430,7 @@ export default function TalentAuditionsPage() {
                       <img src={a.agency.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </span>
                   )}
-                  <div style={{ fontWeight: 900, color: '#241C15', fontSize: 18 }}>{a.agency?.name ?? tx.auditions.adminNotice}</div>
+                  <div style={{ fontWeight: 900, color: '#241C15', fontSize: 18 }}>{agencyName(a.agency, lang) || tx.auditions.adminNotice}</div>
                   {a.agency?.is_verified && (
                     <span style={{ fontSize: 11, background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>{tx.common.verified}</span>
                   )}
@@ -569,7 +570,7 @@ export default function TalentAuditionsPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 2 }}>{modalAudition.agency?.name}</div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 2 }}>{agencyName(modalAudition.agency, lang)}</div>
                 <div style={{ fontWeight: 800, color: '#241C15', fontSize: 17 }}>{modalAudition.title}</div>
               </div>
               <button onClick={closeModal} style={{ background: '#FFFFFF', border: 'none', borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#8A7F6E' }}>

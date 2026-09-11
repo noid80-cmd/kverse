@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageCircle, Bookmark, Trash2, Video, BellOff, BellRing, X } from 'lucide-react'
 import { isNativeApp } from '@/lib/capacitor'
 import { enableNativeNotifications, nativeNotifState } from '@/lib/pushNative'
+import { agencyName } from '@/lib/agencyName'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -29,7 +30,7 @@ type Bookmark = {
 // 보이면 이미 응답한 제안에 또 답하게 된다.
 type Offer = {
   id: string; message: string; created_at: string; expires_at: string
-  agency: { name: string } | null
+  agency: { name: string; name_en?: string | null } | null
 }
 
 const CACHE_KEY = 'kpick-reactions'
@@ -125,7 +126,7 @@ function ReactionsContent() {
 
     const { data: offerRows } = await supabase
       .from('audition_offers')
-      .select('id, message, created_at, expires_at, agency:agencies(name)')
+      .select('id, message, created_at, expires_at, agency:agencies(name, name_en)')
       .eq('talent_id', userId).eq('status', 'pending')
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
@@ -258,7 +259,7 @@ function ReactionsContent() {
                   {tx.reactions.offerTitle}
                 </div>
                 <div style={{ fontSize: 17, fontWeight: 900, color: '#241C15', marginBottom: 10 }}>
-                  {o.agency?.name ?? tx.auditions.agencyLabel}
+                  {agencyName(o.agency, lang) || tx.auditions.agencyLabel}
                 </div>
                 <p style={{ fontSize: 14, color: '#5c5245', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: '0 0 12px' }}>
                   {o.message}

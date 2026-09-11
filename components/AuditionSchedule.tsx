@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { roundOpensAt, roundDeadline, currentRoundNo, roundClosesAt } from '@/lib/launch'
+import { agencyName, agencyInitials } from '@/lib/agencyName'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -22,7 +23,7 @@ import { useT } from '@/lib/i18n/translations'
 // 빈 칸은 서비스가 멈춘 것처럼 보이지만, 실루엣은 아직 안 밝힌 것으로 읽힌다.
 // 없는 기획사 이름을 지어내지는 않는다 — 확정된 회차만 이름이 나온다.
 
-type Round = { deadline: string; title: string; status: string; agencyName: string | null; logo: string | null }
+type Round = { deadline: string; title: string; status: string; name: string | null; nameEn: string | null; logo: string | null }
 
 const KST = 9 * 3600_000
 
@@ -58,7 +59,7 @@ export default function AuditionSchedule({
   useEffect(() => {
     const supabase = createClient()
     supabase.from('auditions')
-      .select('deadline, title, status, agency:agencies(name, logo_url)')
+      .select('deadline, title, status, agency:agencies(name, name_en, logo_url)')
       .not('deadline', 'is', null)
       .gte('deadline', roundDeadline(first))
       .lte('deadline', roundDeadline(last))
@@ -67,12 +68,13 @@ export default function AuditionSchedule({
       .in('status', ['scheduled', 'active', 'closed'])
       .then(({ data }) => {
         setRounds((data ?? []).map(r => {
-          const ag = (r as unknown as { agency?: { name?: string; logo_url?: string } }).agency
+          const ag = (r as unknown as { agency?: { name?: string; name_en?: string; logo_url?: string } }).agency
           return {
             deadline: r.deadline as string,
             title: (r.title as string) ?? tx.schedule.audition,
             status: (r.status as string) ?? 'active',
-            agencyName: ag?.name ?? null,
+            name: ag?.name ?? null,
+            nameEn: ag?.name_en ?? null,
             logo: ag?.logo_url ?? null,
           }
         }))
@@ -125,7 +127,8 @@ export default function AuditionSchedule({
           // 회차에만 쓴다.
           const past = round ? round.status === 'closed' || now > closesAt : now > closesAt
           const live = !past && (round ? round.status === 'active' : now >= opensAt)
-          const initials = (round?.agencyName ?? '').slice(0, 2)
+          const shown = round ? agencyName({ name: round.name, name_en: round.nameEn }, lang) : ''
+          const initials = round ? agencyInitials({ name: round.name, name_en: round.nameEn }, lang, 2) : ''
 
           return (
             <div key={no} style={{ position: 'relative', marginBottom: 2 }}>
@@ -181,8 +184,8 @@ export default function AuditionSchedule({
                       <div style={{
                         fontSize: 13.5, fontWeight: 800, color: past ? '#8A7F6E' : '#241C15',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{round.agencyName ?? round.title}</div>
-                      {round.agencyName && !compact && (
+                      }}>{shown || round.title}</div>
+                      {shown && !compact && (
                         <div style={{
                           fontSize: 11.5, color: '#8A7F6E', marginTop: 1,
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

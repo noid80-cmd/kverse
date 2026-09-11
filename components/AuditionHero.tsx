@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, Check } from 'lucide-react'
 import { roundClosesAt, roundNoOf, CLOSE_HOUR_KST } from '@/lib/launch'
+import { agencyName, agencyInitials } from '@/lib/agencyName'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -21,7 +22,7 @@ type HeroAudition = {
   title: string
   deadline: string | null
   mode: 'online' | 'offline' | 'both' | null
-  agency: { name: string; is_verified: boolean; logo_url: string | null } | null
+  agency: { name: string; name_en?: string | null; is_verified: boolean; logo_url: string | null } | null
 }
 
 function twoDigit(n: number) {
@@ -75,8 +76,8 @@ export default function AuditionHero({
   }, [audition.deadline])
 
   const roundNo = audition.deadline ? roundNoOf(audition.deadline) : null
-  const agencyName = audition.agency?.name ?? tx.auditions.adminNotice
-  const initials = agencyName.slice(0, 3)
+  const shownName = agencyName(audition.agency, lang) || tx.auditions.adminNotice
+  const initials = agencyInitials(audition.agency, lang) || shownName.slice(0, 3)
   const canApply = !appStatus && audition.mode !== 'offline'
 
   const ctaLabel = appStatus === 'pending' ? tx.auditions.review
@@ -128,7 +129,7 @@ export default function AuditionHero({
           <div style={{
             display: 'flex', alignItems: 'center', gap: 6, fontSize: 18, fontWeight: 900, letterSpacing: -0.4,
           }}>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agencyName}</span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shownName}</span>
             {audition.agency?.is_verified && <Check size={15} strokeWidth={3} style={{ flexShrink: 0 }} />}
           </div>
           <div style={{
