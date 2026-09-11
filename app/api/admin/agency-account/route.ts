@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -14,6 +14,26 @@ import { cookies } from 'next/headers'
 // 않는다 — 메일로 오는 코드로 들어오고, 그게 곧 본인 확인이다.
 
 export const dynamic = 'force-dynamic'
+
+type Admin = SupabaseClient<any>
+
+// auth 유저는 한 번에 다 오지 않는다. 페이지를 끝까지 넘긴다 — 한 페이지만
+// 보면 가입자가 늘어난 뒤부터 담당자 이메일이 조용히 사라진다.
+async function allAuthUsers(admin: Admin) {
+  const out: { id: string; email?: string }[] = []
+  for (let page = 1; page <= 50; page++) {
+    const { data } = await admin.auth.admin.listUsers({ page, perPage: 1000 })
+    const users = data?.users ?? []
+    out.push(...users)
+    if (users.length < 1000) break
+  }
+  return out
+}
+
+async function findUser(admin: Admin, email: string) {
+  const target = email.toLowerCase()
+  return (await allAuthUsers(admin)).find(u => u.email?.toLowerCase() === target)
+}
 
 async function verifyAdmin() {
   const store = await cookies()
@@ -55,13 +75,16 @@ export async function POST(req: NextRequest) {
 
   let userId: string | undefined = created?.user?.id
   if (authError) {
-    if (!authError.message.includes('already registered')) {
+    // Supabase 쪽 문장이 "already registered"일 때도 있고 "already been
+    // registered"일 때도 있다. 한 문장에 맞춰두면 다음에 또 조용히 빗나간다.
+    const dup = (authError as { code?: string }).code === 'email_exists'
+      || /already .*(registered|exists)/i.test(authError.message)
+    if (!dup) {
       return NextResponse.json({ error: authError.message }, { status: 400 })
     }
     // 이미 있는 계정이면 그 계정을 이 기획사에 붙인다. 담당자가 다른 기획사에서
     // 옮겨왔거나, 우리가 두 번 눌렀을 때다.
-    const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
-    userId = list?.users.find(u => u.email?.toLowerCase() === String(email).toLowerCase())?.id
+    userId = (await findUser(admin, String(email)))?.id
     if (!userId) return NextResponse.json({ error: '이미 가입된 이메일인데 계정을 찾지 못했어요' }, { status: 409 })
   }
 
@@ -99,12 +122,12 @@ export async function GET() {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  const [{ data: members }, { data: list }] = await Promise.all([
+  const [{ data: members }, users] = await Promise.all([
     admin.from('agency_members').select('agency_id, profile_id'),
-    admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+    allAuthUsers(admin),
   ])
 
-  const emailOf = new Map((list?.users ?? []).map(u => [u.id, u.email ?? '']))
+  const emailOf = new Map(users.map(u => [u.id, u.email ?? '']))
   const byAgency: Record<string, string[]> = {}
   for (const m of members ?? []) {
     const aid = m.agency_id as string
