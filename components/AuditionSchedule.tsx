@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { daysUntilLaunch, roundOpensAt, roundDeadline, currentRoundNo, roundClosesAt } from '@/lib/launch'
+import { roundOpensAt, roundDeadline, currentRoundNo, roundClosesAt } from '@/lib/launch'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
@@ -81,8 +81,13 @@ export default function AuditionSchedule({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [first, last])
 
-  const daysLeft = daysUntilLaunch()
   const now = Date.now()
+
+  // 몇 곳이 잡혔고 몇 곳이 남았는지. "시즌"처럼 새 개념을 만들지 않고도
+  // 회차들이 한 묶음이라는 게 이 한 줄에 담긴다. 무엇보다 지금이 채워지는
+  // 중이라는 사실 자체가 다음 주를 기다릴 이유가 된다.
+  const confirmed = numbers.filter(no => rounds.some(r => r.deadline === roundDeadline(no))).length
+  const pending = numbers.length - confirmed
 
   return (
     <div>
@@ -90,10 +95,16 @@ export default function AuditionSchedule({
         <span style={{ fontSize: 14.5, fontWeight: 900, color: '#241C15', letterSpacing: -0.2 }}>
           {skipDeadline ? tx.auditions.nextRounds : tx.schedule.title}
         </span>
-        {/* 카운트다운은 화면에 한 번만 나온다. 위 히어로가 이미 세고 있으면
-            여기서는 말하지 않는다 — 같은 말을 두 번 하면 둘 다 약해진다. */}
-        {!skipDeadline && daysLeft >= 0 && (
-          <span style={{ fontSize: 12.5, color: '#8A7F6E', fontWeight: 700 }}>D-{daysLeft}</span>
+        {/* 카운트다운은 화면에 한 번만 나온다. 지망생 화면(compact)에는 위에
+            히어로가 늘 있고 그게 세고 있다 — 여기서 또 세면 같은 말을 두 번
+            하는 것이고, 둘 다 약해진다. 히어로가 없는 기획사 화면에서만 센다. */}
+        {/* 불러오기 전에는 비워둔다. D-day를 잠깐 띄웠다가 이 문구로 바꾸면
+            눈앞에서 글자가 갈아끼워지는 게 보인다. */}
+        {loaded && (
+          <span style={{ fontSize: 12.5, color: '#8A7F6E', fontWeight: 700 }}>
+            {tx.schedule.confirmedCount.replace('{n}', String(confirmed))}
+            {pending > 0 && ` · ${tx.schedule.pendingCount.replace('{n}', String(pending))}`}
+          </span>
         )}
       </div>
 

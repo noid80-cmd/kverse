@@ -517,6 +517,8 @@ const t = {
     closed:        ['마감', 'Closed', '締切', '已截止', '已截止', 'ปิดรับแล้ว', 'Ditutup', 'Đã đóng', 'Sarado', 'Cerrada'],
     live:          ['진행 중', 'Open now', '受付中', '进行中', '進行中', 'กำลังเปิดรับ', 'Sedang buka', 'Đang mở', 'Bukas ngayon', 'Abierta'],
     upcoming:      ['예정', 'Upcoming', '予定', '即将开始', '即將開始', 'เร็วๆ นี้', 'Akan datang', 'Sắp tới', 'Paparating', 'Próximamente'],
+    confirmedCount:['{n}곳 확정', '{n} confirmed', '{n}社 確定', '{n} 家已确定', '{n} 家已確定', 'ยืนยันแล้ว {n}', '{n} terkonfirmasi', '{n} đã xác nhận', '{n} kumpirmado', '{n} confirmadas'],
+    pendingCount:  ['{n}곳 조율 중', '{n} in talks', '{n}社 調整中', '{n} 家洽谈中', '{n} 家洽談中', 'กำลังเจรจา {n}', '{n} dalam pembicaraan', '{n} đang thương lượng', '{n} pinag-uusapan', '{n} en conversación'],
     audition:      ['오디션', 'Audition', 'オーディション', '试镜', '試鏡', 'ออดิชัน', 'Audisi', 'Thử vai', 'Audisyon', 'Audición'],
   },
 
