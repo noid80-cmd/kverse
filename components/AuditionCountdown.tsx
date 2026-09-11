@@ -13,7 +13,15 @@ import { nativeNotifState } from '@/lib/pushNative'
 // 공고가 하나도 없을 때 "현재 열린 오디션이 없어요"만 띄우면 빈손으로 나가게 된다.
 // 오픈까지 남은 날짜를 세어주고, 그 자리에서 알림을 켜게 해서 첫 공고가 올라오는
 // 순간 다시 데려올 수 있게 한다. 오픈일이 지나면 이 카드는 스스로 사라진다.
-export default function AuditionCountdown({ variant = 'notify' }: { variant?: 'notify' | 'signup' }) {
+export default function AuditionCountdown({
+  variant = 'notify', compact = false,
+}: {
+  variant?: 'notify' | 'signup'
+  /** 홈처럼 이 카드가 목적지가 아니라 입구일 때. 같은 카드를 두 화면에서
+   *  똑같이 크게 보여주면, 눌러 들어간 사람은 같은 것을 두 번 본다. 홈은
+   *  요약이고 오디션 화면이 본편이다. */
+  compact?: boolean
+}) {
   const { lang } = useLang()
   const tx = useT(lang).auditions
   const sx = useT(lang).schedule
@@ -69,6 +77,45 @@ export default function AuditionCountdown({ variant = 'notify' }: { variant?: 'n
   if (days === null || days < 0) return null
 
   const dateLabel = launchDateLabel(lang)
+
+  if (compact) {
+    return (
+      <div style={{
+        background: '#FFFFFF', borderRadius: 18, padding: '15px 16px',
+        border: '1px solid rgba(36,28,21,0.07)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            fontSize: 32, fontWeight: 900, letterSpacing: -1.4, color: '#D84A1E', lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums', flexShrink: 0,
+          }}>
+            {days === 0 ? 'D-DAY' : `D-${days}`}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 700 }}>{tx.countdownLabel}</div>
+            <div style={{ fontSize: 13, color: '#241C15', fontWeight: 700, marginTop: 2, wordBreak: 'keep-all' }}>
+              {days === 0 ? tx.countdownToday : tx.countdownDesc.replace('{date}', dateLabel)}
+            </div>
+          </div>
+        </div>
+
+        {/* 알림은 아직 안 켠 사람에게만 묻는다. 켠 사람에게 다시 묻는 건
+            같은 말을 두 번 하는 것이고, 홈은 그럴 자리가 아니다. */}
+        {variant === 'notify' && !notifyOn && (
+          <button onClick={handleNotify} disabled={busy} style={{
+            width: '100%', marginTop: 13, padding: '11px', borderRadius: 13, border: 'none',
+            background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#FFFFFF',
+            fontSize: 14, fontWeight: 800, fontFamily: 'inherit',
+            cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.75 : 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+          }}>
+            <Bell size={15} strokeWidth={2.2} />
+            {tx.countdownNotify}
+          </button>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div style={{

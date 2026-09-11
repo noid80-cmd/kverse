@@ -286,8 +286,9 @@ export default function DashboardPage() {
 
             {recentAuditions.length === 0 ? (
               // 오픈 전이면 카운트다운이, 오픈일이 지났는데 공고가 비면 원래 안내가 뜬다.
+              // 홈은 입구라 요약만 — 같은 카드를 오디션 화면에서 다시 만난다.
               <>
-                <AuditionCountdown />
+                <AuditionCountdown compact />
                 {daysUntilLaunch() < 0 && (
                   <div style={{ background: '#FFFFFF', borderRadius: 18, padding: '24px 20px', textAlign: 'center', border: '1px solid rgba(36,28,21,0.06)' }}>
                     <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,111,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#D84A1E' }}>
