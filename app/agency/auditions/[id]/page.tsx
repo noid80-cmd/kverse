@@ -181,8 +181,11 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
 
   const passedCount = apps.filter(a => a.status === 'invited').length
   const holdCount = apps.filter(a => a.status === 'on_hold').length
-  // 아직 결과가 안 정해진 사람. 보류도 여기 든다.
-  const pendingCount = apps.filter(a => a.status === 'pending' || a.status === 'skip' || a.status === 'on_hold').length
+  // 머리글에 쓰는 '검토중'은 보류를 뺀 수다. 같이 세면 보류 한 사람이
+  // "보류 1명 · 검토중 1명"으로 두 번 세어진 것처럼 보인다.
+  const reviewingCount = apps.filter(a => a.status === 'pending' || a.status === 'skip').length
+  // [심사 완료] 가 정리할 사람. 이쪽은 보류까지 넣어야 맞다.
+  const pendingCount = reviewingCount + holdCount
   const shownApps = onlyHold ? apps.filter(a => a.status === 'on_hold') : apps
 
   return (
@@ -204,7 +207,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
           지원자 {apps.length}명
           {passedCount > 0 && <span style={{ color: '#16a34a' }}> · 1차 합격 {passedCount}명</span>}
           {holdCount > 0 && <span style={{ color: '#b45309' }}> · 보류 {holdCount}명</span>}
-          {pendingCount > 0 && <span style={{ color: '#ca8a04' }}> · 검토중 {pendingCount}명</span>}
+          {reviewingCount > 0 && <span style={{ color: '#ca8a04' }}> · 검토중 {reviewingCount}명</span>}
         </div>
 
         {/* 보류해 둔 사람만 추려 본다. 백 명을 넘겨 본 뒤 다시 훑는 자리다. */}
