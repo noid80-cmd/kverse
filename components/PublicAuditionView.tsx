@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/i18n/context'
 import { LANGS } from '@/lib/i18n/translations'
-import { roundClosesAt } from '@/lib/launch'
+import { roundClosesAt, roundOpensAt, isRoundNotOpenYet } from '@/lib/launch'
 import { createClient } from '@/lib/supabase/client'
 import { setSignupIntent } from '@/lib/intent'
 import { BadgeCheck, CalendarDays, Monitor, MapPin, Shuffle, ArrowRight } from 'lucide-react'
@@ -38,6 +38,8 @@ function translationKey(lang: string): string | null {
 // 홍보 링크의 착륙지점이라 그 자리에서 언어가 맞아야 한다.
 const COPY_T = {
   open:        ['모집 중', 'Now accepting', '募集中', '招募中', '招募中', 'เปิดรับสมัคร', 'Sedang dibuka', 'Đang nhận hồ sơ', 'Bukás na', 'Convocatoria abierta'],
+  soon:        ['곧 열려요', 'Opening soon', 'まもなく公開', '即将开放', '即將開放', 'เปิดเร็ว ๆ นี้', 'Segera dibuka', 'Sắp mở', 'Malapit nang buksan', 'Abre pronto'],
+  opensAt:     ['{d}에 열려요', 'Opens {d} (KST)', '{d}に公開（韓国時間）', '{d} 开放（韩国时间）', '{d} 開放（韓國時間）', 'เปิด {d} (เวลาเกาหลี)', 'Dibuka {d} (WK)', 'Mở {d} (giờ Hàn Quốc)', 'Bubukas {d} (KST)', 'Abre el {d} (hora de Corea)'],
   closed:      ['마감', 'Closed', '締切', '已截止', '已截止', 'ปิดรับแล้ว', 'Ditutup', 'Đã đóng', 'Sarado', 'Cerrada'],
   ddayToday:   ['오늘 마감', 'Closes today', '本日締切', '今天截止', '今天截止', 'ปิดรับวันนี้', 'Ditutup hari ini', 'Đóng hôm nay', 'Sarado ngayon', 'Cierra hoy'],
   ddayLeft:    ['마감 D-{n}', '{n} days left', '締切まで{n}日', '还剩 {n} 天', '還剩 {n} 天', 'เหลืออีก {n} วัน', 'Sisa {n} hari', 'Còn {n} ngày', '{n} araw na lang', 'Quedan {n} días'],
@@ -69,7 +71,8 @@ function copyFor(lang: string) {
   // 사전에 없는 언어는 영어로 떨어진다(색인 1).
   const pick = (a: readonly string[]) => a[i] ?? a[1]
   return {
-    open: pick(COPY_T.open), closed: pick(COPY_T.closed),
+    open: pick(COPY_T.open), closed: pick(COPY_T.closed), soon: pick(COPY_T.soon),
+    opensAt: (d: string) => pick(COPY_T.opensAt).replace('{d}', d),
     dday: (n: number) => (n === 0 ? pick(COPY_T.ddayToday) : pick(COPY_T.ddayLeft).replace('{n}', String(n))),
     deadline: pick(COPY_T.deadline), category: pick(COPY_T.category), mode: pick(COPY_T.mode),
     online: pick(COPY_T.online), offline: pick(COPY_T.offline), both: pick(COPY_T.both),
@@ -106,11 +109,22 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
   const description = (key && audition.translations?.[key]?.description) || audition.description
 
   const left = audition.deadline ? daysUntil(audition.deadline) : null
-  const isOpen = audition.status === 'active' && (left === null || left >= 0)
+  // 열리는 시각은 status 가 아니라 시계로 본다. 크론이 열어주기를 기다리면
+  // 한 시간까지 늦는다 — 링크를 미리 뿌려도 지원은 정각부터 된다.
+  const notOpenYet = isRoundNotOpenYet(audition.deadline)
+  const published = audition.status === 'active' || audition.status === 'scheduled'
+  const isOpen = published && !notOpenYet && (left === null || left >= 0)
   // /dashboard/auditions 는 mode === 'offline' 공고의 지원을 막는다. 여기서도 막지 않으면
   // 지원하기를 눌러 이동한 뒤에야 지원이 안 된다는 걸 알게 된다.
   const isOffline = audition.mode === 'offline'
   const canApply = isOpen && !isOffline
+
+  // "10월 6일 오후 6시"처럼 보는 사람 언어로 적는다.
+  const openLabel = audition.deadline && notOpenYet
+    ? new Intl.DateTimeFormat(lang === 'zh-TW' ? 'zh-TW' : lang, {
+        month: 'long', day: 'numeric', hour: 'numeric', timeZone: 'Asia/Seoul',
+      }).format(roundOpensAt(audition.deadline))
+    : ''
 
   const categoryLabel = (c as unknown as Record<string, string>)[audition.category] ?? audition.category
   const modeLabel = audition.mode === 'offline' ? c.offline : audition.mode === 'both' ? c.both : c.online
@@ -137,7 +151,7 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
             background: isOpen ? '#FF6F3C' : '#C9BFB1', color: '#FFFFFF',
           }}
         >
-          {isOpen ? c.open : c.closed}
+          {isOpen ? c.open : notOpenYet ? c.soon : c.closed}
         </span>
 
         {audition.agencyName && (
@@ -238,6 +252,8 @@ export default function PublicAuditionView({ audition }: { audition: PublicAudit
                 {c.apply}
                 <ArrowRight size={19} strokeWidth={2.4} />
               </>
+            ) : notOpenYet ? (
+              c.opensAt(openLabel)
             ) : isOffline ? (
               c.applyOffline
             ) : (

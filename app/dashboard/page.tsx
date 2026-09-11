@@ -6,7 +6,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
 import PushSubscribe from '@/components/PushSubscribe'
 import AuditionCountdown from '@/components/AuditionCountdown'
-import { daysUntilLaunch } from '@/lib/launch'
+import { daysUntilLaunch, isRoundClosed, isRoundNotOpenYet } from '@/lib/launch'
 import LiveTicker from '@/components/LiveTicker'
 import Link from 'next/link'
 import { Plus, Megaphone, Bookmark, MessageCircle, User, ChevronRight, Play } from 'lucide-react'
@@ -84,9 +84,11 @@ export default function DashboardPage() {
         supabase.from('videos').select('id, title, thumbnail_url', { count: 'exact' }).eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }).limit(6),
         supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('talent_id', user.id),
         supabase.from('conversations').select('id', { count: 'exact' }).eq('talent_id', user.id).eq('deleted_by_talent', false),
+        // 'scheduled' 도 받아온다 — 크론이 열어주기를 기다리면 최대 한 시간
+        // 늦게 뜬다. 여는 시각과 닫는 시각은 아래에서 직접 본다.
+        // 날짜로 거르면 마감일 21시가 지나도 종일 남는다.
         supabase.from('auditions').select('id, title, category, deadline, translations, agency:agencies(name, logo_url)')
-          .eq('status', 'active')
-          .or(`deadline.is.null,deadline.gte.${new Date().toISOString().slice(0, 10)}`)
+          .in('status', ['active', 'scheduled'])
           .order('created_at', { ascending: false }).limit(8),
         // 참여 기획사 수는 실제로 센다. 예전엔 티커에 16이 박혀 있었는데 초대만
         // 해두고 가입 안 한 곳까지 센 숫자였다. 세어서 쓰면 다시는 안 틀린다.
@@ -102,7 +104,10 @@ export default function DashboardPage() {
         videoCount: vCount ?? 0,
         bookmarks: bCount ?? 0,
         contacts: cCount ?? 0,
-        recentAuditions: (auds as unknown as RecentAudition[]) ?? [],
+        // 열릴 시각이 안 됐거나 이미 닫힌 회차는 뺀다. 월요일 저녁 6시에
+        // 나타나고 일요일 저녁 9시에 사라진다.
+        recentAuditions: ((auds as unknown as RecentAudition[]) ?? [])
+          .filter(a => !isRoundNotOpenYet(a.deadline) && !isRoundClosed(a.deadline)),
         agencyCount: agCount ?? 0,
         applications: {
           total: appRows.length,

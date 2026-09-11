@@ -78,5 +78,7 @@ export default async function PublicAuditionPage({ params }: { params: Promise<{
   const { id } = await params
   const audition = await getAudition(id)
   if (!audition) notFound()
+  // 아직 승인 전인 신청 건은 링크를 알아도 열리면 안 된다.
+  if (audition.status === 'requested') notFound()
   return <PublicAuditionView audition={audition} />
 }
