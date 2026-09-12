@@ -189,6 +189,9 @@ const t = {
     other:           ['기타', 'Other', 'その他', '其他', '其他', 'อื่นๆ', 'Lainnya', 'Khác', 'Iba pa', 'Otro'],
     uploading:       ['업로드 중...', 'Uploading...', 'アップロード中...', '上传中...', '上傳中...', 'กำลังอัปโหลด...', 'Mengunggah...', 'Đang tải lên...', 'Nag-a-upload...', 'Subiendo...'],
     uploadDone:      ['업로드 완료!', 'Upload complete!', 'アップロード完了！', '上传完成！', '上傳完成！', 'อัปโหลดสำเร็จ!', 'Upload selesai!', 'Tải lên hoàn tất!', 'Tapos na ang pag-upload!', '¡Subida completa!'],
+    // 공개 범위를 늘리는 대신 기대치를 낮춘다. 올리기를 망설이는 이유는
+    // 대개 공개가 무서워서가 아니라 "잘한 것만 올려야 할 것 같아서"다.
+    uploadSubtitle:  ['완성된 무대가 아니어도 괜찮아요. 연습하는 모습 그대로 올려도 돼요.', 'It does not have to be a finished performance — a practice take is fine.', '完成したステージでなくて大丈夫です。練習中のままでも構いません。', '不必是完整的舞台,练习中的样子也可以。', '不必是完整的舞台,練習中的樣子也可以。', 'ไม่จำเป็นต้องเป็นการแสดงที่สมบูรณ์ คลิปตอนซ้อมก็ได้', 'Tidak harus penampilan yang sempurna — rekaman latihan juga boleh.', 'Không cần là màn trình diễn hoàn chỉnh — video lúc luyện tập cũng được.', 'Hindi kailangang tapos na performance — pwede rin ang practice take.', 'No tiene que ser una actuación terminada: un ensayo también sirve.'],
     uploadTitle:     ['영상 업로드', 'Upload Video', '動画アップロード', '上传视频', '上傳影片', 'อัปโหลดวิดีโอ', 'Upload Video', 'Tải lên Video', 'Mag-upload ng Video', 'Subir Video'],
     titleRequired:   ['영상 제목 *', 'Video title *', '動画タイトル *', '视频标题 *', '影片標題 *', 'ชื่อวิดีโอ *', 'Judul video *', 'Tiêu đề video *', 'Pamagat ng video *', 'Título de video *'],
     descPlaceholder: ['설명 (선택사항)', 'Description (optional)', '説明（任意）', '描述（可选）', '描述（可選）', 'คำอธิบาย (ไม่จำเป็น)', 'Deskripsi (opsional)', 'Mô tả (tùy chọn)', 'Paglalarawan (opsyonal)', 'Descripción (opcional)'],

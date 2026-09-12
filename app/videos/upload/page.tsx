@@ -439,6 +439,10 @@ export default function UploadPage() {
           <h1 style={{ fontSize: 22, fontWeight: 900, color: '#241C15' }}>{tx.videos.uploadTitle}</h1>
         </div>
 
+        <p style={{ fontSize: 13, color: '#8A7F6E', lineHeight: 1.6, margin: '0 0 18px', wordBreak: 'keep-all' }}>
+          {tx.videos.uploadSubtitle}
+        </p>
+
         <form onSubmit={handleUpload} className="flex flex-col gap-4">
 
           {/* 영상 선택/촬영 */}
