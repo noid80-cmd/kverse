@@ -235,6 +235,8 @@ export default function ExplorePage() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
   const [myId, setMyId] = useState('')
+  // 내 영상 중 기획사에게 보이는 것이 몇 개인가. 탐색 맨 위에 늘 걸어둔다.
+  const [exposedCount, setExposedCount] = useState<number | null>(null)
   const [muted, setMuted] = useState(true)
   const [swipeIdx, setSwipeIdx] = useState<number | null>(null)
   const swipeVideoRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -253,6 +255,12 @@ export default function ExplorePage() {
     const user = (await supabase.auth.getSession()).data.session?.user
     if (!user) { window.location.href = '/login'; return }
     setMyId(user.id)
+
+    // 공개·기획사만 둘 다 기획사에게 보인다. 비공개만 빠진다.
+    supabase.from('videos').select('id', { count: 'exact', head: true })
+      .eq('talent_id', user.id).eq('status', 'active')
+      .or('visibility.eq.public,visibility.eq.agency_only,visibility.is.null')
+      .then(({ count }) => setExposedCount(count ?? 0))
 
     const { data: blocked } = await supabase.from('blocked_users').select('blocked_id').eq('blocker_id', user.id)
     const blockedIds = (blocked ?? []).map(b => b.blocked_id)
@@ -350,6 +358,33 @@ export default function ExplorePage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(36,28,21,0.39)" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
             <span style={{ fontSize: 14, color: 'rgba(36,28,21,0.36)' }}>Search covers, artists...</span>
           </div>
+
+          {/* 내 노출 상태 — 안내문은 한 번 읽고 잊지만, 볼 때마다 자기 상태가
+              적혀 있으면 "상시로 보인다"가 말이 아니라 사실로 읽힌다.
+              숫자를 아직 못 읽었으면 아무것도 그리지 않는다(빈 칸이 깜빡이지 않게). */}
+          {exposedCount !== null && (
+            <Link href="/videos" style={{
+              display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none',
+              background: exposedCount > 0 ? 'rgba(255,111,60,0.1)' : 'rgba(36,28,21,0.05)',
+              border: `1px solid ${exposedCount > 0 ? 'rgba(255,111,60,0.28)' : 'rgba(36,28,21,0.1)'}`,
+              borderRadius: 14, padding: '10px 14px', marginBottom: 12,
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                background: exposedCount > 0 ? '#FF6F3C' : 'rgba(36,28,21,0.25)',
+              }} />
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 800, color: '#241C15', lineHeight: 1.35 }}>
+                  {exposedCount > 0
+                    ? tx.explore.exposureOn.replace('{n}', String(exposedCount))
+                    : tx.explore.exposureNone}
+                </span>
+                <span style={{ display: 'block', fontSize: 11.5, color: '#8A7F6E', marginTop: 2, lineHeight: 1.45 }}>
+                  {exposedCount > 0 ? tx.explore.exposureOnSub : tx.explore.exposureNoneSub}
+                </span>
+              </span>
+            </Link>
+          )}
 
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
             {(['all', 'vocal', 'dance', 'acting', 'rap', 'other'] as const).map(c => (

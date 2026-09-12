@@ -484,6 +484,13 @@ export default function UploadPage() {
                 : visibility === 'agency_only' ? tx.videos.visHintAgency
                 : tx.videos.visHintPrivate}
             </div>
+            {/* 기획사에 보이는 두 경우에만 "언제까지" 보이는지 덧붙인다.
+                오디션 앱이라 공고가 열릴 때만 보는 줄 아는 사람이 많다. */}
+            {visibility !== 'private' && (
+              <div style={{ fontSize: 11.5, color: '#A89880', marginTop: 5, lineHeight: 1.5 }}>
+                {tx.videos.visAlwaysOn}
+              </div>
+            )}
           </div>
 
           {error && <p style={{ color: '#DC2626', fontSize: 14, textAlign: 'center' }}>{error}</p>}

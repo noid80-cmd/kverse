@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
-import { Heart, Bookmark } from 'lucide-react'
+import { Heart, Bookmark, Globe, Building2, Lock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
@@ -172,7 +172,7 @@ export default function VideoDetailPage() {
             <div style={{ display: 'flex', gap: 8 }}>
               {(['public', 'agency_only', 'private'] as const).map(v => {
                 const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
-                const icons = { public: '🌐', agency_only: '🏢', private: '🔒' }
+                const Icon = v === 'public' ? Globe : v === 'agency_only' ? Building2 : Lock
                 const selected = visibility === v
                 return (
                   <button key={v} type="button" onClick={() => handleVisibilityChange(v)} disabled={savingVisibility}
@@ -184,12 +184,22 @@ export default function VideoDetailPage() {
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                       opacity: savingVisibility ? 0.6 : 1,
                     }}>
-                    <span style={{ fontSize: 16 }}>{icons[v]}</span>
+                    <Icon size={17} strokeWidth={1.8} />
                     <span>{labels[v]}</span>
                   </button>
                 )
               })}
             </div>
+            <div style={{ fontSize: 12, color: visibility === 'private' ? '#D84A1E' : '#8A7F6E', lineHeight: 1.5 }}>
+              {visibility === 'public' ? tx.videos.visHintPublic
+                : visibility === 'agency_only' ? tx.videos.visHintAgency
+                : tx.videos.visHintPrivate}
+            </div>
+            {visibility !== 'private' && (
+              <div style={{ fontSize: 11.5, color: '#A89880', marginTop: -4, lineHeight: 1.5 }}>
+                {tx.videos.visAlwaysOn}
+              </div>
+            )}
           </div>
         )}
 

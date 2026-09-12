@@ -5,12 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
 import Link from 'next/link'
+import { Lock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 
 type Video = {
   id: string; title: string; thumbnail_url: string | null
   view_count: number; status: string; created_at: string; category: string
+  visibility: string | null
 }
 
 export default function VideosPage() {
@@ -27,7 +29,7 @@ export default function VideosPage() {
     async function load() {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { window.location.href = '/login'; return }
-      const { data } = await supabase.from('videos').select('id, title, thumbnail_url, view_count, status, created_at, category')
+      const { data } = await supabase.from('videos').select('id, title, thumbnail_url, view_count, status, created_at, category, visibility')
         .eq('talent_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false })
       setVideos(data ?? [])
       setLoading(false)
@@ -67,6 +69,20 @@ export default function VideosPage() {
                   ? <img src={v.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🎬</div>
                 }
+                {/* 기획사에게 보이는지 아닌지. 칸이 좁아 글자는 안 들어가므로
+                    켜진 점과 자물쇠로 가른다 — 목록을 훑으면 한눈에 세어진다. */}
+                <div
+                  title={v.visibility === 'private' ? tx.videos.hiddenBadge : tx.videos.exposedBadge}
+                  style={{
+                    position: 'absolute', top: 5, left: 5, width: 20, height: 20, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  {v.visibility === 'private'
+                    ? <Lock size={11} strokeWidth={2.2} color="rgba(255,255,255,0.85)" />
+                    : <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF6F3C' }} />}
+                </div>
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.75))', padding: '16px 6px 6px' }}>
                   <div style={{ fontSize: 11, color: 'white', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.title}</div>
                 </div>
