@@ -37,6 +37,8 @@ export default function TalentProfilePage() {
   const [myId, setMyId] = useState('')
   const [convId, setConvId] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
+  // 1차 합격시킨 지원자만 열린다. 판정은 talent_identities의 RLS가 한다.
+  const [realName, setRealName] = useState<string | null>(null)
   const [bookmarked, setBookmarked] = useState(false)
   const [agencyName, setAgencyName] = useState('')
   // 기본값은 잠금. 판정이 끝나기 전에 잠깐이라도 열려 보이면 안 된다.
@@ -65,6 +67,11 @@ export default function TalentProfilePage() {
       ])
 
       setTalent({ ...(t as unknown as Talent), instagram: null, phone: null })
+
+      // 본명도 연락처와 같은 문이다. 심사 중에는 행 자체가 안 돌아온다.
+      const { data: ident } = await supabase.from('talent_identities')
+        .select('real_name').eq('talent_id', id).maybeSingle()
+      setRealName((ident?.real_name as string | null) ?? null)
       setVideos((v as unknown as Video[]) ?? [])
       if (conv) setConvId(conv.id)
       setBookmarked(!!bm)
@@ -180,6 +187,9 @@ export default function TalentProfilePage() {
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ fontWeight: 900, color: '#1e1b4b', fontSize: 22 }}>{talent.name}</span>
+                {realName && (
+                  <span style={{ fontSize: 13, color: '#8A7F6E', fontWeight: 700 }}>본명 {realName}</span>
+                )}
                 <button onClick={toggleBookmark} style={{
                   width: 32, height: 32, borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
                   background: bookmarked ? 'rgba(251,191,36,0.15)' : '#f0f0f8',

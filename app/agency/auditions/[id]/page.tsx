@@ -37,6 +37,9 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
   const [passMessage, setPassMessage] = useState('')
   const [closing, setClosing] = useState(false)
   const [onlyHold, setOnlyHold] = useState(false)
+  // 본명은 1차 합격시킨 지원자만 열린다. 누가 열리는지는 화면이 아니라
+  // talent_identities의 RLS가 정한다 — 여기서는 돌아온 것만 그린다.
+  const [realNames, setRealNames] = useState<Record<string, string>>({})
   const router = useRouter()
   const supabase = createClient()
 
@@ -55,7 +58,15 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
         .eq('audition_id', id)
         .order('created_at', { ascending: false })
 
-      setApps((data as unknown as Application[]) ?? [])
+      const list = (data as unknown as Application[]) ?? []
+      setApps(list)
+
+      const talentIds = [...new Set(list.map(x => x.talent?.id).filter(Boolean) as string[])]
+      if (talentIds.length > 0) {
+        const { data: idents } = await supabase.from('talent_identities')
+          .select('talent_id, real_name').in('talent_id', talentIds)
+        setRealNames(Object.fromEntries((idents ?? []).map(r => [r.talent_id as string, r.real_name as string])))
+      }
 
       const { data: am } = await supabase.from('agency_members').select('agency_id').eq('profile_id', user.id).maybeSingle()
       if (am?.agency_id) {
@@ -321,6 +332,9 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, color: '#1e1b4b', fontSize: 14 }}>{a.talent?.name ?? '이름 없음'}</div>
+                        {a.talent?.id && realNames[a.talent.id] && (
+                          <div style={{ fontSize: 12, color: '#8A7F6E' }}>본명 {realNames[a.talent.id]}</div>
+                        )}
                         {age && <div style={{ fontSize: 12, color: '#8A7F6E' }}>{age}세</div>}
                       </div>
                       <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>

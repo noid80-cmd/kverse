@@ -52,7 +52,7 @@ function formatPhone(v: string) {
   return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7, 11)
 }
 
-  type ProfileForm = { name: string; bio: string; instagram: string; phone: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
+  type ProfileForm = { name: string; realName: string; bio: string; instagram: string; phone: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -85,9 +85,15 @@ function formatPhone(v: string) {
       const user = (await supabase.auth.getSession()).data.session?.user
       if (!user) { router.push('/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      // 본명은 profiles가 아니라 talent_identities에 있다. profiles는 기획사가
+      // 통째로 읽을 수 있어서, 같은 테이블에 두면 화면에서 감춰도 API로는
+      // 읽힌다. 마이그레이션 전이면 테이블이 없으니 조용히 빈 값으로 둔다.
+      const { data: ident } = await supabase.from('talent_identities')
+        .select('real_name').eq('talent_id', user.id).maybeSingle()
       const loaded: ProfileForm = {
         userId: user.id,
         name: data?.name ?? '',
+        realName: (ident?.real_name as string | null) ?? '',
         bio: data?.bio ?? '',
         instagram: data?.instagram ?? '',
         phone: formatPhone(data?.phone ?? ''),
@@ -207,6 +213,15 @@ function formatPhone(v: string) {
       phone: form.phone.trim() || null,
     }).eq('id', form.userId)
 
+    // 본명도 따로 저장한다. 비워두면 행을 지운다 — 안 쓰겠다는 뜻이다.
+    const realName = form.realName.trim()
+    if (realName) {
+      await supabase.from('talent_identities')
+        .upsert({ talent_id: form.userId, real_name: realName, updated_at: new Date().toISOString() })
+    } else {
+      await supabase.from('talent_identities').delete().eq('talent_id', form.userId)
+    }
+
     setSaving(false)
     if (error) { setSaveError(tx.profile.saveFailed + ': ' + error.message) }
     else { setSaved(true); setIsDirty(false); router.refresh() }
@@ -223,7 +238,7 @@ function formatPhone(v: string) {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
-  const { name, bio, instagram, phone, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
+  const { name, realName, bio, instagram, phone, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
@@ -283,6 +298,9 @@ function formatPhone(v: string) {
             <div className="flex flex-col gap-3">
               <input type="text" value={name} onChange={e => updateForm(f => ({ ...f, name: e.target.value }))}
                 placeholder={tx.profile.nameRequired} required style={inputStyle} />
+              <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-4px 0 0', lineHeight: 1.5 }}>
+                {tx.profile.stageNameHint}
+              </p>
               {/* 국적은 어느 나라 지망생인지 알아보는 값이라 지원서가 아니라
                   프로필에 속한다. 생년월일·성별과 달리 신상이라 할 것도 없다. */}
               <select value={nationality} onChange={e => updateForm(f => ({ ...f, nationality: e.target.value }))} style={inputStyle}>
@@ -337,6 +355,19 @@ function formatPhone(v: string) {
           </p>
 
           <div style={{ background: 'rgba(255,111,60,0.05)', border: '1px solid rgba(255,111,60,0.16)', borderRadius: 24, padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+            {/* 본명은 심사가 끝난 뒤에 열린다. 심사 전에 본명을 알면 기획사가
+                인스타를 뒤져보고 나서 영상을 보게 된다 — 그건 영상으로 뽑는 게
+                아니다. 잠금은 화면이 아니라 talent_identities의 RLS가 건다. */}
+            <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.realNameLabel}</p>
+              <input type="text" value={realName}
+                onChange={e => updateForm(f => ({ ...f, realName: e.target.value }))}
+                placeholder={tx.profile.realNamePlaceholder} style={inputStyle} />
+              <p style={{ fontSize: 12, color: '#8A7F6E', margin: '10px 0 0', lineHeight: 1.5 }}>
+                {tx.profile.realNameHint}
+              </p>
+            </div>
 
             <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.basicInfo}</p>
