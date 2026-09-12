@@ -352,10 +352,7 @@ function formatPhone(v: string) {
             <span style={{ fontSize: 16, fontWeight: 900, color: '#241C15' }}>{tx.profile.applyInfo}</span>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#D84A1E', background: 'rgba(216,74,30,0.09)', padding: '3px 8px', borderRadius: 6 }}>{tx.profile.applyBadge}</span>
           </div>
-          <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-8px 0 0', lineHeight: 1.5 }}>
-            {tx.profile.applyDesc}
-          </p>
-          <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-4px 0 0', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-8px 0 0', lineHeight: 1.5, wordBreak: 'keep-all' }}>
             {tx.profile.applyPrefillHint}
           </p>
 
@@ -365,11 +362,29 @@ function formatPhone(v: string) {
                 인스타를 뒤져보고 나서 영상을 보게 된다 — 그건 영상으로 뽑는 게
                 아니다. 잠금은 화면이 아니라 talent_identities의 RLS가 건다. */}
             <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', marginBottom: 12, letterSpacing: 0.5 }}>{tx.profile.realNameLabel}</p>
-              <input type="text" value={realName}
-                onChange={e => updateForm(f => ({ ...f, realName: e.target.value }))}
-                placeholder={tx.profile.realNamePlaceholder} style={inputStyle} />
-              <p style={{ fontSize: 12, color: '#8A7F6E', margin: '10px 0 0', lineHeight: 1.5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12, flexWrap: 'wrap' }}>
+                <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: 0, letterSpacing: 0.5 }}>
+                  {tx.profile.realNameLabel} · {tx.profile.contact}
+                </p>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#D84A1E', background: 'rgba(216,74,30,0.09)', padding: '2px 7px', borderRadius: 6 }}>
+                  {tx.profile.passOnlyBadge}
+                </span>
+              </div>
+              <div className="flex flex-col gap-3">
+                <input type="text" value={realName}
+                  onChange={e => updateForm(f => ({ ...f, realName: e.target.value }))}
+                  placeholder={tx.profile.realNamePlaceholder} style={inputStyle} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
+                  <input type="text" value={instagram}
+                    onChange={e => updateForm(f => ({ ...f, instagram: e.target.value }))}
+                    placeholder={tx.profile.instaPlaceholder} style={{ ...inputStyle, flex: 1 }} />
+                </div>
+                <input type="text" inputMode="text" value={phone}
+                  onChange={e => updateForm(f => ({ ...f, phone: formatPhone(e.target.value) }))}
+                  placeholder={tx.profile.phonePlaceholder} style={inputStyle} />
+              </div>
+              <p style={{ fontSize: 12, color: '#8A7F6E', margin: '10px 0 0', lineHeight: 1.5, wordBreak: 'keep-all' }}>
                 {tx.profile.realNameHint}
               </p>
             </div>
@@ -399,20 +414,6 @@ function formatPhone(v: string) {
                 <input type="number" value={weight} onChange={e => updateForm(f => ({ ...f, weight: e.target.value }))}
                   placeholder={tx.profile.weightPlaceholder} style={inputStyle} />
               </div>
-            </div>
-
-            {/* 지망생이 자기소개에 인스타를 적는 건 적을 데가 없어서다. 칸을 만들어주면 거기 쓴다. */}
-            <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: '0 0 12px' }}>{tx.profile.contact}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
-                <input type="text" value={instagram}
-                  onChange={e => updateForm(f => ({ ...f, instagram: e.target.value }))}
-                  placeholder={tx.profile.instaPlaceholder} style={{ ...inputStyle, flex: 1 }} />
-              </div>
-              <input type="text" inputMode="text" value={phone}
-                onChange={e => updateForm(f => ({ ...f, phone: formatPhone(e.target.value) }))}
-                placeholder={tx.profile.phonePlaceholder} style={inputStyle} />
             </div>
 
             {/* 경력은 공개 자기소개가 아니라 여기다. "○○학원, ○○콩쿠르 입상"은

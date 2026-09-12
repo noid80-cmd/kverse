@@ -829,8 +829,22 @@ export default function TalentAuditionsPage() {
                 <input type="text" value={info.realName}
                   onChange={e => setInfo(f => ({ ...f, realName: e.target.value }))}
                   placeholder={tx.profile.realNameLabel} style={applyInputStyle} />
-                <p style={{ fontSize: 11, color: '#8A7F6E', margin: '-4px 0 4px', lineHeight: 1.5 }}>
+                <p style={{ fontSize: 11, color: '#8A7F6E', margin: '-4px 0 0', lineHeight: 1.5 }}>
                   {tx.auditions.realNameCheck}
+                </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
+                  <input type="text" value={info.instagram}
+                    onChange={e => setInfo(f => ({ ...f, instagram: e.target.value }))}
+                    placeholder={tx.profile.instaPlaceholder} style={{ ...applyInputStyle, flex: 1 }} />
+                </div>
+                <input type="text" value={info.phone}
+                  onChange={e => setInfo(f => ({ ...f, phone: e.target.value }))}
+                  placeholder={tx.profile.phonePlaceholder} style={applyInputStyle} />
+
+                <p style={{ fontSize: 11, color: '#D84A1E', fontWeight: 700, margin: '-4px 0 4px', lineHeight: 1.5 }}>
+                  {tx.profile.passOnlyBadge}
                 </p>
 
                 <div style={{ ...applyInputStyle, padding: '8px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -855,16 +869,6 @@ export default function TalentAuditionsPage() {
                     onChange={e => setInfo(f => ({ ...f, weight: e.target.value }))}
                     placeholder={tx.profile.weightPlaceholder} style={applyInputStyle} />
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
-                  <input type="text" value={info.instagram}
-                    onChange={e => setInfo(f => ({ ...f, instagram: e.target.value }))}
-                    placeholder={tx.profile.instaPlaceholder} style={{ ...applyInputStyle, flex: 1 }} />
-                </div>
-                <input type="text" value={info.phone}
-                  onChange={e => setInfo(f => ({ ...f, phone: e.target.value }))}
-                  placeholder={tx.profile.phonePlaceholder} style={applyInputStyle} />
 
                 <textarea value={info.career}
                   onChange={e => setInfo(f => ({ ...f, career: e.target.value }))}
