@@ -442,7 +442,7 @@ function formatPhone(v: string) {
             style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'none', border: '1px solid rgba(36,28,21,0.1)', color: notifPerm === 'denied' ? '#DC2626' : '#8A7F6E', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             {notifPerm === 'denied' ? <BellOff size={17} strokeWidth={1.8} /> : <BellRing size={17} strokeWidth={1.8} />}
             {tx.profile.notifSettings}
-            <span style={{ fontSize: 12, fontWeight: 600, marginLeft: 'auto', color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: notifPerm === 'granted' ? '#D84A1E' : notifPerm === 'denied' ? '#DC2626' : '#8A7F6E' }}>
               {notifPerm === 'granted' ? tx.profile.notifStateOn : notifPerm === 'denied' ? tx.profile.notifStateBlocked : tx.profile.notifStateOff}
             </span>
           </button>
