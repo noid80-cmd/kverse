@@ -110,6 +110,10 @@ export default function TalentAuditionsPage() {
     realName: '', birthDate: '', gender: '', height: '', weight: '', instagram: '', phone: '', career: '',
   }
   const [info, setInfo] = useState<ApplyInfo>(EMPTY_INFO)
+  // 불러온 내용 그대로다. 지원서에서 고친 게 있으면 기본 정보를 덮어쓰기
+  // 전에 한 번 묻는다 — 이번 한 번 다르게 적은 것이 다음 회차까지 조용히
+  // 따라가면 안 된다.
+  const [savedInfo, setSavedInfo] = useState<ApplyInfo>(EMPTY_INFO)
 
   const supabase = createClient()
 
@@ -134,7 +138,7 @@ export default function TalentAuditionsPage() {
       supabase.from('talent_identities').select('real_name').eq('talent_id', user.id).maybeSingle(),
     ])
 
-    setInfo({
+    const loaded: ApplyInfo = {
       realName: (ident?.real_name as string | null) ?? '',
       birthDate: (prof?.birth_date as string | null) ?? '',
       gender: (prof?.gender as string | null) ?? '',
@@ -143,7 +147,9 @@ export default function TalentAuditionsPage() {
       instagram: (prof?.instagram as string | null) ?? '',
       phone: (prof?.phone as string | null) ?? '',
       career: (prof?.career as string | null) ?? '',
-    })
+    }
+    setInfo(loaded)
+    setSavedInfo(loaded)
 
     // 아직 열릴 시각이 안 된 회차는 감춘다(월요일 저녁 6시에 정확히 열린다).
     const visible = ((auds as unknown as Audition[]) ?? []).filter(a => !isRoundNotOpenYet(a.deadline))
@@ -273,6 +279,15 @@ export default function TalentAuditionsPage() {
       && (info.instagram.trim() || info.phone.trim())
     if (!filled) { setError(tx.auditions.applyInfoMissing); return }
 
+    const keys = Object.keys(info) as (keyof ApplyInfo)[]
+    const hadSaved = keys.some(k => savedInfo[k].trim())
+    const changed = keys.some(k => info[k].trim() !== savedInfo[k].trim())
+    // 처음 적는 사람에게는 묻지 않는다. 바꾼 게 없어도 묻지 않는다.
+    if (hadSaved && changed && !confirm(tx.auditions.saveInfoConfirm)) {
+      setInfo(savedInfo)
+      return
+    }
+
     setSubmitting(true); setError('')
 
     let videoUrl = ''
@@ -337,6 +352,7 @@ export default function TalentAuditionsPage() {
     // 전까지 가려야 하는 값을 거기 둘 수 없다.
     await supabase.from('talent_identities')
       .upsert({ talent_id: myId, real_name: info.realName.trim(), updated_at: new Date().toISOString() })
+    setSavedInfo(info)
 
     setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
