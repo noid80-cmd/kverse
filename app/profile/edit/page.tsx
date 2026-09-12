@@ -52,7 +52,7 @@ function formatPhone(v: string) {
   return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7, 11)
 }
 
-  type ProfileForm = { name: string; realName: string; bio: string; instagram: string; phone: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
+  type ProfileForm = { name: string; realName: string; career: string; bio: string; instagram: string; phone: string; birthDate: string; gender: string; height: string; weight: string; nationality: string; skills: string[]; avatarUrl: string | null; userId: string }
   const [form, setForm] = useState<ProfileForm | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -94,6 +94,7 @@ function formatPhone(v: string) {
         userId: user.id,
         name: data?.name ?? '',
         realName: (ident?.real_name as string | null) ?? '',
+        career: data?.career ?? '',
         bio: data?.bio ?? '',
         instagram: data?.instagram ?? '',
         phone: formatPhone(data?.phone ?? ''),
@@ -203,6 +204,7 @@ function formatPhone(v: string) {
       height: form.height ? parseInt(form.height) : null,
       weight: form.weight ? parseInt(form.weight) : null,
       nationality: form.nationality.trim() || null,
+      career: form.career.trim() || null,
       skills: form.skills,
     }).eq('id', form.userId)
     // 연락처는 따로 저장한다. instagram 컬럼이 아직 없는 환경에서도 나머지
@@ -238,7 +240,7 @@ function formatPhone(v: string) {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
-  const { name, realName, bio, instagram, phone, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
+  const { name, realName, career, bio, instagram, phone, birthDate, gender, height, weight, nationality, skills, avatarUrl } = form
 
   return (
     <div className="min-h-screen pb-28" style={{ background: '#FFF8E7' }}>
@@ -408,6 +410,16 @@ function formatPhone(v: string) {
               <input type="text" inputMode="text" value={phone}
                 onChange={e => updateForm(f => ({ ...f, phone: formatPhone(e.target.value) }))}
                 placeholder={tx.profile.phonePlaceholder} style={inputStyle} />
+            </div>
+
+            {/* 경력은 공개 자기소개가 아니라 여기다. "○○학원, ○○콩쿠르 입상"은
+                신원을 특정한다 — 본명을 떼어낸 이유와 정면으로 어긋난다. */}
+            <div style={{ background: '#FFFFFF', borderRadius: 18, padding: 18, border: '1px solid rgba(36,28,21,0.09)' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#8A7F6E', margin: '0 0 12px' }}>{tx.auditions.careerLabel}</p>
+              <textarea value={career}
+                onChange={e => updateForm(f => ({ ...f, career: e.target.value }))}
+                placeholder={tx.auditions.careerPlaceholder} rows={4}
+                style={{ ...inputStyle, resize: 'none' }} />
             </div>
 
           </div>

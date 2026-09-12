@@ -62,6 +62,11 @@ function isDone(a: Audition) {
   return a.status === 'closed' || isExpired(a.deadline)
 }
 
+const applyInputStyle: React.CSSProperties = {
+  width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)',
+  borderRadius: 12, padding: '11px 14px', fontSize: 15, color: '#241C15',
+}
+
 export default function TalentAuditionsPage() {
   const router = useRouter()
   const { lang } = useLang()
@@ -94,6 +99,17 @@ export default function TalentAuditionsPage() {
   const [submitting, setSubmitting] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
+  // 지원 정보. 가입할 때는 묻지 않고 여기서 한 번에 받는다. 적은 내용은
+  // 프로필(지원 정보 칸)에 그대로 저장돼서 언제든 고칠 수 있고, 다음 회차엔
+  // 자동으로 채워진다 — 처음 한 번만 길고 그 뒤로는 확인만 하면 된다.
+  type ApplyInfo = {
+    realName: string; birthDate: string; gender: string
+    height: string; weight: string; instagram: string; phone: string; career: string
+  }
+  const EMPTY_INFO: ApplyInfo = {
+    realName: '', birthDate: '', gender: '', height: '', weight: '', instagram: '', phone: '', career: '',
+  }
+  const [info, setInfo] = useState<ApplyInfo>(EMPTY_INFO)
 
   const supabase = createClient()
 
@@ -103,7 +119,7 @@ export default function TalentAuditionsPage() {
     if (!user) { window.location.href = '/login'; return }
     setMyId(user.id)
 
-    const [{ data: auds }, { data: myApps }, { data: vids }] = await Promise.all([
+    const [{ data: auds }, { data: myApps }, { data: vids }, { data: prof }, { data: ident }] = await Promise.all([
       supabase.from('auditions')
         .select('id, title, description, category, mode, deadline, status, created_at, translations, agency:agencies(name, name_en, is_verified, logo_url)')
         // 'scheduled' 도 받아온다. 크론이 열어주기를 기다리면 최대 한 시간
@@ -113,7 +129,21 @@ export default function TalentAuditionsPage() {
       supabase.from('audition_applications').select('audition_id, status, video_url, thumbnail_url').eq('talent_id', user.id),
       supabase.from('videos').select('id, title, thumbnail_url, video_url, category')
         .eq('talent_id', user.id).eq('status', 'active').order('created_at', { ascending: false }),
+      supabase.from('profiles')
+        .select('birth_date, gender, height, weight, instagram, phone, career').eq('id', user.id).maybeSingle(),
+      supabase.from('talent_identities').select('real_name').eq('talent_id', user.id).maybeSingle(),
     ])
+
+    setInfo({
+      realName: (ident?.real_name as string | null) ?? '',
+      birthDate: (prof?.birth_date as string | null) ?? '',
+      gender: (prof?.gender as string | null) ?? '',
+      height: prof?.height != null ? String(prof.height) : '',
+      weight: prof?.weight != null ? String(prof.weight) : '',
+      instagram: (prof?.instagram as string | null) ?? '',
+      phone: (prof?.phone as string | null) ?? '',
+      career: (prof?.career as string | null) ?? '',
+    })
 
     // 아직 열릴 시각이 안 된 회차는 감춘다(월요일 저녁 6시에 정확히 열린다).
     const visible = ((auds as unknown as Audition[]) ?? []).filter(a => !isRoundNotOpenYet(a.deadline))
@@ -236,6 +266,12 @@ export default function TalentAuditionsPage() {
     if (!modalAudition) return
     if (tab === 'existing' && !selectedVideo) { setError(tx.auditions.selectVideoError); return }
     if (tab === 'new' && !newFile) { setError(tx.videos.selectVideoFile); return }
+    // 기획사가 실제 지원서에서 요구하는 항목들이다. 비워서 내면 기획사는
+    // 심사할 재료가 없고, 붙여도 연락할 방법이 없다.
+    const filled = info.realName.trim() && info.birthDate && info.gender
+      && info.height.trim() && info.weight.trim() && info.career.trim()
+      && (info.instagram.trim() || info.phone.trim())
+    if (!filled) { setError(tx.auditions.applyInfoMissing); return }
 
     setSubmitting(true); setError('')
 
@@ -275,6 +311,7 @@ export default function TalentAuditionsPage() {
     }
 
     const { error: dbErr } = await supabase.from('audition_applications').insert({
+      career: info.career.trim(),
       audition_id: modalAudition.id,
       talent_id: myId,
       video_url: videoUrl,
@@ -284,6 +321,22 @@ export default function TalentAuditionsPage() {
     })
 
     if (dbErr) { setError(tx.auditions.applyFailed + ': ' + dbErr.message); setSubmitting(false); return }
+
+    // 적은 내용은 기본 정보로 남긴다. 프로필의 지원 정보 칸이 이 값을 그대로
+    // 보여주고, 다음 회차 지원서는 여기서 다시 채워진다.
+    await supabase.from('profiles').update({
+      birth_date: info.birthDate,
+      gender: info.gender,
+      height: parseInt(info.height),
+      weight: parseInt(info.weight),
+      instagram: info.instagram.trim().replace(/^@/, '') || null,
+      phone: info.phone.trim() || null,
+      career: info.career.trim(),
+    }).eq('id', myId)
+    // 본명만 따로다 — profiles는 기획사가 통째로 읽을 수 있어서, 1차 합격
+    // 전까지 가려야 하는 값을 거기 둘 수 없다.
+    await supabase.from('talent_identities')
+      .upsert({ talent_id: myId, real_name: info.realName.trim(), updated_at: new Date().toISOString() })
 
     setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
@@ -695,6 +748,72 @@ export default function TalentAuditionsPage() {
                 <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2, lineHeight: 1.5 }}>
                   {tx.auditions.profileVideosHint}
                 </div>
+              </div>
+            </div>
+
+            {/* 가입할 때는 아무것도 묻지 않는다. 오디션에 지원할 생각이 없는
+                사람에게 생년월일·키·연락처를 요구하면 문맥 없이 개인정보를
+                내놓으라는 말이 된다. 낼 서류라는 게 분명한 이 자리에서 받는다. */}
+            <div style={{
+              background: '#FFF8E7', border: '1px solid rgba(216,74,30,0.18)',
+              borderRadius: 16, padding: 16, marginBottom: 12,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 14, fontWeight: 900, color: '#241C15' }}>{tx.auditions.applyInfoTitle}</span>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, color: '#D84A1E',
+                  background: 'rgba(216,74,30,0.1)', padding: '3px 8px', borderRadius: 6,
+                }}>{tx.auditions.applyInfoAgencyOnly}</span>
+              </div>
+              <p style={{ fontSize: 12, color: '#8A7F6E', lineHeight: 1.6, margin: '0 0 12px', wordBreak: 'keep-all' }}>
+                {tx.auditions.applyInfoOnce}
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <input type="text" value={info.realName}
+                  onChange={e => setInfo(f => ({ ...f, realName: e.target.value }))}
+                  placeholder={tx.profile.realNameLabel} style={applyInputStyle} />
+                <p style={{ fontSize: 11, color: '#8A7F6E', margin: '-4px 0 4px', lineHeight: 1.5 }}>
+                  {tx.auditions.realNameCheck}
+                </p>
+
+                <div style={{ ...applyInputStyle, padding: '8px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <span style={{ fontSize: 11, color: '#8A7F6E', fontWeight: 600 }}>{tx.profile.birthDate}</span>
+                  <input type="date" value={info.birthDate}
+                    onChange={e => setInfo(f => ({ ...f, birthDate: e.target.value }))}
+                    style={{ border: 'none', outline: 'none', fontSize: 15, color: '#241C15', background: 'transparent', width: '100%', padding: 0 }} />
+                </div>
+
+                <select value={info.gender} onChange={e => setInfo(f => ({ ...f, gender: e.target.value }))} style={applyInputStyle}>
+                  <option value="">{tx.profile.selectGender}</option>
+                  <option value="male">{tx.profile.genderMale}</option>
+                  <option value="female">{tx.profile.genderFemale}</option>
+                  <option value="other">{tx.profile.genderOther}</option>
+                </select>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <input type="number" value={info.height}
+                    onChange={e => setInfo(f => ({ ...f, height: e.target.value }))}
+                    placeholder={tx.profile.heightPlaceholder} style={applyInputStyle} />
+                  <input type="number" value={info.weight}
+                    onChange={e => setInfo(f => ({ ...f, weight: e.target.value }))}
+                    placeholder={tx.profile.weightPlaceholder} style={applyInputStyle} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 15, color: '#8A7F6E', fontWeight: 700 }}>@</span>
+                  <input type="text" value={info.instagram}
+                    onChange={e => setInfo(f => ({ ...f, instagram: e.target.value }))}
+                    placeholder={tx.profile.instaPlaceholder} style={{ ...applyInputStyle, flex: 1 }} />
+                </div>
+                <input type="text" value={info.phone}
+                  onChange={e => setInfo(f => ({ ...f, phone: e.target.value }))}
+                  placeholder={tx.profile.phonePlaceholder} style={applyInputStyle} />
+
+                <textarea value={info.career}
+                  onChange={e => setInfo(f => ({ ...f, career: e.target.value }))}
+                  placeholder={tx.auditions.careerPlaceholder} rows={3}
+                  style={{ ...applyInputStyle, resize: 'none' }} />
               </div>
             </div>
 

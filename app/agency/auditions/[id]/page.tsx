@@ -11,6 +11,7 @@ import { sendPush } from '@/lib/notify'
 type Application = {
   id: string
   message: string | null
+  career: string | null
   video_url: string
   thumbnail_url: string | null
   status: string
@@ -54,7 +55,7 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
       setAudition(aud)
 
       const { data } = await supabase.from('audition_applications')
-        .select('id, message, video_url, thumbnail_url, status, created_at, talent:profiles!talent_id(id, name, avatar_url, birth_date, skills)')
+        .select('id, message, video_url, thumbnail_url, status, created_at, career, talent:profiles!talent_id(id, name, avatar_url, birth_date, skills)')
         .eq('audition_id', id)
         .order('created_at', { ascending: false })
 
@@ -339,6 +340,15 @@ export default function AuditionApplicantsPage({ params }: { params: Promise<{ i
                       </div>
                       <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </Link>
+
+                    {/* 경력은 심사 재료다 — 본명·연락처와 달리 지원이 들어온
+                        순간부터 보인다. 지원한 시점의 내용이 그대로 남는다. */}
+                    {a.career && (
+                      <div style={{ fontSize: 13, color: '#4b5563', background: '#fbfbff', border: '1px solid #eeeef8', borderRadius: 10, padding: '10px 12px', marginBottom: 10, whiteSpace: 'pre-wrap' }}>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: '#8A7F6E', marginBottom: 4 }}>경력·활동</div>
+                        {a.career}
+                      </div>
+                    )}
 
                     {a.message && (
                       <div style={{ fontSize: 13, color: '#6b7280', background: '#f8f8fc', borderRadius: 10, padding: '10px 12px', marginBottom: 12 }}>
