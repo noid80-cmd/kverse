@@ -118,6 +118,10 @@ export default function TalentAuditionsPage() {
   // 영상 고르고 한마디 쓰면 끝나던 일이 서류 작성이 된다. 채워져 있으면
   // 요약만 보여주고, 고칠 사람만 펼친다.
   const [infoOpen, setInfoOpen] = useState(false)
+  // 화면이 다시 보일 때마다 load()가 돈다(다른 앱에 갔다 오면 그렇다).
+  // 지원 화면을 열어둔 채 인스타 아이디를 복사하러 나갔다 오면 적던 내용이
+  // 통째로 지워지므로, 열려 있는 동안에는 서버 값으로 덮어쓰지 않는다.
+  const modalOpenRef = useRef(false)
 
   const supabase = createClient()
 
@@ -152,9 +156,11 @@ export default function TalentAuditionsPage() {
       phone: (prof?.phone as string | null) ?? '',
       career: (prof?.career as string | null) ?? '',
     }
-    setInfo(loaded)
     setSavedInfo(loaded)
-    setInfoOpen(!Object.values(loaded).some(v => v.trim()))
+    if (!modalOpenRef.current) {
+      setInfo(loaded)
+      setInfoOpen(!Object.values(loaded).some(v => v.trim()))
+    }
 
     // 아직 열릴 시각이 안 된 회차는 감춘다(월요일 저녁 6시에 정확히 열린다).
     const visible = ((auds as unknown as Audition[]) ?? []).filter(a => !isRoundNotOpenYet(a.deadline))
@@ -198,6 +204,7 @@ export default function TalentAuditionsPage() {
   }
 
   function openModal(audition: Audition) {
+    modalOpenRef.current = true
     setModalAudition(audition)
     setTab('existing')
     setSelectedVideo(null)
@@ -209,6 +216,7 @@ export default function TalentAuditionsPage() {
 
   function closeModal() {
     if (submitting) return
+    modalOpenRef.current = false
     setModalAudition(null)
   }
 
@@ -344,7 +352,7 @@ export default function TalentAuditionsPage() {
 
     // 적은 내용은 기본 정보로 남긴다. 프로필의 지원 정보 칸이 이 값을 그대로
     // 보여주고, 다음 회차 지원서는 여기서 다시 채워진다.
-    await supabase.from('profiles').update({
+    const { error: profErr } = await supabase.from('profiles').update({
       birth_date: info.birthDate,
       gender: info.gender,
       height: parseInt(info.height),
@@ -355,9 +363,12 @@ export default function TalentAuditionsPage() {
     }).eq('id', myId)
     // 본명만 따로다 — profiles는 기획사가 통째로 읽을 수 있어서, 1차 합격
     // 전까지 가려야 하는 값을 거기 둘 수 없다.
-    await supabase.from('talent_identities')
+    const { error: identErr } = await supabase.from('talent_identities')
       .upsert({ talent_id: myId, real_name: info.realName.trim(), updated_at: new Date().toISOString() })
-    setSavedInfo(info)
+    // 저장이 막혔는데 저장된 셈 치면, 다음 회차에 빈 폼을 다시 마주하고도
+    // "고쳤냐"고 묻지 않는다. 성공했을 때만 기준값을 옮긴다.
+    if (!profErr && !identErr) setSavedInfo(info)
+    else console.warn('[apply] 기본 정보 저장 실패', profErr ?? identErr)
 
     setApplicationMap(prev => ({ ...prev, [modalAudition.id]: { status: 'pending', videoUrl: videoUrl, thumbnailUrl: thumbnailUrl } }))
     setProgress(100)
@@ -374,6 +385,7 @@ export default function TalentAuditionsPage() {
     })
 
     setSubmitting(false)
+    modalOpenRef.current = false
     setModalAudition(null)
     setAppliedNudge(true)
   }
