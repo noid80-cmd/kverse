@@ -28,6 +28,9 @@ export default function UploadPage() {
   const [category, setCategory] = useState('vocal')
   const [tags, setTags] = useState('')
   const [visibility, setVisibility] = useState<'public' | 'agency_only' | 'private'>('public')
+  // 올리고 나서 한 화면. 바로 목록으로 넘기면 방금 무슨 일이 일어났는지
+  // 말할 자리가 없다 — 기획사에 보이기 시작한 순간이 바로 여기다.
+  const [done, setDone] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -313,10 +316,61 @@ export default function UploadPage() {
       })
     }
 
-    router.push('/videos')
+    setUploading(false)
+    setDone(true)
   }
 
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+
+  if (done) {
+    const exposed = visibility !== 'private'
+    return (
+      <div className="min-h-screen" style={{ background: '#FFF8E7', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: 380, margin: '0 auto', width: '100%', textAlign: 'center' }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%', margin: '0 auto 20px',
+            background: exposed ? 'linear-gradient(135deg, #D84A1E, #FF6F3C)' : 'rgba(36,28,21,0.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {exposed
+              ? <CheckCircle size={30} strokeWidth={2} color="#fff" />
+              : <Lock size={26} strokeWidth={2} color="#8A7F6E" />}
+          </div>
+
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#8A7F6E', marginBottom: 8 }}>
+            {tx.videos.uploadDone}
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#241C15', letterSpacing: -0.4, marginBottom: 10, lineHeight: 1.35 }}>
+            {exposed ? tx.videos.doneExposed : tx.videos.donePrivate}
+          </h1>
+          <p style={{ fontSize: 13.5, color: '#8A7F6E', lineHeight: 1.7, marginBottom: 28, wordBreak: 'keep-all' }}>
+            {exposed ? tx.videos.visAlwaysOn : tx.videos.donePrivateSub}
+          </p>
+
+          <button
+            onClick={() => router.push('/videos')}
+            style={{
+              width: '100%', padding: '15px', borderRadius: 14, border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: '#fff',
+              fontSize: 15, fontWeight: 800, marginBottom: 10,
+            }}
+          >
+            {tx.nav.myVideos}
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              width: '100%', padding: '13px', borderRadius: 14, cursor: 'pointer',
+              background: 'none', border: '1.5px solid rgba(36,28,21,0.13)', color: '#8A7F6E',
+              fontSize: 14, fontWeight: 700,
+            }}
+          >
+            {tx.videos.uploadMore}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pb-10" style={{ background: '#FFF8E7' }}>

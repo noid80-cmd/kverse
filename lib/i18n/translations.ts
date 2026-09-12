@@ -209,6 +209,12 @@ const t = {
     // 사람들은 오디션 앱이니 공고가 열릴 때만 본다고 생각한다. "상시"는 따로 말해야 전해진다.
     // 그리고 언제든 내릴 수 있다는 말을 같이 걸어야 안심하고 올린다.
     visAlwaysOn:      ['공고가 없는 동안에도 계속 보여요. 언제든 내릴 수 있어요', 'It stays visible even when no auditions are open. You can hide it anytime', '募集がない期間もずっと表示されます。いつでも非公開にできます', '没有招募公告时也会一直展示，随时可以设为私密', '沒有招募公告時也會一直展示，隨時可以設為私密', 'ยังแสดงอยู่แม้ไม่มีออดิชันเปิดรับ เปลี่ยนเป็นส่วนตัวได้ทุกเมื่อ', 'Tetap tampil meski tidak ada audisi yang dibuka. Bisa disembunyikan kapan saja', 'Vẫn hiển thị ngay cả khi không có buổi thử giọng nào. Bạn có thể ẩn bất cứ lúc nào', 'Nananatiling nakikita kahit walang bukas na audition. Pwede mong itago anumang oras', 'Sigue visible aunque no haya audiciones abiertas. Puedes ocultarlo cuando quieras'],
+    // 올린 직후 한 번. 방금 무슨 일이 일어났는지 여기서 말하지 않으면
+    // 말할 자리가 없다(전에는 말없이 목록으로 넘어갔다).
+    doneExposed:      ['이제 기획사가 볼 수 있어요', 'Agencies can see it now', '事務所が見られるようになりました', '经纪公司现在可以看到了', '經紀公司現在可以看到了', 'ตอนนี้ค่ายเพลงเห็นได้แล้ว', 'Sekarang agensi bisa melihatnya', 'Giờ các công ty có thể xem được', 'Nakikita na ito ng mga ahensya', 'Ahora las agencias pueden verlo'],
+    donePrivate:      ['나만 볼 수 있게 올렸어요', 'Saved as private', '自分だけが見られる設定で保存しました', '已保存为仅自己可见', '已儲存為僅自己可見', 'บันทึกเป็นส่วนตัวแล้ว', 'Disimpan sebagai pribadi', 'Đã lưu ở chế độ riêng tư', 'Na-save bilang pribado', 'Guardado como privado'],
+    donePrivateSub:   ['기획사에는 보이지 않아요. 언제든 공개로 바꿀 수 있어요', 'Agencies cannot see it. You can make it public anytime', '事務所には表示されません。いつでも公開に変えられます', '经纪公司看不到，随时可以改为公开', '經紀公司看不到，隨時可以改為公開', 'ค่ายเพลงจะไม่เห็น เปลี่ยนเป็นสาธารณะได้ทุกเมื่อ', 'Agensi tidak bisa melihatnya. Bisa dijadikan publik kapan saja', 'Các công ty không thấy được. Bạn có thể chuyển sang công khai bất cứ lúc nào', 'Hindi ito makikita ng mga ahensya. Pwede mong gawing pampubliko anumang oras', 'Las agencias no pueden verlo. Puedes hacerlo público cuando quieras'],
+    uploadMore:       ['하나 더 올리기', 'Upload another', 'もう一本上げる', '再上传一个', '再上傳一部', 'อัปโหลดอีก', 'Unggah lagi', 'Đăng thêm video', 'Mag-upload pa', 'Subir otro'],
     exposedBadge:     ['기획사에 노출 중', 'Visible to agencies', '事務所に公開中', '经纪公司可见中', '經紀公司可見中', 'ค่ายเพลงเห็นอยู่', 'Terlihat oleh agensi', 'Đang hiển thị với công ty', 'Nakikita ng mga ahensya', 'Visible para agencias'],
     hiddenBadge:      ['나만 보기', 'Only you', '自分のみ', '仅自己可见', '僅自己可見', 'เฉพาะคุณ', 'Hanya kamu', 'Chỉ mình bạn', 'Ikaw lang', 'Solo tú'],
     visibilityPrivate:['비공개', 'Private', '非公開', '私密', '私密', 'ส่วนตัว', 'Pribadi', 'Riêng tư', 'Pribado', 'Privado'],
