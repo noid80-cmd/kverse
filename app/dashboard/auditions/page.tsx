@@ -114,6 +114,10 @@ export default function TalentAuditionsPage() {
   // 전에 한 번 묻는다 — 이번 한 번 다르게 적은 것이 다음 회차까지 조용히
   // 따라가면 안 된다.
   const [savedInfo, setSavedInfo] = useState<ApplyInfo>(EMPTY_INFO)
+  // 이미 채워둔 사람에게 같은 폼을 매번 다시 펼쳐 보이면 지원 화면이 길어져서,
+  // 영상 고르고 한마디 쓰면 끝나던 일이 서류 작성이 된다. 채워져 있으면
+  // 요약만 보여주고, 고칠 사람만 펼친다.
+  const [infoOpen, setInfoOpen] = useState(false)
 
   const supabase = createClient()
 
@@ -150,6 +154,7 @@ export default function TalentAuditionsPage() {
     }
     setInfo(loaded)
     setSavedInfo(loaded)
+    setInfoOpen(!Object.values(loaded).some(v => v.trim()))
 
     // 아직 열릴 시각이 안 된 회차는 감춘다(월요일 저녁 6시에 정확히 열린다).
     const visible = ((auds as unknown as Audition[]) ?? []).filter(a => !isRoundNotOpenYet(a.deadline))
@@ -277,7 +282,7 @@ export default function TalentAuditionsPage() {
     const filled = info.realName.trim() && info.birthDate && info.gender
       && info.height.trim() && info.weight.trim() && info.career.trim()
       && (info.instagram.trim() || info.phone.trim())
-    if (!filled) { setError(tx.auditions.applyInfoMissing); return }
+    if (!filled) { setInfoOpen(true); setError(tx.auditions.applyInfoMissing); return }
 
     const keys = Object.keys(info) as (keyof ApplyInfo)[]
     const hadSaved = keys.some(k => savedInfo[k].trim())
@@ -782,10 +787,33 @@ export default function TalentAuditionsPage() {
                 }}>{tx.auditions.applyInfoAgencyOnly}</span>
               </div>
               <p style={{ fontSize: 12, color: '#8A7F6E', lineHeight: 1.6, margin: '0 0 12px', wordBreak: 'keep-all' }}>
-                {tx.auditions.applyInfoOnce}
+                {infoOpen ? tx.auditions.applyInfoOnce : tx.auditions.applyInfoLoaded}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {!infoOpen && (
+                <div style={{
+                  background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.1)', borderRadius: 12,
+                  padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10,
+                }}>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: '#241C15', lineHeight: 1.7 }}>
+                    <div style={{ fontWeight: 800 }}>{info.realName}</div>
+                    <div style={{ color: '#8A7F6E' }}>
+                      {[info.birthDate, info.height && `${info.height}cm`, info.weight && `${info.weight}kg`]
+                        .filter(Boolean).join(' · ')}
+                    </div>
+                    <div style={{ color: '#8A7F6E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {info.career}
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setInfoOpen(true)} style={{
+                    background: 'none', border: '1px solid rgba(36,28,21,0.15)', borderRadius: 10,
+                    padding: '7px 12px', fontSize: 12, fontWeight: 800, color: '#8A7F6E',
+                    cursor: 'pointer', flexShrink: 0,
+                  }}>{tx.auditions.applyInfoEdit}</button>
+                </div>
+              )}
+
+              <div style={{ display: infoOpen ? 'flex' : 'none', flexDirection: 'column', gap: 8 }}>
                 <input type="text" value={info.realName}
                   onChange={e => setInfo(f => ({ ...f, realName: e.target.value }))}
                   placeholder={tx.profile.realNameLabel} style={applyInputStyle} />
