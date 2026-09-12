@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/layout/BottomNav'
 import { useTalentNav } from '@/components/layout/talentNav'
-import { Heart, Bookmark, Globe, Building2, Lock } from 'lucide-react'
+import { Heart, Bookmark, Globe, Lock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import ReportBlockMenu from '@/components/ReportBlockMenu'
@@ -170,9 +170,9 @@ export default function VideoDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
             <div style={{ fontSize: 12, color: '#8A7F6E', fontWeight: 600 }}>{tx.videos.visibilityLabel}</div>
             <div style={{ display: 'flex', gap: 8 }}>
-              {(['public', 'agency_only', 'private'] as const).map(v => {
-                const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
-                const Icon = v === 'public' ? Globe : v === 'agency_only' ? Building2 : Lock
+              {(['public', 'private'] as const).map(v => {
+                const labels = { public: tx.videos.visibilityPublic, private: tx.videos.visibilityPrivate }
+                const Icon = v === 'public' ? Globe : Lock
                 const selected = visibility === v
                 return (
                   <button key={v} type="button" onClick={() => handleVisibilityChange(v)} disabled={savingVisibility}
@@ -191,9 +191,7 @@ export default function VideoDetailPage() {
               })}
             </div>
             <div style={{ fontSize: 12, color: visibility === 'private' ? '#D84A1E' : '#8A7F6E', lineHeight: 1.5 }}>
-              {visibility === 'public' ? tx.videos.visHintPublic
-                : visibility === 'agency_only' ? tx.videos.visHintAgency
-                : tx.videos.visHintPrivate}
+              {visibility === 'public' ? tx.videos.visHintPublic : tx.videos.visHintPrivate}
             </div>
             {visibility !== 'private' && (
               <div style={{ fontSize: 11.5, color: '#A89880', marginTop: -4, lineHeight: 1.5 }}>

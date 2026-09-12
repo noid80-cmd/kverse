@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Video, ArrowLeft, Camera, RotateCcw, Upload, Globe, Building2, Lock } from 'lucide-react'
+import { CheckCircle, Video, ArrowLeft, Camera, RotateCcw, Upload, Globe, Lock } from 'lucide-react'
 import { useLang } from '@/lib/i18n/context'
 import { useT } from '@/lib/i18n/translations'
 import { compressVideoIfNeeded } from '@/lib/compressVideo'
@@ -459,9 +459,14 @@ export default function UploadPage() {
           <div>
             <div style={{ fontSize: 12, color: '#8A7F6E', marginBottom: 8, fontWeight: 600 }}>{tx.videos.visibilityLabel}</div>
             <div style={{ display: 'flex', gap: 8 }}>
-              {(['public', 'agency_only', 'private'] as const).map(v => {
-                const labels = { public: tx.videos.visibilityPublic, agency_only: tx.videos.visibilityAgency, private: tx.videos.visibilityPrivate }
-                const Icon = v === 'public' ? Globe : v === 'agency_only' ? Building2 : Lock
+              {/* 공개 아니면 비공개, 둘뿐이다. "기획사만"이 있던 자리인데 여덟 명 중
+                  아무도 고르지 않았고(2026-09-12 실측 0건), 고르는 사람이 생기면
+                  탐색 탭에서는 사라지므로 앱이 조용해진다. 올릴까 말까만 정하게 한다.
+                  DB의 agency_only 값과 기획사 쪽 조회 조건은 그대로 두었다 — 되돌릴 때
+                  화면만 다시 세 칸으로 만들면 된다. */}
+              {(['public', 'private'] as const).map(v => {
+                const labels = { public: tx.videos.visibilityPublic, private: tx.videos.visibilityPrivate }
+                const Icon = v === 'public' ? Globe : Lock
                 const selected = visibility === v
                 return (
                   <button key={v} type="button" onClick={() => setVisibility(v)} style={{
@@ -480,9 +485,7 @@ export default function UploadPage() {
               fontSize: 12, color: visibility === 'private' ? '#D84A1E' : '#8A7F6E',
               marginTop: 8, lineHeight: 1.5,
             }}>
-              {visibility === 'public' ? tx.videos.visHintPublic
-                : visibility === 'agency_only' ? tx.videos.visHintAgency
-                : tx.videos.visHintPrivate}
+              {visibility === 'public' ? tx.videos.visHintPublic : tx.videos.visHintPrivate}
             </div>
             {/* 기획사에 보이는 두 경우에만 "언제까지" 보이는지 덧붙인다.
                 오디션 앱이라 공고가 열릴 때만 보는 줄 아는 사람이 많다. */}
