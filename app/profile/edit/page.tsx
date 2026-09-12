@@ -355,6 +355,9 @@ function formatPhone(v: string) {
           <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-8px 0 0', lineHeight: 1.5 }}>
             {tx.profile.applyDesc}
           </p>
+          <p style={{ fontSize: 12, color: '#8A7F6E', margin: '-4px 0 0', lineHeight: 1.5 }}>
+            {tx.profile.applyPrefillHint}
+          </p>
 
           <div style={{ background: 'rgba(255,111,60,0.05)', border: '1px solid rgba(255,111,60,0.16)', borderRadius: 24, padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
