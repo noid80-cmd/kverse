@@ -84,6 +84,9 @@ export default function TalentAuditionsPage() {
   const [sortBy, setSortBy] = useState<'recent' | 'deadline'>('recent')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [modalAudition, setModalAudition] = useState<Audition | null>(null)
+  // 지원이 끝난 직후 한 번만 뜬다. 프로필에 영상을 더 쌓아두라는 말을 할 수
+  // 있는 자리가 여기뿐이다 — 지원 버튼을 막 누른 사람이 가장 의욕이 크다.
+  const [appliedNudge, setAppliedNudge] = useState(false)
   const [tab, setTab] = useState<'existing' | 'new'>('existing')
   const [selectedVideo, setSelectedVideo] = useState<MyVideo | null>(null)
   const [newFile, setNewFile] = useState<File | null>(null)
@@ -298,6 +301,7 @@ export default function TalentAuditionsPage() {
 
     setSubmitting(false)
     setModalAudition(null)
+    setAppliedNudge(true)
   }
 
   // 히어로에 세울 이번 회차. 아래 일정표·목록이 같은 회차를 두 번 보여주지
@@ -676,6 +680,24 @@ export default function TalentAuditionsPage() {
               </div>
             )}
 
+            {/* 지원 영상 하나로 끝나는 게 아니라는 걸 지원 전에 알려둔다.
+                0개면 가장 크게 걸린다 — 기획사가 프로필에 들어와도 볼 게 없다. */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
+              background: myVideos.length === 0 ? 'rgba(216,74,30,0.07)' : 'rgba(36,28,21,0.04)',
+              border: myVideos.length === 0 ? '1px solid rgba(216,74,30,0.2)' : '1px solid rgba(36,28,21,0.08)',
+              borderRadius: 14, padding: '10px 14px',
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#241C15' }}>
+                  {tx.auditions.profileVideos} {myVideos.length}
+                </div>
+                <div style={{ fontSize: 12, color: '#8A7F6E', marginTop: 2, lineHeight: 1.5 }}>
+                  {tx.auditions.profileVideosHint}
+                </div>
+              </div>
+            </div>
+
             <textarea value={message} onChange={e => setMessage(e.target.value)}
               placeholder={tx.auditions.messagePlaceholder} rows={3}
               style={{ width: '100%', background: '#FFFFFF', border: '1px solid rgba(36,28,21,0.13)', borderRadius: 14, padding: '12px 16px', fontSize: 14, color: '#241C15', resize: 'none', marginBottom: 12 }} />
@@ -689,6 +711,40 @@ export default function TalentAuditionsPage() {
               boxShadow: '0 4px 16px rgba(255,111,60,0.3)',
             }}>
               {submitting ? tx.auditions.submitting : tx.auditions.apply}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {appliedNudge && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 110,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end',
+        }} onClick={() => setAppliedNudge(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#FFFFFF', borderRadius: '24px 24px 0 0', width: '100%',
+            padding: '26px 20px 40px', border: '1px solid rgba(36,28,21,0.09)',
+          }}>
+            <div style={{ fontSize: 19, fontWeight: 900, color: '#241C15', marginBottom: 8 }}>
+              {tx.auditions.appliedTitle}
+            </div>
+            <p style={{ fontSize: 14, color: '#8A7F6E', lineHeight: 1.6, marginBottom: 20 }}>
+              {myVideos.length === 0 ? tx.auditions.appliedDescEmpty : tx.auditions.appliedDesc}
+            </p>
+            <button onClick={() => router.push('/videos/upload')} style={{
+              width: '100%', padding: '14px', borderRadius: 16, border: 'none',
+              fontSize: 16, fontWeight: 700, cursor: 'pointer',
+              background: 'linear-gradient(135deg, #D84A1E, #FF6F3C)', color: 'white',
+              boxShadow: '0 4px 16px rgba(255,111,60,0.3)', marginBottom: 10,
+            }}>
+              {tx.auditions.uploadNow}
+            </button>
+            <button onClick={() => setAppliedNudge(false)} style={{
+              width: '100%', padding: '12px', borderRadius: 16,
+              border: '1px solid rgba(36,28,21,0.12)', background: 'none',
+              fontSize: 15, fontWeight: 700, color: '#8A7F6E', cursor: 'pointer',
+            }}>
+              {tx.auditions.uploadLater}
             </button>
           </div>
         </div>
